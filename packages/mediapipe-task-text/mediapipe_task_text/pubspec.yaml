@@ -1,11 +1,12 @@
 name: mediapipe_task_text
-description: A new Flutter plugin project.
+description: A Flutter plugin for using MediaPipe's text-based Tasks.
 version: 0.0.1
-homepage:
+repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text/mediapipe_task_text
+
 
 environment:
-  sdk: '>=3.1.0-113.0.dev <4.0.0'
-  flutter: ">=3.3.0"
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
@@ -17,26 +18,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 flutter:
-  # This section identifies this Flutter project as a plugin project.
-  # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
-  # which should be registered in the plugin registry. This is required for
-  # using method channels.
-  # The Android 'package' specifies package in which the registered class is.
-  # This is required for using method channels on Android.
-  # The 'ffiPlugin' specifies that native code should be built and bundled.
-  # This is required for using `dart:ffi`.
-  # All these are used by the tooling to maintain consistency when
-  # adding or updating assets for this project.
   plugin:
     platforms:
       android:
-        package: com.google.mediapipe_task_text
-        pluginClass: MediapipeTaskTextPlugin
+        default_package: mediapipe_task_text_android
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
