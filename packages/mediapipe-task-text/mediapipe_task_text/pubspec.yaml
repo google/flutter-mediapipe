@@ -3,12 +3,20 @@ description: A Flutter plugin for using MediaPipe's text-based Tasks.
 version: 0.0.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text/mediapipe_task_text
 
+# TODO: Remove this when ready to upload to pub.dev.
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
   flutter: ">=3.10.0"
 
 dependencies:
+  mediapipe_task_text_android:
+    # TODO: Change this to pin an actual version when the package is ready to be uploaded to pub.dev.
+    path: ../mediapipe_task_text_android
+  mediapipe_task_text_platform_interface:
+    # TODO: Change this to pin an actual version when the package is ready to be uploaded to pub.dev.
+    path: ../mediapipe_task_text_platform_interface
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
