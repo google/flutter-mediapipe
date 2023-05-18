@@ -25,8 +25,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 
 class TextClassifierHelper(
     var currentModel: String = WORD_VEC,
-    val context: Context,
-    val listener: TextResultsListener,
+//    val context: Context,
+//    val listener: TextResultsListener,
 ) {
     private lateinit var textClassifier: TextClassifier
     private lateinit var executor: ScheduledThreadPoolExecutor
@@ -46,10 +46,10 @@ class TextClassifierHelper(
             val options = optionsBuilder.build()
             textClassifier = TextClassifier.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-            listener.onError(
-                "Text classifier failed to initialize. See error logs for " +
-                        "details"
-            )
+//            listener.onError(
+//                "Text classifier failed to initialize. See error logs for " +
+//                        "details"
+//            )
             Log.e(
                 TAG, "Text classifier failed to load the task with error: " + e
                     .message
@@ -61,16 +61,18 @@ class TextClassifierHelper(
     fun classify(text: String) {
         executor = ScheduledThreadPoolExecutor(1)
 
+        // return from here?
         executor.execute {
-            // inferenceTime is the amount of time, in milliseconds, that it takes to
-            // classify the input text.
-            var inferenceTime = SystemClock.uptimeMillis()
+//            // inferenceTime is the amount of time, in milliseconds, that it takes to
+//            // classify the input text.
+//            var inferenceTime = SystemClock.uptimeMillis()
 
             val results = textClassifier.classify(text)
+            return results
 
-            inferenceTime = SystemClock.uptimeMillis() - inferenceTime
+//            inferenceTime = SystemClock.uptimeMillis() - inferenceTime
 
-            listener.onResult(results, inferenceTime)
+//            listener.onResult(results, inferenceTime)
         }
     }
 
