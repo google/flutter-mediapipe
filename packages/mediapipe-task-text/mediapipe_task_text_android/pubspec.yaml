@@ -1,10 +1,11 @@
 name: mediapipe_task_text_android
 description: A new Flutter package project.
 version: 0.0.1
+publish_to: none
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text/mediapipe_task_text_android
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=3.10.0"
 
 flutter:
@@ -12,9 +13,9 @@ flutter:
     implements: mediapipe_task_text
     platforms:
       android:
-        package: com.google.plugins.mediapipe_task_text
-        pluginClass: MediaPipeTaskTextPlugin
-        dartPluginClass: AndroidMediaPipeTaskText
+        package: com.google.mediapipe_task_text
+        pluginClass: MediapipeTaskTextPlugin
+        dartPluginClass: AndroidMediapipeTaskTextPlatform
 
 dependencies:
   mediapipe_task_text_platform_interface:

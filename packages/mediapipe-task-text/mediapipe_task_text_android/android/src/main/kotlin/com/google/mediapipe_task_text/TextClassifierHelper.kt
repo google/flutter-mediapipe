@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 
 class TextClassifierHelper(
     var currentModel: String = WORD_VEC,
-//    val context: Context,
+    val context: Context,
 //    val listener: TextResultsListener,
 ) {
     private lateinit var textClassifier: TextClassifier
@@ -58,28 +58,14 @@ class TextClassifierHelper(
     }
 
     // Run text classification using MediaPipe Text Classifier API
-    fun classify(text: String) {
-        executor = ScheduledThreadPoolExecutor(1)
-
-        // return from here?
-        executor.execute {
-//            // inferenceTime is the amount of time, in milliseconds, that it takes to
-//            // classify the input text.
-//            var inferenceTime = SystemClock.uptimeMillis()
-
-            val results = textClassifier.classify(text)
-            return results
-
-//            inferenceTime = SystemClock.uptimeMillis() - inferenceTime
-
-//            listener.onResult(results, inferenceTime)
-        }
+    fun classify(text: String): String {
+        val results = textClassifier.classify(text)
+        val item = results.classificationResult().classifications()[0].categories()[0]
+        // TODO: MARSHAL `results`!
+        return item.categoryName() + " " + item.score();
+        // return results
     }
 
-    interface TextResultsListener {
-        fun onError(error: String)
-        fun onResult(results: TextClassifierResult, inferenceTime: Long)
-    }
 
     companion object {
         const val TAG = "TextClassifierHelper"

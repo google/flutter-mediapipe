@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mediapipe_task_text/mediapipe_task_text.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,21 +14,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<String?> platformVersion;
+  String? classification;
+  final TextEditingController _controller = TextEditingController();
+  final _mediaPipeTaskTextPlugin = MediapipeTaskText('assets/model.tflite');
 
-  @override
-  void initState() {
-    platformVersion = _initPlatformVersion();
-    super.initState();
-  }
-
-  Future<String?> _initPlatformVersion() async {
-    try {
-      return _mediaPipeTaskTextPlugin.getPlatformVersion() ??
-          'UnknownPlatformVersion';
-    } on PlatformException {
-      return 'Failed to get platform version';
-    }
+  Future<void> classify() async {
+    final result = await _mediaPipeTaskTextPlugin.classify(_controller.text);
   }
 
   @override
@@ -42,7 +34,11 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Column(
             children: <Widget>[
-              Text('Running on $_platformVersion'),
+              Text('Running on $classification'),
+              TextField(controller: _controller),
+              MaterialButton(
+                onPressed: classify,
+              ),
             ],
           ),
         ),
