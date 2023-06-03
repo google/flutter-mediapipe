@@ -62,7 +62,6 @@ class TextClassifierHelper(
         // return results
     }
 
-
     companion object {
         const val TAG = "TextClassifierHelper"
 

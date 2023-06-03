@@ -23,32 +23,6 @@ class MediapipeTaskTextPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var context: Context
   private lateinit var classifierHelper: TextClassifierHelper
 
-//  private val listener = object :
-//    TextClassifierHelper.TextResultsListener {
-//    override fun onResult(
-//      results: TextClassifierResult,
-//      inferenceTime: Long
-//    ) {
-//      // Instead of popping a bottomsheet - need to return data on the MethodChannel
-//      runOnUiThread {
-//        activityMainBinding.bottomSheetLayout.inferenceTimeVal.text =
-//          String.format("%d ms", inferenceTime)
-//
-//        adapter.updateResult(results.classificationResult()
-//          .classifications().first()
-//          .categories().sortedByDescending {
-//              it.score()
-//          }, classifierHelper.currentModel
-//        )
-//      }
-//    }
-//
-//    override fun onError(error: String) {
-//      // Instead of popping a toast - need to return the error on the MethodChannel
-//      Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT).show()
-//    }
-//  }
-
   fun registerWith(
     @NonNull registrar: io.flutter.plugin.common.PluginRegistry.Registrar
   ) {
