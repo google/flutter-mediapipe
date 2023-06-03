@@ -46,10 +46,6 @@ class TextClassifierHelper(
             val options = optionsBuilder.build()
             textClassifier = TextClassifier.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-//            listener.onError(
-//                "Text classifier failed to initialize. See error logs for " +
-//                        "details"
-//            )
             Log.e(
                 TAG, "Text classifier failed to load the task with error: " + e
                     .message
