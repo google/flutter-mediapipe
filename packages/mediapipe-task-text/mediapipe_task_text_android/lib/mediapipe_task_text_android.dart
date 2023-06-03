@@ -28,7 +28,8 @@ class AndroidMediapipeTaskTextPlatform extends MediapipeTaskTextPlatform {
       'text': value,
     });
     if (serializedClassificationResult != null) {
-      return ClassificationResult.fromJson(serializedClassificationResult);
+      return ClassificationResult.fromJson(
+          {'value': serializedClassificationResult});
     }
     return null;
   }
