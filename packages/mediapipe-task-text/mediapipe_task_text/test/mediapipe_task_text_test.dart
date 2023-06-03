@@ -3,9 +3,9 @@ import 'package:mediapipe_task_text/mediapipe_task_text.dart';
 import 'package:mediapipe_task_text_platform_interface/mediapipe_task_text_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockMediapipeTaskTextPlatform
+class MockMediaPipeTaskTextPlatform
     with MockPlatformInterfaceMixin
-    implements MediapipeTaskTextPlatform {
+    implements MediaPipeTaskTextPlatform {
   @override
   Future<ClassificationResult?> classify(String value) {
     // TODO: implement classify
@@ -20,19 +20,10 @@ class MockMediapipeTaskTextPlatform
 }
 
 void main() {
-  final MediapipeTaskTextPlatform initialPlatform =
-      MediapipeTaskTextPlatform.instance;
+  final MediaPipeTaskTextPlatform initialPlatform =
+      MediaPipeTaskTextPlatform.instance;
 
-  test('$MethodChannelMediapipeTaskText is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelMediapipeTaskText>());
-  });
-
-  test('getPlatformVersion', () async {
-    MediapipeTaskText mediapipeTaskTextPlugin = MediapipeTaskText('fake');
-    MockMediapipeTaskTextPlatform fakePlatform =
-        MockMediapipeTaskTextPlatform();
-    MediapipeTaskTextPlatform.instance = fakePlatform;
-
-    // expect(await mediapipeTaskTextPlugin.getPlatformVersion(), '42');
+  test('$MethodChannelMediaPipeTaskText is the default instance', () {
+    expect(initialPlatform, isInstanceOf<MethodChannelMediaPipeTaskText>());
   });
 }

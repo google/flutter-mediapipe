@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // TODO: probably need to pull this from pubspec.yaml
-  final _mediapipeTaskTextPlugin = MediapipeTaskText('fake');
+  final _mediapipeTaskTextPlugin = MediaPipeTaskText('fake');
 
   @override
   void initState() {

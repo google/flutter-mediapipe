@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String? classification;
   final TextEditingController _controller = TextEditingController();
-  final _mediaPipeTaskTextPlugin = MediapipeTaskText('assets/model.tflite');
+  final _mediaPipeTaskTextPlugin = MediaPipeTaskText('assets/model.tflite');
 
   @override
   void initState() {

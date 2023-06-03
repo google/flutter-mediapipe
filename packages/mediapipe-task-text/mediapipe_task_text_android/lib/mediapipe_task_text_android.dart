@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mediapipe_task_text_platform_interface/mediapipe_task_text_platform_interface.dart';
 
-class AndroidMediapipeTaskTextPlatform extends MediapipeTaskTextPlatform {
+class AndroidMediapipeTaskTextPlatform extends MediaPipeTaskTextPlatform {
   AndroidMediapipeTaskTextPlatform();
 
   static void registerWith() {
-    MediapipeTaskTextPlatform.instance = AndroidMediapipeTaskTextPlatform();
+    MediaPipeTaskTextPlatform.instance = AndroidMediapipeTaskTextPlatform();
   }
 
   @visibleForTesting

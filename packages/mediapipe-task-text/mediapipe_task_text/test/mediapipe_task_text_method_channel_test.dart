@@ -7,7 +7,7 @@ import 'package:mediapipe_task_text_platform_interface/mediapipe_task_text_platf
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelMediapipeTaskText platform = MethodChannelMediapipeTaskText();
+  MethodChannelMediaPipeTaskText platform = MethodChannelMediaPipeTaskText();
   const MethodChannel channel = MethodChannel('mediapipe_task_text');
 
   setUp(() {
