@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:mediapipe_task_text/mediapipe_task_text.dart';
 
 void main() {

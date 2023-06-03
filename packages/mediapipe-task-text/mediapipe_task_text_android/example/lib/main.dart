@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mediapipe_task_text/mediapipe_task_text.dart';
 
 void main() {
@@ -18,8 +17,15 @@ class _MyAppState extends State<MyApp> {
   final TextEditingController _controller = TextEditingController();
   final _mediaPipeTaskTextPlugin = MediapipeTaskText('assets/model.tflite');
 
+  @override
+  void initState() {
+    _mediaPipeTaskTextPlugin.initClassifier();
+    super.initState();
+  }
+
   Future<void> classify() async {
     final result = await _mediaPipeTaskTextPlugin.classify(_controller.text);
+    setState(() => classification = result?.value);
   }
 
   @override
@@ -38,6 +44,7 @@ class _MyAppState extends State<MyApp> {
               TextField(controller: _controller),
               MaterialButton(
                 onPressed: classify,
+                child: const Text('Classify'),
               ),
             ],
           ),
