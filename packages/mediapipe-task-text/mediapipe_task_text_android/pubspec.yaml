@@ -14,7 +14,7 @@ flutter:
     platforms:
       android:
         package: com.google.mediapipe_task_text
-        pluginClass: MediapipeTaskTextPlugin
+        pluginClass: MediaPipeTaskTextPlugin
         dartPluginClass: AndroidMediapipeTaskTextPlatform
 
 dependencies:
