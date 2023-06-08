@@ -14,8 +14,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String? classification;
+  String? lastClassified;
   final TextEditingController _controller = TextEditingController();
-  final _mediaPipeTaskTextPlugin = MediaPipeTaskText('assets/model.tflite');
+  final _mediaPipeTaskTextPlugin = MediaPipeTaskText('model.tflite');
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> classify() async {
+    setState(() => lastClassified = _controller.text);
     final result = await _mediaPipeTaskTextPlugin.classify(_controller.text);
     setState(() => classification = result?.value);
   }
@@ -36,17 +38,39 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            children: <Widget>[
-              Text('Running on $classification'),
-              TextField(controller: _controller),
-              MaterialButton(
-                onPressed: classify,
-                child: const Text('Classify'),
-              ),
-            ],
+      home: SafeArea(
+        child: Scaffold(
+          body: Center(
+            child: Stack(
+              children: <Widget>[
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      lastClassified == null
+                          ? const Text('Awaiting first classification...')
+                          : Text('Running on "$lastClassified"'),
+                      classification == null
+                          ? Container()
+                          : Text('Result: $classification'),
+                    ],
+                  ),
+                ),
+                Column(
+                  children: <Widget>[
+                    TextField(controller: _controller),
+                    MaterialButton(
+                      onPressed: classify,
+                      color: Colors.blue,
+                      child: const Text(
+                        'Classify',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

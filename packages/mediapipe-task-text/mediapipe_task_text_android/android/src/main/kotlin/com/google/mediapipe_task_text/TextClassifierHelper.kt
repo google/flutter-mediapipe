@@ -26,7 +26,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor
 class TextClassifierHelper(
     var currentModel: String = WORD_VEC,
     val context: Context,
-//    val listener: TextResultsListener,
 ) {
     private lateinit var textClassifier: TextClassifier
     private lateinit var executor: ScheduledThreadPoolExecutor

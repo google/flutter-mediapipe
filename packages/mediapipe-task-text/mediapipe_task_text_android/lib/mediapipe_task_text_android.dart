@@ -8,6 +8,7 @@ class AndroidMediapipeTaskTextPlatform extends MediaPipeTaskTextPlatform {
   AndroidMediapipeTaskTextPlatform();
 
   static void registerWith() {
+    print('hey oh');
     MediaPipeTaskTextPlatform.instance = AndroidMediapipeTaskTextPlatform();
   }
 
