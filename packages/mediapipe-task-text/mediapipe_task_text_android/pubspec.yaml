@@ -1,0 +1,30 @@
+name: mediapipe_task_text_android
+description: A new Flutter package project.
+version: 0.0.1
+publish_to: none
+repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text/mediapipe_task_text_android
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+flutter:
+  plugin:
+    implements: mediapipe_task_text
+    platforms:
+      android:
+        package: com.google.mediapipe_task_text
+        pluginClass: MediaPipeTaskTextPlugin
+        dartPluginClass: AndroidMediapipeTaskTextPlatform
+
+dependencies:
+  mediapipe_task_text_platform_interface:
+    # TODO: Change this to pin an actual version when the package is ready to be uploaded to pub.dev.
+    path: ../mediapipe_task_text_platform_interface
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
