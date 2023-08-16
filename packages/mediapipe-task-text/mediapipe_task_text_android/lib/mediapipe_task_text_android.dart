@@ -22,14 +22,13 @@ class AndroidMediapipeTaskTextPlatform extends MediaPipeTaskTextPlatform {
   }
 
   @override
-  Future<ClassificationResult?> classify(String value) async {
-    final serializedClassificationResult =
+  Future<TextClassifierResult?> classify(String value) async {
+    final serializedTextClassifierResult =
         await methodChannel.invokeMethod<String>('classify', <String, String>{
       'text': value,
     });
-    if (serializedClassificationResult != null) {
-      return ClassificationResult.fromJson(
-          {'value': serializedClassificationResult});
+    if (serializedTextClassifierResult != null) {
+      return TextClassifierResult.decode(serializedTextClassifierResult);
     }
     return null;
   }

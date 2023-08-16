@@ -16,12 +16,14 @@
 package com.google.mediapipe.examples.textclassifier
 
 import android.content.Context
-import android.os.SystemClock
 import android.util.Log
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.text.textclassifier.TextClassifier
-import com.google.mediapipe.tasks.text.textclassifier.TextClassifierResult
 import java.util.concurrent.ScheduledThreadPoolExecutor
+import Category
+import ClassificationResult
+import Classifications
+import TextClassifierResult
 
 class TextClassifierHelper(
     var currentModel: String = WORD_VEC,
@@ -53,13 +55,43 @@ class TextClassifierHelper(
     }
 
     // Run text classification using MediaPipe Text Classifier API
-    fun classify(text: String): String {
+    fun classify(text: String): TextClassifierResult {
+        // Actually call the MediaPipe SDK to classify this text
         val results = textClassifier.classify(text)
-        val item = results.classificationResult().classifications()[0].categories()[0]
-        // TODO: MARSHAL `results`!
-        return item.categoryName() + " " + item.score();
-        // return results
+
+        // Setup data conversion to Pigeon-generated classes for wire transfer
+        val classifications =  mutableListOf<Classifications>()
+        for (_classifications in results.classificationResult().classifications()) {
+            val categories = mutableListOf<Category>()
+            for (_category in _classifications.categories()) {
+                categories.add(Category(
+                    index=_category.index().toLong(),
+                    score=_category.score().toDouble(),
+                    displayName=_category.displayName(),
+                    categoryName=_category.categoryName(),
+                ))
+            }
+            classifications.add(Classifications(
+                categories=categories,
+                headIndex=_classifications.headIndex().toLong(),
+                headName=_classifications.headName().orElse(null),
+            ))
+        }
+
+        return TextClassifierResult(
+            classificationResult=ClassificationResult(
+                classifications=classifications,
+                timestampMs=results.timestampMs().toDouble(),
+            ),
+            timestampMs=results.timestampMs().toDouble(),
+        )
     }
+
+//    fun toJson(result: TextClassifierResult) : List<Any> {
+//        var json = mutableListOf<Any?>()
+//        json.addAll(result.toList())
+//
+//    }
 
     companion object {
         const val TAG = "TextClassifierHelper"

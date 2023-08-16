@@ -3,14 +3,13 @@ package com.google.mediapipe_task_text
 import androidx.annotation.NonNull
 
 import android.content.Context
-import android.os.SystemClock
-import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import com.google.mediapipe.examples.textclassifier.TextClassifierHelper
+import TextClassifierResult
 
 
 /** MediaPipeTaskTextPlugin */
@@ -37,15 +36,15 @@ class MediaPipeTaskTextPlugin: FlutterPlugin, MethodCallHandler {
 
    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
      if (call.method == "initClassifier") {
-      classifierHelper = TextClassifierHelper(
+       classifierHelper = TextClassifierHelper(
          currentModel = call.argument("modelPath")!!,
          context = context,
        )
      } else if (call.method == "classify") {
-      // a string (I think)
-       val results = classifierHelper.classify(call.argument("text") ?: "")
-       
-       result.success(results)
+       val results: TextClassifierResult = classifierHelper.classify(call.argument("text") ?: "")
+       print(results.toList())
+       // asdf
+       result.success(results.toList())
      } else {
        result.notImplemented()
      }

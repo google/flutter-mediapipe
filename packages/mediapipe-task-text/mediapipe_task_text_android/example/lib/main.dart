@@ -13,7 +13,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String? classification;
+  String? classificationName;
+  double? classificationScore;
   String? lastClassified;
   final TextEditingController _controller = TextEditingController();
   final _mediaPipeTaskTextPlugin = MediaPipeTaskText('model.tflite');
@@ -25,9 +26,18 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> classify() async {
-    setState(() => lastClassified = _controller.text);
+    setState(() {
+      lastClassified = _controller.text;
+      classificationName = null;
+      classificationScore = null;
+    });
     final result = await _mediaPipeTaskTextPlugin.classify(_controller.text);
-    setState(() => classification = result?.value);
+    Category? category =
+        result?.classificationResult.classifications.first?.categories.first;
+    setState(() {
+      classificationName = category?.displayName ?? category?.categoryName;
+      classificationScore = category?.score;
+    });
   }
 
   @override
@@ -50,9 +60,12 @@ class _MyAppState extends State<MyApp> {
                       lastClassified == null
                           ? const Text('Awaiting first classification...')
                           : Text('Running on "$lastClassified"'),
-                      classification == null
+                      classificationName == null
                           ? Container()
-                          : Text('Result: $classification'),
+                          : Text('Classification: $classificationName'),
+                      classificationScore == null
+                          ? Container()
+                          : Text('Score: $classificationScore'),
                     ],
                   ),
                 ),

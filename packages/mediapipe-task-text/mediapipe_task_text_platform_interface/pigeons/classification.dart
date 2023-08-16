@@ -15,10 +15,12 @@ import 'package:pigeon/pigeon.dart';
 )
 
 /// A classification category.
-
+///
 /// Category is a util class, contains a label, its display name, a float
 /// value as score, and the index of the label in the corresponding label file.
 /// Typically it's used as the result of classification tasks.
+///
+/// See also: https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Category
 class Category {
   const Category({
     required this.index,
@@ -44,6 +46,8 @@ class Category {
 
 /// Represents the list of classification for a given classifier head.
 /// Typically used as a result for classification tasks.
+///
+/// See also: https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Classifications
 class Classifications {
   const Classifications({
     required this.categories,
@@ -65,6 +69,8 @@ class Classifications {
 }
 
 /// Data returned from MediaPipe SDK.
+///
+/// See also: https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/ClassificationResult
 class ClassificationResult {
   const ClassificationResult({
     required this.classifications,
@@ -79,8 +85,23 @@ class ClassificationResult {
   final double? timestampMs;
 }
 
+/// See also: https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/textclassifier/TextClassifierResult
+class TextClassifierResult {
+  const TextClassifierResult({
+    required this.classificationResult,
+    required this.timestampMs,
+  });
+
+  /// The results of this classification request.
+  final ClassificationResult classificationResult;
+
+  /// The optional timestamp (in milliseconds) of the start of the chunk of
+  /// data corresponding to these results.
+  final double? timestampMs;
+}
+
 @HostApi()
 abstract class TextClassifier {
   @async
-  ClassificationResult classify(String value);
+  TextClassifierResult classify(String value);
 }

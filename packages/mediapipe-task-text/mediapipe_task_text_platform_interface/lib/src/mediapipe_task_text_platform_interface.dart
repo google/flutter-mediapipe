@@ -1,6 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'classification_result.dart';
+import 'classification.g.dart';
 import 'mediapipe_task_text_method_channel.dart';
 
 abstract class MediaPipeTaskTextPlatform extends PlatformInterface {
@@ -25,10 +25,10 @@ abstract class MediaPipeTaskTextPlatform extends PlatformInterface {
   }
 
   Future<void> initClassifier(String modelPath) {
-    throw UnimplementedError('$this should implement initClassifier()');
+    throw UnimplementedError('$this should implement initClassifier(String)');
   }
 
-  Future<ClassificationResult?> classify(String value) {
+  Future<TextClassifierResult?> classify(String value) {
     throw UnimplementedError('$this should implement classify(String)');
   }
 }
