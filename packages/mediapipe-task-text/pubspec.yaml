@@ -18,6 +18,8 @@ dependencies:
   logging: ^1.2.0
   mediapipe_core:
     path: ../mediapipe-core
+  native_assets_cli: ^0.3.0
+  native_toolchain_c: ^0.3.0
 
 dev_dependencies:
   ffigen: ^9.0.1
