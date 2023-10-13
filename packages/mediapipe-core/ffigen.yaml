@@ -1,0 +1,13 @@
+name: "MediaPipeCommonBindings"
+description: "Bindings for shared MediaPipe structs common across many tasks"
+output:
+  bindings: "lib/src/mediapipe_common_bindings.dart"
+  symbol-file:
+    output: "package:mediapipe_core/generated/core_symbols.yaml"
+    import-path: "package:mediapipe_core/src/mediapipe_common_bindings.dart"
+headers:
+  entry-points:
+    - "third_party/mediapipe/tasks/c/core/base_options.h"
+    - "third_party/mediapipe/tasks/c/components/containers/category.h"
+    - "third_party/mediapipe/tasks/c/components/containers/classification_result.h"
+    - "third_party/mediapipe/tasks/c/components/processors/classifier_options.h"

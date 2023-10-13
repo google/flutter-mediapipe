@@ -1,0 +1,38 @@
+format_version: 1.0.0
+files:
+  package:mediapipe_core/src/mediapipe_common_bindings.dart:
+    used-config:
+      ffi-native: false
+    symbols:
+      c:@S@BaseOptions:
+        name: BaseOptions
+      c:@S@Category:
+        name: Category
+      c:@S@ClassificationResult:
+        name: ClassificationResult
+      c:@S@Classifications:
+        name: Classifications
+      c:@S@ClassifierOptions:
+        name: ClassifierOptions
+      c:@S@__darwin_pthread_handler_rec:
+        name: __darwin_pthread_handler_rec
+      c:@S@_opaque_pthread_attr_t:
+        name: _opaque_pthread_attr_t
+      c:@S@_opaque_pthread_cond_t:
+        name: _opaque_pthread_cond_t
+      c:@S@_opaque_pthread_condattr_t:
+        name: _opaque_pthread_condattr_t
+      c:@S@_opaque_pthread_mutex_t:
+        name: _opaque_pthread_mutex_t
+      c:@S@_opaque_pthread_mutexattr_t:
+        name: _opaque_pthread_mutexattr_t
+      c:@S@_opaque_pthread_once_t:
+        name: _opaque_pthread_once_t
+      c:@S@_opaque_pthread_rwlock_t:
+        name: _opaque_pthread_rwlock_t
+      c:@S@_opaque_pthread_rwlockattr_t:
+        name: _opaque_pthread_rwlockattr_t
+      c:@S@_opaque_pthread_t:
+        name: _opaque_pthread_t
+      c:@UA@__mbstate_t:
+        name: __mbstate_t
