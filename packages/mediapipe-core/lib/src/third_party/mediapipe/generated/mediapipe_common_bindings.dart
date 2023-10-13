@@ -177,6 +177,38 @@ final class ClassificationResult extends ffi.Struct {
   external bool has_timestamp_ms;
 }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+final class ClassifierOptions extends ffi.Struct {
+  external ffi.Pointer<ffi.Char> display_names_locale;
+
+  @ffi.Int()
+  external int max_results;
+
+  @ffi.Float()
+  external double score_threshold;
+
+  external ffi.Pointer<ffi.Pointer<ffi.Char>> category_allowlist;
+
+  @ffi.Uint32()
+  external int category_allowlist_count;
+
+  external ffi.Pointer<ffi.Pointer<ffi.Char>> category_denylist;
+
+  @ffi.Uint32()
+  external int category_denylist_count;
+}
+
+const int __bool_true_false_are_defined = 1;
+
+const int true1 = 1;
+
+const int false1 = 0;
+
+>>>>>>> a39e75b (updated generated code's location and license (for 3P status))
+=======
+>>>>>>> 006e8ef (code review responses)
 const int __WORDSIZE = 64;
 
 const int __DARWIN_ONLY_64_BIT_INO_T = 1;
@@ -342,9 +374,18 @@ const int WINT_MAX = 2147483647;
 const int SIG_ATOMIC_MIN = -2147483648;
 
 const int SIG_ATOMIC_MAX = 2147483647;
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 006e8ef (code review responses)
 
 const int __bool_true_false_are_defined = 1;
 
 const int true1 = 1;
 
 const int false1 = 0;
+<<<<<<< HEAD
+=======
+>>>>>>> a39e75b (updated generated code's location and license (for 3P status))
+=======
+>>>>>>> 006e8ef (code review responses)
