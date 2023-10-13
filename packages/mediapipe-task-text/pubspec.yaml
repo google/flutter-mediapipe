@@ -1,0 +1,22 @@
+name: mediapipe_text
+description: A new Flutter package project.
+version: 0.0.1
+repository: https://github.com/google/flutter-mediapipe
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  ffi: ^2.1.0
+  flutter:
+    sdk: flutter
+  logging: ^1.2.0
+  mediapipe_core:
+    path: ../mediapipe-core
+
+dev_dependencies:
+  ffigen: ^9.0.1
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter

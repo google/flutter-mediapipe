@@ -1,0 +1,10 @@
+name: "MediaPipeTextBindings"
+description: "Bindings for MediaPipe structs for text-related tasks"
+output:
+  bindings: "lib/src/mediapipe_text_bindings.dart"
+headers:
+  entry-points:
+    - "third_party/mediapipe/tasks/c/text/text_classifier/text_classifier.h"
+import:
+  symbol-files:
+    - "package:mediapipe_core/generated/core_symbols.yaml"
