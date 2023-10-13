@@ -47,6 +47,7 @@ class BaseOptions extends Equatable {
     }
     if (modelAssetBuffer != null) {
       struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
+      struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
     }
     return struct;
   }

@@ -20,14 +20,17 @@ limitations under the License.
 extern "C" {
 #endif
 
-// Base options for MediaPipe C Tasks.
-struct BaseOptions {
-  // The model asset file contents as a string.
-  char* model_asset_buffer;
+  // Base options for MediaPipe C Tasks.
+  struct BaseOptions {
+    // The model asset file contents as a string.
+    char* model_asset_buffer;
 
-  // The path to the model asset to open and mmap in memory.
-  char* model_asset_path;
-};
+    // The path to the model asset to open and mmap in memory.
+    char* model_asset_path;
+
+    // The size of the model assets buffer (or `0` if not set).
+    unsigned int model_asset_buffer_count;
+  };
 
 #ifdef __cplusplus
 }  // extern C
