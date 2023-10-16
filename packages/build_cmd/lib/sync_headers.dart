@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:args/command_runner.dart';
-import 'package:build_cmd/repo_finder.dart';
+import 'package:build/repo_finder.dart';
 import 'package:io/ansi.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';

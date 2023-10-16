@@ -19,17 +19,29 @@ mixin RepoFinderMixin on Command {
   /// not executed from within, then this searching algorithm will reach the root
   /// of the file system, log the error, and exit.
   io.Directory findFlutterMediaPipeRoot() {
+    final placesChecked = <io.Directory>[];
     io.Directory dir = io.Directory(path.current);
     while (true) {
       if (_isFlutterMediaPipeRoot(dir)) {
         return dir;
       }
+      placesChecked.add(dir);
       dir = dir.parent;
       if (dir.parent.path == dir.path) {
         io.stderr.writeln(
           wrapWith(
-            'Failed to find google/mediapipe root directory. '
-            'Did you execute this command from within the repository?',
+            'Failed to find google/flutter-mediapipe root directory. '
+            'Did you execute this command from within the repository?\n'
+            'Looked in:',
+            [red],
+          ),
+        );
+        io.stderr.writeln(
+          wrapWith(
+            placesChecked
+                .map<String>((dir) => ' - ${dir.absolute.path}')
+                .toList()
+                .join('\n'),
             [red],
           ),
         );
