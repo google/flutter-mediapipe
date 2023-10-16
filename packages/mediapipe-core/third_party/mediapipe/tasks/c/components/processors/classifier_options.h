@@ -41,12 +41,14 @@ struct ClassifierOptions {
   // category name is not in this set will be filtered out. Duplicate or unknown
   // category names are ignored. Mutually exclusive with category_denylist.
   char** category_allowlist;
+
   // The number of elements in the category allowlist.
   uint32_t category_allowlist_count;
 
   // The denylist of category names. If non-empty, detection results whose
   // category name is in this set will be filtered out. Duplicate or unknown
   // category names are ignored. Mutually exclusive with category_allowlist.
+
   char** category_denylist;
   // The number of elements in the category denylist.
   uint32_t category_denylist_count;
