@@ -54,18 +54,23 @@ class ClassifierOptions extends Equatable {
   /// The maximum number of top-scored classification results to return.
   final int? maxResults;
 
-  /// Overrides the ones provided in the model metadata. Results below this
-  /// value are rejected.
+  /// Overrides the ones provided in the model metadata.
+  ///
+  /// Results below this value are rejected.
   final double? scoreThreshold;
 
-  /// Allowlist of category names. If non-empty, classification results whose
-  /// category name is not in this set will be discarded. Duplicate or unknown
-  /// category names are ignored. Mutually exclusive with `categoryDenylist`.
+  /// Allowlist of category names.
+  ///
+  /// If non-empty, classification results whose category name is not in
+  /// this set will be discarded. Duplicate or unknown category names
+  /// are ignored. Mutually exclusive with `categoryDenylist`.
   final List<String>? categoryAllowlist;
 
-  /// Denylist of category names. If non-empty, classification results whose
-  /// category name is in this set will be discarded. Duplicate or unknown
-  /// category names are ignored. Mutually exclusive with `categoryAllowList`.
+  /// Denylist of category names.
+  ///
+  /// If non-empty, classification results whose category name is in this set
+  /// will be discarded. Duplicate or unknown category names are ignored.
+  /// Mutually exclusive with `categoryAllowList`.
   final List<String>? categoryDenylist;
 
   Pointer<bindings.ClassifierOptions> toStruct() {
