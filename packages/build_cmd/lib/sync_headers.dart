@@ -28,6 +28,16 @@ List<(String, String, String, Function(io.File)?)> headerPaths = [
   (tc, textPackage, 'text_classifier.h', relativeIncludes),
 ];
 
+/// Command to copy all necessary C header files into this repository.
+///
+/// Pulls a list of hard-coded header files out of various destinations within
+/// the google/mediapipe repository and places them in the same paths within
+/// this repository. The only major change between their orientation within the
+/// source repository (google/mediapipe) and their orientation here is that
+/// shared header files are placed in `mediapipe-core` here, and no such
+/// distinction exists in the source. This also implies rewriting the import
+/// paths within these files to match, as their old relative positioning is
+/// disrupted by the move.
 class SyncHeadersCommand extends Command with RepoFinderMixin {
   @override
   String description = 'Syncs header files to google/flutter-mediapipe';
@@ -62,6 +72,9 @@ class SyncHeadersCommand extends Command with RepoFinderMixin {
     await copyHeaders(config);
   }
 
+  /// Central method that does the work of actually moving the files into the
+  /// local repository and rewriting their relative import statements within
+  /// the files themselves.
   Future<void> copyHeaders(Options config) async {
     final mgr = LocalProcessManager();
     for (final tup in headerPaths) {
@@ -80,20 +93,20 @@ class SyncHeadersCommand extends Command with RepoFinderMixin {
       );
       final destinationFile = io.File(destinationPath);
       if (destinationFile.existsSync() && !config.allowOverwrite) {
-        io.stdout.writeln(
-          'Warning: Not overwriting existing file at $destinationPath. '
-          'Skipping ${tup.$3}.',
+        io.stdout.writeAll(
+          [
+            'Warning: Not overwriting existing file at $destinationPath\n',
+            wrapWith('Skipping ${tup.$3}.\n', [cyan]),
+          ],
         );
         continue;
       }
 
+      // MediaPipe header files often come from deeply nested locations, and new
+      // header files could require new folders. Thus, create any missing folders.
       ensureFolders(io.File(destinationPath));
 
-      final process = await mgr.start([
-        'cp',
-        headerFile.path,
-        destinationPath,
-      ], runInShell: true);
+      final process = await mgr.start(['cp', headerFile.path, destinationPath]);
       int processExitCode = await process.exitCode;
       if (processExitCode != 0) {
         final processStdErr = utf8.decoder.convert(

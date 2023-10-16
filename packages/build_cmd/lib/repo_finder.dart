@@ -4,7 +4,23 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 import 'package:io/ansi.dart';
 
+/// Mixin to help [Command] subclasses locate both `google/mediapipe` and
+/// the root of `google/flutter-mediapipe` (this repository).
+///
+/// The primary methods are [findFlutterMediaPipeRoot] and [findMediaPipeRoot].
+///
+/// By default, the root for `google/flutter-mediapipe` is determined by the
+/// firest ancestor directory which contains a `.flutter-mediapipe-root` file
+/// (whose contents are irrelevant), and the root of `google/mediapipe` is
+/// expected to be a sibling of that. However, the `--source` flag can overwrite
+/// this expectation and specify an absolute path where to find `google/mediapipe`.
+///
+/// Note that it is not possible to override the method of locating the root of
+/// `google/flutter-mediapipe`.
 mixin RepoFinderMixin on Command {
+  /// Name of the file which, when found, indicates the root of this repository.
+  static String sentinelFileName = '.flutter-mediapipe-root';
+
   void addSourceOption(ArgParser argParser) {
     argParser.addOption(
       'source',
@@ -52,39 +68,36 @@ mixin RepoFinderMixin on Command {
 
   /// Finds the `google/mediapipe` checkout where artifacts built in this
   /// repository should be sourced. By default, this command assumes the two
-  /// repositories are siblings on the file system, but the `--origin` flag
+  /// repositories are siblings on the file system, but the `--source` flag
   /// allows for this assumption to be overridden.
   io.Directory findMediaPipeRoot(
     io.Directory flutterMediaPipeDir,
-    String? origin,
+    String? source,
   ) {
-    final flutterMediaPipeDirectory = io.Directory(
-      origin ??
-          path.joinAll([
-            flutterMediaPipeDir.parent.absolute.path,
-            'mediapipe',
-          ]),
+    final mediaPipeDirectory = io.Directory(
+      source ??
+          path.joinAll([flutterMediaPipeDir.parent.absolute.path, 'mediapipe']),
     );
 
-    if (!flutterMediaPipeDirectory.existsSync()) {
+    if (!mediaPipeDirectory.existsSync()) {
       io.stderr.writeln(
-        'Could not find ${flutterMediaPipeDirectory.absolute.path}. '
+        'Could not find ${mediaPipeDirectory.absolute.path}. '
         'Folder does not exist.',
       );
       io.exit(1);
     }
-    return flutterMediaPipeDirectory;
+    return mediaPipeDirectory;
   }
-}
 
-/// Looks for the sentinel file of this repository's root directory. This allows
-/// the `dart build` command to be run from various locations within the
-/// `google/mediapipe` repository and still correctly set paths for all of its
-/// operations.
-bool _isFlutterMediaPipeRoot(io.Directory dir) {
-  return io.File(
-    path.joinAll(
-      [dir.absolute.path, '.flutter-mediapipe-root'],
-    ),
-  ).existsSync();
+  /// Looks for the sentinel file of this repository's root directory. This allows
+  /// the `dart build` command to be run from various locations within the
+  /// `google/mediapipe` repository and still correctly set paths for all of its
+  /// operations.
+  bool _isFlutterMediaPipeRoot(io.Directory dir) {
+    return io.File(
+      path.joinAll(
+        [dir.absolute.path, sentinelFileName],
+      ),
+    ).existsSync();
+  }
 }
