@@ -4,7 +4,7 @@ test_core:
 
 # Runs the utility to pull in all header files from `google/mediapipe`
 headers:
-	cd packages/build && dart bin/main.dart headers
+	cd packages/build_cmd && dart bin/main.dart headers
 
 # Runs `ffigen` for `mediapipe_core`
 generate_core:
