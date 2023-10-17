@@ -1,11 +1,26 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:ffi/ffi.dart';
-import 'mediapipe_common_bindings.dart' as bindings;
 import 'ffi_utils.dart';
+import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
+    as bindings;
 
+/// Dart representation of MediaPipe's "BaseOptions" concept.
+///
+/// Used to configure various classifiers by specifying the model they will use
+/// for computation.
+///
+/// See also:
+///  * [MediaPipe's BaseOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/core/BaseOptions)
+///  * [ClassifierOptions], which is often used in conjunction to specify a
+///    classifier's desired behavior.
 class BaseOptions extends Equatable {
+  /// Generative constructor that creates a [BaseOptions] instance.
   const BaseOptions({this.modelAssetBuffer, this.modelAssetPath})
       : assert(
           !(modelAssetBuffer == null && modelAssetPath == null),
@@ -22,6 +37,8 @@ class BaseOptions extends Equatable {
   /// Path to the model asset file.
   final String? modelAssetPath;
 
+  /// Converts this pure-Dart representation into C-memory suitable for the
+  /// MediaPipe SDK to instantiate various classifiers.
   Pointer<bindings.BaseOptions> toStruct() {
     final struct = calloc<bindings.BaseOptions>();
 
@@ -38,7 +55,16 @@ class BaseOptions extends Equatable {
   List<Object?> get props => [modelAssetBuffer, modelAssetPath];
 }
 
+/// Dart representation of MediaPipe's "ClassifierOptions" concept.
+///
+/// Classifier options shared across MediaPipe classification tasks.
+///
+/// See also:
+///  * [MediaPipe's ClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/processors/ClassifierOptions)
+///  * [BaseOptions], which is often used in conjunction to specify a
+///    classifier's desired behavior.
 class ClassifierOptions extends Equatable {
+  /// Generative constructor that creates a [ClassifierOptions] instance.
   const ClassifierOptions({
     this.displayNamesLocale,
     this.maxResults,
@@ -54,9 +80,8 @@ class ClassifierOptions extends Equatable {
   /// The maximum number of top-scored classification results to return.
   final int? maxResults;
 
-  /// Overrides the ones provided in the model metadata.
-  ///
-  /// Results below this value are rejected.
+  /// If set, establishes a minimum `score` and leads to the rejection of any
+  /// categories with lower `score` values.
   final double? scoreThreshold;
 
   /// Allowlist of category names.
@@ -64,6 +89,9 @@ class ClassifierOptions extends Equatable {
   /// If non-empty, classification results whose category name is not in
   /// this set will be discarded. Duplicate or unknown category names
   /// are ignored. Mutually exclusive with `categoryDenylist`.
+  ///
+  /// See also:
+  ///  * [Category.categoryName]
   final List<String>? categoryAllowlist;
 
   /// Denylist of category names.
@@ -71,8 +99,13 @@ class ClassifierOptions extends Equatable {
   /// If non-empty, classification results whose category name is in this set
   /// will be discarded. Duplicate or unknown category names are ignored.
   /// Mutually exclusive with `categoryAllowList`.
+  ///
+  /// See also:
+  ///  * [Category.categoryName]
   final List<String>? categoryDenylist;
 
+  /// Converts this pure-Dart representation into C-memory suitable for the
+  /// MediaPipe SDK to instantiate various classifiers.
   Pointer<bindings.ClassifierOptions> toStruct() {
     final struct = calloc<bindings.ClassifierOptions>();
     _setDisplayNamesLocale(struct.ref);

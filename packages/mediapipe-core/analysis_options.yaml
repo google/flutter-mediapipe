@@ -1,7 +1,10 @@
 # Specify analysis options.
-
 include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - public_member_api_docs # see https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc
 
 analyzer:
   exclude:
-    - "lib/src/mediapipe_common_bindings.dart"
+    - "**/mediapipe_common_bindings.dart"

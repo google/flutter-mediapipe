@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -24,9 +28,7 @@ void main() {
       final options = BaseOptions(modelAssetPath: 'abc');
       final struct = options.toStruct();
       expect(toDartString(struct.ref.model_asset_path), 'abc');
-
-      // TODO: Is this the most precise expectation we can make here?
-      expect(struct.ref.model_asset_buffer, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.model_asset_buffer);
     });
 
     test('allocate memory in C for a modelAssetBuffer', () {
@@ -38,9 +40,7 @@ void main() {
         toUint8List(struct.ref.model_asset_buffer),
         Uint8List.fromList([1, 2, 3]),
       );
-
-      // TODO: Is this the most precise expectation we can make here?
-      expect(struct.ref.model_asset_path, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.model_asset_path);
     });
 
     test('allocate memory in C for a modelAssetBuffer containing 0', () {
@@ -52,9 +52,7 @@ void main() {
         toUint8List(struct.ref.model_asset_buffer),
         Uint8List.fromList([1, 2]),
       );
-
-      // TODO: Is this the most precise expectation we can make here?
-      expect(struct.ref.model_asset_path, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.model_asset_path);
     });
   });
 
@@ -70,8 +68,7 @@ void main() {
       expect(struct.ref.category_allowlist_count, 0);
       expect(struct.ref.category_denylist, isA<Pointer<Never>>());
       expect(struct.ref.category_denylist_count, 0);
-      // TODO: Is this the most precise expectation we can make here?
-      expect(struct.ref.display_names_locale, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.display_names_locale);
 
       // TODO: Could we do something like this?
       // (right now, this segfaults)
@@ -114,3 +111,5 @@ void main() {
     });
   });
 }
+
+void expectNullPtr(Pointer ptr) => expect(ptr.address, equals(0));
