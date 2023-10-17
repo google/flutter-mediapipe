@@ -1,13 +1,29 @@
 name: "MediaPipeCommonBindings"
 description: "Bindings for shared MediaPipe structs common across many tasks"
 output:
-  bindings: "lib/src/mediapipe_common_bindings.dart"
+  bindings: "lib/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart"
   symbol-file:
     output: "package:mediapipe_core/generated/core_symbols.yaml"
-    import-path: "package:mediapipe_core/src/mediapipe_common_bindings.dart"
+    import-path: "package:mediapipe_core/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart"
 headers:
   entry-points:
     - "third_party/mediapipe/tasks/c/core/base_options.h"
     - "third_party/mediapipe/tasks/c/components/containers/category.h"
     - "third_party/mediapipe/tasks/c/components/containers/classification_result.h"
     - "third_party/mediapipe/tasks/c/components/processors/classifier_options.h"
+preamble: |
+  /* Copyright 2023 The MediaPipe Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  ==============================================================================*/
+ffi-native:
