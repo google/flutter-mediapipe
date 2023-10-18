@@ -1,39 +1,27 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# MediaPipe Core for Flutter
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
+![pub package](https://img.shields.io/pub/v/mediapipe_core)
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
+A Flutter plugin to use the MediaPipe Core API, which enables multiple Mediapipe tasks.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+To learn more about MediaPipe, please visit the [MediaPipe website](https://developers.google.com/mediapipe)
 
-## Features
+## Getting Started
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+To get started with MediaPipe, please [see the documentation](https://developers.google.com/mediapipe/solutions/guide).
 
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
+<!-- ASPIRATIONAL
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+To use this plugin, please visit the [Core Usage documentation](https://github.com/google/flutter-mediapipe#Usage)
+-->
 
-```dart
-const like = 'sample';
-```
+## Issues and feedback
 
-## Additional information
+Please file Flutter-MediaPipe specific issues, bugs, or feature requests in our [issue tracker](https://github.com/google/flutter-mediapipe/issues/new).
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+Issues that are specific to Flutter can be filed in the [Flutter issue tracker](https://github.com/flutter/flutter/issues/new).
+
+To contribute a change to this plugin,
+please review our [contribution guide](https://github.com/google/flutter-mediapipe/blob/master/CONTRIBUTING.md)
+and open a [pull request](https://github.com/google/flutter-mediapipe/pulls).
