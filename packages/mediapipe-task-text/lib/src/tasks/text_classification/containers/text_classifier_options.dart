@@ -1,7 +1,7 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import '../../../mediapipe_text_bindings.dart' as bindings;
 
@@ -19,11 +19,13 @@ class TextClassifierOptions {
   factory TextClassifierOptions.fromAssetPath(
     String assetPath, {
     ClassifierOptions? classifierOptions,
-  }) =>
-      TextClassifierOptions(
-        baseOptions: BaseOptions(modelAssetPath: assetPath),
-        classifierOptions: classifierOptions,
-      );
+  }) {
+    assert(!kIsWeb, 'fromAssetPath cannot be used on the web');
+    return TextClassifierOptions(
+      baseOptions: BaseOptions(modelAssetPath: assetPath),
+      classifierOptions: classifierOptions,
+    );
+  }
 
   /// Convenience constructor that uses a model existing in memory.
   ///
