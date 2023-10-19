@@ -4,7 +4,6 @@ import 'package:mediapipe_text/mediapipe_text.dart';
 void main() {
   group('FFI-based TextClassifier.classify should', () {
     final classifier = TextClassifier(
-      sdkPath: 'test/c/fake_text_classifier.dylib',
       options: TextClassifierOptions.fromAssetPath('fake'),
     );
 
