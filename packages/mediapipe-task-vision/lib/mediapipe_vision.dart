@@ -1,7 +1,1 @@
-library mediapipe_vision;
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/tasks/image_classification/image_classification.dart';
