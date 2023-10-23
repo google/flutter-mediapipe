@@ -10,8 +10,8 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 
 /// Dart representation of MediaPipe's "Category" concept.
 ///
-/// Category is a util class, that contains a category name, its display name,
-/// a float value as score, and the index of the label in the corresponding
+/// Category is a util class, that contains a [categoryName], its [displayName],
+/// a float value as [score], and the [index] of the label in the corresponding
 /// label file. Typically it's used as result of classification or detection
 /// tasks.
 ///
