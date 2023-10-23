@@ -95,7 +95,7 @@ class Classifications {
     required this.headName,
   });
 
-  /// A list of Category objects which contain the actual classification
+  /// A list of [Category] objects which contain the actual classification
   /// information, including human-readable labels and probability scores.
   final List<Category> categories;
 
