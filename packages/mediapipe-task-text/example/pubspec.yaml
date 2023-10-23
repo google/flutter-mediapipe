@@ -1,19 +1,28 @@
 name: example
-description: "A new Flutter project."
-publish_to: 'none'
+description: A new Flutter project.
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=3.3.0-33.0.dev <4.0.0'
+  sdk: ">=3.1.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  logging: ^1.2.0
+  mediapipe_text:
+    path: ../
+  path: ^1.8.3
+  path_provider: ^2.1.1
 
 dev_dependencies:
+  flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/bert_classifier.tflite
+    - assets/libtext_classifier.dylib
