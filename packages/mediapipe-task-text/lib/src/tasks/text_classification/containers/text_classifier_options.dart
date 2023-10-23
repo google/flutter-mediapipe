@@ -5,7 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import '../../../mediapipe_text_bindings.dart' as bindings;
 
+/// Configuration object for a MediaPipe text classifier.
+///
+/// See also:
+///  * [MediaPipe's TextClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/js/tasks-text.textclassifieroptions)
 class TextClassifierOptions {
+  /// Generative constructor.
   const TextClassifierOptions({
     required this.baseOptions,
     ClassifierOptions? classifierOptions,
@@ -39,9 +44,14 @@ class TextClassifierOptions {
         classifierOptions: classifierOptions,
       );
 
+  /// Container storing options universal to all MediaPipe tasks (namely, which
+  /// model to use for the task).
   final BaseOptions baseOptions;
+
+  /// Container storing options universal to all MediaPipe classifiers.
   final ClassifierOptions classifierOptions;
 
+  /// Converts this [ImageClassifierOptions] instance into its C representation.
   Pointer<bindings.TextClassifierOptions> toStruct() {
     final struct = calloc<bindings.TextClassifierOptions>();
 
