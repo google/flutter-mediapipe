@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 
@@ -11,10 +12,26 @@ final _log = Logger('TextClassifier');
 
 /// TextClassifier implementation able to use FFI and `dart:io`.
 class TextClassifier extends BaseTextClassifier {
+  /// Generative constructor.
   TextClassifier({required super.options});
 
+  /// Sends a `String` value to MediaPipe for classification. Uses an Isolate
+  /// on mobile and desktop, and a web worker on web, to add concurrency and avoid
+  /// blocking the UI thread while this task completes.
+  ///
+  /// See also:
+  ///  * [classify_sync] for a synchronous alternative
   @override
-  TextClassifierResult classify(String text) {
+  Future<TextClassifierResult> classify(String text) async =>
+      compute<String, TextClassifierResult>(classifySync, text);
+
+  /// Sends a `String` value to MediaPipe for classification. Blocks the main
+  /// event loop for the duration of the task, so use this with caution.
+  ///
+  /// See also:
+  ///  * [classify] for a concurrent alternative
+  @override
+  TextClassifierResult classifySync(String text) {
     // Allocate and hydrate the configuration object
     final optionsPtr = options.toStruct();
     _log.finest('optionsPtr: $optionsPtr');
