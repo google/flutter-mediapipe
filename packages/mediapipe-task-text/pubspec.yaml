@@ -16,6 +16,7 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   logging: ^1.2.0
+  http: ^1.1.0
   mediapipe_core:
     path: ../mediapipe-core
   native_assets_cli: ^0.3.0

@@ -1,11 +1,10 @@
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:native_assets_cli/native_assets_cli.dart';
-import 'package:native_toolchain_c/native_toolchain_c.dart';
+import 'package:http/http.dart' as http;
 
 const assetFilename = 'libtext_classifier.dylib';
 const assetLocation =
-    'https://storage.cloud.google.com/random-storage-asdf/$assetFilename';
+    'https://storage.googleapis.com/random-storage-asdf/$assetFilename';
 
 File outputFile = File(
     '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/logs-build.txt');
@@ -37,12 +36,16 @@ Future<void> _build(List<String> args) async {
     }
     downloadedFile.createSync();
     downloadedFile.writeAsBytes(downloadResponse.bodyBytes);
+  } else {
+    log('${downloadResponse.statusCode} :: ${downloadResponse.body}');
+    return;
   }
   buildOutput.dependencies.dependencies
       .add(buildConfig.packageRoot.resolve('build.dart'));
   buildOutput.assets.add(
     Asset(
-      id: 'package:mediapipe_text/src/mediapipe_text_bindings.dart',
+      // What should this `id` be?
+      id: 'package:mediapipe_text/mediapipe_text.dart',
       linkMode: LinkMode.dynamic,
       target: Target.macOSArm64,
       path: AssetAbsolutePath(downloadFileLocation),
