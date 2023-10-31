@@ -53,6 +53,8 @@ class TextClassifier extends BaseTextClassifier {
     final result = TextClassifierResult.fromStruct(resultsPtr.ref);
     _log.fine('Text classification result: $result');
     bindings.text_classifier_close(classifierPtr);
+    TextClassifierOptions.freeStruct(optionsPtr);
+    calloc.free(optionsPtr);
     TextClassifierResult.freeStruct(resultsPtr);
     return result;
   }

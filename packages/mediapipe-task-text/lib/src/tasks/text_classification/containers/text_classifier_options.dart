@@ -60,4 +60,11 @@ class TextClassifierOptions {
 
     return struct;
   }
+
+  /// Releases all C memory held by this [bindings.TextClassifierOptions] struct.
+  static void freeStruct(Pointer<bindings.TextClassifierOptions> ptr) {
+    BaseOptions.freeStruct(ptr.ref.base_options);
+    ClassifierOptions.freeStruct(ptr.ref.classifier_options);
+    calloc.free(ptr);
+  }
 }
