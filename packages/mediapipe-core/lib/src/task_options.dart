@@ -53,6 +53,16 @@ class BaseOptions extends Equatable {
 
   @override
   List<Object?> get props => [modelAssetBuffer, modelAssetPath];
+
+  /// Releases all C memory held by this [bindings.BaseOptions] struct.
+  static void freeStruct(bindings.BaseOptions struct) {
+    if (struct.model_asset_buffer.address != 0) {
+      calloc.free(struct.model_asset_buffer);
+    }
+    if (struct.model_asset_path.address != 0) {
+      calloc.free(struct.model_asset_path);
+    }
+  }
 }
 
 /// Dart representation of MediaPipe's "ClassifierOptions" concept.
@@ -144,6 +154,19 @@ class ClassifierOptions extends Equatable {
     if (categoryDenylist != null) {
       struct.category_denylist = prepareListOfStrings(categoryDenylist!);
       struct.category_denylist_count = categoryDenylist!.length;
+    }
+  }
+
+  /// Releases all C memory held by this [bindings.ClassifierOptions] struct.
+  static void freeStruct(bindings.ClassifierOptions struct) {
+    if (struct.display_names_locale.address != 0) {
+      calloc.free(struct.display_names_locale);
+    }
+    if (struct.category_allowlist.address != 0) {
+      calloc.free(struct.category_allowlist);
+    }
+    if (struct.category_denylist.address != 0) {
+      calloc.free(struct.category_denylist);
     }
   }
 
