@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class _MainAppState extends State<MainApp> {
   late final TextClassifier _classifier;
   final TextEditingController _controller = TextEditingController();
   String? results;
+  ByteData? classifierBytes;
 
   @override
   void initState() {
@@ -50,43 +52,58 @@ class _MainAppState extends State<MainApp> {
 
     // DefaultAssetBundle.of(context).
 
-    // final ByteData classifierBytes = await DefaultAssetBundle.of(context)
-    //     .load('assets/bert_classifier.tflite');
+    // final model = io.File(
+    //     '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/example/assets/bert_classifier.tflite');
 
-    final dir = io.Directory(path.current);
-    final modelPath = path.joinAll(
-      [dir.absolute.path, 'assets/bert_classifier.tflite'],
-    );
-    _log.finest('modelPath: $modelPath');
-    if (io.File(modelPath).existsSync()) {
-      _log.fine('Successfully found model.');
-    } else {
-      _log.severe('Invalid model path $modelPath. Model not found.');
-      io.exit(1);
-    }
+    final model =
+        io.File('/Users/craiglabenz/Downloads/bert_classifier.tflite');
 
-    final sdkPath = path.joinAll(
-      [dir.absolute.path, 'assets/libtext_classifier.dylib'],
-    );
-    _log.finest('sdkPath: $sdkPath');
-    if (io.File(sdkPath).existsSync()) {
-      _log.fine('Successfully found SDK.');
-    } else {
-      _log.severe('Invalid SDK path $sdkPath. SDK not found.');
-      io.exit(1);
-    }
+    classifierBytes = await DefaultAssetBundle.of(context)
+        .load('assets/bert_classifier.tflite');
+
+    // final ImmutableBuffer classifierBuffer =
+    //     await DefaultAssetBundle.of(context)
+    //         .loadBuffer('assets/bert_classifier.tflite');
+
+    // final dir = io.Directory(path.current);
+    // final modelPath = path.joinAll(
+    //   [dir.absolute.path, 'assets/bert_classifier.tflite'],
+    // );
+    // _log.finest('modelPath: $modelPath');
+    // if (io.File(modelPath).existsSync()) {
+    //   _log.fine('Successfully found model.');
+    // } else {
+    //   _log.severe('Invalid model path \n\t$modelPath.\n\nModel not found.');
+    //   io.exit(1);
+    // }
+
+    // final sdkPath = path.joinAll(
+    //   [dir.absolute.path, 'assets/libtext_classifier.dylib'],
+    // );
+    // _log.finest('sdkPath: $sdkPath');
+    // if (io.File(sdkPath).existsSync()) {
+    //   _log.fine('Successfully found SDK.');
+    // } else {
+    //   _log.severe('Invalid SDK path $sdkPath. SDK not found.');
+    //   io.exit(1);
+    // }
 
     _classifier = TextClassifier(
-      options: TextClassifierOptions.fromAssetPath(modelPath),
+      // options: TextClassifierOptions.fromAssetPath(
+      // '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/example/assets/bert_classifier.tflite'),
+      // '/Users/craiglabenz/Downloads/bert_classifier.tflite'),
       // options: TextClassifierOptions.fromAssetBuffer(
-      //     Uint8List.view(classifierBytes.buffer)),
-      // sdkPath: sdkPath,
+      //     classifierBytes.buffer.asUint8List()),
+      // options: TextClassifierOptions.fromAssetBuffer(
+      //     classifierBytes!.buffer.asUint8List()),
+      options: TextClassifierOptions.fromAssetBuffer(model.readAsBytesSync()),
     );
   }
 
   void _classify() async {
     setState(() => results = null);
     _log.info('Classifying ${_controller.text}');
+    _log.info('ClassifierBytes.length ${classifierBytes!.lengthInBytes}');
     final classification = await _classifier.classify(_controller.text);
     setState(() {
       final categoryName =
