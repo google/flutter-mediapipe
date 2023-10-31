@@ -25,27 +25,29 @@ void main(List<String> args) async {
 Future<void> _build(List<String> args) async {
   final buildConfig = await BuildConfig.fromArgs(args);
   final buildOutput = BuildOutput();
-  final downloadUri = Uri.parse(assetLocation);
   final downloadFileLocation = buildConfig.outDir.resolve(assetFilename);
-  log('Downloading $downloadUri');
-  final downloadResponse = await http.get(downloadUri);
-  final downloadedFile = File(downloadFileLocation.toFilePath());
-  if (downloadResponse.statusCode == 200) {
-    if (downloadedFile.existsSync()) {
-      downloadedFile.deleteSync();
+  if (!buildConfig.dryRun) {
+    final downloadUri = Uri.parse(assetLocation);
+    log('Downloading $downloadUri');
+    final downloadResponse = await http.get(downloadUri);
+    final downloadedFile = File(downloadFileLocation.toFilePath());
+    if (downloadResponse.statusCode == 200) {
+      if (downloadedFile.existsSync()) {
+        downloadedFile.deleteSync();
+      }
+      downloadedFile.createSync();
+      downloadedFile.writeAsBytes(downloadResponse.bodyBytes);
+    } else {
+      log('${downloadResponse.statusCode} :: ${downloadResponse.body}');
+      return;
     }
-    downloadedFile.createSync();
-    downloadedFile.writeAsBytes(downloadResponse.bodyBytes);
-  } else {
-    log('${downloadResponse.statusCode} :: ${downloadResponse.body}');
-    return;
   }
   buildOutput.dependencies.dependencies
       .add(buildConfig.packageRoot.resolve('build.dart'));
   buildOutput.assets.add(
     Asset(
       // What should this `id` be?
-      id: 'package:mediapipe_text/mediapipe_text.dart',
+      id: 'package:mediapipe_text/src/mediapipe_text_bindings.dart',
       linkMode: LinkMode.dynamic,
       target: Target.macOSArm64,
       path: AssetAbsolutePath(downloadFileLocation),
