@@ -9,32 +9,16 @@ import 'package:test/test.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 
 void main() {
-  group('BaseOptions constructor should', () {
-    test('enforce exactly one of modelPath and modelBuffer', () {
-      expect(
-        () => BaseOptions(
-          modelAssetPath: 'abc',
-          modelAssetBuffer: Uint8List.fromList([1, 2, 3]),
-        ),
-        throwsA(TypeMatcher<AssertionError>()),
-      );
-
-      expect(BaseOptions.new, throwsA(TypeMatcher<AssertionError>()));
-    });
-  });
-
   group('BaseOptions.toStruct/fromStruct should', () {
     test('allocate memory in C for a modelAssetPath', () {
-      final options = BaseOptions(modelAssetPath: 'abc');
+      final options = BaseOptions.path('abc');
       final struct = options.toStruct();
       expect(toDartString(struct.ref.model_asset_path), 'abc');
       expectNullPtr(struct.ref.model_asset_buffer);
     });
 
     test('allocate memory in C for a modelAssetBuffer', () {
-      final options = BaseOptions(
-        modelAssetBuffer: Uint8List.fromList([1, 2, 3]),
-      );
+      final options = BaseOptions.memory(Uint8List.fromList([1, 2, 3]));
       final struct = options.toStruct();
       expect(
         toUint8List(struct.ref.model_asset_buffer),
@@ -44,9 +28,7 @@ void main() {
     });
 
     test('allocate memory in C for a modelAssetBuffer containing 0', () {
-      final options = BaseOptions(
-        modelAssetBuffer: Uint8List.fromList([1, 2, 0, 3]),
-      );
+      final options = BaseOptions.memory(Uint8List.fromList([1, 2, 0, 3]));
       final struct = options.toStruct();
       expect(
         toUint8List(struct.ref.model_asset_buffer),

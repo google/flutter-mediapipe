@@ -38,6 +38,7 @@ class _MainAppState extends State<MainApp> {
     super.initState();
     _controller.text = 'Hello, world!';
     _initClassifier();
+    Future.delayed(const Duration(milliseconds: 500)).then((_) => _classify());
   }
 
   Future<void> _initClassifier() async {
