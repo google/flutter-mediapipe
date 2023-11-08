@@ -2,6 +2,8 @@ name: mediapipe_text
 description: A new Flutter package project.
 version: 0.0.1
 repository: https://github.com/google/flutter-mediapipe
+issue_tracker: https://github.com/google/flutter-mediapipe/issues/
+publish_to: none
 
 environment:
   sdk: ">=3.1.0 <4.0.0"

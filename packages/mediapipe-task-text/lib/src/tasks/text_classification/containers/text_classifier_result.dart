@@ -1,5 +1,9 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:mediapipe_core/mediapipe_core.dart';
-import '../../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
+import 'package:mediapipe_text/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// Container with results of MediaPipe's `classifyText` task.
