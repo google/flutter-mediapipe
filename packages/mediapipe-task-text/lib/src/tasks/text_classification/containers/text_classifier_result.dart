@@ -1,5 +1,3 @@
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/src/mediapipe_text_bindings.dart' as bindings;
 
@@ -39,16 +37,6 @@ class TextClassifierResult {
           ? Duration(milliseconds: struct.timestamp_ms)
           : null,
     );
-  }
-
-  /// Deallocates all memory associated with an [bindings.ImageClassifierResult]
-  /// in C memory.
-  static void freeStruct(Pointer<bindings.TextClassifierResult> struct) {
-    Classifications.freeStructs(
-      struct.ref.classifications,
-      struct.ref.classifications_count,
-    );
-    calloc.free(struct);
   }
 
   /// Convenience helper for the first [Classifications] object.

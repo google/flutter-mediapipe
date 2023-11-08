@@ -4,7 +4,7 @@ output:
   bindings: "lib/src/mediapipe_text_bindings.dart"
 headers:
   entry-points:
-    - "third_party/mediapipe/tasks/c/**"
+    - "third_party/mediapipe/tasks/c/**.h"
 import:
   symbol-files:
     - "package:mediapipe_core/generated/core_symbols.yaml"

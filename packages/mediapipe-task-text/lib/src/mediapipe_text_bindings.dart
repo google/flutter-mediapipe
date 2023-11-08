@@ -18,25 +18,39 @@ import 'dart:ffi' as ffi;
 import 'package:mediapipe_core/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as imp1;
 
-@ffi.Native<ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextClassifierOptions>)>(
-    symbol: 'text_classifier_create')
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextClassifierOptions>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_create')
 external ffi.Pointer<ffi.Void> text_classifier_create(
   ffi.Pointer<TextClassifierOptions> options,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>,
-        ffi.Pointer<TextClassifierResult>)>(symbol: 'text_classifier_classify')
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Char>,
+        ffi.Pointer<TextClassifierResult>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_classify')
 external int text_classifier_classify(
   ffi.Pointer<ffi.Void> classifier,
   ffi.Pointer<ffi.Char> utf8_str,
   ffi.Pointer<TextClassifierResult> result,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>)>(
-    symbol: 'text_classifier_close')
-external void text_classifier_close(
+@ffi.Native<ffi.Void Function(ffi.Pointer<TextClassifierResult>)>(
+    symbol: 'text_classifier_close_result')
+external void text_classifier_close_result(
+  ffi.Pointer<TextClassifierResult> result,
+);
+
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_close')
+external int text_classifier_close(
   ffi.Pointer<ffi.Void> classifier,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 final class TextClassifierOptions extends ffi.Struct {

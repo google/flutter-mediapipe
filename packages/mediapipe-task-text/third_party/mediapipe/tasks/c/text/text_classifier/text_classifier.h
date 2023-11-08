@@ -20,6 +20,10 @@ limitations under the License.
 #include "../../../../../../../mediapipe-core/third_party/mediapipe/tasks/c/components/processors/classifier_options.h"
 #include "../../../../../../../mediapipe-core/third_party/mediapipe/tasks/c/core/base_options.h"
 
+#ifndef MP_EXPORT
+#define MP_EXPORT __attribute__((visibility("default")))
+#endif  // MP_EXPORT
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,14 +42,31 @@ extern "C" {
   };
 
   // Creates a TextClassifier from the provided `options`.
-  void *text_classifier_create(struct TextClassifierOptions *options);
+  // Returns a pointer to the text classifier on success.
+  // If an error occurs, returns `nullptr` and sets the error parameter to an
+  // an error message (if `error_msg` is not nullptr). You must free the memory
+  // allocated for the error message.
+  MP_EXPORT void* text_classifier_create(struct TextClassifierOptions* options,
+    char** error_msg);
 
-  // Performs classification on the input `text`.
-  int text_classifier_classify(void *classifier, char *utf8_str,
-    TextClassifierResult *result);
+  // Performs classification on the input `text`. Returns `0` on success.
+  // If an error occurs, returns an error code and sets the error parameter to an
+  // an error message (if `error_msg` is not nullptr). You must free the memory
+  // allocated for the error message.
+  MP_EXPORT int text_classifier_classify(void* classifier, const char* utf8_str,
+    TextClassifierResult* result,
+    char** error_msg);
+
+  // Frees the memory allocated inside a TextClassifierResult result. Does not
+  // free the result pointer itself.
+  MP_EXPORT void text_classifier_close_result(TextClassifierResult* result);
 
   // Shuts down the TextClassifier when all the work is done. Frees all memory.
-  void text_classifier_close(void *classifier);
+  // If an error occurs, returns an error code and sets the error parameter to an
+  // an error message (if `error_msg` is not nullptr). You must free the memory
+  // allocated for the error message.
+  MP_EXPORT int text_classifier_close(void* classifier,
+    char** error_msg);
 
 #ifdef __cplusplus
 }  // extern C

@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "base_options.h": "c",
+        "__config": "c",
+        "text_classifier.h": "c",
+        "category.h": "c"
+    }
+}

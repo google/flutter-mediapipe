@@ -23,6 +23,9 @@ final class BaseOptions extends ffi.Struct {
   external ffi.Pointer<ffi.Char> model_asset_buffer;
 
   external ffi.Pointer<ffi.Char> model_asset_path;
+
+  @ffi.UnsignedInt()
+  external int model_asset_buffer_count;
 }
 
 final class __mbstate_t extends ffi.Union {

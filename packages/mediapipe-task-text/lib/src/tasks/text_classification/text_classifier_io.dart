@@ -1,19 +1,33 @@
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:isolate';
+import 'package:async/async.dart';
 import 'package:logging/logging.dart';
-import 'package:mediapipe_core/mediapipe_core.dart';
 
+import 'text_classification_executor.dart';
 import 'text_classifier.dart';
 import 'containers/containers.dart';
-import '../../mediapipe_text_bindings.dart' as bindings;
 
 final _log = Logger('TextClassifier');
 
 /// TextClassifier implementation able to use FFI and `dart:io`.
 class TextClassifier extends BaseTextClassifier {
   /// Generative constructor.
-  TextClassifier({required super.options});
+  TextClassifier({required super.options})
+      : _readyCompleter = Completer<void>() {
+    _createIsolate(options).then((results) {
+      _events = results.$1;
+      _sendPort = results.$2;
+      _readyCompleter.complete();
+    });
+  }
+
+  late SendPort _sendPort;
+  late StreamQueue<dynamic> _events;
+  final Completer<void> _readyCompleter;
+  Future<void> get _ready => _readyCompleter.future;
+
+  /// Closes down the background isolate, releasing all resources.
+  void dispose() => _sendPort.send(null);
 
   /// Sends a `String` value to MediaPipe for classification. Uses an Isolate
   /// on mobile and desktop, and a web worker on web, to add concurrency and avoid
@@ -22,40 +36,47 @@ class TextClassifier extends BaseTextClassifier {
   /// See also:
   ///  * [classify_sync] for a synchronous alternative
   @override
-  Future<TextClassifierResult> classify(String text) async =>
-      compute<String, TextClassifierResult>(classifySync, text);
-
-  /// Sends a `String` value to MediaPipe for classification. Blocks the main
-  /// event loop for the duration of the task, so use this with caution.
-  ///
-  /// See also:
-  ///  * [classify] for a concurrent alternative
-  @override
-  TextClassifierResult classifySync(String text) {
-    // Allocate and hydrate the configuration object
-    final optionsPtr = options.toStruct();
-    _log.finest('optionsPtr: $optionsPtr');
-    final classifierPtr = bindings.text_classifier_create(optionsPtr);
-    _log.finest('classifierPtr: $classifierPtr');
-
-    // Allocate the container for our results
-    final resultsPtr = calloc<bindings.TextClassifierResult>();
-    _log.finest('resultsPtr: $resultsPtr');
-
-    // Actually classify the text
-    bindings.text_classifier_classify(
-      classifierPtr,
-      prepareString(text),
-      resultsPtr,
-    );
-
-    // Convert the results into pure-Dart objects and free all memory
-    final result = TextClassifierResult.fromStruct(resultsPtr.ref);
-    _log.fine('Text classification result: $result');
-    bindings.text_classifier_close(classifierPtr);
-    TextClassifierOptions.freeStruct(optionsPtr);
-    calloc.free(optionsPtr);
-    TextClassifierResult.freeStruct(resultsPtr);
-    return result;
+  Future<TextClassifierResult> classify(String text) async {
+    _log.info('Classifying "$text"');
+    await _ready;
+    _sendPort.send(text);
+    return await _events.next;
   }
+}
+
+Future<(StreamQueue<dynamic>, SendPort)> _createIsolate(
+    TextClassifierOptions options) async {
+  final p = ReceivePort();
+  await Isolate.spawn(
+    (SendPort port) => _classificationService(
+      port,
+      options,
+    ),
+    p.sendPort,
+  );
+
+  final events = StreamQueue<dynamic>(p);
+  final SendPort sendPort = await events.next;
+  return (events, sendPort);
+}
+
+Future<void> _classificationService(
+  SendPort p,
+  TextClassifierOptions options,
+) async {
+  final commandPort = ReceivePort();
+  p.send(commandPort.sendPort);
+
+  final executor = TextClassifierExecutor(options);
+
+  await for (final String? message in commandPort) {
+    if (message != null) {
+      final TextClassifierResult result = executor.classify(message);
+      p.send(result);
+    } else {
+      break;
+    }
+  }
+  executor.close();
+  Isolate.exit();
 }

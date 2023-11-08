@@ -8,9 +8,11 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  async: ^2.11.0
   ffi: ^2.1.0
   flutter:
     sdk: flutter
+  http: ^1.1.0
   logging: ^1.2.0
   mediapipe_core:
     path: ../mediapipe-core
@@ -20,3 +22,4 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
+  path: ^1.8.3
