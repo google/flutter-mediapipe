@@ -33,14 +33,6 @@ test_core:
 generate_text:
 	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
 
-# Compiles the faked C artifacts for testing
-compile_fake_text:
-	# Builds standalone executable
-	cd packages/mediapipe-task-text/test/c && gcc fake_text_classifier.c -o fake_text_classifier
-	# Builds what Flutter needs
-	cd packages/mediapipe-task-text/test/c && gcc -static -c -fPIC *.c -o fake_text_classifier.o
-	cd packages/mediapipe-task-text/test/c && gcc -shared -o fake_text_classifier.dylib fake_text_classifier.o 
-
 # Runs `ffigen` for `mediapipe_text` and all text tests
 test_text: compile_fake_text test_text_only
 
