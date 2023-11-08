@@ -13,8 +13,8 @@ class TextClassifierOptions {
   /// Generative constructor.
   const TextClassifierOptions({
     required this.baseOptions,
-    ClassifierOptions? classifierOptions,
-  }) : classifierOptions = classifierOptions ?? const ClassifierOptions();
+    this.classifierOptions = const ClassifierOptions(),
+  });
 
   /// Convenience constructor that looks for the model asset at the given file
   /// system location.
@@ -23,7 +23,7 @@ class TextClassifierOptions {
   /// not suitable for Flutter Web projects.
   factory TextClassifierOptions.fromAssetPath(
     String assetPath, {
-    ClassifierOptions? classifierOptions,
+    ClassifierOptions classifierOptions = const ClassifierOptions(),
   }) {
     assert(!kIsWeb, 'fromAssetPath cannot be used on the web');
     return TextClassifierOptions(
@@ -37,7 +37,7 @@ class TextClassifierOptions {
   /// Note: This constructor can be used on any target platform.
   factory TextClassifierOptions.fromAssetBuffer(
     Uint8List assetBuffer, {
-    ClassifierOptions? classifierOptions,
+    ClassifierOptions classifierOptions = const ClassifierOptions(),
   }) =>
       TextClassifierOptions(
         baseOptions: BaseOptions(modelAssetBuffer: assetBuffer),
