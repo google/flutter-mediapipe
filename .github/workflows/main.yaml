@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, ffi-wrapper-core-pkg]
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *" # Every day at midnight
