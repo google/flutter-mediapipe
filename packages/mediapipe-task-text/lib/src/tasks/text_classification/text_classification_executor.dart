@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
-import '../../mediapipe_text_bindings.dart' as bindings;
+import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
+    as bindings;
 
 final _log = Logger('TextClassifierExecutor');
 

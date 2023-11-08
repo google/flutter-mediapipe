@@ -3,7 +3,8 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
-import '../../../mediapipe_text_bindings.dart' as bindings;
+import '../../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
+    as bindings;
 
 /// Configuration object for a MediaPipe text classifier.
 ///

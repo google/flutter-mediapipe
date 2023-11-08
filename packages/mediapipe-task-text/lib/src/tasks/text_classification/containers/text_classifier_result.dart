@@ -1,5 +1,6 @@
 import 'package:mediapipe_core/mediapipe_core.dart';
-import 'package:mediapipe_text/src/mediapipe_text_bindings.dart' as bindings;
+import '../../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
+    as bindings;
 
 /// Container with results of MediaPipe's `classifyText` task.
 ///

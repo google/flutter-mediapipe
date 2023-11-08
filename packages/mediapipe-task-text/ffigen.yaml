@@ -1,7 +1,7 @@
 name: "MediaPipeTextBindings"
 description: "Bindings for MediaPipe structs for text-related tasks"
 output:
-  bindings: "lib/src/mediapipe_text_bindings.dart"
+  bindings: "lib/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart"
 headers:
   entry-points:
     - "third_party/mediapipe/tasks/c/**.h"
