@@ -2,9 +2,10 @@ import 'dart:io';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:http/http.dart' as http;
 
-const assetFilename = 'libtext_classifier.dylib';
+const cloudAssetFilename = 'libtext_classifier-v0.0.3.dylib';
+const localAssetFilename = 'libtext_classifier.dylib';
 const assetLocation =
-    'https://storage.googleapis.com/random-storage-asdf/$assetFilename';
+    'https://storage.googleapis.com/random-storage-asdf/$cloudAssetFilename';
 
 File outputFile = File(
     '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/logs-build.txt');
@@ -25,7 +26,7 @@ void main(List<String> args) async {
 Future<void> _build(List<String> args) async {
   final buildConfig = await BuildConfig.fromArgs(args);
   final buildOutput = BuildOutput();
-  final downloadFileLocation = buildConfig.outDir.resolve(assetFilename);
+  final downloadFileLocation = buildConfig.outDir.resolve(localAssetFilename);
   if (!buildConfig.dryRun) {
     final downloadUri = Uri.parse(assetLocation);
     log('Downloading $downloadUri');
