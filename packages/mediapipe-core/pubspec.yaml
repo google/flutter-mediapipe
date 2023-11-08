@@ -1,6 +1,7 @@
 name: mediapipe_core
 description: Shared logic and utilities required by other MediaPipe Task packages.
 version: 0.0.1-wip
+publish_to: none
 
 repository: https://github.com/google/flutter-mediapipe
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
