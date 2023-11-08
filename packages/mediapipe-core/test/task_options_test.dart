@@ -64,16 +64,11 @@ void main() {
 
       expect(struct.ref.max_results, -1);
       expect(struct.ref.score_threshold, 0.0);
-      expect(struct.ref.category_allowlist, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.category_allowlist);
       expect(struct.ref.category_allowlist_count, 0);
-      expect(struct.ref.category_denylist, isA<Pointer<Never>>());
+      expectNullPtr(struct.ref.category_denylist);
       expect(struct.ref.category_denylist_count, 0);
       expectNullPtr(struct.ref.display_names_locale);
-
-      // TODO: Could we do something like this?
-      // (right now, this segfaults)
-      // expect(struct.ref.display_names_locale.cast<Uint8>().asTypedList(1),
-      //     Uint8List.fromList([0]));
     });
 
     test('allocate memory for full fields', () {

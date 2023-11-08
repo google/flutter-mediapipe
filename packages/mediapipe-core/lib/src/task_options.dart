@@ -99,9 +99,6 @@ class ClassifierOptions extends Equatable {
   /// If non-empty, classification results whose category name is not in
   /// this set will be discarded. Duplicate or unknown category names
   /// are ignored. Mutually exclusive with `categoryDenylist`.
-  ///
-  /// See also:
-  ///  * [Category.categoryName]
   final List<String>? categoryAllowlist;
 
   /// Denylist of category names.
@@ -109,9 +106,6 @@ class ClassifierOptions extends Equatable {
   /// If non-empty, classification results whose category name is in this set
   /// will be discarded. Duplicate or unknown category names are ignored.
   /// Mutually exclusive with `categoryAllowList`.
-  ///
-  /// See also:
-  ///  * [Category.categoryName]
   final List<String>? categoryDenylist;
 
   /// Converts this pure-Dart representation into C-memory suitable for the
