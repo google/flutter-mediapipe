@@ -5,7 +5,7 @@ set -e
 DIR="${BASH_SOURCE%/*}"
 source "$DIR/ci_script_shared.sh"
 
-# flutter doctor -v
+flutter doctor -v
 
 declare -ar PACKAGE_NAMES=(
     "mediapipe-core"
