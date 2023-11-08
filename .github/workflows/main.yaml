@@ -1,0 +1,36 @@
+name: Main Branch CI
+
+# Declare default permissions as read only.
+permissions: read-all
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, ffi-wrapper-core-pkg]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # Every day at midnight
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  flutter-tests:
+    name: Test mediapipe_core against ${{ matrix.flutter_version }}
+    runs-on: ${{ matrix.os }}
+    # Skip running job on forks
+    if: github.repository == 'google/flutter-mediapipe'
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter_version: [stable, beta, master]
+        # TODO(craiglabenz): Add `ubuntu-latest` and `windows-latest` when those artifacts exist
+        os: [macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.flutter_version }}
+      - run: ./tool/mediapipe_ci_script_${{ matrix.flutter_version }}.sh
