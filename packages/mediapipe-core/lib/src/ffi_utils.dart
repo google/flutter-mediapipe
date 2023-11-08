@@ -39,7 +39,23 @@ String? toDartString(Pointer<Char> val) {
 ///
 /// See also:
 ///  * [toDartString]
-List<String?> toDartStrings(Pointer<Pointer<Char>> val, int length) {
+List<String?> toDartStrings(Pointer<Pointer<Char>> val, [int? length]) =>
+    length != null
+        ? _toDartStringsWithCount(val, length)
+        : _toStartStringsUntilNull(val);
+
+List<String?> _toStartStringsUntilNull(Pointer<Pointer<Char>> val) {
+  final dartStrings = <String?>[];
+  int counter = 0;
+  while (true) {
+    if (val[counter].address == 0) break;
+    dartStrings.add(toDartString(val[counter]));
+    counter++;
+  }
+  return dartStrings;
+}
+
+List<String?> _toDartStringsWithCount(Pointer<Pointer<Char>> val, int length) {
   final dartStrings = <String?>[];
   int counter = 0;
   while (counter < length) {
@@ -69,6 +85,7 @@ Uint8List toUint8List(Pointer<Char> val, {int? length}) {
   return codeUnits.asTypedList(length);
 }
 
+// Counts the non-null bytes in a string to determine its length
 int _length(Pointer<Uint8> codeUnits) {
   var length = 0;
   while (codeUnits[length] != 0) {
