@@ -7,11 +7,7 @@ const localAssetFilename = 'libtext_classifier.dylib';
 const assetLocation =
     'https://storage.googleapis.com/random-storage-asdf/$cloudAssetFilename';
 
-void main(List<String> args) async {
-  _build(args);
-}
-
-Future<void> _build(List<String> args) async {
+Future<void> main(List<String> args) async {
   final buildConfig = await BuildConfig.fromArgs(args);
   final buildOutput = BuildOutput();
   final downloadFileLocation = buildConfig.outDir.resolve(localAssetFilename);
