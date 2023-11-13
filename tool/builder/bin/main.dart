@@ -1,5 +1,5 @@
 import 'package:args/command_runner.dart';
-import 'package:build/sync_headers.dart';
+import 'package:builder/sync_headers.dart';
 
 final runner = CommandRunner(
   'build',
