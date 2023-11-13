@@ -30,8 +30,8 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   late final TextClassifier _classifier;
   final TextEditingController _controller = TextEditingController();
-  String? results;
-  ByteData? classifierBytes;
+  List<Widget> results = [];
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -41,45 +41,57 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> _initClassifier() async {
-    final model =
-        io.File('/Users/craiglabenz/Downloads/bert_classifier.tflite');
-
-    classifierBytes = await DefaultAssetBundle.of(context)
+    ByteData? classifierBytes = await DefaultAssetBundle.of(context)
         .load('assets/bert_classifier.tflite');
 
     _classifier = TextClassifier(
-      options: TextClassifierOptions.fromAssetBuffer(model.readAsBytesSync()),
+      options: TextClassifierOptions.fromAssetBuffer(
+        classifierBytes.buffer.asUint8List(),
+      ),
     );
+    classifierBytes = null;
   }
 
-  void _classify() async {
-    setState(() => results = null);
-    _log.info('Classifying ${_controller.text}');
-    _log.info('ClassifierBytes.length ${classifierBytes!.lengthInBytes}');
-    final classification = await _classifier.classify(_controller.text);
+  void _prepareForClassification() {
     setState(() {
+      _isProcessing = true;
+      results.add(const CircularProgressIndicator.adaptive());
+    });
+  }
+
+  void _showClassificationResults(TextClassifierResult classification) {
+    setState(() {
+      _isProcessing = false;
       final categoryName =
           classification.firstClassification?.firstCategory?.categoryName;
       final score = classification.firstClassification?.firstCategory?.score;
-      results = '$categoryName :: $score';
+      // Replace "..." with the results
+      results.last = Text('$categoryName :: $score');
     });
+  }
+
+  Future<void> _classify() async {
+    _prepareForClassification();
+    final classification = await _classifier.classify(_controller.text);
+    _showClassificationResults(classification);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
               TextField(controller: _controller),
-              if (results != null) Text(results!),
+              ...results,
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _classify,
+          onPressed: _isProcessing ? null : _classify,
           child: const Icon(Icons.search),
         ),
       ),
