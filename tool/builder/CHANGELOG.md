@@ -1,3 +1,3 @@
 ## 1.0.0
 
-- Initial version.
+- Initial version with headers command to sync C headers from `google/mediapipe`.
