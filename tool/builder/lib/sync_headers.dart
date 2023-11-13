@@ -133,19 +133,6 @@ class SyncHeadersCommand extends Command with RepoFinderMixin {
       }
     }
   }
-
-  /// Builds any missing folders between the file and the root of the repository
-  void ensureFolders(io.File file) {
-    io.Directory parent = file.parent;
-    List<io.Directory> dirsToCreate = [];
-    while (!parent.existsSync()) {
-      dirsToCreate.add(parent);
-      parent = parent.parent;
-    }
-    for (io.Directory dir in dirsToCreate.reversed) {
-      dir.createSync();
-    }
-  }
 }
 
 class Options {
