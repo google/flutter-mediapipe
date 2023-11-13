@@ -25,4 +25,3 @@ flutter:
 
   assets:
     - assets/bert_classifier.tflite
-    - assets/libtext_classifier.dylib

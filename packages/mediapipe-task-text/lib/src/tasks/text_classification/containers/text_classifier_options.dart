@@ -32,7 +32,7 @@ class TextClassifierOptions {
   }) {
     assert(!kIsWeb, 'fromAssetPath cannot be used on the web');
     return TextClassifierOptions(
-      baseOptions: BaseOptions(modelAssetPath: assetPath),
+      baseOptions: BaseOptions.path(assetPath),
       classifierOptions: classifierOptions,
     );
   }
@@ -45,7 +45,7 @@ class TextClassifierOptions {
     ClassifierOptions classifierOptions = const ClassifierOptions(),
   }) =>
       TextClassifierOptions(
-        baseOptions: BaseOptions(modelAssetBuffer: assetBuffer),
+        baseOptions: BaseOptions.memory(assetBuffer),
         classifierOptions: classifierOptions,
       );
 

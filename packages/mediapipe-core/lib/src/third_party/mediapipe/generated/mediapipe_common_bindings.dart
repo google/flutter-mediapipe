@@ -24,7 +24,7 @@ final class BaseOptions extends ffi.Struct {
 
   external ffi.Pointer<ffi.Char> model_asset_path;
 
-  @ffi.UnsignedInt()
+  @ffi.Int()
   external int model_asset_buffer_count;
 }
 
