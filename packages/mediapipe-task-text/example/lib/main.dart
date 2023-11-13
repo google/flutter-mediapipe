@@ -1,11 +1,8 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
-import 'package:path_provider/path_provider.dart';
 
 final _log = Logger('TextClassificationExample');
 
@@ -44,58 +41,13 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> _initClassifier() async {
-    // getApplicationDocumentsDirectory().then((dir) {
-    //   print(dir.absolute.path);
-    // });
-    // final dir = await getApplicationSupportDirectory();
-    // print('app support: ${dir.absolute.path}');
-
-    // DefaultAssetBundle.of(context).
-
-    // final model = io.File(
-    //     '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/example/assets/bert_classifier.tflite');
-
     final model =
         io.File('/Users/craiglabenz/Downloads/bert_classifier.tflite');
 
     classifierBytes = await DefaultAssetBundle.of(context)
         .load('assets/bert_classifier.tflite');
 
-    // final ImmutableBuffer classifierBuffer =
-    //     await DefaultAssetBundle.of(context)
-    //         .loadBuffer('assets/bert_classifier.tflite');
-
-    // final dir = io.Directory(path.current);
-    // final modelPath = path.joinAll(
-    //   [dir.absolute.path, 'assets/bert_classifier.tflite'],
-    // );
-    // _log.finest('modelPath: $modelPath');
-    // if (io.File(modelPath).existsSync()) {
-    //   _log.fine('Successfully found model.');
-    // } else {
-    //   _log.severe('Invalid model path \n\t$modelPath.\n\nModel not found.');
-    //   io.exit(1);
-    // }
-
-    // final sdkPath = path.joinAll(
-    //   [dir.absolute.path, 'assets/libtext_classifier.dylib'],
-    // );
-    // _log.finest('sdkPath: $sdkPath');
-    // if (io.File(sdkPath).existsSync()) {
-    //   _log.fine('Successfully found SDK.');
-    // } else {
-    //   _log.severe('Invalid SDK path $sdkPath. SDK not found.');
-    //   io.exit(1);
-    // }
-
     _classifier = TextClassifier(
-      // options: TextClassifierOptions.fromAssetPath(
-      // '/Users/craiglabenz/Dev/git/google/flutter-mediapipe/packages/mediapipe-task-text/example/assets/bert_classifier.tflite'),
-      // '/Users/craiglabenz/Downloads/bert_classifier.tflite'),
-      // options: TextClassifierOptions.fromAssetBuffer(
-      //     classifierBytes.buffer.asUint8List()),
-      // options: TextClassifierOptions.fromAssetBuffer(
-      //     classifierBytes!.buffer.asUint8List()),
       options: TextClassifierOptions.fromAssetBuffer(model.readAsBytesSync()),
     );
   }
