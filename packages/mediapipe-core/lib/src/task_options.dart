@@ -89,6 +89,16 @@ class BaseOptions extends Equatable {
     return struct;
   }
 
+  /// Releases all C memory held by this [bindings.BaseOptions] struct.
+  static void freeStruct(bindings.BaseOptions struct) {
+    if (struct.model_asset_path.isNotNullPointer) {
+      calloc.free(struct.model_asset_path);
+    }
+    if (struct.model_asset_buffer.isNotNullPointer) {
+      calloc.free(struct.model_asset_buffer);
+    }
+  }
+
   @override
   List<Object?> get props => [
         modelAssetBuffer,

@@ -5,10 +5,10 @@ headers:
 # Runs `ffigen` for all packages
 generate: generate_core generate_text
 
-# Runs `ffigen` for all packages, compiles the faked C artifacts, and runs all tests
+# Runs `ffigen` for all packages and runs all tests
 test: generate_text test_text generate_core test_core
 
-# Runs `ffigen` for all packages and all tests for all packages
+# Runs all tests for all packages
 test_only: test_core test_text
 
 # Rebuilds the MediaPipe task for macOS
@@ -33,9 +33,6 @@ test_core:
 generate_text:
 	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
 
-# Runs `ffigen` for `mediapipe_text` and all text tests
-test_text: compile_fake_text test_text_only
-
 # Runs all text tests
-test_text_only:
+test_text:
 	cd packages/mediapipe-task-text && flutter test

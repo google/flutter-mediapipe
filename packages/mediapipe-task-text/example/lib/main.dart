@@ -31,14 +31,13 @@ class _MainAppState extends State<MainApp> {
   late final TextClassifier _classifier;
   final TextEditingController _controller = TextEditingController();
   List<Widget> results = [];
-  bool _isProcessing = false;
+  String? _isProcessing;
 
   @override
   void initState() {
     super.initState();
     _controller.text = 'Hello, world!';
     _initClassifier();
-    Future.delayed(const Duration(milliseconds: 500)).then((_) => _classify());
   }
 
   Future<void> _initClassifier() async {
@@ -55,20 +54,26 @@ class _MainAppState extends State<MainApp> {
 
   void _prepareForClassification() {
     setState(() {
-      _isProcessing = true;
+      _isProcessing = _controller.text;
       results.add(const CircularProgressIndicator.adaptive());
     });
   }
 
   void _showClassificationResults(TextClassifierResult classification) {
     setState(() {
-      _isProcessing = false;
       final categoryName =
           classification.firstClassification?.firstCategory?.categoryName;
       final score = classification.firstClassification?.firstCategory?.score;
       // Replace "..." with the results
-      results.last = Text('$categoryName :: $score');
+      _log.info('"$_isProcessing" $categoryName :: $score');
+      results.last = Card(
+        child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text('"$_isProcessing" $categoryName :: $score')),
+      );
+      _isProcessing = null;
     });
+    setState(() {});
   }
 
   Future<void> _classify() async {
@@ -80,7 +85,6 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -92,7 +96,9 @@ class _MainAppState extends State<MainApp> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: _isProcessing ? null : _classify,
+          onPressed: _isProcessing != null && _controller.text != ''
+              ? null
+              : _classify,
           child: const Icon(Icons.search),
         ),
       ),
