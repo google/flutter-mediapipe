@@ -143,7 +143,7 @@ class TextClassifierExecutor {
       _closeErrorMessage = null;
     }
     if (isNotNullOrNullPointer(_optionsPtr)) {
-      calloc.free(_optionsPtr!);
+      TextClassifierOptions.freeStruct(_optionsPtr!);
       _optionsPtr = null;
     }
   }
