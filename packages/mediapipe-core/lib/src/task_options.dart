@@ -24,7 +24,6 @@ class BaseOptions extends Equatable {
   const BaseOptions._({
     this.modelAssetBuffer,
     this.modelAssetPath,
-    this.modelAssetBufferCount,
     required _BaseOptionsType type,
   })  : assert(
           !(modelAssetBuffer == null && modelAssetPath == null),
@@ -33,11 +32,6 @@ class BaseOptions extends Equatable {
         assert(
           !(modelAssetBuffer != null && modelAssetPath != null),
           'You must only supply one of `modelAssetBuffer` and `modelAssetPath`',
-        ),
-        assert(
-          (modelAssetBuffer == null) == (modelAssetBufferCount == null),
-          'modelAssetBuffer and modelAssetBufferCount must only be submitted '
-          'together',
         ),
         _type = type;
 
@@ -58,16 +52,12 @@ class BaseOptions extends Equatable {
   factory BaseOptions.memory(Uint8List buffer) {
     return BaseOptions._(
       modelAssetBuffer: buffer,
-      modelAssetBufferCount: buffer.lengthInBytes,
       type: _BaseOptionsType.memory,
     );
   }
 
   /// The model asset file contents as bytes;
   final Uint8List? modelAssetBuffer;
-
-  /// The size of the model assets buffer (or `0` if not set).
-  final int? modelAssetBufferCount;
 
   /// Path to the model asset file.
   final String? modelAssetPath;
@@ -103,7 +93,7 @@ class BaseOptions extends Equatable {
   List<Object?> get props => [
         modelAssetBuffer,
         modelAssetPath,
-        modelAssetBufferCount,
+        modelAssetBuffer?.lengthInBytes,
       ];
 }
 
