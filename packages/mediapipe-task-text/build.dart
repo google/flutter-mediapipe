@@ -31,7 +31,7 @@ Future<void> main(List<String> args) async {
   buildOutput.assets.add(
     Asset(
       // What should this `id` be?
-      id: 'package:mediapipe_text/src/mediapipe_text_bindings.dart',
+      id: 'package:mediapipe_text/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart',
       linkMode: LinkMode.dynamic,
       target: Target.macOSArm64,
       path: AssetAbsolutePath(downloadFileLocation),
