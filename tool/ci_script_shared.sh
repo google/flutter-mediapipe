@@ -17,6 +17,9 @@ function ci_package () {
         # Run the formatter on all the dart files to make sure everything's linted.
         dart format --output none --set-exit-if-changed .
 
+        # Download bert_classifier.tflite model into example/assets for integration tests
+        dart ../../tool/builder/bin/main.dart model -m textclassification
+
         # Run the actual tests.
         if [ -d "test" ]
         then
