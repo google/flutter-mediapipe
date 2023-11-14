@@ -86,13 +86,15 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: <Widget>[
-              TextField(controller: _controller),
-              ...results,
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                TextField(controller: _controller),
+                ...results,
+              ],
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
