@@ -33,7 +33,7 @@ function ci_package () {
         flutter config --enable-native-assets
 
         echo `pwd`
-        ll build/native_assets/macos/
+        ls -lah build/native_assets/macos/
 
 
         # Run the actual tests.
