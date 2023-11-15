@@ -20,7 +20,7 @@ class TextClassifierResult {
   /// The classification results for each head of the model.
   final List<Classifications> classifications;
 
-  /// The optional timestamp (as a Duration) of the start of the chunk of data
+  /// The optional timestamp (as a [Duration]) of the start of the chunk of data
   /// corresponding to these results.
   ///
   /// This is only used for classification on time series (e.g. audio
