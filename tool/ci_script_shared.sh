@@ -30,8 +30,11 @@ function ci_package () {
         # Run the formatter on all the dart files to make sure everything's linted.
         dart format --output none --set-exit-if-changed .
         
-        echo "Enabling native assets"
         flutter config --enable-native-assets
+
+        echo `pwd`
+        ll build/native_assets/macos/
+
 
         # Run the actual tests.
         if [ -d "test" ]
