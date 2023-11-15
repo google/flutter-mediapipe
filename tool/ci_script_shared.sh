@@ -7,7 +7,7 @@ function ci_text_package() {
     popd
 
     echo `pwd`
-    ls -lah build/native_assets/macos/
+    ls -lah
 }
 
 function ci_package () {
