@@ -5,6 +5,9 @@ function ci_text_package() {
     dart pub get
     dart bin/main.dart model -m textclassification
     popd
+
+    echo `pwd`
+    ls -lah build/native_assets/macos/
 }
 
 function ci_package () {
@@ -31,10 +34,6 @@ function ci_package () {
         dart format --output none --set-exit-if-changed .
         
         flutter config --enable-native-assets
-
-        echo `pwd`
-        ls -lah build/native_assets/macos/
-
 
         # Run the actual tests.
         if [ -d "test" ]
