@@ -23,6 +23,9 @@ function ci_package () {
         dart pub get
         dart bin/main.dart model -m textclassification
         popd
+        
+        echo "Enabling native assets"
+        flutter config --enable-native-assets
 
         # Run the actual tests.
         if [ -d "test" ]
