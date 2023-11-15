@@ -4,7 +4,7 @@ description: Performs build operations for google/flutter-mediapipe that depend
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 environment:
-  sdk: ^3.2.0-162.0.dev
+  sdk: ^3.1.5
 
 # Add regular dependencies here.
 dependencies:
