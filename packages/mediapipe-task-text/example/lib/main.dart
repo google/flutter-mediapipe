@@ -28,7 +28,46 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late final TextClassifier _classifier;
+  late Future<TextClassifier> _classifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _classifier = _initClassifier();
+  }
+
+  Future<TextClassifier> _initClassifier() async {
+    ByteData? classifierBytes = await DefaultAssetBundle.of(context)
+        .load('assets/bert_classifier.tflite');
+
+    TextClassifier classifier = TextClassifier(
+      options: TextClassifierOptions.fromAssetBuffer(
+        classifierBytes.buffer.asUint8List(),
+      ),
+    );
+    classifierBytes = null;
+    return classifier;
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        home: TextClassificationResults(
+          classifier: _classifier,
+        ),
+      );
+}
+
+class TextClassificationResults extends StatefulWidget {
+  const TextClassificationResults({super.key, required this.classifier});
+
+  final Future<BaseTextClassifier> classifier;
+
+  @override
+  State<TextClassificationResults> createState() =>
+      _TextClassificationResultsState();
+}
+
+class _TextClassificationResultsState extends State<TextClassificationResults> {
   final TextEditingController _controller = TextEditingController();
   List<Widget> results = [];
   String? _isProcessing;
@@ -37,19 +76,6 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     _controller.text = 'Hello, world!';
-    _initClassifier();
-  }
-
-  Future<void> _initClassifier() async {
-    ByteData? classifierBytes = await DefaultAssetBundle.of(context)
-        .load('assets/bert_classifier.tflite');
-
-    _classifier = TextClassifier(
-      options: TextClassifierOptions.fromAssetBuffer(
-        classifierBytes.buffer.asUint8List(),
-      ),
-    );
-    classifierBytes = null;
   }
 
   void _prepareForClassification() {
@@ -65,11 +91,15 @@ class _MainAppState extends State<MainApp> {
           classification.firstClassification?.firstCategory?.categoryName;
       final score = classification.firstClassification?.firstCategory?.score;
       // Replace "..." with the results
-      _log.info('"$_isProcessing" $categoryName :: $score');
+      final message = '"$_isProcessing" $categoryName :: $score';
+      _log.info(message);
       results.last = Card(
+        key: Key('Classification::"$_isProcessing"'),
+        margin: const EdgeInsets.all(10),
         child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text('"$_isProcessing" $categoryName :: $score')),
+          padding: const EdgeInsets.all(10),
+          child: Text(message),
+        ),
       );
       _isProcessing = null;
     });
@@ -78,14 +108,14 @@ class _MainAppState extends State<MainApp> {
 
   Future<void> _classify() async {
     _prepareForClassification();
-    final classification = await _classifier.classify(_controller.text);
+    BaseTextClassifier classifier = await widget.classifier;
+    final classification = await classifier.classify(_controller.text);
     _showClassificationResults(classification);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+  Widget build(BuildContext context) => //
+      Scaffold(
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -103,7 +133,5 @@ class _MainAppState extends State<MainApp> {
               : _classify,
           child: const Icon(Icons.search),
         ),
-      ),
-    );
-  }
+      );
 }
