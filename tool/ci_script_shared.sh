@@ -41,6 +41,8 @@ function ci_package () {
         if [ -d "test" ]
         then
             flutter test
+            echo `pwd`
+            ls -lah
         fi
 
         # Run any example tests if they exist
