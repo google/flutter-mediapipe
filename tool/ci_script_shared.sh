@@ -35,6 +35,8 @@ function ci_package () {
         
         flutter config --enable-native-assets
 
+        flutter doctor -v
+
         # Run the actual tests.
         if [ -d "test" ]
         then
