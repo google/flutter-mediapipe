@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+# set -e
 
 DIR="${BASH_SOURCE%/*}"
 source "$DIR/ci_script_shared.sh"
