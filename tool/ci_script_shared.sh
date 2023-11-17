@@ -43,8 +43,7 @@ function ci_package () {
             flutter test
             echo `pwd`
             ls -lah
-            ls -lah build/native_assets/macos
-            cat build/native_assets/macos/native_assets.yaml
+            ls -lah build/
         fi
 
         # Run any example tests if they exist
