@@ -35,7 +35,13 @@ function ci_package () {
         
         flutter config --enable-native-assets
 
+        echo "$ flutter config --list 1"
+        flutter config --list
+
         flutter doctor -v
+
+        echo "$ flutter config --list 2"
+        flutter config --list
 
         # Run the actual tests.
         if [ -d "test" ]
@@ -45,6 +51,8 @@ function ci_package () {
             ls -lah
             ls -lah build/
             ls -lah build/unit_test_assets
+            echo "$ flutter config --list 3"
+            flutter config --list
         fi
 
         # Run any example tests if they exist
