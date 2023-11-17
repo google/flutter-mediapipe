@@ -44,6 +44,7 @@ function ci_package () {
             echo `pwd`
             ls -lah
             ls -lah build/
+            ls -lah build/unit_test_assets
         fi
 
         # Run any example tests if they exist
