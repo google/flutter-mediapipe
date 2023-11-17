@@ -50,7 +50,9 @@ function ci_package () {
             echo `pwd`
             ls -lah
             ls -lah build/
-            ls -lah build/unit_test_assets
+            ls -lah build/native_assets
+            ls -lah build/native_assets/macos
+            cat build/native_assets/macos/native_assets.yaml
             echo "$ flutter config --list 3"
             flutter config --list
         fi
