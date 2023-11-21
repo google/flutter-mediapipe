@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 
 void main() {
-  group('BaseOptions.toStruct/fromStruct should', () {
+  group('BaseOptions.toStruct/structToDart should', () {
     test('allocate memory in C for a modelAssetPath', () {
       final options = BaseOptions.path('abc');
       final struct = options.toStruct();
