@@ -46,7 +46,7 @@ function ci_package () {
         # Run the actual tests.
         if [ -d "test" ]
         then
-            flutter test
+            flutter test -v
             echo `pwd`
             echo "ls -lah"
             ls -lah

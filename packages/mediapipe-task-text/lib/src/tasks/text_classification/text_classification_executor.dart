@@ -102,7 +102,7 @@ class TextClassifierExecutor {
   /// [TextClassificationResult] object.
   TextClassifierResult _processResult() {
     // Convert the results into pure-Dart objects and free all memory
-    final result = TextClassifierResult.fromStruct(_resultsPtr!.ref);
+    final result = TextClassifierResult.structToDart(_resultsPtr!.ref);
     _log.fine('Text classification result: $result');
     bindings.text_classifier_close_result(_resultsPtr!);
     _resultsPtr = null;
