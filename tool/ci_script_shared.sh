@@ -48,10 +48,15 @@ function ci_package () {
         then
             flutter test
             echo `pwd`
+            echo "ls -lah"
             ls -lah
+            echo "ls -lah build/"
             ls -lah build/
+            echo "ls -lah build/native_assets"
             ls -lah build/native_assets
+            echo "ls -lah build/native_assets/macos"
             ls -lah build/native_assets/macos
+            echo "cat build/native_assets/macos/native_assets.yaml"
             cat build/native_assets/macos/native_assets.yaml
             echo "$ flutter config --list 3"
             flutter config --list
