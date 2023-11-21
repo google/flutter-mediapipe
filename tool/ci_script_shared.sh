@@ -58,6 +58,8 @@ function ci_package () {
             ls -lah build/native_assets/macos
             echo "cat build/native_assets/macos/native_assets.yaml"
             cat build/native_assets/macos/native_assets.yaml
+            echo "nm -a build/native_assets/macos/libtext_classifier.dylib | grep text_classifier_create"
+            nm -a build/native_assets/macos/libtext_classifier.dylib | grep text_classifier_create
             echo "$ flutter config --list 3"
             flutter config --list
         fi

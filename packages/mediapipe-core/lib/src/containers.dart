@@ -44,13 +44,9 @@ class Category {
     Pointer<bindings.Category> structs,
     int count,
   ) {
-    print('num categories: $count');
-    // assert(count == 1);
     final categories = <Category>[];
     for (int i = 0; i < count; i++) {
-      print('struct $i :: ${structs[i]}');
       categories.add(structToDart(structs[i]));
-      print('categories.last: ${categories.last}');
     }
     return categories;
   }
@@ -58,12 +54,8 @@ class Category {
   /// Accepts a pointer to a single struct and returns a pure-Dart [Category] instance.
   static Category structToDart(bindings.Category struct) {
     return Category(
-      // index: 1,
       index: struct.index,
       score: struct.score,
-      // score: 0,
-      // categoryName: null,
-      // displayName: null,
       categoryName: toDartString(struct.category_name),
       displayName: toDartString(struct.display_name),
     );
@@ -136,7 +128,6 @@ class Classifications {
   /// Accepts a pointer to a single struct and returns a pure-Dart [Classifications]
   /// instance.
   static Classifications structToDart(bindings.Classifications struct) {
-    print('struct.categories_count:: ${struct.categories_count}');
     return Classifications(
       categories: Category.structsToDart(
         struct.categories,

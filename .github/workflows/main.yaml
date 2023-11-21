@@ -25,7 +25,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flutter_version: [stable, beta, master]
+        flutter_version: [master]
+        # TODO(craiglabenz): reverse once CI works
+        # flutter_version: [stable, beta, master]
         # TODO(craiglabenz): Add `ubuntu-latest` and `windows-latest` when those artifacts exist
         os: [macos-latest]
     steps:

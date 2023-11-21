@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
+import 'package:mediapipe_core/src/test_utils.dart';
 import 'package:test/test.dart';
 import 'package:mediapipe_core/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as core_bindings;
@@ -9,7 +10,7 @@ void main() {
   group('Category.structToDart should', () {
     test('load a Category', () {
       final categoryPtr = calloc<core_bindings.Category>();
-      populateCategory(category: categoryPtr.ref);
+      populateCategory(categoryPtr.ref);
 
       final category = Category.structToDart(categoryPtr.ref);
       expect(category.index, 1);
@@ -21,7 +22,8 @@ void main() {
     });
 
     test('load a Category with a display name', () {
-      final categoryPtr = createCategory(displayName: 'v-good');
+      final categoryPtr = calloc<core_bindings.Category>();
+      populateCategory(categoryPtr.ref, displayName: 'v-good');
 
       final category = Category.structToDart(categoryPtr.ref);
       expect(category.index, 1);
@@ -33,7 +35,8 @@ void main() {
     });
 
     test('load a Category with no names', () {
-      final categoryPtr = createCategory(categoryName: null);
+      final categoryPtr = calloc<core_bindings.Category>();
+      populateCategory(categoryPtr.ref, categoryName: null);
 
       final category = Category.structToDart(categoryPtr.ref);
       expect(category.index, 1);
@@ -46,10 +49,9 @@ void main() {
 
     test('should load a list of structs', () {
       final ptrs = calloc<core_bindings.Category>(2);
-      // final Pointer<core_bindings.Category> ptr = ptrs[0];
-      populateCategory(category: ptrs[0]);
+      populateCategory(ptrs[0]);
       populateCategory(
-        category: ptrs[1],
+        ptrs[1],
         categoryName: 'Negative',
         index: 2,
         score: 0.01,
@@ -65,22 +67,48 @@ void main() {
       expect(categories[1].score, closeTo(0.01, 0.0001));
     });
   });
-}
 
-void populateCategory({
-  required core_bindings.Category category,
-  int index = 1,
-  double score = 0.9,
-  String? categoryName = 'Positive',
-  String? displayName,
-}) {
-  category.index = index;
-  category.score = score;
+  group('Classifications.structToDart should', () {
+    test('load a Classifications object', () {
+      final classificationsPtr = calloc<core_bindings.Classifications>();
+      populateClassifications(classificationsPtr.ref);
 
-  if (categoryName != null) {
-    category.category_name = prepareString(categoryName);
-  }
-  if (displayName != null) {
-    category.display_name = prepareString(displayName);
-  }
+      final classifications =
+          Classifications.structToDart(classificationsPtr.ref);
+      expect(classifications.headIndex, 1);
+      expect(classifications.headName, 'Head');
+      expect(classifications.categories.length, 2);
+      expect(classifications.categories.first.categoryName, 'Positive');
+      expect(classifications.categories.last.categoryName, 'Positive');
+
+      Classifications.freeStructs(classificationsPtr, 1);
+    });
+
+    test('load a Classifications object with 1 category', () {
+      final classificationsPtr = calloc<core_bindings.Classifications>();
+      populateClassifications(classificationsPtr.ref, numCategories: 1);
+
+      final classifications =
+          Classifications.structToDart(classificationsPtr.ref);
+      expect(classifications.headIndex, 1);
+      expect(classifications.headName, 'Head');
+      expect(classifications.categories.length, 1);
+      expect(classifications.categories.first.categoryName, 'Positive');
+
+      Classifications.freeStructs(classificationsPtr, 1);
+    });
+
+    test('load a Classifications object with no categories', () {
+      final classificationsPtr = calloc<core_bindings.Classifications>();
+      populateClassifications(classificationsPtr.ref, numCategories: 0);
+
+      final classifications =
+          Classifications.structToDart(classificationsPtr.ref);
+      expect(classifications.headIndex, 1);
+      expect(classifications.headName, 'Head');
+      expect(classifications.categories.length, 0);
+
+      Classifications.freeStructs(classificationsPtr, 1);
+    });
+  });
 }
