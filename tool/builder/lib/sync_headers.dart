@@ -57,10 +57,12 @@ class SyncHeadersCommand extends Command with RepoFinderMixin {
           'at destination locations.',
     );
     addSourceOption(argParser);
+    addVerboseOption(argParser);
   }
 
   @override
   Future<void> run() async {
+    setUpLogging();
     final io.Directory flutterMediaPipeDirectory = findFlutterMediaPipeRoot();
     final io.Directory mediaPipeDirectory = findMediaPipeRoot(
       flutterMediaPipeDirectory,
