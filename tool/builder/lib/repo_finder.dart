@@ -5,6 +5,7 @@
 import 'dart:io' as io;
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:io/ansi.dart';
 
@@ -32,6 +33,18 @@ mixin RepoFinderMixin on Command {
       help: 'The location of google/mediapipe. Defaults to being '
           'adjacent to google/flutter-mediapipe.',
     );
+  }
+
+  void addVerboseOption(ArgParser argParser) =>
+      argParser.addFlag('verbose', abbr: 'v', defaultsTo: false);
+
+  void setUpLogging() {
+    final bool verbose = argResults!['verbose'];
+    Logger.root.level = verbose ? Level.FINEST : Level.INFO;
+    Logger.root.onRecord.listen((LogRecord record) {
+      io.stdout.writeln(
+          '[${record.loggerName}][${record.level.name}] ${record.message}');
+    });
   }
 
   /// Looks upward for the root of the `google/mediapipe` repository. This assumes
