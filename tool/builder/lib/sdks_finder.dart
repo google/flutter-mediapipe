@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:builder/extensions.dart';
@@ -47,9 +48,12 @@ enum MediaPipeSdk {
 /// command helps by automating a portion of the task.
 ///
 /// The cache-busting mechanism of Flutter's native assets feature is a hash
-/// of the contents of any build dependencies, so if this command leads to any
-/// new build state, this must be reflected by *some change* to the associated
-/// library's `build.dart` script.
+/// of the contents of any build dependencies. The output files of this command
+/// are included in the build dependencies (as specified by the contents of each
+/// package's `build.dart` file), so if this command generates new SDK locations
+/// in those files, Flutter's CLI will have a cache miss, will re-run
+/// `build.dart` during the build phase, and in turn will download the newest
+/// versions of the MediaPipe SDKs onto the developer's machine.
 ///
 /// Operationally, [SdksFinderCommand]'s implementation involves orchestrating
 /// one [_OsFinder] instance for each supported [OS] value, which in turn
@@ -67,7 +71,7 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
   }
   @override
   String description =
-      'Downloads the appropriate MediaPipe SDKs for the current build target';
+      'Updates MediaPipe SDK manifest files for the current build target';
 
   @override
   String name = 'sdks';
@@ -120,9 +124,26 @@ final Map<String, Map<String, String>> sdkDownloadUrls = ${encoder.convert(resul
   }
 
   void _checkGsUtil() async {
+    if (!io.Platform.isMacOS && !io.Platform.isLinux) {
+      // `which` is not available on Windows, so allow the command to attempt
+      // to run on Windows
+      // TODO: possibly add Windows-specific support
+      return;
+    }
     final process = await Process.start('which', ['gsutil']);
-    await process.exitCode;
-    if ((await process.processedStdOut).isEmpty) {
+    final exitCode = await process.exitCode;
+    final List<String> processStdOut = await process.processedStdOut;
+    if (exitCode != 0) {
+      stderr.writeln(
+        wrapWith(
+          'Warning: Unexpected exit code $exitCode checking for gsutil. Output:'
+          '${processStdOut.join('\n')}',
+          [yellow],
+        ),
+      );
+      // Not exiting here, since this could be a false-negative.
+    }
+    if (processStdOut.isEmpty) {
       stderr.writeln(
         wrapWith(
           'gsutil command not found. Visit: '
@@ -297,7 +318,21 @@ Future<List<String>> _gsUtil(String path, {bool recursive = false}) async {
   ];
   _log.finest('Running: `gsutil ${cmd.join(' ')}`');
   final process = await Process.start('gsutil', cmd);
-  await process.exitCode;
+  final exitCode = await process.exitCode;
+  if (exitCode > 1) {
+    // Exit codes of 1 appear when `gsutil` checks for a file that does not
+    // exist, which for our purposes does not constitute an actual error, and is
+    // handled later when `process.processedStdOut` is empty.
+    stderr.writeln(
+      wrapWith(
+        'Warning: Unexpected exit code $exitCode running '
+        '`gsutil ${cmd.join(' ')}`. Output: '
+        '${(await process.processedStdOut).join('\n')}',
+        [red],
+      ),
+    );
+    exit(exitCode);
+  }
   final processStdout = await process.processedStdOut;
   final filtered = (processStdout).where((String line) => line != '').toList();
   return filtered;

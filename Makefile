@@ -11,6 +11,10 @@ test: generate_text test_text generate_core test_core
 # Runs `ffigen` for all packages and all tests for all packages
 test_only: test_core test_text
 
+# Runs `sdks_finder` to update manifest files
+sdks:
+	dart tool/builder/bin/main.dart sdks
+
 # Core ---
 
 # Runs `ffigen` for `mediapipe_core`
