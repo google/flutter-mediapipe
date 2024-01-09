@@ -17,6 +17,10 @@ compile_text_classifier_macos:
 	cd ../mediapipe && bazel build --linkopt -s --config darwin_arm64 --strip always --define MEDIAPIPE_DISABLE_GPU=1 mediapipe/tasks/c/text/text_classifier:libtext_classifier.dylib
 	cd ../mediapipe && sudo cp bazel-bin/mediapipe/tasks/c/text/text_classifier/libtext_classifier.dylib ../flutter-mediapipe/packages/mediapipe-task-text/example/assets
 
+# Runs `sdks_finder` to update manifest files
+sdks:
+	dart tool/builder/bin/main.dart sdks
+
 # Core ---
 
 # Runs `ffigen` for `mediapipe_core`
