@@ -94,7 +94,7 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
       final message = '"$_isProcessing" $categoryName :: $score';
       _log.info(message);
       results.last = Card(
-        key: Key('Classification::"$_isProcessing"'),
+        key: Key('Classification::"$_isProcessing" ${results.length}'),
         margin: const EdgeInsets.all(10),
         child: Padding(
           padding: const EdgeInsets.all(10),

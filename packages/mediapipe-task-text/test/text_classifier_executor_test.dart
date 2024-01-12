@@ -7,24 +7,6 @@ import 'package:path/path.dart' as path;
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/src/tasks/text_classification/text_classification_executor.dart';
 
-void debugFileSystem() {
-  final buildDir = io.Directory(
-      '/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/'
-      'mediapipe-task-text/build/native_assets/macos');
-
-  for (io.FileSystemEntity entity in buildDir.listSync()) {
-    if (entity is! io.File) continue;
-    print(entity.path);
-  }
-
-  final buildConfig = io.File(path.joinAll([
-    buildDir.absolute.path,
-    'native_assets.yaml',
-  ]));
-
-  print(buildConfig.readAsLinesSync());
-}
-
 void main() {
   final pathToModel = path.joinAll([
     io.Directory.current.absolute.path,
@@ -34,7 +16,6 @@ void main() {
 
   group('TextClassifierExecutor should', () {
     test('run a task', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
@@ -44,7 +25,6 @@ void main() {
     });
 
     test('run multiple tasks', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
@@ -56,7 +36,6 @@ void main() {
     });
 
     test('unpack a result', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
@@ -72,7 +51,6 @@ void main() {
     });
 
     test('use the denylist', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(
           modelBytes,
@@ -85,15 +63,12 @@ void main() {
       final classifications = result.classifications.first;
       expect(classifications.headName, equals('probability'));
       expect(classifications.categories, hasLength(1));
-      // expect(classifications.categories.first.categoryName, equals('positive'));
-      // expect(classifications.categories.first.score, closeTo(0.9919, 0.0001));
       expect(classifications.categories.first.categoryName, equals('negative'));
       expect(classifications.categories.first.score, closeTo(0.00804, 0.00001));
       executor.close();
     });
 
     test('use the allowlist', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(
           modelBytes,
@@ -112,7 +87,6 @@ void main() {
     });
 
     test('release all resources', () {
-      debugFileSystem();
       final executor = TextClassifierExecutor(
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
