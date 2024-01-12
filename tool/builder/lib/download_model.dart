@@ -61,6 +61,7 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
             'if you use the `custommodel` option, but optional if you use the '
             '`model` option.',
       );
+    addVerboseOption(argParser);
   }
 
   static final Map<String, String> _standardModelSources = {
@@ -79,6 +80,7 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
 
   @override
   Future<void> run() async {
+    setUpLogging();
     final io.Directory flutterMediaPipeDirectory = findFlutterMediaPipeRoot();
 
     late final String modelSource;
