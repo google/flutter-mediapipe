@@ -188,9 +188,14 @@ class _OsFinder {
   /// Folders for specific [Target] values, where a Target is an OS/architecture
   /// combination.
   static const targetFolders = <OS, Map<String, Architecture>>{
-    OS.android: {'android_arm64': Architecture.arm64},
+    OS.android: {
+      'android_arm64': Architecture.arm64,
+    },
     OS.iOS: {},
-    OS.macOS: {'arm64': Architecture.arm64, 'x86_64': Architecture.x64},
+    OS.macOS: {
+      'darwin_arm64': Architecture.arm64,
+      'darwin_x86_64': Architecture.x64,
+    },
   };
 
   final OS os;
@@ -254,11 +259,23 @@ class _OsFinder {
   /// Receives a [Path] like ".../[os_folder]/release/[build_number]/[date]/"
   /// and yields all matching architecture folders within.
   Stream<String> _getArchitectectures(String path) async* {
+    final pathsWithinBuild = <String>[];
+    final expectedFolders = targetFolders[os]!.keys.toSet();
     for (final pathWithinBuild in await _gsUtil(path)) {
+      pathsWithinBuild.add(lastChunk(pathWithinBuild));
       final maybeArchitecture = lastChunk(pathWithinBuild);
       if (targetFolders[os]!.containsKey(maybeArchitecture)) {
+        expectedFolders.remove(maybeArchitecture);
         yield maybeArchitecture;
       }
+    }
+    if (expectedFolders.isNotEmpty) {
+      _log.warning(
+        'Did not find all expected folders in "$path".\n '
+        'Expected to find ${targetFolders[os]!.keys.toSet()}.\n '
+        'Did not find $expectedFolders.\n '
+        'Folders in path were: $pathsWithinBuild.',
+      );
     }
   }
 
