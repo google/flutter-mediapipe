@@ -44,6 +44,7 @@ generate_text:
 # Runs all text tests
 test_text:
 	cd packages/mediapipe-task-text && flutter test
+	cd packages/mediapipe-task-text/example && flutter test
 
 example_text:
 	cd packages/mediapipe-task-text/example && flutter run -d macos

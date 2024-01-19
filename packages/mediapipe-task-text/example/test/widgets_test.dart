@@ -46,7 +46,7 @@ void main() {
     await tester.tap(find.byType(Icon));
     await tester.pumpAndSettle();
     expect(
-      find.byKey(const Key('Classification::"Hello, world!"')),
+      find.byKey(const Key('Classification::"Hello, world!" 1')),
       findsOneWidget,
     );
     expect(
