@@ -111,6 +111,7 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
     file.writeAsStringSync('''// Generated file. Do not manually edit.
 final Map<String, Map<String, String>> sdkDownloadUrls = ${encoder.convert(results).replaceAll('"', "'")};
 ''');
+    io.Process.start('dart', ['format', file.absolute.path]);
   }
 
   File _getOutputFile(MediaPipeSdk sdk) {
