@@ -60,7 +60,6 @@ Future<void> main(List<String> args) async {
       Asset(
         id: 'package:mediapipe_text/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart',
         linkMode: LinkMode.dynamic,
-        // target: buildConfig.target,
         target: Target.fromArchitectureAndOs(
             Architecture.fromString(arch), buildConfig.targetOs),
         path: AssetAbsolutePath(downloadFileLocation),
@@ -87,6 +86,7 @@ Future<void> downloadAsset(String assetUrl, Uri destinationFile) async {
       downloadedFile.deleteSync();
     }
     downloadedFile.createSync();
+    log('Saving file to ${downloadedFile.absolute.path}');
     downloadedFile.writeAsBytes(downloadResponse.bodyBytes);
   } else {
     log('${downloadResponse.statusCode} :: ${downloadResponse.body}');
