@@ -23,12 +23,6 @@ function ci_package () {
         if [[ $PACKAGE_NAME == "mediapipe-task-text" ]]; then
             ci_text_package
         fi
-        if [[ $PACKAGE_NAME == "mediapipe-task-audio" ]]; then
-            
-        fi
-        if [[ $PACKAGE_NAME == "mediapipe-task-vision" ]]; then
-            
-        fi
 
         # Grab packages.
         flutter pub get
