@@ -69,13 +69,18 @@ class BaseOptions extends Equatable {
   Pointer<bindings.BaseOptions> toStruct() {
     final struct = calloc<bindings.BaseOptions>();
 
-    if (_type == _BaseOptionsType.path) {
-      struct.ref.model_asset_path = prepareString(modelAssetPath!);
+    switch (_type) {
+      case _BaseOptionsType.path:
+        {
+          struct.ref.model_asset_path = prepareString(modelAssetPath!);
+        }
+      case _BaseOptionsType.memory:
+        {
+          struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
+          struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
+        }
     }
-    if (_type == _BaseOptionsType.memory) {
-      struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
-      struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
-    }
+
     return struct;
   }
 

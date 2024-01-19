@@ -103,7 +103,6 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
       );
       _isProcessing = null;
     });
-    setState(() {});
   }
 
   Future<void> _classify() async {
