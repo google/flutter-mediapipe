@@ -23,6 +23,12 @@ function ci_package () {
         if [[ $PACKAGE_NAME == "mediapipe-task-text" ]]; then
             ci_text_package
         fi
+        if [[ $PACKAGE_NAME == "mediapipe-task-audio" ]]; then
+            
+        fi
+        if [[ $PACKAGE_NAME == "mediapipe-task-vision" ]]; then
+            
+        fi
 
         # Grab packages.
         flutter pub get
@@ -33,35 +39,13 @@ function ci_package () {
         # Run the formatter on all the dart files to make sure everything's linted.
         dart format --output none --set-exit-if-changed .
         
+        # Turn on the native-assets feature required by flutter-mediapipe
         flutter config --enable-native-assets
 
-        echo "$ flutter config --list 1"
-        flutter config --list
-
-        flutter doctor -v
-
-        echo "$ flutter config --list 2"
-        flutter config --list
-
-        # Run the actual tests.
+        # Run the actual tests if they exist.
         if [ -d "test" ]
         then
-            flutter test -v
-            echo `pwd`
-            echo "ls -lah"
-            ls -lah
-            echo "ls -lah build/"
-            ls -lah build/
-            echo "ls -lah build/native_assets"
-            ls -lah build/native_assets
-            echo "ls -lah build/native_assets/macos"
-            ls -lah build/native_assets/macos
-            echo "cat build/native_assets/macos/native_assets.yaml"
-            cat build/native_assets/macos/native_assets.yaml
-            echo "nm -a build/native_assets/macos/libtext_classifier.dylib | grep text_classifier_create"
-            nm -a build/native_assets/macos/libtext_classifier.dylib | grep text_classifier_create
-            echo "$ flutter config --list 3"
-            flutter config --list
+            flutter test
         fi
 
         # Run any example tests if they exist
