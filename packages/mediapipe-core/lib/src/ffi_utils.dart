@@ -77,6 +77,30 @@ int _length(Pointer<Uint8> codeUnits) {
   return length;
 }
 
+/// Converts a pointer to a (representing a list of) floats to a list of
+/// Dart doubles.
+List<double> toDartListDouble(Pointer<Float> floats, {int? length}) {
+  if (floats.isNullPointer) {
+    throw Exception('Unexpected nullptr passed to `toDartListDouble`.');
+  }
+  final codeUnits = floats.cast<Float>();
+  if (length != null) {
+    RangeError.checkNotNegative(length, 'length');
+  } else {
+    length = _lengthFloats(codeUnits);
+  }
+  final value = codeUnits.asTypedList(length);
+  return value;
+}
+
+int _lengthFloats(Pointer<Float> codeUnits) {
+  var length = 0;
+  while (codeUnits[length] != 0) {
+    length++;
+  }
+  return length;
+}
+
 /// Offers convenience and readability extensions for detecting null pointers.
 extension NullAwarePtr on Pointer {
   /// Returns true if this is a null pointer.

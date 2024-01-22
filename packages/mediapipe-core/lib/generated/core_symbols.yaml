@@ -16,6 +16,12 @@ files:
         name: Classifications
       c:@S@ClassifierOptions:
         name: ClassifierOptions
+      c:@S@EmbedderOptions:
+        name: EmbedderOptions
+      c:@S@Embedding:
+        name: Embedding
+      c:@S@EmbeddingResult:
+        name: EmbeddingResult
       c:@S@__darwin_pthread_handler_rec:
         name: __darwin_pthread_handler_rec
       c:@S@_opaque_pthread_attr_t:

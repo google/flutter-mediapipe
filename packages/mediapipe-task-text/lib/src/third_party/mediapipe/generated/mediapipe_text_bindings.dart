@@ -53,6 +53,47 @@ external int text_classifier_close(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
+@ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextEmbedderOptions>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_create')
+external ffi.Pointer<ffi.Void> text_embedder_create(
+  ffi.Pointer<TextEmbedderOptions> options,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Char>,
+        ffi.Pointer<TextEmbedderResult>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_embed')
+external int text_embedder_embed(
+  ffi.Pointer<ffi.Void> embedder,
+  ffi.Pointer<ffi.Char> utf8_str,
+  ffi.Pointer<TextEmbedderResult> result,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<TextEmbedderResult>)>(
+    symbol: 'text_embedder_close_result')
+external void text_embedder_close_result(
+  ffi.Pointer<TextEmbedderResult> result,
+);
+
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_close')
+external int text_embedder_close(
+  ffi.Pointer<ffi.Void> embedder,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<ffi.Int Function(imp1.Embedding)>(
+    symbol: 'text_embedder_cosine_similarity')
+external int text_embedder_cosine_similarity(
+  imp1.Embedding arg0,
+);
+
 final class TextClassifierOptions extends ffi.Struct {
   external imp1.BaseOptions base_options;
 
@@ -60,6 +101,14 @@ final class TextClassifierOptions extends ffi.Struct {
 }
 
 typedef TextClassifierResult = imp1.ClassificationResult;
+
+final class TextEmbedderOptions extends ffi.Struct {
+  external imp1.BaseOptions base_options;
+
+  external imp1.EmbedderOptions embedder_options;
+}
+
+typedef TextEmbedderResult = imp1.EmbeddingResult;
 
 const int __bool_true_false_are_defined = 1;
 

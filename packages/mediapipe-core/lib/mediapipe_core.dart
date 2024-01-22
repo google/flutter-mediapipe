@@ -6,11 +6,6 @@
 /// audio-based tasks.
 library;
 
-export 'src/containers.dart'
-    show
-        Category,
-        Classifications,
-        ClassifierResult,
-        TimestampedClassifierResult;
 export 'src/ffi_utils.dart';
-export 'src/task_options.dart' show BaseOptions, ClassifierOptions;
+export 'src/task_options.dart';
+export 'src/third_party/containers/containers.dart';

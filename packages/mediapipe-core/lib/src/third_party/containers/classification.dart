@@ -5,8 +5,7 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
-import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
-    as bindings;
+import '../mediapipe/generated/mediapipe_common_bindings.dart' as bindings;
 
 /// Dart representation of MediaPipe's "Category" concept.
 ///
@@ -62,8 +61,7 @@ class Category {
   }
 
   /// Releases all C memory associated with a list of [bindings.Category] pointers.
-  /// This method is important to call after calling [Category.structsToDart] to
-  /// convert that C memory into pure-Dart objects.
+  /// This method is important to call after calling [Category.structsToDart].
   static void freeStructs(Pointer<bindings.Category> structs, int count) {
     int index = 0;
     while (index < count) {
