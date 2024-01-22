@@ -13,12 +13,13 @@ void main() {
     test('load an empty object', () {
       final Pointer<bindings.TextClassifierResult> struct =
           calloc<bindings.TextClassifierResult>();
+      // These fields are provided by the real MediaPipe implementation, but
+      // Dart ignores them because they are meaningless in context of text tasks
       struct.ref.classifications_count = 0;
-      struct.ref.has_timestamp_ms = false;
+      struct.ref.has_timestamp_ms = true;
 
       final result = TextClassifierResult.structToDart(struct.ref);
       expect(result.classifications, isEmpty);
-      expect(result.timestamp, isNull);
     });
 
     test('load a hydrated object', () {
@@ -32,11 +33,10 @@ void main() {
       struct.ref.classifications_count = 2;
       struct.ref.classifications = classificationsPtr;
       struct.ref.has_timestamp_ms = true;
-      struct.ref.timestamp_ms = 9999999;
+      struct.ref.timestamp_ms = 0;
 
       final result = TextClassifierResult.structToDart(struct.ref);
       expect(result.classifications, hasLength(2));
-      expect(result.timestamp, isNotNull);
     }, timeout: const Timeout(Duration(milliseconds: 10)));
   });
 }

@@ -166,3 +166,52 @@ class Classifications {
         'headIndex=$headIndex, headName=$headName)';
   }
 }
+
+/// Container for classification results across any MediaPipe task.
+abstract class ClassifierResult {
+  /// Container for classification results across any MediaPipe task.
+  const ClassifierResult({
+    required this.classifications,
+  });
+
+  /// The classification results for each head of the model.
+  final List<Classifications> classifications;
+
+  /// Convenience helper for the first [Classifications] object.
+  Classifications? get firstClassification =>
+      classifications.isNotEmpty ? classifications.first : null;
+
+  @override
+  String toString() {
+    final classificationStrings =
+        classifications.map((cat) => cat.toString()).join(', ');
+    return '$runtimeType(classifications=[$classificationStrings])';
+  }
+}
+
+/// Container for classification results that may describe a slice of time
+/// within a larger, streaming data source (.e.g, a video or audio file).
+abstract class TimestampedClassifierResult extends ClassifierResult {
+  /// Generative constructor.
+  const TimestampedClassifierResult({
+    required super.classifications,
+    this.timestamp,
+  });
+
+  /// The optional timestamp (as a [Duration]) of the start of the chunk of data
+  /// corresponding to these results.
+  ///
+  /// This is only used for classification on time series (e.g. audio
+  /// classification). In these use cases, the amount of data to process might
+  /// exceed the maximum size that the model can process: to solve this, the
+  /// input data is split into multiple chunks starting at different timestamps.
+  final Duration? timestamp;
+
+  @override
+  String toString() {
+    final classificationStrings =
+        classifications.map((cat) => cat.toString()).join(', ');
+    return '$runtimeType(classifications=[$classificationStrings], '
+        'timestamp=$timestamp)';
+  }
+}

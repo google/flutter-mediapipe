@@ -20,7 +20,7 @@ void main() {
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
       final TextClassifierResult result = executor.classify('Hello, world!');
-      expect(result.timestamp, isNotNull);
+      expect(result.classifications, isNotEmpty);
       executor.close();
     });
 
@@ -29,9 +29,9 @@ void main() {
         TextClassifierOptions.fromAssetBuffer(modelBytes),
       );
       final TextClassifierResult result = executor.classify('Hello, world!');
-      expect(result.timestamp, isNotNull);
+      expect(result.classifications, isNotEmpty);
       final TextClassifierResult result2 = executor.classify('Hello, world!');
-      expect(result2.timestamp, isNotNull);
+      expect(result2.classifications, isNotEmpty);
       executor.close();
     });
 
