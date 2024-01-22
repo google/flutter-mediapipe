@@ -22,10 +22,10 @@ import 'dart:ffi' as ffi;
 final class BaseOptions extends ffi.Struct {
   external ffi.Pointer<ffi.Char> model_asset_buffer;
 
-  external ffi.Pointer<ffi.Char> model_asset_path;
-
   @ffi.UnsignedInt()
   external int model_asset_buffer_count;
+
+  external ffi.Pointer<ffi.Char> model_asset_path;
 }
 
 final class __mbstate_t extends ffi.Union {
@@ -150,6 +150,13 @@ final class Category extends ffi.Struct {
   external ffi.Pointer<ffi.Char> category_name;
 
   external ffi.Pointer<ffi.Char> display_name;
+}
+
+final class Categories extends ffi.Struct {
+  external ffi.Pointer<Category> categories;
+
+  @ffi.Uint32()
+  external int categories_count;
 }
 
 final class Classifications extends ffi.Struct {

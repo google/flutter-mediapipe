@@ -18,10 +18,12 @@ dependencies:
   logging: ^1.2.0
   mediapipe_core:
     path: ../mediapipe-core
+  native_assets_cli: ^0.3.0
+  native_toolchain_c: ^0.3.0
+  path: ^1.8.3
 
 dev_dependencies:
   ffigen: ^9.0.1
   flutter_lints: ^2.0.0
   flutter_test:
     sdk: flutter
-  path: ^1.8.3

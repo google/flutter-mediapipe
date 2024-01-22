@@ -1,3 +1,15 @@
+function ci_text_package() {
+    # Download bert_classifier.tflite model into example/assets for integration tests
+    echo "Downloading TextClassification model"
+    pushd ../../tool/builder
+    dart pub get
+    dart bin/main.dart model -m textclassification
+    popd
+
+    echo `pwd`
+    ls -lah
+}
+
 function ci_package () {
     local channel="$1"
 
@@ -8,6 +20,10 @@ function ci_package () {
         echo "== Testing '${PACKAGE_NAME}' on Flutter's $channel channel =="
         pushd "packages/${PACKAGE_NAME}"
 
+        if [[ $PACKAGE_NAME == "mediapipe-task-text" ]]; then
+            ci_text_package
+        fi
+
         # Grab packages.
         flutter pub get
 
@@ -16,11 +32,34 @@ function ci_package () {
 
         # Run the formatter on all the dart files to make sure everything's linted.
         dart format --output none --set-exit-if-changed .
+        
+        # Turn on the native-assets feature required by flutter-mediapipe
+        flutter config --enable-native-assets
 
-        # Run the actual tests.
+        # Run the actual tests if they exist.
         if [ -d "test" ]
         then
             flutter test
+        fi
+
+        # Run any example tests if they exist
+        if [ -d "example/test" ]
+        then
+            echo "Analyzing '${PACKAGE_NAME}/example'"
+            
+            pushd "example"
+
+            flutter pub get
+
+            # Run the analyzer to find any static analysis issues.
+            dart analyze --fatal-infos
+
+            # Run the formatter on all the dart files to make sure everything's linted.
+            dart format --output none --set-exit-if-changed .
+
+            flutter test
+
+            popd
         fi
 
         popd

@@ -40,19 +40,19 @@ class Category {
 
   /// Accepts a pointer to a list of structs, and a count representing the length
   /// of the list, and returns a list of pure-Dart [Category] instances.
-  static List<Category> fromStructs(
+  static List<Category> structsToDart(
     Pointer<bindings.Category> structs,
     int count,
   ) {
     final categories = <Category>[];
     for (int i = 0; i < count; i++) {
-      categories.add(fromStruct(structs[i]));
+      categories.add(structToDart(structs[i]));
     }
     return categories;
   }
 
   /// Accepts a pointer to a single struct and returns a pure-Dart [Category] instance.
-  static Category fromStruct(bindings.Category struct) {
+  static Category structToDart(bindings.Category struct) {
     return Category(
       index: struct.index,
       score: struct.score,
@@ -62,17 +62,23 @@ class Category {
   }
 
   /// Releases all C memory associated with a list of [bindings.Category] pointers.
-  /// This method is important to call after calling [Category.fromStructs] to
+  /// This method is important to call after calling [Category.structsToDart] to
   /// convert that C memory into pure-Dart objects.
   static void freeStructs(Pointer<bindings.Category> structs, int count) {
     int index = 0;
     while (index < count) {
       bindings.Category obj = structs[index];
-      calloc.free(obj.category_name);
-      calloc.free(obj.display_name);
+      Category.freeStruct(obj);
       index++;
     }
     calloc.free(structs);
+  }
+
+  /// Releases the string fields associated with a single [bindings.Category]
+  /// struct.
+  static void freeStruct(bindings.Category struct) {
+    calloc.free(struct.category_name);
+    calloc.free(struct.display_name);
   }
 
   @override
@@ -108,22 +114,22 @@ class Classifications {
 
   /// Accepts a pointer to a list of structs, and a count representing the length
   /// of the list, and returns a list of pure-Dart [Classifications] instances.
-  static List<Classifications> fromStructs(
+  static List<Classifications> structsToDart(
     Pointer<bindings.Classifications> structs,
     int count,
   ) {
     final classifications = <Classifications>[];
     for (int i = 0; i < count; i++) {
-      classifications.add(fromStruct(structs[i]));
+      classifications.add(structToDart(structs[i]));
     }
     return classifications;
   }
 
   /// Accepts a pointer to a single struct and returns a pure-Dart [Classifications]
   /// instance.
-  static Classifications fromStruct(bindings.Classifications struct) {
+  static Classifications structToDart(bindings.Classifications struct) {
     return Classifications(
-      categories: Category.fromStructs(
+      categories: Category.structsToDart(
         struct.categories,
         struct.categories_count,
       ),
@@ -133,7 +139,7 @@ class Classifications {
   }
 
   /// Releases all C memory associated with a list of [bindings.Classifications]
-  /// pointers. This method is important to call after calling [Classifications.fromStructs]
+  /// pointers. This method is important to call after calling [Classifications.structsToDart]
   /// to convert that C memory into pure-Dart objects.
   static void freeStructs(
     Pointer<bindings.Classifications> structs,

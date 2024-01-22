@@ -1,0 +1,3 @@
+tags:
+  # Integration tests that talk to C code bundled via the native-assets feature
+  native-assets:

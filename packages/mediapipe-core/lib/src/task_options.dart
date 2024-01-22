@@ -21,15 +21,40 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 ///    classifier's desired behavior.
 class BaseOptions extends Equatable {
   /// Generative constructor that creates a [BaseOptions] instance.
-  const BaseOptions({this.modelAssetBuffer, this.modelAssetPath})
-      : assert(
+  const BaseOptions._({
+    this.modelAssetBuffer,
+    this.modelAssetPath,
+    required _BaseOptionsType type,
+  })  : assert(
           !(modelAssetBuffer == null && modelAssetPath == null),
           'You must supply either `modelAssetBuffer` or `modelAssetPath`',
         ),
         assert(
           !(modelAssetBuffer != null && modelAssetPath != null),
           'You must only supply one of `modelAssetBuffer` and `modelAssetPath`',
-        );
+        ),
+        _type = type;
+
+  /// Constructor for [BaseOptions] classes using a file system path.
+  ///
+  /// In practice, this is unsupported, as assets in Flutter are bundled into
+  /// the build output and not available on disk. However, it can potentially
+  /// be helpful for testing / development purposes.
+  factory BaseOptions.path(String path) => BaseOptions._(
+        modelAssetPath: path,
+        type: _BaseOptionsType.path,
+      );
+
+  /// Constructor for [BaseOptions] classes using an in-memory pointer to the
+  /// MediaPipe SDK.
+  ///
+  /// In practice, this is the only option supported for production builds.
+  factory BaseOptions.memory(Uint8List buffer) {
+    return BaseOptions._(
+      modelAssetBuffer: buffer,
+      type: _BaseOptionsType.memory,
+    );
+  }
 
   /// The model asset file contents as bytes;
   final Uint8List? modelAssetBuffer;
@@ -37,34 +62,47 @@ class BaseOptions extends Equatable {
   /// Path to the model asset file.
   final String? modelAssetPath;
 
+  final _BaseOptionsType _type;
+
   /// Converts this pure-Dart representation into C-memory suitable for the
   /// MediaPipe SDK to instantiate various classifiers.
   Pointer<bindings.BaseOptions> toStruct() {
     final struct = calloc<bindings.BaseOptions>();
 
-    if (modelAssetPath != null) {
-      struct.ref.model_asset_path = prepareString(modelAssetPath!);
+    switch (_type) {
+      case _BaseOptionsType.path:
+        {
+          struct.ref.model_asset_path = prepareString(modelAssetPath!);
+        }
+      case _BaseOptionsType.memory:
+        {
+          struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
+          struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
+        }
     }
-    if (modelAssetBuffer != null) {
-      struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
-      struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
-    }
+
     return struct;
   }
 
-  @override
-  List<Object?> get props => [modelAssetBuffer, modelAssetPath];
-
   /// Releases all C memory held by this [bindings.BaseOptions] struct.
   static void freeStruct(bindings.BaseOptions struct) {
-    if (struct.model_asset_buffer.address != 0) {
-      calloc.free(struct.model_asset_buffer);
-    }
-    if (struct.model_asset_path.address != 0) {
+    if (struct.model_asset_path.isNotNullPointer) {
       calloc.free(struct.model_asset_path);
     }
+    if (struct.model_asset_buffer.isNotNullPointer) {
+      calloc.free(struct.model_asset_buffer);
+    }
   }
+
+  @override
+  List<Object?> get props => [
+        modelAssetBuffer,
+        modelAssetPath,
+        modelAssetBuffer?.lengthInBytes,
+      ];
 }
+
+enum _BaseOptionsType { path, memory }
 
 /// Dart representation of MediaPipe's "ClassifierOptions" concept.
 ///

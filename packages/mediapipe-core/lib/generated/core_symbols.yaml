@@ -6,6 +6,8 @@ files:
     symbols:
       c:@S@BaseOptions:
         name: BaseOptions
+      c:@S@Categories:
+        name: Categories
       c:@S@Category:
         name: Category
       c:@S@ClassificationResult:

@@ -31,10 +31,10 @@ class TextClassifierResult {
 
   /// Factory constructor which converts the C representation of an
   /// ImageClassifierResult into an actual [ImageClassifierResult].
-  factory TextClassifierResult.fromStruct(
+  factory TextClassifierResult.structToDart(
       bindings.TextClassifierResult struct) {
     return TextClassifierResult(
-      classifications: Classifications.fromStructs(
+      classifications: Classifications.structsToDart(
         struct.classifications,
         struct.classifications_count,
       ),

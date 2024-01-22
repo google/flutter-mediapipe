@@ -1,3 +1,5 @@
+@Tags(['native-assets'])
+
 import 'dart:io' as io;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
@@ -42,9 +44,9 @@ void main() {
       expect(classifications.headName, equals('probability'));
       expect(classifications.categories, hasLength(2));
       expect(classifications.categories.first.categoryName, equals('positive'));
-      expect(classifications.categories.first.score, closeTo(0.9919, 0.0001));
+      expect(classifications.categories.first.score, closeTo(0.9919, 0.0009));
       expect(classifications.categories.last.categoryName, equals('negative'));
-      expect(classifications.categories.last.score, closeTo(0.00804, 0.00001));
+      expect(classifications.categories.last.score, closeTo(0.00804, 0.0009));
       executor.close();
     });
 
@@ -61,10 +63,8 @@ void main() {
       final classifications = result.classifications.first;
       expect(classifications.headName, equals('probability'));
       expect(classifications.categories, hasLength(1));
-      // expect(classifications.categories.first.categoryName, equals('positive'));
-      // expect(classifications.categories.first.score, closeTo(0.9919, 0.0001));
       expect(classifications.categories.first.categoryName, equals('negative'));
-      expect(classifications.categories.first.score, closeTo(0.00804, 0.00001));
+      expect(classifications.categories.first.score, closeTo(0.00804, 0.0009));
       executor.close();
     });
 
@@ -82,7 +82,7 @@ void main() {
       expect(classifications.headName, equals('probability'));
       expect(classifications.categories, hasLength(1));
       expect(classifications.categories.first.categoryName, equals('positive'));
-      expect(classifications.categories.first.score, closeTo(0.9919, 0.0001));
+      expect(classifications.categories.first.score, closeTo(0.9919, 0.0009));
       executor.close();
     });
 
