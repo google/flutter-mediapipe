@@ -212,3 +212,41 @@ class ClassifierOptions extends Equatable {
         ...(categoryDenylist ?? []),
       ];
 }
+
+/// {@template EmbedderOptions}
+/// Options for setting up an embedder.
+///
+/// See also:
+///   [MediaPipe documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/textembedder/TextEmbedder.TextEmbedderOptions.Builder)
+/// {@endtemplate}
+class EmbedderOptions extends Equatable {
+  /// {@macro EmbedderOptions}
+  const EmbedderOptions({
+    this.l2Normalize = false,
+    this.quantize = false,
+  });
+
+  /// Whether to normalize the returned feature vector with L2 norm. Use this
+  /// option only if the model does not already contain a native L2_NORMALIZATION
+  /// TF Lite Op. In most cases, this is already the case and L2 norm is thus
+  /// achieved through TF Lite inference.
+  final bool l2Normalize;
+
+  /// Whether the returned embedding should be quantized to bytes via scalar
+  /// quantization. Embeddings are implicitly assumed to be unit-norm and
+  /// therefore any dimension is guaranteed to have a value in [-1.0, 1.0]. Use
+  /// the l2_normalize option if this is not the case.
+  final bool quantize;
+
+  /// Converts this pure-Dart representation into C-memory suitable for the
+  /// MediaPipe SDK to instantiate various classifiers.
+  Pointer<bindings.EmbedderOptions> toStruct() {
+    final struct = calloc<bindings.EmbedderOptions>();
+    struct.ref.l2_normalize = l2Normalize;
+    struct.ref.quantize = quantize;
+    return struct;
+  }
+
+  @override
+  List<Object?> get props => [l2Normalize, quantize];
+}

@@ -56,7 +56,7 @@ class TextClassifierOptions {
   /// Container storing options universal to all MediaPipe classifiers.
   final ClassifierOptions classifierOptions;
 
-  /// Converts this [ImageClassifierOptions] instance into its C representation.
+  /// Converts this [TextClassifierOptions] instance into its C representation.
   Pointer<bindings.TextClassifierOptions> toStruct() {
     final struct = calloc<bindings.TextClassifierOptions>();
 
