@@ -11,8 +11,9 @@ import 'package:path/path.dart' as path;
 
 final _log = Logger('DownloadModelCommand');
 
-enum Models {
+enum Model {
   textclassification,
+  textembedding,
   languagedetection,
 }
 
@@ -31,8 +32,9 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
         allowed: [
           // Values will be added to this as the repository gets more
           // integration tests that require new models.
-          Models.textclassification.name,
-          Models.languagedetection.name,
+          Model.textclassification.name,
+          Model.textembedding.name,
+          Model.languagedetection.name,
         ],
         help: 'The desired model to download. Use this option if you want the '
             'standard model for a given task. Using this option also removes any '
@@ -64,19 +66,30 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
     addVerboseOption(argParser);
   }
 
-  static final Map<String, String> _standardModelSources = {
-    Models.textclassification.name:
-        'https://storage.googleapis.com/mediapipe-models/text_classifier/bert_classifier/float32/1/bert_classifier.tflite',
-    Models.languagedetection.name:
-        'https://storage.googleapis.com/mediapipe-models/language_detector/language_detector/float32/1/language_detector.tflite',
-  };
+  String getModelSource() => switch (model) {
+        Model.textclassification =>
+          'https://storage.googleapis.com/mediapipe-models/text_classifier/bert_classifier/float32/latest/bert_classifier.tflite',
+        Model.textembedding =>
+          'https://storage.googleapis.com/mediapipe-models/text_embedder/universal_sentence_encoder/float32/latest/universal_sentence_encoder.tflite',
+        Model.languagedetection =>
+          'https://storage.googleapis.com/mediapipe-models/language_detector/language_detector/float32/latest/language_detector.tflite',
+      };
 
-  static final Map<String, String> _standardModelDestinations = {
-    Models.textclassification.name:
-        'packages/mediapipe-task-text/example/assets/',
-    Models.languagedetection.name:
-        'packages/mediapipe-task-text/example/assets/',
-  };
+  String getModelDestination() => switch (model) {
+        Model.textclassification =>
+          'packages/mediapipe-task-text/example/assets/',
+        Model.textembedding => 'packages/mediapipe-task-text/example/assets/',
+        Model.languagedetection =>
+          'packages/mediapipe-task-text/example/assets/',
+      };
+
+  Model get model {
+    final value = Model.values.asNameMap()[argResults!['model']];
+    if (value == null) {
+      throw ('Unexpected Model value ${argResults!['model']}');
+    }
+    return value;
+  }
 
   @override
   Future<void> run() async {
@@ -87,10 +100,10 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
     late final String modelDestination;
 
     if (argResults!['model'] != null) {
-      modelSource = _standardModelSources[argResults!['model']]!;
+      modelSource = getModelSource();
       modelDestination = (_isArgProvided(argResults!['destination']))
           ? argResults!['destination']
-          : _standardModelDestinations[argResults!['model']]!;
+          : getModelDestination();
     } else {
       if (argResults!['custommodel'] == null) {
         throw Exception(
@@ -99,7 +112,7 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
       }
       if (argResults!['destination'] == null) {
         throw Exception(
-          'If you do not use the `model` option, then you must supply a '
+          'If you use the `custommodel` option, then you must supply a '
           '`destination`, as a "standard" destination cannot be used.',
         );
       }
