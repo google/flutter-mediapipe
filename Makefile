@@ -52,3 +52,4 @@ test_text:
 
 example_text:
 	cd packages/mediapipe-task-text/example && flutter run -d macos
+	
