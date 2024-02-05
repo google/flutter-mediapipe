@@ -76,3 +76,60 @@ int _length(Pointer<Uint8> codeUnits) {
   }
   return length;
 }
+
+/// Converts a pointer to a (representing a list of) floats to a list of
+/// Dart doubles.
+List<double> toDartListDouble(Pointer<Float> floats, {int? length}) {
+  if (floats.isNullPointer) {
+    throw Exception('Unexpected nullptr passed to `toDartListDouble`.');
+  }
+  final codeUnits = floats.cast<Float>();
+  if (length != null) {
+    RangeError.checkNotNegative(length, 'length');
+  } else {
+    length = lengthFloats(codeUnits);
+  }
+  final value = codeUnits.asTypedList(length);
+  return value;
+}
+
+/// Calculates the length of this array of floats by scanning for a value of 0.
+int lengthFloats(Pointer<Float> codeUnits) {
+  var length = 0;
+  while (codeUnits[length] != 0) {
+    length++;
+  }
+  return length;
+}
+
+/// Offers convenience and readability extensions for detecting null pointers.
+extension NullAwarePtr on Pointer {
+  /// Returns true if this is a null pointer.
+  bool get isNullPointer => address == 0;
+
+  /// Returns true if this is not a null pointer.
+  bool get isNotNullPointer => address != 0;
+}
+
+/// Returns true if this nullable pointer is both not-null and not a `NullPtr`,
+/// which is to say, its address is 0x00000000.
+bool isNotNullOrNullPointer(Pointer? ptr) =>
+    ptr != null && ptr.isNotNullPointer;
+
+/// Returns true if this nullable pointer is either null OR is a `NullPtr`,
+/// which is to say, its address is 0x00000000.
+bool isNullOrNullPointer(Pointer? ptr) => ptr == null || ptr.isNullPointer;
+
+/// Extension method for converting a [String] to a `Pointer<Utf8>`.
+extension NativeFloats on List<double> {
+  /// Creates a zero-terminated array of [Float]s from this list of doubles.
+  ///
+  /// Returns an [allocator]-allocated pointer to the result.
+  Pointer<Float> toNative({Allocator allocator = malloc}) {
+    final Pointer<Float> result = allocator<Float>(length + 1);
+    final Float32List nativeFloats = result.asTypedList(length + 1);
+    nativeFloats.setAll(0, this);
+    nativeFloats[length] = 0;
+    return result.cast();
+  }
+}
