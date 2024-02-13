@@ -1,3 +1,5 @@
+// `native-assets` tag allows test runs to opt in or out of running integration
+// tests via `flutter test -x native-assets` or `flutter test -t native-assets`
 @Tags(['native-assets'])
 
 import 'dart:io' as io;

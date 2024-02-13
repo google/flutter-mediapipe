@@ -40,10 +40,12 @@ class BaseOptions extends Equatable {
   /// In practice, this is unsupported, as assets in Flutter are bundled into
   /// the build output and not available on disk. However, it can potentially
   /// be helpful for testing / development purposes.
-  factory BaseOptions.path(String path) => BaseOptions._(
-        modelAssetPath: path,
-        type: _BaseOptionsType.path,
-      );
+  factory BaseOptions.path(String path) {
+    return BaseOptions._(
+      modelAssetPath: path,
+      type: _BaseOptionsType.path,
+    );
+  }
 
   /// Constructor for [BaseOptions] classes using an in-memory pointer to the
   /// MediaPipe SDK.
