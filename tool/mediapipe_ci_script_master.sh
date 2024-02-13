@@ -8,7 +8,6 @@ source "$DIR/ci_script_shared.sh"
 flutter doctor -v
 
 declare -ar PACKAGE_NAMES=(
-    # TODO(craiglabenz): Uncomment once native assets works on CI
     "mediapipe-core"
     "mediapipe-task-text"
 )
