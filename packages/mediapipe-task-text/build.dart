@@ -53,8 +53,9 @@ Future<void> main(List<String> args) async {
   final archKeys = sdkDownloadUrls[targetOs]!.keys;
   for (final String arch in archKeys) {
     final assetUrl = sdkDownloadUrls[targetOs]![arch]!;
-    final downloadFileLocation =
-        buildConfig.outDir.resolve('${arch}_${assetUrl.split('/').last}',);
+    final downloadFileLocation = buildConfig.outDir.resolve(
+      '${arch}_${assetUrl.split('/').last}',
+    );
     log('downloadFileLocation: $downloadFileLocation');
     buildOutput.assets.add(
       Asset(

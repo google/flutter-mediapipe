@@ -119,8 +119,8 @@ class TextClassifierExecutor {
       final dartErrorMessage = toDartStrings(errorMessage, 1);
       _log.severe('dartErrorMessage: $dartErrorMessage');
       exception = status == null
-        ? 'Error: $dartErrorMessage'
-         : 'Error: Status $status :: $dartErrorMessage';
+          ? 'Error: $dartErrorMessage'
+          : 'Error: Status $status :: $dartErrorMessage';
     }
     calloc.free(errorMessage[0]);
     calloc.free(errorMessage);
