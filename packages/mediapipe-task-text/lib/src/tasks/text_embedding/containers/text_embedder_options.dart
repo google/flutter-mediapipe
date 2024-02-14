@@ -9,7 +9,7 @@ import '../../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 /// {@template TextEmbedderOptions}
 /// Embedder options for MediaPipe C embedding extraction tasks.
 /// {@endtemplate}
-class TextEmbedderOptions {
+class TextEmbedderOptions extends TaskOptions<bindings.TextEmbedderOptions> {
   /// {@macro TextEmbedderOptions}
   const TextEmbedderOptions({
     required this.baseOptions,
@@ -52,12 +52,26 @@ class TextEmbedderOptions {
   final EmbedderOptions embedderOptions;
 
   /// Converts this [TextEmbedderOptions] instance into its C representation.
+  @override
   Pointer<bindings.TextEmbedderOptions> toStruct() {
-    final struct = calloc<bindings.TextEmbedderOptions>();
-
-    struct.ref.base_options = baseOptions.toStruct().ref;
-    struct.ref.embedder_options = embedderOptions.toStruct().ref;
-
-    return struct;
+    final ptr = calloc<bindings.TextEmbedderOptions>();
+    assignToStruct(ptr.ref);
+    return ptr;
   }
+
+  @override
+  void assignToStruct(bindings.TextEmbedderOptions struct) {
+    baseOptions.assignToStruct(struct.base_options);
+    embedderOptions.assignToStruct(struct.embedder_options);
+  }
+
+  /// Releases all C memory held by this [bindings.TextEmbedderOptions] struct.
+  static void freeStruct(Pointer<bindings.TextEmbedderOptions> ptr) {
+    BaseOptions.freeStruct(ptr.ref.base_options);
+    EmbedderOptions.freeStruct(ptr.ref.embedder_options);
+    calloc.free(ptr);
+  }
+
+  @override
+  List<Object?> get props => [baseOptions, embedderOptions];
 }

@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+// import 'dart:ffi';
 import 'dart:isolate';
 import 'package:async/async.dart';
 import 'package:logging/logging.dart';
+import 'package:mediapipe_text/mediapipe_text.dart';
 
-import 'text_classification_executor.dart';
-import 'text_classifier.dart';
-import 'containers/containers.dart';
+// import 'text_classification_executor.dart';
+// import 'text_classifier.dart';
+// import 'containers/containers.dart';
 
 final _log = Logger('TextClassifier');
 
@@ -31,6 +33,7 @@ class TextClassifier extends BaseTextClassifier {
   Future<void> get _ready => _readyCompleter.future;
 
   /// Closes down the background isolate, releasing all resources.
+  @override
   void dispose() => _sendPort.send(null);
 
   /// Sends a `String` value to MediaPipe for classification. Uses an Isolate
@@ -41,7 +44,7 @@ class TextClassifier extends BaseTextClassifier {
   ///  * [classify_sync] for a synchronous alternative
   @override
   Future<TextClassifierResult> classify(String text) async {
-    _log.info('Classifying "$text"');
+    _log.fine('Classifying "$text"');
     await _ready;
     _sendPort.send(text);
     return await _events.next;
@@ -71,7 +74,7 @@ Future<void> _classificationService(
   final commandPort = ReceivePort();
   p.send(commandPort.sendPort);
 
-  final executor = TextClassifierExecutor(options);
+  final executor = TextClassifierExecutor2(options);
 
   await for (final String? message in commandPort) {
     if (message != null) {
@@ -81,6 +84,6 @@ Future<void> _classificationService(
       break;
     }
   }
-  executor.close();
+  executor.dispose();
   Isolate.exit();
 }

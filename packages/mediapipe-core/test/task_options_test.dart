@@ -13,7 +13,7 @@ void main() {
     test('allocate memory in C for a modelAssetPath', () {
       final options = BaseOptions.path('abc');
       final struct = options.toStruct();
-      expect(toDartString(struct.ref.model_asset_path), 'abc');
+      expect(struct.ref.model_asset_path.toDartString(), 'abc');
       expectNullPtr(struct.ref.model_asset_buffer);
     });
 
@@ -21,7 +21,7 @@ void main() {
       final options = BaseOptions.memory(Uint8List.fromList([1, 2, 3]));
       final struct = options.toStruct();
       expect(
-        toUint8List(struct.ref.model_asset_buffer),
+        struct.ref.model_asset_buffer.toUint8List(3),
         Uint8List.fromList([1, 2, 3]),
       );
       expectNullPtr(struct.ref.model_asset_path);
@@ -31,8 +31,8 @@ void main() {
       final options = BaseOptions.memory(Uint8List.fromList([1, 2, 0, 3]));
       final struct = options.toStruct();
       expect(
-        toUint8List(struct.ref.model_asset_buffer),
-        Uint8List.fromList([1, 2]),
+        struct.ref.model_asset_buffer.toUint8List(4),
+        Uint8List.fromList([1, 2, 0, 3]),
       );
       expectNullPtr(struct.ref.model_asset_path);
     });
@@ -64,13 +64,12 @@ void main() {
 
       final struct = options.toStruct();
 
-      expect(toDartString(struct.ref.display_names_locale), 'en');
+      expect(struct.ref.display_names_locale.toDartString(), 'en');
       expect(struct.ref.max_results, 5);
       expect(struct.ref.score_threshold, greaterThan(0.8999));
       expect(struct.ref.score_threshold, lessThan(0.90001));
       expect(
-        toDartStrings(
-          struct.ref.category_allowlist,
+        struct.ref.category_allowlist.toDartStrings(
           struct.ref.category_allowlist_count,
         ),
         ['good', 'great', 'best'],
@@ -78,8 +77,7 @@ void main() {
       expect(struct.ref.category_allowlist_count, 3);
 
       expect(
-        toDartStrings(
-          struct.ref.category_denylist,
+        struct.ref.category_denylist.toDartStrings(
           struct.ref.category_denylist_count,
         ),
         ['bad', 'terrible', 'worst', 'honestly come on'],

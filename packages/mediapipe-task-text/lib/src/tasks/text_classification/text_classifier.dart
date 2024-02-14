@@ -23,4 +23,9 @@ abstract class BaseTextClassifier {
   /// See also:
   ///  * [classify_sync] for a synchronous alternative
   Future<TextClassifierResult> classify(String text);
+
+  /// {@template textClassifierDispose}
+  /// Closes down this TextClassifier and releases all resources.
+  /// {@endtemplate}
+  void dispose();
 }

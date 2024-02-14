@@ -10,6 +10,20 @@ import 'ffi_utils.dart';
 import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
+/// {@template TaskOptions}
+/// {@endtemplate}
+abstract class TaskOptions<T extends Struct> extends Equatable {
+  /// {@macro TaskOptions}
+  const TaskOptions();
+
+  /// Converts this Dart [TaskOptions] instance into its associated
+  /// C-represenation struct.
+  Pointer<T> toStruct();
+
+  /// Assigns all values to an existing struct.
+  void assignToStruct(T struct);
+}
+
 /// Dart representation of MediaPipe's "BaseOptions" concept.
 ///
 /// Used to configure various classifiers by specifying the model they will use
@@ -19,7 +33,7 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 ///  * [MediaPipe's BaseOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/core/BaseOptions)
 ///  * [ClassifierOptions], which is often used in conjunction to specify a
 ///    classifier's desired behavior.
-class BaseOptions extends Equatable {
+class BaseOptions extends TaskOptions<bindings.BaseOptions> {
   /// Generative constructor that creates a [BaseOptions] instance.
   const BaseOptions._({
     this.modelAssetBuffer,
@@ -66,22 +80,26 @@ class BaseOptions extends Equatable {
 
   /// Converts this pure-Dart representation into C-memory suitable for the
   /// MediaPipe SDK to instantiate various classifiers.
+  @override
   Pointer<bindings.BaseOptions> toStruct() {
-    final struct = calloc<bindings.BaseOptions>();
+    final ptr = calloc<bindings.BaseOptions>();
+    assignToStruct(ptr.ref);
+    return ptr;
+  }
 
+  @override
+  void assignToStruct(bindings.BaseOptions struct) {
     switch (_type) {
       case _BaseOptionsType.path:
         {
-          struct.ref.model_asset_path = prepareString(modelAssetPath!);
+          struct.model_asset_path = modelAssetPath!.copyToNative();
         }
       case _BaseOptionsType.memory:
         {
-          struct.ref.model_asset_buffer = prepareUint8List(modelAssetBuffer!);
-          struct.ref.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
+          struct.model_asset_buffer = modelAssetBuffer!.copyToNative();
+          struct.model_asset_buffer_count = modelAssetBuffer!.lengthInBytes;
         }
     }
-
-    return struct;
   }
 
   /// Releases all C memory held by this [bindings.BaseOptions] struct.
@@ -112,7 +130,7 @@ enum _BaseOptionsType { path, memory }
 ///  * [MediaPipe's ClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/processors/ClassifierOptions)
 ///  * [BaseOptions], which is often used in conjunction to specify a
 ///    classifier's desired behavior.
-class ClassifierOptions extends Equatable {
+class ClassifierOptions extends TaskOptions<bindings.ClassifierOptions> {
   /// Generative constructor that creates a [ClassifierOptions] instance.
   const ClassifierOptions({
     this.displayNamesLocale,
@@ -149,19 +167,25 @@ class ClassifierOptions extends Equatable {
 
   /// Converts this pure-Dart representation into C-memory suitable for the
   /// MediaPipe SDK to instantiate various classifiers.
+  @override
   Pointer<bindings.ClassifierOptions> toStruct() {
-    final struct = calloc<bindings.ClassifierOptions>();
-    _setDisplayNamesLocale(struct.ref);
-    _setMaxResults(struct.ref);
-    _setScoreThreshold(struct.ref);
-    _setAllowlist(struct.ref);
-    _setDenylist(struct.ref);
-    return struct;
+    final ptr = calloc<bindings.ClassifierOptions>();
+    assignToStruct(ptr.ref);
+    return ptr;
+  }
+
+  @override
+  void assignToStruct(bindings.ClassifierOptions struct) {
+    _setDisplayNamesLocale(struct);
+    _setMaxResults(struct);
+    _setScoreThreshold(struct);
+    _setAllowlist(struct);
+    _setDenylist(struct);
   }
 
   void _setDisplayNamesLocale(bindings.ClassifierOptions struct) {
     if (displayNamesLocale != null) {
-      struct.display_names_locale = prepareString(displayNamesLocale!);
+      struct.display_names_locale = displayNamesLocale!.copyToNative();
     }
   }
 
@@ -178,14 +202,14 @@ class ClassifierOptions extends Equatable {
 
   void _setAllowlist(bindings.ClassifierOptions struct) {
     if (categoryAllowlist != null) {
-      struct.category_allowlist = prepareListOfStrings(categoryAllowlist!);
+      struct.category_allowlist = categoryAllowlist!.copyToNative();
       struct.category_allowlist_count = categoryAllowlist!.length;
     }
   }
 
   void _setDenylist(bindings.ClassifierOptions struct) {
     if (categoryDenylist != null) {
-      struct.category_denylist = prepareListOfStrings(categoryDenylist!);
+      struct.category_denylist = categoryDenylist!.copyToNative();
       struct.category_denylist_count = categoryDenylist!.length;
     }
   }
@@ -219,7 +243,7 @@ class ClassifierOptions extends Equatable {
 /// See also:
 ///   [MediaPipe documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/textembedder/TextEmbedder.TextEmbedderOptions.Builder)
 /// {@endtemplate}
-class EmbedderOptions extends Equatable {
+class EmbedderOptions extends TaskOptions<bindings.EmbedderOptions> {
   /// {@macro EmbedderOptions}
   const EmbedderOptions({
     this.l2Normalize = false,
@@ -239,12 +263,24 @@ class EmbedderOptions extends Equatable {
   final bool quantize;
 
   /// Converts this pure-Dart representation into C-memory suitable for the
-  /// MediaPipe SDK to instantiate various classifiers.
+  /// MediaPipe SDK to instantiate various embedders.
+  @override
   Pointer<bindings.EmbedderOptions> toStruct() {
-    final struct = calloc<bindings.EmbedderOptions>();
-    struct.ref.l2_normalize = l2Normalize;
-    struct.ref.quantize = quantize;
-    return struct;
+    final ptr = calloc<bindings.EmbedderOptions>();
+    assignToStruct(ptr.ref);
+    return ptr;
+  }
+
+  @override
+  void assignToStruct(bindings.EmbedderOptions struct) {
+    struct.l2_normalize = l2Normalize;
+    struct.quantize = quantize;
+  }
+
+  /// Releases all C memory held by this [bindings.EmbedderOptions] struct (of
+  /// which there is none that will survive the freeing of the struct itself).
+  static void freeStruct(bindings.EmbedderOptions struct) {
+    // no-op; nothing to free
   }
 
   @override

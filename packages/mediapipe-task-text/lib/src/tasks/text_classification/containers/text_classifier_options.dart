@@ -14,7 +14,8 @@ import '../../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 ///
 /// See also:
 ///  * [MediaPipe's TextClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/js/tasks-text.textclassifieroptions)
-class TextClassifierOptions {
+class TextClassifierOptions
+    extends TaskOptions<bindings.TextClassifierOptions> {
   /// Generative constructor.
   const TextClassifierOptions({
     required this.baseOptions,
@@ -57,13 +58,17 @@ class TextClassifierOptions {
   final ClassifierOptions classifierOptions;
 
   /// Converts this [TextClassifierOptions] instance into its C representation.
+  @override
   Pointer<bindings.TextClassifierOptions> toStruct() {
-    final struct = calloc<bindings.TextClassifierOptions>();
+    final ptr = calloc<bindings.TextClassifierOptions>();
+    assignToStruct(ptr.ref);
+    return ptr;
+  }
 
-    struct.ref.base_options = baseOptions.toStruct().ref;
-    struct.ref.classifier_options = classifierOptions.toStruct().ref;
-
-    return struct;
+  @override
+  void assignToStruct(bindings.TextClassifierOptions struct) {
+    baseOptions.assignToStruct(struct.base_options);
+    classifierOptions.assignToStruct(struct.classifier_options);
   }
 
   /// Releases all C memory held by this [bindings.TextClassifierOptions] struct.
@@ -72,4 +77,7 @@ class TextClassifierOptions {
     ClassifierOptions.freeStruct(ptr.ref.classifier_options);
     calloc.free(ptr);
   }
+
+  @override
+  List<Object?> get props => [baseOptions, classifierOptions];
 }

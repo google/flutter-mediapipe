@@ -6,108 +6,23 @@ import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
-/// Converts a list of Dart strings into their C memory equivalent.
-///
-/// See also:
-///  * [prepareString]
-Pointer<Pointer<Char>> prepareListOfStrings(List<String> values) {
-  final ptrArray = calloc<Pointer<Char>>(values.length);
-  for (var i = 0; i < values.length; i++) {
-    ptrArray[i] = prepareString(values[i]);
-  }
-  return ptrArray;
-}
-
-/// Converts a single Dart string into its C memory equivalent.
-///
-/// See also:
-///  * [prepareListOfStrings]
-Pointer<Char> prepareString(String val) => val.toNativeUtf8().cast<Char>();
-
-/// Converts the C memory representation of a string into a Dart [String]. If the
-/// supplied pointer is a null pointer, this function returns `null`.
-///
-/// See also:
-///  * [toDartStrings]
-String? toDartString(Pointer<Char> val) {
-  if (val.address == 0) return null;
-  return val.cast<Utf8>().toDartString();
-}
-
-/// Converts a list of C memory representations of strings into a list of Dart
-/// [String]s.
-///
-/// See also:
-///  * [toDartString]
-List<String?> toDartStrings(Pointer<Pointer<Char>> val, int length) {
-  final dartStrings = <String?>[];
-  int counter = 0;
-  while (counter < length) {
-    dartStrings.add(toDartString(val[counter]));
-    counter++;
-  }
-  return dartStrings;
-}
-
-/// Converts Dart's representation for binary data, a [Uint8List], into its C
-/// memory representation.
-Pointer<Char> prepareUint8List(Uint8List ints) {
-  final Pointer<Uint8> ptr = calloc<Uint8>(ints.length);
-  ptr.asTypedList(ints.length).setAll(0, ints);
-  return ptr.cast();
-}
-
-/// Converts a pointer to binary data in C memory to Dart's representation for
-/// binary data, a [Uint8List].
-Uint8List toUint8List(Pointer<Char> val, {int? length}) {
-  final codeUnits = val.cast<Uint8>();
-  if (length != null) {
-    RangeError.checkNotNegative(length, 'length');
-  } else {
-    length = _length(codeUnits);
-  }
-  return codeUnits.asTypedList(length);
-}
-
-int _length(Pointer<Uint8> codeUnits) {
-  var length = 0;
-  while (codeUnits[length] != 0) {
-    length++;
-  }
-  return length;
-}
-
-/// Converts a pointer to a (representing a list of) floats to a list of
-/// Dart doubles.
-List<double> toDartListDouble(Pointer<Float> floats, {int? length}) {
-  if (floats.isNullPointer) {
-    throw Exception('Unexpected nullptr passed to `toDartListDouble`.');
-  }
-  final codeUnits = floats.cast<Float>();
-  if (length != null) {
-    RangeError.checkNotNegative(length, 'length');
-  } else {
-    length = _lengthFloats(codeUnits);
-  }
-  final value = codeUnits.asTypedList(length);
-  return value;
-}
-
-int _lengthFloats(Pointer<Float> codeUnits) {
-  var length = 0;
-  while (codeUnits[length] != 0) {
-    length++;
-  }
-  return length;
-}
-
 /// Offers convenience and readability extensions for detecting null pointers.
-extension NullAwarePtr on Pointer {
-  /// Returns true if this is a null pointer.
-  bool get isNullPointer => address == 0;
+extension NullAwarePtr on Pointer? {
+  bool get _isNull => this == null;
 
-  /// Returns true if this is not a null pointer.
-  bool get isNotNullPointer => address != 0;
+  bool get _isNotNull => !_isNull;
+
+  /// Returns true if this is a `nullptr`.
+  bool get isNullPointer => _isNotNull && this!.address == nullptr.address;
+
+  /// Returns true if this is not a `nullptr`, but also not [null].
+  bool get isNotNullPointer => _isNotNull && this!.address != nullptr.address;
+
+  /// Returns true if this is neither [null] nor a `nullptr`.
+  bool get isNotNullAndIsNotNullPointer => _isNotNull && isNotNullPointer;
+
+  /// Returns true if this is either [null] or is a `nullptr`.
+  bool get isNullOrNullPointer => _isNull || isNullPointer;
 }
 
 /// Helpers to convert between a [String] and a `Pointer<Char>`.
@@ -124,7 +39,7 @@ extension NativeListOfStrings on List<String> {
   /// Copies a list of Dart strings into native memory.
   ///
   /// See also:
-  ///  * [Pointer<Char>.toNative] for a non-list equivalent.
+  ///  * [Pointer<Char>.copyToNative] for a non-list equivalent.
   Pointer<Pointer<Char>> copyToNative() {
     final ptrArray = calloc<Pointer<Char>>(length);
     for (var i = 0; i < length; i++) {

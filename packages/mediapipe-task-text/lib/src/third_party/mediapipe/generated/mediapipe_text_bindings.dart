@@ -88,10 +88,18 @@ external int text_embedder_close(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
-@ffi.Native<ffi.Int Function(imp1.Embedding)>(
+@ffi.Native<
+        ffi.Int Function(
+            ffi.Pointer<imp1.Embedding>,
+            ffi.Pointer<imp1.Embedding>,
+            ffi.Pointer<ffi.Double>,
+            ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
     symbol: 'text_embedder_cosine_similarity')
 external int text_embedder_cosine_similarity(
-  imp1.Embedding arg0,
+  ffi.Pointer<imp1.Embedding> u,
+  ffi.Pointer<imp1.Embedding> v,
+  ffi.Pointer<ffi.Double> similarity,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 final class TextClassifierOptions extends ffi.Struct {

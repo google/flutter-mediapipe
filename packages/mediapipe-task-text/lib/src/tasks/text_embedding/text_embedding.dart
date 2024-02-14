@@ -3,4 +3,5 @@
 // found in the LICENSE file.
 
 export 'text_embedding.dart';
+export 'text_embedder.dart';
 export 'containers/containers.dart';

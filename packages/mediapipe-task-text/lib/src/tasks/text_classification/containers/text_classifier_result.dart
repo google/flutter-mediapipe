@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
@@ -26,4 +29,17 @@ class TextClassifierResult extends ClassifierResult {
       ),
     );
   }
+
+  @override
+  void free() {
+    // TODO: make correct if the Embedding refactor wins out
+  }
+  // @override
+  // void free(covariant Pointer<bindings.TextClassifierResult> pointer) {
+  //   Classifications.freeStructs(
+  //     pointer.ref.classifications,
+  //     pointer.ref.classifications_count,
+  //   );
+  //   calloc.free(pointer);
+  // }
 }

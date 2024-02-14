@@ -55,8 +55,8 @@ class Category {
     return Category(
       index: struct.index,
       score: struct.score,
-      categoryName: toDartString(struct.category_name),
-      displayName: toDartString(struct.display_name),
+      categoryName: struct.category_name.toDartString(),
+      displayName: struct.display_name.toDartString(),
     );
   }
 
@@ -132,7 +132,7 @@ class Classifications {
         struct.categories_count,
       ),
       headIndex: struct.head_index,
-      headName: toDartString(struct.head_name),
+      headName: struct.head_name.toDartString(),
     );
   }
 
@@ -166,7 +166,7 @@ class Classifications {
 }
 
 /// Container for classification results across any MediaPipe task.
-abstract class ClassifierResult {
+abstract class ClassifierResult extends TaskResult {
   /// Container for classification results across any MediaPipe task.
   const ClassifierResult({
     required this.classifications,

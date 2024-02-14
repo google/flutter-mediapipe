@@ -18,4 +18,10 @@ class TextClassifier extends BaseTextClassifier {
   Future<TextClassifierResult> classify(String text) async {
     throw Exception('Must use the web or FFI implementations');
   }
+
+  /// {@macro textClassifierDispose}
+  @override
+  void dispose() {
+    throw Exception('Must use the web or FFI implementations');
+  }
 }

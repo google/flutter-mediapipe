@@ -41,6 +41,9 @@ test_core:
 generate_text:
 	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
 
+build_runner_text:
+	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets run build_runner build --delete-conflicting-outputs
+
 # Runs all text tests
 test_text:
 	cd packages/mediapipe-task-text && flutter test

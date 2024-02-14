@@ -4,8 +4,13 @@
 
 /// Package containing core dependencies for MediaPipe's text, vision, and
 /// audio-based tasks.
-library;
+library mediapipe_core;
 
+export 'src/dart_native_memory_manager.dart';
 export 'src/ffi_utils.dart';
+export 'src/native_memory_manager.dart';
+export 'src/task_executor.dart';
+export 'src/task_message.dart';
 export 'src/task_options.dart';
+export 'src/task_result.dart';
 export 'src/third_party/containers/containers.dart';

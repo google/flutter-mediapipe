@@ -68,7 +68,7 @@ class TextClassifierExecutor {
 
   /// Creates a TextClassifier in C memory if one is not already on hand.
   void _createClassifier() {
-    if (isNotNullOrNullPointer(_textClassifierPointer)) return;
+    if (_textClassifierPointer.isNotNullAndIsNotNullPointer) return;
 
     // Allocate and hydrate the configuration object
     _optionsPtr = options.toStruct();
@@ -90,7 +90,7 @@ class TextClassifierExecutor {
     _classifyErrorMessage = calloc<Pointer<Char>>();
     final classificationStatus = bindings.text_classifier_classify(
       _textClassifierPointer!,
-      prepareString(text),
+      text.copyToNative(),
       _resultsPtr!,
       _classifyErrorMessage!,
     );
@@ -115,7 +115,7 @@ class TextClassifierExecutor {
   /// method completely handles the potential error.
   void _handleErrorMessage(Pointer<Pointer<Char>> errorMessage, [int? status]) {
     if (errorMessage.isNotNullPointer && errorMessage[0].isNotNullPointer) {
-      final dartErrorMessage = toDartStrings(errorMessage, 1);
+      final dartErrorMessage = errorMessage.toDartStrings(1);
       _log.severe('dartErrorMessage: $dartErrorMessage');
       if (status == null) {
         calloc.free(errorMessage[0]);
@@ -132,7 +132,7 @@ class TextClassifierExecutor {
 
   /// Releases all pointers to objects held in C memory.
   void close() {
-    if (isNotNullOrNullPointer(_textClassifierPointer)) {
+    if (_textClassifierPointer.isNotNullAndIsNotNullPointer) {
       _closeErrorMessage = calloc<Pointer<Char>>();
       final closingStatus = bindings.text_classifier_close(
         _textClassifierPointer!,
@@ -142,7 +142,7 @@ class TextClassifierExecutor {
       _handleErrorMessage(_closeErrorMessage!, closingStatus);
       _closeErrorMessage = null;
     }
-    if (isNotNullOrNullPointer(_optionsPtr)) {
+    if (_optionsPtr.isNotNullAndIsNotNullPointer) {
       TextClassifierOptions.freeStruct(_optionsPtr!);
       _optionsPtr = null;
     }

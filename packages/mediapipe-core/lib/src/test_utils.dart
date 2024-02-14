@@ -17,10 +17,10 @@ void populateCategory(
   category.score = score;
 
   if (categoryName != null) {
-    category.category_name = prepareString(categoryName);
+    category.category_name = categoryName.copyToNative();
   }
   if (displayName != null) {
-    category.display_name = prepareString(displayName);
+    category.display_name = displayName.copyToNative();
   }
 }
 
@@ -36,7 +36,7 @@ void populateClassifications(
   int headIndex = 1,
   String headName = 'Head',
 }) {
-  if (isNotNullOrNullPointer(categories)) {
+  if (categories.isNotNullAndIsNotNullPointer) {
     classifications.categories = categories!;
     classifications.categories_count = numCategories;
   } else {
@@ -49,6 +49,6 @@ void populateClassifications(
     classifications.categories = ptrs;
     classifications.categories_count = numCategories;
   }
-  classifications.head_name = prepareString(headName);
+  classifications.head_name = headName.copyToNative();
   classifications.head_index = headIndex;
 }
