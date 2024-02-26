@@ -9,93 +9,105 @@ import 'test_utils.dart';
 void main() {
   group('Category.native should', () {
     test('load a Category', () {
-      final categoryPtr = calloc<core_bindings.Category>();
-      populateCategory(categoryPtr.ref);
+      using((arena) {
+        final categoryPtr = arena<core_bindings.Category>();
+        populateCategory(categoryPtr.ref);
 
-      final category = Category.native(categoryPtr);
-      expect(category.index, 1);
-      expect(category.categoryName, 'Positive');
-      expect(category.displayName, isNull);
-      expect(category.score, closeTo(0.9, 0.0001));
-      calloc.free(categoryPtr);
+        final category = Category.native(categoryPtr);
+        expect(category.index, 1);
+        expect(category.categoryName, 'Positive');
+        expect(category.displayName, isNull);
+        expect(category.score, closeTo(0.9, 0.0001));
+      });
     });
 
     test('load a Category with a display name', () {
-      final categoryPtr = calloc<core_bindings.Category>();
-      populateCategory(categoryPtr.ref, displayName: 'v-good');
+      using((arena) {
+        final categoryPtr = arena<core_bindings.Category>();
+        populateCategory(categoryPtr.ref, displayName: 'v-good');
 
-      final category = Category.native(categoryPtr);
-      expect(category.index, 1);
-      expect(category.categoryName, 'Positive');
-      expect(category.displayName, 'v-good');
-      expect(category.score, closeTo(0.9, 0.0001));
-      calloc.free(categoryPtr);
+        final category = Category.native(categoryPtr);
+        expect(category.index, 1);
+        expect(category.categoryName, 'Positive');
+        expect(category.displayName, 'v-good');
+        expect(category.score, closeTo(0.9, 0.0001));
+      });
     });
 
     test('load a Category with no names', () {
-      final categoryPtr = calloc<core_bindings.Category>();
-      populateCategory(categoryPtr.ref, categoryName: null);
+      using((arena) {
+        final categoryPtr = arena<core_bindings.Category>();
+        populateCategory(categoryPtr.ref, categoryName: null);
 
-      final category = Category.native(categoryPtr);
-      expect(category.index, 1);
-      expect(category.categoryName, isNull);
-      expect(category.displayName, isNull);
-      expect(category.score, closeTo(0.9, 0.0001));
+        final category = Category.native(categoryPtr);
+        expect(category.index, 1);
+        expect(category.categoryName, isNull);
+        expect(category.displayName, isNull);
+        expect(category.score, closeTo(0.9, 0.0001));
+      });
     });
 
     test('should load a list of structs', () {
-      final ptrs = calloc<core_bindings.Category>(2);
-      populateCategory(ptrs[0]);
-      populateCategory(
-        ptrs[1],
-        categoryName: 'Negative',
-        index: 2,
-        score: 0.01,
-      );
-      final categories = Category.fromNativeArray(ptrs, 2);
-      expect(categories, hasLength(2));
-      expect(categories[0].categoryName, 'Positive');
-      expect(categories[0].index, 1);
-      expect(categories[0].score, closeTo(0.9, 0.0001));
+      using((arena) {
+        final ptrs = arena<core_bindings.Category>(2);
+        populateCategory(ptrs[0]);
+        populateCategory(
+          ptrs[1],
+          categoryName: 'Negative',
+          index: 2,
+          score: 0.01,
+        );
+        final categories = Category.fromNativeArray(ptrs, 2);
+        expect(categories, hasLength(2));
+        expect(categories[0].categoryName, 'Positive');
+        expect(categories[0].index, 1);
+        expect(categories[0].score, closeTo(0.9, 0.0001));
 
-      expect(categories[1].categoryName, 'Negative');
-      expect(categories[1].index, 2);
-      expect(categories[1].score, closeTo(0.01, 0.0001));
+        expect(categories[1].categoryName, 'Negative');
+        expect(categories[1].index, 2);
+        expect(categories[1].score, closeTo(0.01, 0.0001));
+      });
     });
   });
 
   group('Classifications.native should', () {
     test('load a Classifications object', () {
-      final classificationsPtr = calloc<core_bindings.Classifications>();
-      populateClassifications(classificationsPtr.ref);
+      using((arena) {
+        final classificationsPtr = arena<core_bindings.Classifications>();
+        populateClassifications(classificationsPtr.ref);
 
-      final classifications = Classifications.native(classificationsPtr);
-      expect(classifications.headIndex, 1);
-      expect(classifications.headName, 'Head');
-      expect(classifications.categories.length, 2);
-      expect(classifications.categories.first.categoryName, 'Positive');
-      expect(classifications.categories.last.categoryName, 'Positive');
+        final classifications = Classifications.native(classificationsPtr);
+        expect(classifications.headIndex, 1);
+        expect(classifications.headName, 'Head');
+        expect(classifications.categories.length, 2);
+        expect(classifications.categories.first.categoryName, 'Positive');
+        expect(classifications.categories.last.categoryName, 'Positive');
+      });
     });
 
     test('load a Classifications object with 1 category', () {
-      final classificationsPtr = calloc<core_bindings.Classifications>();
-      populateClassifications(classificationsPtr.ref, numCategories: 1);
+      using((arena) {
+        final classificationsPtr = calloc<core_bindings.Classifications>();
+        populateClassifications(classificationsPtr.ref, numCategories: 1);
 
-      final classifications = Classifications.native(classificationsPtr);
-      expect(classifications.headIndex, 1);
-      expect(classifications.headName, 'Head');
-      expect(classifications.categories.length, 1);
-      expect(classifications.categories.first.categoryName, 'Positive');
+        final classifications = Classifications.native(classificationsPtr);
+        expect(classifications.headIndex, 1);
+        expect(classifications.headName, 'Head');
+        expect(classifications.categories.length, 1);
+        expect(classifications.categories.first.categoryName, 'Positive');
+      });
     });
 
     test('load a Classifications object with no categories', () {
-      final classificationsPtr = calloc<core_bindings.Classifications>();
-      populateClassifications(classificationsPtr.ref, numCategories: 0);
+      using((arena) {
+        final classificationsPtr = arena<core_bindings.Classifications>();
+        populateClassifications(classificationsPtr.ref, numCategories: 0);
 
-      final classifications = Classifications.native(classificationsPtr);
-      expect(classifications.headIndex, 1);
-      expect(classifications.headName, 'Head');
-      expect(classifications.categories.length, 0);
+        final classifications = Classifications.native(classificationsPtr);
+        expect(classifications.headIndex, 1);
+        expect(classifications.headName, 'Head');
+        expect(classifications.categories.length, 0);
+      });
     });
   });
 }
