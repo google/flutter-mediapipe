@@ -1,8 +1,8 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
-import 'package:mediapipe_core/mediapipe_core.dart';
-import 'package:mediapipe_core/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
+import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as core_bindings;
 
 /// Hydrates a faked [core_bindings.Category] object.
@@ -17,10 +17,10 @@ void populateCategory(
   category.score = score;
 
   if (categoryName != null) {
-    category.category_name = prepareString(categoryName);
+    category.category_name = categoryName.copyToNative();
   }
   if (displayName != null) {
-    category.display_name = prepareString(displayName);
+    category.display_name = displayName.copyToNative();
   }
 }
 
@@ -36,7 +36,7 @@ void populateClassifications(
   int headIndex = 1,
   String headName = 'Head',
 }) {
-  if (isNotNullOrNullPointer(categories)) {
+  if (categories.isNotNullAndIsNotNullPointer) {
     classifications.categories = categories!;
     classifications.categories_count = numCategories;
   } else {
@@ -49,6 +49,6 @@ void populateClassifications(
     classifications.categories = ptrs;
     classifications.categories_count = numCategories;
   }
-  classifications.head_name = prepareString(headName);
+  classifications.head_name = headName.copyToNative();
   classifications.head_index = headIndex;
 }

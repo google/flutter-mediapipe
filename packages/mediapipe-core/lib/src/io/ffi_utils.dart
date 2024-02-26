@@ -141,21 +141,3 @@ extension NativeInts on Uint8List {
     return result.cast();
   }
 }
-
-/// Offers convenience and readability extensions for detecting null pointers.
-extension NullAwarePtr on Pointer {
-  /// Returns true if this is a null pointer.
-  bool get isNullPointer => address == 0;
-
-  /// Returns true if this is not a null pointer.
-  bool get isNotNullPointer => address != 0;
-}
-
-/// Returns true if this nullable pointer is both not-null and not a `NullPtr`,
-/// which is to say, its address is 0x00000000.
-bool isNotNullOrNullPointer(Pointer? ptr) =>
-    ptr != null && ptr.isNotNullPointer;
-
-/// Returns true if this nullable pointer is either null OR is a `NullPtr`,
-/// which is to say, its address is 0x00000000.
-bool isNullOrNullPointer(Pointer? ptr) => ptr == null || ptr.isNullPointer;
