@@ -87,20 +87,5 @@ void main() {
       result.dispose();
       executor.dispose();
     });
-
-    test('release all resources', () {
-      final executor = TextClassifierExecutor(
-        TextClassifierOptions.fromAssetBuffer(modelBytes),
-      );
-      final result = executor.classify('Hello, world!');
-      executor.dispose();
-      // expect(executor.textClassifierPointer, isNull);
-      // expect(executor.textClassifierPointer, isNull);
-      // expect(executor.optionsPtr, isNull);
-      // expect(executor.resultsPtr, isNull);
-      // expect(executor.createErrorMessage, isNull);
-      // expect(executor.classifyErrorMessage, isNull);
-      // expect(executor.disposeErrorMessage, isNull);
-    });
   });
 }
