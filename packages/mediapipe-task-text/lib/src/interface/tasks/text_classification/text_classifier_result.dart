@@ -13,8 +13,4 @@ import 'package:mediapipe_core/interface.dart';
 abstract class ITextClassifierResult extends IClassifierResult {
   /// {@macro TextClassifierResult}
   ITextClassifierResult();
-
-  /// {@macro ClassifierResult.fake}
-  // ITextClassifierResult.fake({required List<IClassifications> classifications})
-  //     : super.fake(classifications: classifications);
 }
