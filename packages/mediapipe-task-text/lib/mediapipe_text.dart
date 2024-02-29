@@ -5,5 +5,6 @@
 /// Package containing MediaPipe's text-specific tasks.
 library mediapipe_text;
 
-export 'src/tasks/text_classification/text_classifier.dart';
-export 'src/tasks/text_classification/containers/containers.dart';
+export 'universal_mediapipe_text.dart'
+    if (dart.library.html) 'src/web/mediapipe_text.dart'
+    if (dart.library.io) 'src/io/mediapipe_text.dart';

@@ -1,7 +1,11 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
-import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/src/io/mediapipe_core.dart';
 import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as core_bindings;
 

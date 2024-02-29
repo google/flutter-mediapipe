@@ -4,9 +4,9 @@
 
 /// Package containing core dependencies for MediaPipe's text, vision, and
 /// audio-based tasks.
-library;
+library mediapipe_core;
 
-export 'src/interface/interface.dart';
+export 'src/extensions.dart';
 export 'universal_mediapipe_core.dart'
-    if (dart.library.html) 'web_mediapipe_core.dart'
-    if (dart.library.io) 'io_mediapipe_core.dart';
+    if (dart.library.html) 'src/web/mediapipe_core.dart'
+    if (dart.library.io) 'src/io/mediapipe_core.dart';

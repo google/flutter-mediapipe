@@ -15,7 +15,7 @@ import 'package:equatable/equatable.dart';
 /// See more:
 ///  * [MediaPipe's Category documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Category)
 /// {@endtemplate}
-abstract class BaseCategory extends Equatable {
+abstract class ICategory extends Equatable {
   /// The index of the label in the corresponding label file.
   int get index;
 
@@ -45,10 +45,10 @@ abstract class BaseCategory extends Equatable {
 /// See also:
 ///  * [MediaPipe's Classifications documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Classifications)
 /// {@endtemplate}
-abstract class BaseClassifications extends Equatable {
+abstract class IClassifications extends Equatable {
   /// A list of [Category] objects which contain the actual classification
   /// information, including human-readable labels and probability scores.
-  List<BaseCategory> get categories;
+  List<ICategory> get categories;
 
   /// The index of the classifier head these entries refer to.
   int get headIndex;
@@ -58,7 +58,7 @@ abstract class BaseClassifications extends Equatable {
   String? get headName;
 
   /// Convenience getter for the first [Category] out of the [categories] list.
-  BaseCategory? get firstCategory =>
+  ICategory? get firstCategory =>
       categories.isNotEmpty ? categories.first : null;
 
   @override

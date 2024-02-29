@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
-import 'package:mediapipe_core/src/interface/interface.dart';
-import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/interface.dart';
+import 'package:mediapipe_core/io.dart';
 import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
@@ -12,15 +12,16 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 mixin TaskResult {}
 
 /// {@macro ClassifierResult}
-abstract class ClassifierResult extends IBaseClassifierResult with TaskResult {
-  /// {@macro ClassifierResult}
-  ClassifierResult({required List<Classifications> classifications})
-      : _classifications = classifications,
+abstract class ClassifierResult extends IClassifierResult with TaskResult {
+  // No-args constructor to satisfy extending abstract classes.
+  ClassifierResult._()
+      : _classifications = const [],
         _pointer = null;
 
-  /// Instantiates a [ClassifierResult] instance as a wrapper around native
-  /// memory.
-  ClassifierResult.native(this._pointer);
+  /// {@macro ClassifierResult.fake}
+  ClassifierResult.fake({required List<Classifications> classifications})
+      : _classifications = classifications,
+        _pointer = null;
 
   final Pointer<bindings.ClassificationResult>? _pointer;
 
@@ -50,10 +51,7 @@ abstract class ClassifierResult extends IBaseClassifierResult with TaskResult {
 /// {@macro TimestampedClassifierResult}
 abstract class TimestampedClassifierResult extends ClassifierResult
     with TimestampedResult {
-  /// Instantiates a [TimestampedClassifierResult] instance as a wrapper around native memory.
-  TimestampedClassifierResult.native(
-      Pointer<bindings.ClassificationResult> pointer)
-      : super.native(pointer);
+  TimestampedClassifierResult._() : super._();
 
   Duration? _timestamp;
   @override

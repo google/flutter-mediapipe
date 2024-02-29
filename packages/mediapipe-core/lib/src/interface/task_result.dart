@@ -2,17 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:mediapipe_core/mediapipe_core.dart';
+import 'package:mediapipe_core/interface.dart';
+
+/// Anchor class for all result objects from MediaPipe tasks.
+abstract class TaskResult {
+  /// {@template TaskResult.dispose}
+  /// Releases platform memory if any is held.
+  /// {@endtemplate}
+  void dispose();
+}
 
 /// {@template ClassifierResult}
 /// Container for classification results across any MediaPipe task.
 /// {@endtemplate}
-abstract class IBaseClassifierResult {
+abstract class IClassifierResult extends TaskResult {
   /// The classification results for each head of the model.
-  List<BaseClassifications> get classifications;
+  List<IClassifications> get classifications;
 
   /// Convenience helper for the first [Classifications] object.
-  BaseClassifications? get firstClassification =>
+  IClassifications? get firstClassification =>
       classifications.isNotEmpty ? classifications.first : null;
 
   @override

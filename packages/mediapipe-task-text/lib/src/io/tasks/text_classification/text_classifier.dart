@@ -6,19 +6,17 @@ import 'dart:async';
 import 'dart:isolate';
 import 'package:async/async.dart';
 import 'package:logging/logging.dart';
-
-import 'text_classification_executor.dart';
-import 'text_classifier.dart';
-import 'containers/containers.dart';
+import 'package:mediapipe_core/mediapipe_core.dart';
+import 'package:mediapipe_text/interface.dart';
+import 'package:mediapipe_text/io.dart';
 
 final _log = Logger('TextClassifier');
 
-/// TextClassifier implementation able to use FFI and `dart:io`.
-class TextClassifier extends BaseTextClassifier {
-  /// Generative constructor.
-  TextClassifier({required super.options})
-      : _readyCompleter = Completer<void>() {
-    _createIsolate(options).then((results) {
+/// {@macro TextClassifier}
+class TextClassifier extends ITextClassifier {
+  /// {@macro TextClassifier}
+  TextClassifier(this._options) : _readyCompleter = Completer<void>() {
+    _createIsolate(_options).then((results) {
       _events = results.$1;
       _sendPort = results.$2;
       _readyCompleter.complete();
@@ -30,26 +28,23 @@ class TextClassifier extends BaseTextClassifier {
   final Completer<void> _readyCompleter;
   Future<void> get _ready => _readyCompleter.future;
 
-  /// Closes down the background isolate, releasing all resources.
-  void dispose() => _sendPort.send(null);
+  final TextClassifierOptions _options;
 
-  /// Sends a `String` value to MediaPipe for classification. Uses an Isolate
-  /// on mobile and desktop, and a web worker on web, to add concurrency and avoid
-  /// blocking the UI thread while this task completes.
-  ///
-  /// See also:
-  ///  * [classify_sync] for a synchronous alternative
   @override
   Future<TextClassifierResult> classify(String text) async {
-    _log.info('Classifying "$text"');
+    _log.info('Classifying "${text.shorten()}"');
     await _ready;
     _sendPort.send(text);
     return await _events.next;
   }
+
+  /// Closes down the background isolate, releasing all resources.
+  void dispose() => _sendPort.send(null);
 }
 
 Future<(StreamQueue<dynamic>, SendPort)> _createIsolate(
-    TextClassifierOptions options) async {
+  TextClassifierOptions options,
+) async {
   final p = ReceivePort();
   await Isolate.spawn(
     (SendPort port) => _classificationService(
@@ -81,6 +76,6 @@ Future<void> _classificationService(
       break;
     }
   }
-  executor.close();
+  executor.dispose();
   Isolate.exit();
 }

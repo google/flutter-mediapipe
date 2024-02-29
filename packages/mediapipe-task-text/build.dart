@@ -59,7 +59,7 @@ Future<void> main(List<String> args) async {
     log('downloadFileLocation: $downloadFileLocation');
     buildOutput.assets.add(
       Asset(
-        id: 'package:mediapipe_text/src/third_party/mediapipe/generated/mediapipe_text_bindings.dart',
+        id: 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart',
         linkMode: LinkMode.dynamic,
         target: Target.fromArchitectureAndOs(
             Architecture.fromString(arch), buildConfig.targetOs),

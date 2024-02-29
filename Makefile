@@ -6,14 +6,10 @@ headers:
 generate: generate_core generate_text
 
 # Runs `ffigen` for all packages and runs all tests
-test: generate_text test_text generate_core test_core
+test: generate_core test_core generate_text test_text
 
 # Runs all tests for all packages
 test_only: test_core test_text
-
-# Runs `sdks_finder` to update manifest files
-sdks:
-	dart tool/builder/bin/main.dart sdks
 
 # Rebuilds the MediaPipe task for macOS
 # Assumes google/mediapipe and google/flutter-mediapipe are siblings on the file system
@@ -28,6 +24,10 @@ compile_text_classifier_macos_x86:
 # Runs `sdks_finder` to update manifest files
 sdks:
 	dart tool/builder/bin/main.dart sdks
+
+analyze:
+	cd packages/mediapipe-core && dart format -o write .
+	cd packages/mediapipe-task-text && dart format -o write .
 
 # Core ---
 

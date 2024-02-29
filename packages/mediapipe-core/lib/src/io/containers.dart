@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
-import 'package:mediapipe_core/src/interface/interface.dart';
-import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/interface.dart';
+import 'package:mediapipe_core/src/io/mediapipe_core.dart';
 import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// {@macro Category}
-class Category extends BaseCategory {
-  /// Initializes a [Category] instance with mock values for testing.
+// ignore: must_be_immutable
+class Category extends ICategory {
+  /// {@macro Category.fake}
   Category.fake({
     required int index,
     required double score,
@@ -22,7 +23,9 @@ class Category extends BaseCategory {
         _displayName = displayName,
         _pointer = null;
 
-  /// Initializes a [Category] instance as a wrapper around native memory.
+  /// {@template Category.native}
+  /// Instatiates a [Category] object as a wrapper around native memory.
+  /// {@endtemplate}
   Category.native(this._pointer);
 
   final Pointer<bindings.Category>? _pointer;
@@ -86,8 +89,9 @@ class Category extends BaseCategory {
 }
 
 /// {@macro Classifications}
-class Classifications extends BaseClassifications {
-  /// {@macro Classifications}
+// ignore: must_be_immutable
+class Classifications extends IClassifications {
+  /// {@macro Classifications.fake}
   Classifications.fake({
     required List<Category> categories,
     required int headIndex,
@@ -97,7 +101,9 @@ class Classifications extends BaseClassifications {
         _headName = headName,
         _pointer = null;
 
-  /// Instantiates a [Classifications] instance as a wrapper around native memory.
+  /// {@template Classifications.native}
+  /// Instatiates a [Classifications] object as a wrapper around native memory.
+  /// {@endtemplate}
   Classifications.native(this._pointer);
 
   final Pointer<bindings.Classifications>? _pointer;

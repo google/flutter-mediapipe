@@ -41,7 +41,7 @@ class _MainAppState extends State<MainApp> {
         .load('assets/bert_classifier.tflite');
 
     TextClassifier classifier = TextClassifier(
-      options: TextClassifierOptions.fromAssetBuffer(
+      TextClassifierOptions.fromAssetBuffer(
         classifierBytes.buffer.asUint8List(),
       ),
     );
@@ -60,7 +60,7 @@ class _MainAppState extends State<MainApp> {
 class TextClassificationResults extends StatefulWidget {
   const TextClassificationResults({super.key, required this.classifier});
 
-  final Future<BaseTextClassifier> classifier;
+  final Future<TextClassifier> classifier;
 
   @override
   State<TextClassificationResults> createState() =>
@@ -85,11 +85,11 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
     });
   }
 
-  void _showClassificationResults(TextClassifierResult classification) {
+  void _showClassificationResults(TextClassifierResult result) {
     setState(() {
       final categoryName =
-          classification.firstClassification?.firstCategory?.categoryName;
-      final score = classification.firstClassification?.firstCategory?.score;
+          result.firstClassification?.firstCategory?.categoryName;
+      final score = result.firstClassification?.firstCategory?.score;
       // Replace "..." with the results
       final message = '"$_isProcessing" $categoryName :: $score';
       _log.info(message);
@@ -107,7 +107,7 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
 
   Future<void> _classify() async {
     _prepareForClassification();
-    BaseTextClassifier classifier = await widget.classifier;
+    TextClassifier classifier = await widget.classifier;
     final classification = await classifier.classify(_controller.text);
     _showClassificationResults(classification);
   }

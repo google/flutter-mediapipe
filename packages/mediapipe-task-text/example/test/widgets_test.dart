@@ -4,16 +4,16 @@ import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
 import 'package:example/main.dart';
 
-class FakeTextClassifier extends BaseTextClassifier {
-  FakeTextClassifier({required super.options});
+class FakeTextClassifier extends TextClassifier {
+  FakeTextClassifier(TextClassifierOptions options) : super(options);
 
   @override
   Future<TextClassifierResult> classify(String text) => Future.value(
-        const TextClassifierResult(
+        TextClassifierResult.fake(
           classifications: <Classifications>[
-            Classifications(
+            Classifications.fake(
               categories: <Category>[
-                Category(
+                Category.fake(
                   index: 0,
                   score: 0.9,
                   categoryName: 'happy-go-lucky',
@@ -36,7 +36,7 @@ void main() {
       home: TextClassificationResults(
         classifier: Future.value(
           FakeTextClassifier(
-            options: TextClassifierOptions.fromAssetPath('fake'),
+            TextClassifierOptions.fromAssetPath('fake'),
           ),
         ),
       ),

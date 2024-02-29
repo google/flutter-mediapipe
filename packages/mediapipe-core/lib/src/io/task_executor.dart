@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
-import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/io.dart';
 import 'package:logging/logging.dart';
 
 final _log = Logger('TaskExecutor');
 
 /// {@template TaskExecutor}
 /// Instantiates and manages an object which can complete MediaPipe tasks. The
-/// object does not exist in Dart memory, but instead in platform-dependent
-/// native memory.
+/// managed object does not exist in Dart memory, but instead in platform-
+/// dependent native memory.
 ///
 /// Extending classes should implement [createResultsPointer], [createWorker],
-/// [closeWorker], [freeOptions], and any additional task-specific methods.
-/// Applications will only call those extra task-specific methods, which will
-/// throw an exception on any error communicating with the native workers. It is
-/// the job of application code to surround those task-specific methods with
-/// try-catch clauses.
+/// [closeWorker], and any additional task-specific methods. Applications will
+/// only call those extra task-specific methods, which will throw an exception
+/// on any error communicating with the native workers. It is the job of
+/// application code to surround those task-specific methods with try-catch
+/// clauses.
 /// {@endtemplate}
 abstract class TaskExecutor<
     NativeOptions extends Struct,
@@ -43,7 +43,7 @@ abstract class TaskExecutor<
       );
       handleErrorMessage(errorMessageMemory);
       errorMessageMemory.free();
-      options.free();
+      options.dispose();
     }
     return _worker!;
   }
@@ -59,10 +59,6 @@ abstract class TaskExecutor<
 
   /// Releases the worker behind this task.
   int closeWorker(Pointer<Void> worker, Pointer<Pointer<Char>> error);
-
-  /// Releases native memory backing the MediaPipe options that initially
-  /// instantiated the worker behind this task.
-  void freeOptions(Pointer<NativeOptions> options);
 
   /// Releases the worker and any remaining resources.
   void dispose() {
@@ -83,8 +79,8 @@ abstract class TaskExecutor<
       final dartErrorMessage = errorMessage.memory.toDartStrings(1);
       _log.severe('dartErrorMessage: $dartErrorMessage');
 
-      // If there is an exception, release this memory the calling code will not
-      // get a chance to free the memory.
+      // If there is an exception, release this memory because the calling code
+      // will not get a chance to.
       errorMessage.free();
 
       // Raise the exception.

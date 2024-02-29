@@ -6,23 +6,30 @@ import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'ffi_utils.dart';
-import 'package:mediapipe_core/src/interface/interface.dart';
+import 'package:mediapipe_core/interface.dart';
 import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// {@template TaskOptions}
 /// {@endtemplate}
 mixin TaskOptions<T extends Struct> on ITaskOptions {
-  /// Copies this [TaskOptions] instance into native memory. Any fields of type
+  /// {@template TaskOptions.copyToNative}
+  /// Copies these task options into native memory. Any fields of type
   /// [InnerTaskOptions] should have their `assignToStruct` method called.
+  ///
+  /// It is the job of [copyToNative] to both create and cache the pointer to
+  /// native memory. This means that [copyToNative] can be called more than
+  /// once without causing problems other than redundant work.
+  /// {@endtemplate}
   Pointer<T> copyToNative() {
-    throw UnimplementedError('Must implement $runtimeType.copyToNative');
+    throw UnimplementedError('Must implement `$runtimeType.copyToNative`');
   }
 
-  /// Releases native memory if allocated. No-op if called more than once or if
-  /// [copyToNative] has not yet been called.
-  void free() {
-    throw UnimplementedError('Must implement $runtimeType.free');
+  /// {@template TaskOptions.dispose}
+  /// Releases native memory created by [copyToNative].
+  /// {@endtemplate}
+  void dispose() {
+    throw UnimplementedError('Must implement method `$runtimeType.dispose`');
   }
 }
 
@@ -54,11 +61,7 @@ class BaseOptions extends IBaseOptions
           'You must only supply one of `modelAssetBuffer` and `modelAssetPath`',
         );
 
-  /// Constructor for [BaseOptions] classes using a file system path.
-  ///
-  /// In practice, this is unsupported, as assets in Flutter are bundled into
-  /// the build output and not available on disk. However, it can potentially
-  /// be helpful for testing / development purposes.
+  /// {@macro BaseOptions.path}
   factory BaseOptions.path(String path) {
     return BaseOptions._(
       modelAssetPath: path,
@@ -66,10 +69,7 @@ class BaseOptions extends IBaseOptions
     );
   }
 
-  /// Constructor for [BaseOptions] classes using an in-memory pointer to the
-  /// MediaPipe SDK.
-  ///
-  /// In practice, this is the only option supported for production builds.
+  /// {@macro BaseOptions.memory}
   factory BaseOptions.memory(Uint8List buffer) {
     return BaseOptions._(
       modelAssetBuffer: buffer,

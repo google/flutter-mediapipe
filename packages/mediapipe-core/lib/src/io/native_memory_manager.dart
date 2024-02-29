@@ -1,7 +1,7 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:mediapipe_core/io_mediapipe_core.dart';
+import 'package:mediapipe_core/io.dart';
 
 /// {@template NativeMemoryManager}
 /// {@endtemplate}
@@ -58,7 +58,9 @@ class NativeStringManager extends NativeMemoryManager<Pointer<Char>> {
   static void _deallocator(Pointer<Pointer<Char>> ptr) {
     if (ptr.isNullPointer) return;
     // TODO: verify correctness
-    calloc.free(ptr + 1);
+    if (ptr[0].isNotNullPointer) {
+      calloc.free(ptr[0]);
+    }
     calloc.free(ptr);
     // TODO: Is this a best practice or anti-pattern?
     ptr = nullptr;
