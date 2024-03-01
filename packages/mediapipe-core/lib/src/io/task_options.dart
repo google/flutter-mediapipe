@@ -11,6 +11,9 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// {@template TaskOptions}
+/// Provides a suggested API surface for how classes implementing [ITaskOptions]
+/// should manage their [InnerTaskOptions] fields. The two suggested methods are
+/// [copyToNative] and [dispose].
 /// {@endtemplate}
 mixin TaskOptions<T extends Struct> on ITaskOptions {
   /// {@template TaskOptions.copyToNative}
@@ -34,13 +37,27 @@ mixin TaskOptions<T extends Struct> on ITaskOptions {
 }
 
 /// {@macro InnerTaskOptions}
+///
+/// The native implementation suggests two methods each extending class should
+/// implement: [assignToStruct] and [freeStructFields]. Both methods are passed
+/// a struct created and managed elsewhere, and these methods either copy local
+/// values into native memory ([assignToStruct]) or deallocate any native memory
+/// that a naive `calloc.free()` from the parent options class would miss.
 mixin InnerTaskOptions<T extends Struct> on IInnerTaskOptions {
   /// Assigns all values to an existing struct. This method should be
   /// implemented by all [InnerTaskOptions] types to hydrate a struct, but not
   /// for the creation of that struct. Allocation and management of the actual
-  /// structs are handled by [TaskOptions.copyToNative].
+  /// structs are handled by [TaskOptions.copyToNative] on the wrapping options
+  /// object.
   void assignToStruct(T struct) {
     throw UnimplementedError('Must implement $runtimeType.assignToStruct');
+  }
+
+  /// Deallocates any memory on the [struct] that would be missed simply by
+  /// calling `calloc.free(struct)`, which the parent who called this method
+  /// will do after this method completes.
+  void freeStructFields(T struct) {
+    throw UnimplementedError('Must implement $runtimeType.freeStructFields');
   }
 }
 
@@ -86,8 +103,6 @@ class BaseOptions extends IBaseOptions
   @override
   final BaseOptionsType type;
 
-  /// Writes all data to an existing struct which is not owned by this
-  /// instance.
   @override
   void assignToStruct(bindings.BaseOptions struct) {
     switch (type) {
@@ -103,8 +118,8 @@ class BaseOptions extends IBaseOptions
     }
   }
 
-  /// Releases all C memory held by this [bindings.BaseOptions] struct.
-  static void freeStructFields(bindings.BaseOptions struct) {
+  @override
+  void freeStructFields(bindings.BaseOptions struct) {
     if (struct.model_asset_path.isNotNullPointer) {
       calloc.free(struct.model_asset_path);
     }
@@ -181,8 +196,8 @@ class ClassifierOptions extends IClassifierOptions
     }
   }
 
-  /// Releases all C memory held by this [bindings.ClassifierOptions] struct.
-  static void freeStructFields(bindings.ClassifierOptions struct) {
+  @override
+  void freeStructFields(bindings.ClassifierOptions struct) {
     if (struct.display_names_locale.address != 0) {
       calloc.free(struct.display_names_locale);
     }

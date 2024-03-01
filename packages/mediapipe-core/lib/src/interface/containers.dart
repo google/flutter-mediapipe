@@ -39,7 +39,7 @@ abstract class ICategory extends Equatable {
 /// {@template Classifications}
 /// Dart representation of MediaPipe's "Classifications" concept.
 ///
-/// Represents the list of classification for a given classifier head.
+/// Represents the list of classifications for a given classifier head.
 /// Typically used as a result for classification tasks.
 ///
 /// See also:

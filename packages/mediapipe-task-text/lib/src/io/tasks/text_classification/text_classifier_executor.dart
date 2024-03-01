@@ -30,13 +30,16 @@ class TextClassifierExecutor extends TaskExecutor<
   TextClassifierExecutor(super.options);
 
   @override
+  final String taskName = 'TextClassification';
+
+  @override
   Pointer<Void> createWorker(
     Pointer<bindings.TextClassifierOptions> options,
     Pointer<Pointer<Char>> error,
   ) {
-    _log.info('Creating TextClassifier in native memory');
+    _log.fine('Creating TextClassifier in native memory');
     final worker = bindings.text_classifier_create(options, error);
-    _log.fine(
+    _log.finest(
       'Created TextClassifier at 0x${worker.address.toRadixString(16)}',
     );
     return worker;
@@ -44,9 +47,9 @@ class TextClassifierExecutor extends TaskExecutor<
 
   @override
   Pointer<bindings.TextClassifierResult> createResultsPointer() {
-    _log.info('Allocating TextClassifierResult in native memory');
+    _log.fine('Allocating TextClassifierResult in native memory');
     final results = calloc<bindings.TextClassifierResult>();
-    _log.info(
+    _log.finest(
       'Allocated TextClassifierResult at 0x${results.address.toRadixString(16)}',
     );
     return results;
@@ -55,7 +58,7 @@ class TextClassifierExecutor extends TaskExecutor<
   @override
   int closeWorker(Pointer<Void> worker, Pointer<Pointer<Char>> error) {
     final status = bindings.text_classifier_close(worker, error);
-    _log.info('Closed TextClassifier in native memory with status $status');
+    _log.finest('Closed TextClassifier in native memory with status $status');
     return status;
   }
 
@@ -72,7 +75,7 @@ class TextClassifierExecutor extends TaskExecutor<
       resultPtr,
       errorMessageManager.memory,
     );
-    _log.fine('Classified with status $status');
+    _log.finest('Classified with status $status');
     textMemory.free();
     handleErrorMessage(errorMessageManager, status);
     errorMessageManager.free();

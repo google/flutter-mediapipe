@@ -103,6 +103,10 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
       );
       _isProcessing = null;
     });
+
+    // Value is safe to immediately dispose because we have pulled out all of
+    // the parts we care about into our Flutter application code.
+    result.dispose();
   }
 
   Future<void> _classify() async {

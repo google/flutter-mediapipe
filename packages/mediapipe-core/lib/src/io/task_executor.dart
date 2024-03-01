@@ -10,8 +10,8 @@ final _log = Logger('TaskExecutor');
 
 /// {@template TaskExecutor}
 /// Instantiates and manages an object which can complete MediaPipe tasks. The
-/// managed object does not exist in Dart memory, but instead in platform-
-/// dependent native memory.
+/// managed task-completing object does not exist in Dart memory, but instead in
+/// platform-dependent native memory.
 ///
 /// Extending classes should implement [createResultsPointer], [createWorker],
 /// [closeWorker], and any additional task-specific methods. Applications will
@@ -28,15 +28,25 @@ abstract class TaskExecutor<
   /// {@macro TaskExecutor}
   TaskExecutor(this.options);
 
-  /// Initialization values for the `worker`.
+  /// Initialization values for the [worker].
   final Options options;
+
+  /// Inner memoization cache for the [worker].
   Pointer<Void>? _worker;
 
-  /// Idempotent getter which returns a previous worker or creates a new worker
-  /// in native memory if there is not yet one.
+  /// Debug value for log statements.
+  String get taskName;
+
+  /// The native MediaPipe object which will complete this task.
+  ///
+  /// [worker] is a computed property and will return the same object on
+  /// repeated accesses. On the first access, the native [worker] object is
+  /// initialized, and this accessor with throw an [Exception] if that process
+  /// fails.
   Pointer<Void> get worker {
     if (_worker.isNullOrNullPointer) {
       final errorMessageMemory = NativeStringManager();
+      _log.fine('Creating $taskName worker');
       _worker = createWorker(
         options.copyToNative(),
         errorMessageMemory.memory,
@@ -48,22 +58,24 @@ abstract class TaskExecutor<
     return _worker!;
   }
 
-  /// Allocates this task's results type in native memory.
+  /// Allocates this task's results struct in native memory.
   Pointer<NativeResult> createResultsPointer();
 
-  /// Allocates this task's worker type in native memory.
+  /// Allocates this task's [worker] object in native memory.
   Pointer<Void> createWorker(
     Pointer<NativeOptions> options,
     Pointer<Pointer<Char>> error,
   );
 
-  /// Releases the worker behind this task.
+  /// Releases the [worker] object behind this task.
   int closeWorker(Pointer<Void> worker, Pointer<Pointer<Char>> error);
 
-  /// Releases the worker and any remaining resources.
+  /// Releases the [worker] and any remaining resources. After calling [dispose],
+  /// re-using the [worker] property will recreate the native object and will
+  /// require a second call to [dispose].
   void dispose() {
     if (_worker != null) {
-      _log.info('Closing worker');
+      _log.fine('Closing $taskName worker');
       final errorMessageManager = NativeStringManager();
       final status = closeWorker(_worker!, errorMessageManager.memory);
       _worker = null;
@@ -77,7 +89,7 @@ abstract class TaskExecutor<
     if (errorMessage.memory.isNotNullPointer &&
         errorMessage.memory[0].isNotNullPointer) {
       final dartErrorMessage = errorMessage.memory.toDartStrings(1);
-      _log.severe('dartErrorMessage: $dartErrorMessage');
+      _log.severe('$taskName Error: $dartErrorMessage');
 
       // If there is an exception, release this memory because the calling code
       // will not get a chance to.
@@ -85,9 +97,9 @@ abstract class TaskExecutor<
 
       // Raise the exception.
       if (status == null) {
-        throw Exception('Error: $dartErrorMessage');
+        throw Exception('$taskName Error: $dartErrorMessage');
       } else {
-        throw Exception('Error: Status $status :: $dartErrorMessage');
+        throw Exception('$taskName Error: Status $status :: $dartErrorMessage');
       }
     }
   }

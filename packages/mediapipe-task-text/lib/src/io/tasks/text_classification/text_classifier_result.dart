@@ -19,6 +19,9 @@ class TextClassifierResult extends ITextClassifierResult with TaskResult {
   /// {@template TextClassifierResult.native}
   /// Initializes a [TextClassifierResult] instance as a wrapper around native
   /// memory.
+  ///
+  /// See also:
+  ///  * [TextClassifierExecutor.classify] where this is called.
   /// {@endtemplate}
   TextClassifierResult.native(this._pointer);
 

@@ -16,7 +16,9 @@ abstract class TaskResult {
 /// Container for classification results across any MediaPipe task.
 /// {@endtemplate}
 abstract class IClassifierResult extends TaskResult {
+  /// {@template ClassifierResult.classifications}
   /// The classification results for each head of the model.
+  /// {@endtemplate}
   List<IClassifications> get classifications;
 
   /// Convenience helper for the first [Classifications] object.

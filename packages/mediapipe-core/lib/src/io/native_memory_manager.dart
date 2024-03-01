@@ -1,9 +1,18 @@
-import 'dart:ffi';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/io.dart';
 
 /// {@template NativeMemoryManager}
+/// Container for native memory fully managed by Dart code, but hydrated by
+/// native code. Exists to pair the correct allocation and deallocation
+/// functionality for a given data type.
+///
+/// See also:
+///  * [NativeStringManager] for typical usage.
 /// {@endtemplate}
 abstract class NativeMemoryManager<T extends NativeType> {
   /// {@macro NativeMemoryManager}
@@ -25,8 +34,8 @@ abstract class NativeMemoryManager<T extends NativeType> {
   /// Allocates and returns a pointer to the desired type of native memory.
   Pointer<T> get memory => _memory ??= _allocate();
 
-  /// Location where the memory is actually allocated. Extending classes should
-  /// implement this method.
+  /// Allocates native memory. Extending classes should provide this method via
+  /// the constructor's `allocate` parameter.
   final Pointer<T> Function() _allocate;
 
   /// Deallocates any leased memory.
@@ -37,17 +46,29 @@ abstract class NativeMemoryManager<T extends NativeType> {
     }
   }
 
-  /// Location where the memory is actually deallocated. Extending classes
-  /// should implement this method.
+  /// Deallocates any leased memory, but with Flutter style.
+  void dispose() => free();
+
+  /// Deallocates native memory. Extending classes should provide this method
+  /// via the constructor's `deallocate` parameter.
   final void Function(Pointer<T> memory) _deallocate;
 }
 
 /// {@template NativeStringManager}
-/// Manages the native memory behind a string which starts out empty but may be
-/// hydrated within a native function call and terminated by a null character.
+/// Manages the native memory behind a list of strings which starts out empty
+/// but may be hydrated within a native function call and each terminated by a
+/// null character.
 ///
 /// If the pointer is not `nullptr`, then it is assumed to represent an array of
 /// strings with a length of 1.
+///
+/// Usage:
+/// ```dart
+/// final nativeString = NativeStringManager();
+/// bindings.get_message(nativeString.memory);
+/// final String message = nativeString.memory.toDartString();
+/// nativeString.free();
+/// ```
 /// {@endtemplate}
 class NativeStringManager extends NativeMemoryManager<Pointer<Char>> {
   /// {@macro NativeStringManager}
@@ -68,6 +89,15 @@ class NativeStringManager extends NativeMemoryManager<Pointer<Char>> {
 }
 
 /// {@template DartStringMemoryManager}
+/// Manager for a text value originating in Dart code and passed to native code,
+/// and which must be released by Dart.
+///
+/// Usage:
+/// ```dart
+/// final stringManager = DartStringMemoryManager('value');
+/// bindings.process_string(stringManager.memory);
+/// stringManager.free();
+/// ```
 /// {@endtemplate}
 class DartStringMemoryManager extends NativeMemoryManager<Char> {
   /// {@macro DartStringMemoryManager}
@@ -80,25 +110,3 @@ class DartStringMemoryManager extends NativeMemoryManager<Char> {
   static Pointer<Char> _allocateString(String value) => value.copyToNative();
   static void _deallocator(Pointer<Char> ptr) => calloc.free(ptr);
 }
-
-// ///
-// class NativeUint8ListManager implements Finalizable {
-//   NativeStringManager._(this._pointer);
-
-//   ///
-//   factory NativeStringManager({Allocator allocator = malloc}) {
-//     final manager = NativeStringManager._(allocator.call<Char>());
-//     _finalizer.attach(
-//       manager,
-//       manager._pointer.cast(),
-//     );
-//     return manager;
-//   }
-
-//   String get string => toDartString(_pointer)!;
-
-//   final Pointer<Char> _pointer;
-//   bool _closed = false;
-
-//   static final NativeFinalizer _finalizer = NativeFinalizer(calloc.nativeFree);
-// }

@@ -52,12 +52,12 @@ class TextClassifierOptions extends ITextClassifierOptions
   @override
   final ClassifierOptions classifierOptions;
 
-  // Cache of the pointer to the native memory created in [copyToNative].
-  // This pointer is held locally to make `free` an instance method, which is
-  // simpler to call in [TaskExecutor], which only knows about a [TaskOptions]
-  // type and does not know the final type until runtime. This is relevant
-  // because `TaskOptions.free` should be static if it accepted the pointer to
-  // release, but Dart cannot call static methods off a generic type.
+  /// Cache of the pointer to the native memory created in [copyToNative].
+  /// This pointer is held locally to make `free` an instance method, which is
+  /// simpler to call in [TaskExecutor], which only knows about a [TaskOptions]
+  /// type and does not know the final type until runtime. This is relevant
+  /// because `TaskOptions.free` should be static if it accepted the pointer to
+  /// release, but Dart cannot call static methods off a generic type.
   Pointer<bindings.TextClassifierOptions>? _pointer;
 
   bool _isClosed = false;
@@ -73,8 +73,8 @@ class TextClassifierOptions extends ITextClassifierOptions
   @override
   void dispose() {
     if (_isClosed) return;
-    BaseOptions.freeStructFields(_pointer!.ref.base_options);
-    ClassifierOptions.freeStructFields(_pointer!.ref.classifier_options);
+    baseOptions.freeStructFields(_pointer!.ref.base_options);
+    classifierOptions.freeStructFields(_pointer!.ref.classifier_options);
     calloc.free(_pointer!);
     _isClosed = true;
   }

@@ -13,6 +13,11 @@ import 'package:mediapipe_core/interface.dart';
 /// {@endtemplate}
 abstract class ITextClassifierOptions extends ITaskOptions {
   /// {@template TextClassifierOptions.classifierOptions}
+  /// Contains parameter options for how this classifier should behave,
+  /// including allow and denylists, thresholds, maximum results, etc.
+  ///
+  /// See also:
+  ///  * [IClassifierOptions] for each available field.
   /// {@endtemplate}
   IClassifierOptions get classifierOptions;
 

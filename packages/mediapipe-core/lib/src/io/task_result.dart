@@ -26,7 +26,7 @@ abstract class ClassifierResult extends IClassifierResult with TaskResult {
   final Pointer<bindings.ClassificationResult>? _pointer;
 
   /// Internal storage for [classifications], used to cache values pulled out
-  /// of native memory, or passed in via the direct constructor.
+  /// of native memory, or passed in via the [fake] constructor.
   late final List<Classifications>? _classifications;
 
   @override

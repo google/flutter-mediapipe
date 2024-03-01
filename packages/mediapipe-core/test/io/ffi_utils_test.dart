@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:test/test.dart';
@@ -33,23 +37,23 @@ void main() {
     });
 
     test('detect real pointers', () {
-      Pointer? ptr = malloc<Uint8>(1);
+      Pointer? ptr = calloc<Uint8>(1);
       expect(ptr, isNotNull);
       expect(ptr.isNullPointer, false);
       expect(ptr.isNotNullPointer, true);
       expect(ptr.isNotNullAndIsNotNullPointer, true);
       expect(ptr.isNullOrNullPointer, false);
-      malloc.free(ptr);
+      calloc.free(ptr);
     });
 
     test('detect real pointers without nullability', () {
-      Pointer ptr = malloc<Uint8>(1);
+      Pointer ptr = calloc<Uint8>(1);
       expect(ptr, isNotNull);
       expect(ptr.isNullPointer, false);
       expect(ptr.isNotNullPointer, true);
       expect(ptr.isNotNullAndIsNotNullPointer, true);
       expect(ptr.isNullOrNullPointer, false);
-      malloc.free(ptr);
+      calloc.free(ptr);
     });
   });
 
@@ -78,7 +82,7 @@ void main() {
   group('Uint8List should', () {
     test('be convertable to Pointer<Char>', () {
       final Pointer<Char> ptr = Uint8List.fromList([1, 2, 3]).copyToNative();
-      malloc.free(ptr);
+      calloc.free(ptr);
     });
 
     test('be round-trippable', () {
@@ -102,7 +106,7 @@ void main() {
     test('be convertable to Pointer<Char>', () {
       final Pointer<Float> ptr =
           Float32List.fromList([1.0, 2.0, 3.1]).copyToNative();
-      malloc.free(ptr);
+      calloc.free(ptr);
     });
 
     test('be round-trippable', () {
