@@ -5,7 +5,6 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:logging/logging.dart';
-import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_text/io.dart';
 import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
@@ -68,7 +67,6 @@ class TextClassifierExecutor extends TaskExecutor<
     final resultPtr = createResultsPointer();
     final errorMessageManager = NativeStringManager();
     final textMemory = DartStringMemoryManager(text);
-    _log.fine('Classifying "${text.shorten()}"');
     final status = bindings.text_classifier_classify(
       worker,
       textMemory.memory,

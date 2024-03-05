@@ -32,6 +32,7 @@ class TextClassifier extends ITextClassifier {
 
   @override
   Future<TextClassifierResult> classify(String text) async {
+    _log.fine('Classifying ${text.shorten()}');
     await _ready;
     _sendPort.send(text);
     return await _events.next;
