@@ -65,18 +65,18 @@ class TextClassifierExecutor extends TaskExecutor<
   /// [TextClassifierResult] or throwing an exception.
   TextClassifierResult classify(String text) {
     final resultPtr = createResultsPointer();
-    final errorMessageManager = NativeStringManager();
-    final textMemory = DartStringMemoryManager(text);
+    final errorMessageMemory = calloc<Pointer<Char>>();
+    final textMemory = text.copyToNative();
     final status = bindings.text_classifier_classify(
       worker,
-      textMemory.memory,
+      textMemory,
       resultPtr,
-      errorMessageManager.memory,
+      errorMessageMemory,
     );
     _log.finest('Classified with status $status');
     textMemory.free();
-    handleErrorMessage(errorMessageManager, status);
-    errorMessageManager.free();
+    handleErrorMessage(errorMessageMemory, status);
+    errorMessageMemory.free(1);
     return TextClassifierResult.native(resultPtr);
   }
 }

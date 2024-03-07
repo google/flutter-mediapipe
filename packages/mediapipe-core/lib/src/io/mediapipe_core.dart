@@ -4,7 +4,6 @@
 
 export 'containers.dart';
 export 'ffi_utils.dart';
-export 'native_memory_manager.dart';
 export 'task_options.dart';
 export 'task_executor.dart';
 export 'task_result.dart';

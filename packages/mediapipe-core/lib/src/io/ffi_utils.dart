@@ -75,6 +75,9 @@ extension DartAwareChars on Pointer<Char> {
     }
     return cast<Utf8>().toDartString(length: length);
   }
+
+  /// Releases all native memory.
+  void free() => calloc.free(this);
 }
 
 /// Helpers to convert between `Pointer<Pointer<Char>>` and `List<String>`.
@@ -98,6 +101,18 @@ extension DartAwarePointerChars on Pointer<Pointer<Char>> {
       counter++;
     }
     return dartStrings;
+  }
+
+  /// Releases all native memory.
+  void free(int length) {
+    if (isNullPointer) return;
+    int count = 0;
+    while (count < length) {
+      calloc.free(this[count]);
+      count++;
+    }
+    calloc.free(this);
+    // TODO: Should we somehow set ourselves as a `nullptr`?
   }
 }
 

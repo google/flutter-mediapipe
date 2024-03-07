@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/io.dart';
 import 'package:logging/logging.dart';
 
@@ -45,14 +46,14 @@ abstract class TaskExecutor<
   /// fails.
   Pointer<Void> get worker {
     if (_worker.isNullOrNullPointer) {
-      final errorMessageMemory = NativeStringManager();
+      final errorMessageMemory = calloc<Pointer<Char>>();
       _log.fine('Creating $taskName worker');
       _worker = createWorker(
         options.copyToNative(),
-        errorMessageMemory.memory,
+        errorMessageMemory,
       );
       handleErrorMessage(errorMessageMemory);
-      errorMessageMemory.free();
+      errorMessageMemory.free(1);
       options.dispose();
     }
     return _worker!;
@@ -76,24 +77,23 @@ abstract class TaskExecutor<
   void dispose() {
     if (_worker != null) {
       _log.fine('Closing $taskName worker');
-      final errorMessageManager = NativeStringManager();
-      final status = closeWorker(_worker!, errorMessageManager.memory);
+      final errorMessageMemory = calloc<Pointer<Char>>();
+      final status = closeWorker(_worker!, errorMessageMemory);
       _worker = null;
-      handleErrorMessage(errorMessageManager, status);
-      errorMessageManager.free();
+      handleErrorMessage(errorMessageMemory, status);
+      errorMessageMemory.free(1);
     }
   }
 
   /// Throws an exception if [errorMessage] is non-empty.
-  void handleErrorMessage(NativeStringManager errorMessage, [int? status]) {
-    if (errorMessage.memory.isNotNullPointer &&
-        errorMessage.memory[0].isNotNullPointer) {
-      final dartErrorMessage = errorMessage.memory.toDartStrings(1);
+  void handleErrorMessage(Pointer<Pointer<Char>> errorMessage, [int? status]) {
+    if (errorMessage.isNotNullPointer && errorMessage[0].isNotNullPointer) {
+      final dartErrorMessage = errorMessage.toDartStrings(1);
       _log.severe('$taskName Error: $dartErrorMessage');
 
       // If there is an exception, release this memory because the calling code
       // will not get a chance to.
-      errorMessage.free();
+      errorMessage.free(1);
 
       // Raise the exception.
       if (status == null) {
