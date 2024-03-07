@@ -9,7 +9,7 @@ import 'package:mediapipe_core/interface.dart';
 import 'package:mediapipe_text/interface.dart';
 
 /// {@macro TextClassifier}
-class TextClassifier extends ITextClassifier {
+class TextClassifier extends BaseTextClassifier {
   /// {@macro TextClassifier}
   TextClassifier(TextClassifierOptions options);
 
@@ -19,7 +19,7 @@ class TextClassifier extends ITextClassifier {
 }
 
 /// {@macro TextClassifierOptions}
-class TextClassifierOptions extends ITextClassifierOptions {
+class TextClassifierOptions extends BaseTextClassifierOptions {
   /// {@template TextClassifierOptions.fromAssetPath}
   /// Convenience constructor that looks for the model asset at the given file
   /// system location.
@@ -45,14 +45,14 @@ class TextClassifierOptions extends ITextClassifierOptions {
 }
 
 /// {@macro TextClassifierResult}
-class TextClassifierResult extends ITextClassifierResult {
+class TextClassifierResult extends BaseTextClassifierResult {
   /// {@template ClassifierResult.fake}
   /// Instantiates a [TextClassifierResult] with fake data for testing.
   /// {@endtemplate}
   TextClassifierResult.fake({required List<Classifications> classifications});
 
   @override
-  List<IClassifications> get classifications => throw UnimplementedError();
+  List<BaseClassifications> get classifications => throw UnimplementedError();
 
   @override
   void dispose() => throw UnimplementedError();

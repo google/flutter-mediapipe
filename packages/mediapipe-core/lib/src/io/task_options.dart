@@ -11,11 +11,11 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// {@template TaskOptions}
-/// Provides a suggested API surface for how classes implementing [ITaskOptions]
+/// Provides a suggested API surface for how classes implementing [BaseTaskOptions]
 /// should manage their [InnerTaskOptions] fields. The two suggested methods are
 /// [copyToNative] and [dispose].
 /// {@endtemplate}
-mixin TaskOptions<T extends Struct> on ITaskOptions {
+mixin TaskOptions<T extends Struct> on BaseTaskOptions {
   /// {@template TaskOptions.copyToNative}
   /// Copies these task options into native memory. Any fields of type
   /// [InnerTaskOptions] should have their `assignToStruct` method called.
@@ -43,7 +43,7 @@ mixin TaskOptions<T extends Struct> on ITaskOptions {
 /// a struct created and managed elsewhere, and these methods either copy local
 /// values into native memory ([assignToStruct]) or deallocate any native memory
 /// that a naive `calloc.free()` from the parent options class would miss.
-mixin InnerTaskOptions<T extends Struct> on IInnerTaskOptions {
+mixin InnerTaskOptions<T extends Struct> on BaseInnerTaskOptions {
   /// Assigns all values to an existing struct. This method should be
   /// implemented by all [InnerTaskOptions] types to hydrate a struct, but not
   /// for the creation of that struct. Allocation and management of the actual
@@ -62,7 +62,7 @@ mixin InnerTaskOptions<T extends Struct> on IInnerTaskOptions {
 }
 
 /// {@macro BaseOptions}
-class BaseOptions extends IBaseOptions
+class BaseOptions extends BaseBaseOptions
     with InnerTaskOptions<bindings.BaseOptions> {
   /// Generative constructor that creates a [BaseOptions] instance.
   const BaseOptions._({
@@ -130,7 +130,7 @@ class BaseOptions extends IBaseOptions
 }
 
 /// {@macro ClassifierOptions}
-class ClassifierOptions extends IClassifierOptions
+class ClassifierOptions extends BaseClassifierOptions
     with InnerTaskOptions<bindings.ClassifierOptions> {
   /// {@macro ClassifierOptions}
   const ClassifierOptions({

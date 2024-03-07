@@ -7,9 +7,9 @@ import 'text_classification.dart';
 /// {@template TextClassifier}
 /// Utility to analyze text via MediaPipe's text classification task.
 /// {@endtemplate}
-abstract class ITextClassifier {
+abstract class BaseTextClassifier {
   /// {@template TextClassifier.classify}
   /// Sends a [String] value to MediaPipe for classification.
   /// {@endtemplate}
-  Future<ITextClassifierResult> classify(String text);
+  Future<BaseTextClassifierResult> classify(String text);
 }

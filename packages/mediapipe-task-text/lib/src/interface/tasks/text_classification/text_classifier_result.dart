@@ -10,7 +10,7 @@ import 'package:mediapipe_core/interface.dart';
 /// See also:
 ///  * [MediaPipe's textClassifierResult documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/textclassifier/TextClassifierResult)
 /// {@endtemplate}
-abstract class ITextClassifierResult extends IClassifierResult {
+abstract class BaseTextClassifierResult extends BaseClassifierResult {
   /// {@macro TextClassifierResult}
-  ITextClassifierResult();
+  BaseTextClassifierResult();
 }

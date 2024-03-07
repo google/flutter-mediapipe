@@ -12,7 +12,7 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 mixin TaskResult {}
 
 /// {@macro ClassifierResult}
-abstract class ClassifierResult extends IClassifierResult with TaskResult {
+abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
   // No-args constructor to satisfy extending abstract classes.
   ClassifierResult._()
       : _classifications = const [],

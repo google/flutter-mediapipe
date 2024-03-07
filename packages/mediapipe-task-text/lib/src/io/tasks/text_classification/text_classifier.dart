@@ -13,7 +13,7 @@ import 'package:mediapipe_text/io.dart';
 final _log = Logger('TextClassifier');
 
 /// {@macro TextClassifier}
-class TextClassifier extends ITextClassifier {
+class TextClassifier extends BaseTextClassifier {
   /// {@macro TextClassifier}
   TextClassifier(this._options) : _readyCompleter = Completer<void>() {
     _createIsolate(_options).then((results) {

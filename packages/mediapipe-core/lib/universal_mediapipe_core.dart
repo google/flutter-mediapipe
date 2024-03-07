@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:mediapipe_core/interface.dart';
 
 /// {@macro ClassifierResult}
-class ClassifierResult extends IClassifierResult {
+class ClassifierResult extends BaseClassifierResult {
   /// {@macro ClassifierResult}
   ClassifierResult();
 
@@ -17,14 +17,14 @@ class ClassifierResult extends IClassifierResult {
   ClassifierResult.fake({required List<Classifications> classifications});
 
   @override
-  List<IClassifications> get classifications => throw UnimplementedError();
+  List<BaseClassifications> get classifications => throw UnimplementedError();
 
   @override
   void dispose() => throw UnimplementedError();
 }
 
 /// {@macro Category}
-class Category extends ICategory {
+base class Category extends BaseCategory {
   /// {@template Category.fake}
   /// Initializes a [Category] instance with mock values for testing.
   /// {@endtemplate}
@@ -49,7 +49,7 @@ class Category extends ICategory {
 }
 
 /// {@macro Classifications}
-class Classifications extends IClassifications {
+base class Classifications extends BaseClassifications {
   /// {@template Classifications.fake}
   /// Instantiates a [Classifications] object with fake values for testing.
   /// {@endtemplate}
@@ -57,12 +57,10 @@ class Classifications extends IClassifications {
     required List<Category> categories,
     required int headIndex,
     required String? headName,
-  }) {
-    throw UnimplementedError();
-  }
+  });
 
   @override
-  List<ICategory> get categories => throw UnimplementedError();
+  List<BaseCategory> get categories => throw UnimplementedError();
 
   @override
   int get headIndex => throw UnimplementedError();
@@ -72,7 +70,7 @@ class Classifications extends IClassifications {
 }
 
 /// {@macro BaseOptions}
-class BaseOptions extends IBaseOptions {
+class BaseOptions extends BaseBaseOptions {
   /// {@template BaseOptions.path}
   /// Constructor for [BaseOptions] classes using a file system path.
   ///
@@ -101,7 +99,7 @@ class BaseOptions extends IBaseOptions {
 }
 
 /// {@macro ClassifierOptions}
-class ClassifierOptions extends IClassifierOptions {
+class ClassifierOptions extends BaseClassifierOptions {
   /// {@macro ClassifierOptions}
   const ClassifierOptions({
     String? displayNamesLocale,

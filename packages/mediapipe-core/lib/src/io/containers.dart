@@ -10,7 +10,7 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 
 /// {@macro Category}
 // ignore: must_be_immutable
-class Category extends ICategory {
+class Category extends BaseCategory {
   /// {@macro Category.fake}
   Category.fake({
     required int index,
@@ -90,7 +90,7 @@ class Category extends ICategory {
 
 /// {@macro Classifications}
 // ignore: must_be_immutable
-class Classifications extends IClassifications {
+base class Classifications extends BaseClassifications {
   /// {@macro Classifications.fake}
   Classifications.fake({
     required List<Category> categories,

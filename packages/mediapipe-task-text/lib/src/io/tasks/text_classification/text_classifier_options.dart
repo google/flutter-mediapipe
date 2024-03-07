@@ -17,7 +17,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 
 /// {@macro TextClassifierOptions}
 // ignore: must_be_immutable
-class TextClassifierOptions extends ITextClassifierOptions
+class TextClassifierOptions extends BaseTextClassifierOptions
     with TaskOptions<bindings.TextClassifierOptions> {
   /// {@macro TextClassifierOptions}
   TextClassifierOptions({

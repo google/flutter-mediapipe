@@ -7,15 +7,15 @@ import 'package:equatable/equatable.dart';
 /// {@template Category}
 /// Dart representation of MediaPipe's "Category" concept.
 ///
-/// Category is a util class, that contains a [categoryName], its [displayName],
+/// Category is a util class that contains a [categoryName], its [displayName],
 /// a float value as [score], and the [index] of the label in the corresponding
-/// label file. Typically it's used as result of classification or detection
+/// label file. It is Typically used as result of classification or detection
 /// tasks.
 ///
 /// See more:
 ///  * [MediaPipe's Category documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Category)
 /// {@endtemplate}
-abstract class ICategory extends Equatable {
+abstract class BaseCategory extends Equatable {
   /// The index of the label in the corresponding label file.
   int get index;
 
@@ -45,10 +45,10 @@ abstract class ICategory extends Equatable {
 /// See also:
 ///  * [MediaPipe's Classifications documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Classifications)
 /// {@endtemplate}
-abstract class IClassifications extends Equatable {
+abstract base class BaseClassifications extends Equatable {
   /// A list of [Category] objects which contain the actual classification
   /// information, including human-readable labels and probability scores.
-  List<ICategory> get categories;
+  List<BaseCategory> get categories;
 
   /// The index of the classifier head these entries refer to.
   int get headIndex;
@@ -58,7 +58,7 @@ abstract class IClassifications extends Equatable {
   String? get headName;
 
   /// Convenience getter for the first [Category] out of the [categories] list.
-  ICategory? get firstCategory =>
+  BaseCategory? get firstCategory =>
       categories.isNotEmpty ? categories.first : null;
 
   @override

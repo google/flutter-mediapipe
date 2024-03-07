@@ -11,7 +11,7 @@ import 'package:mediapipe_core/interface.dart';
 /// See also:
 ///  * [MediaPipe's TextClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/js/tasks-text.textclassifieroptions)
 /// {@endtemplate}
-abstract class ITextClassifierOptions extends ITaskOptions {
+abstract class BaseTextClassifierOptions extends BaseTaskOptions {
   /// {@template TextClassifierOptions.classifierOptions}
   /// Contains parameter options for how this classifier should behave,
   /// including allow and denylists, thresholds, maximum results, etc.
@@ -19,7 +19,7 @@ abstract class ITextClassifierOptions extends ITaskOptions {
   /// See also:
   ///  * [IClassifierOptions] for each available field.
   /// {@endtemplate}
-  IClassifierOptions get classifierOptions;
+  BaseClassifierOptions get classifierOptions;
 
   @override
   String toString() => 'TextClassifierOptions(baseOptions: $baseOptions, '

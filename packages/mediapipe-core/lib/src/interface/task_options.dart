@@ -9,28 +9,28 @@ import 'package:equatable/equatable.dart';
 /// {@template TaskOptions}
 /// Root class for options classes for MediaPipe tasks.
 ///
-/// Implementing classes will contain two [IInnerTaskOptions] subclasses,
+/// Implementing classes will contain two [BaseInnerTaskOptions] subclasses,
 /// including a descendent of the universal options struct, [IBaseOptions]. The
 /// second field will be task-specific.
 /// {@endtemplate}
-abstract class ITaskOptions extends Equatable {
+abstract class BaseTaskOptions extends Equatable {
   /// {@macro TaskOptions}
-  const ITaskOptions();
+  const BaseTaskOptions();
 
   /// {@template TaskOptions.baseOptions}
   /// Options class shared by all MediaPipe tasks - namely, how to find and load
   /// the task-specific models at runtime.
   /// {@endtemplate}
-  IBaseOptions get baseOptions;
+  BaseBaseOptions get baseOptions;
 }
 
 /// {@template InnerTaskOptions}
 /// Parent class for building block options classes which are later grouped
 /// together to comprise all relevant options for a specific MediaPipe task.
 /// {@endtemplate}
-abstract class IInnerTaskOptions extends Equatable {
+abstract class BaseInnerTaskOptions extends Equatable {
   /// {@macro InnerTaskOptions}
-  const IInnerTaskOptions();
+  const BaseInnerTaskOptions();
 }
 
 /// Indicates how a [BaseOptions] instance informs surrounding code how to find
@@ -54,9 +54,9 @@ enum BaseOptionsType {
 ///  * [ClassifierOptions], which is often used in conjunction to specify a
 ///    classifier's desired behavior.
 /// {@endtemplate}
-abstract class IBaseOptions extends IInnerTaskOptions {
+abstract class BaseBaseOptions extends BaseInnerTaskOptions {
   /// {@macro BaseOptions}
-  const IBaseOptions();
+  const BaseBaseOptions();
 
   /// The model asset file contents as bytes;
   Uint8List? get modelAssetBuffer;
@@ -87,9 +87,9 @@ abstract class IBaseOptions extends IInnerTaskOptions {
 ///  * [BaseOptions], which is often used in conjunction to specify a
 ///    classifier's desired behavior.
 /// {@endtemplate}
-abstract class IClassifierOptions extends IInnerTaskOptions {
+abstract class BaseClassifierOptions extends BaseInnerTaskOptions {
   /// {@macro ClassifierOptions}
-  const IClassifierOptions();
+  const BaseClassifierOptions();
 
   /// The locale to use for display names specified through the TFLite Model
   /// Metadata.

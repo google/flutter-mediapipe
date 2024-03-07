@@ -15,14 +15,14 @@ abstract class TaskResult {
 /// {@template ClassifierResult}
 /// Container for classification results across any MediaPipe task.
 /// {@endtemplate}
-abstract class IClassifierResult extends TaskResult {
+abstract class BaseClassifierResult extends TaskResult {
   /// {@template ClassifierResult.classifications}
   /// The classification results for each head of the model.
   /// {@endtemplate}
-  List<IClassifications> get classifications;
+  List<BaseClassifications> get classifications;
 
   /// Convenience helper for the first [Classifications] object.
-  IClassifications? get firstClassification =>
+  BaseClassifications? get firstClassification =>
       classifications.isNotEmpty ? classifications.first : null;
 
   @override
