@@ -117,7 +117,7 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
   }
 
   @override
-  Widget build(BuildContext context) => //
+  Widget build(BuildContext context) {
       Scaffold(
         body: SafeArea(
           child: Padding(
