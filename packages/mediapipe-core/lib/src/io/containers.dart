@@ -23,8 +23,15 @@ class Category extends BaseCategory {
         _displayName = displayName,
         _pointer = null;
 
-  /// {@template Category.native}
-  /// Instatiates a [Category] object as a wrapper around native memory.
+  /// Instantiates a [Category] object as a wrapper around native memory.
+  ///
+  /// {@template Container.memoryManagement}
+  /// This memory is not owned or managed by this class, because all inner
+  /// container instances only exist as details within a larget "task result"
+  /// object. These task result objects have their own native dispose methods
+  /// which cascade down their full tree of structs, releasing everything
+  /// properly. Thus, it is not the job of this instance to ever release this
+  /// native memory.
   /// {@endtemplate}
   Category.native(this._pointer);
 
@@ -101,9 +108,9 @@ base class Classifications extends BaseClassifications {
         _headName = headName,
         _pointer = null;
 
-  /// {@template Classifications.native}
   /// Instatiates a [Classifications] object as a wrapper around native memory.
-  /// {@endtemplate}
+  ///
+  /// {@macro Container.memoryManagement}
   Classifications.native(this._pointer);
 
   final Pointer<bindings.Classifications>? _pointer;

@@ -10,8 +10,8 @@ import 'package:equatable/equatable.dart';
 /// Root class for options classes for MediaPipe tasks.
 ///
 /// Implementing classes will contain two [BaseInnerTaskOptions] subclasses,
-/// including a descendent of the universal options struct, [IBaseOptions]. The
-/// second field will be task-specific.
+/// including a descendent of the universal options struct, [BaseBaseOptions].
+/// The second field will be task-specific.
 /// {@endtemplate}
 abstract class BaseTaskOptions extends Equatable {
   /// {@macro TaskOptions}
