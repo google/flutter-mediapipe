@@ -11,10 +11,6 @@ import 'package:mediapipe_text/interface.dart';
 import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
-// TODO(craiglabenz): Explore moving all of these classes into one file so
-// methods like `copyToNative` can be private, as they are unnecessary for
-// public usage. This would imply doing the same in the interface layer.
-
 /// {@macro TextClassifierOptions}
 // ignore: must_be_immutable
 class TextClassifierOptions extends BaseTextClassifierOptions

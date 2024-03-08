@@ -13,13 +13,8 @@ mixin TaskResult {}
 
 /// {@macro ClassifierResult}
 abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
-  // No-args constructor to satisfy extending abstract classes.
-  ClassifierResult._()
-      : _classifications = const [],
-        _pointer = null;
-
   /// {@macro ClassifierResult.fake}
-  ClassifierResult.fake({required List<Classifications> classifications})
+  ClassifierResult({required List<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
 
@@ -51,7 +46,12 @@ abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
 /// {@macro TimestampedClassifierResult}
 abstract class TimestampedClassifierResult extends ClassifierResult
     with TimestampedResult {
-  TimestampedClassifierResult._() : super._();
+  /// {@macro TimestampedClassifierResult}
+  TimestampedClassifierResult({
+    required List<Classifications> classifications,
+    required Duration? timestamp,
+  })  : _timestamp = timestamp,
+        super(classifications: classifications);
 
   Duration? _timestamp;
   @override

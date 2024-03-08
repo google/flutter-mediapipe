@@ -49,7 +49,7 @@ class TextClassifierResult extends BaseTextClassifierResult {
   /// {@template ClassifierResult.fake}
   /// Instantiates a [TextClassifierResult] with fake data for testing.
   /// {@endtemplate}
-  TextClassifierResult.fake({required List<Classifications> classifications});
+  TextClassifierResult({required List<Classifications> classifications});
 
   @override
   List<BaseClassifications> get classifications => throw UnimplementedError();

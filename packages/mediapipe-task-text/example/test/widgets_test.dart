@@ -9,11 +9,11 @@ class FakeTextClassifier extends TextClassifier {
 
   @override
   Future<TextClassifierResult> classify(String text) => Future.value(
-        TextClassifierResult.fake(
+        TextClassifierResult(
           classifications: <Classifications>[
-            Classifications.fake(
+            Classifications(
               categories: <Category>[
-                Category.fake(
+                Category(
                   index: 0,
                   score: 0.9,
                   categoryName: 'happy-go-lucky',

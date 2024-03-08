@@ -12,7 +12,7 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 // ignore: must_be_immutable
 class Category extends BaseCategory {
   /// {@macro Category.fake}
-  Category.fake({
+  Category({
     required int index,
     required double score,
     required String? categoryName,
@@ -92,7 +92,7 @@ class Category extends BaseCategory {
 // ignore: must_be_immutable
 base class Classifications extends BaseClassifications {
   /// {@macro Classifications.fake}
-  Classifications.fake({
+  Classifications({
     required List<Category> categories,
     required int headIndex,
     required String? headName,

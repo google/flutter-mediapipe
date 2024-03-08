@@ -12,7 +12,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 /// {@macro TextClassifierResult}
 class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
   /// {@macro ClassifierResult.fake}
-  TextClassifierResult.fake({required List<Classifications> classifications})
+  TextClassifierResult({required List<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
 
