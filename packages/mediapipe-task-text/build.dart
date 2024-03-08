@@ -25,15 +25,15 @@ void log(String msg) {
 }
 
 Future<void> main(List<String> args) async {
+  final buildConfig = await BuildConfig.fromArgs(args);
   logFile = File(
     path.joinAll([
       Directory.current.path, // root dir of app using `mediapipe-task-xyz`
-      'build/${DateTime.now().millisecondsSinceEpoch}-build-log.txt',
+      'build/${buildConfig.dryRun ? "dryrun" : "live-run"}-build-log.txt',
     ]),
   );
 
   log(args.join(' '));
-  final buildConfig = await BuildConfig.fromArgs(args);
   final String targetOs = buildConfig.targetOs.toString();
 
   log('dir.current: ${Directory.current.absolute.path}');

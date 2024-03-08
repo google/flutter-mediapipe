@@ -5,9 +5,6 @@ function ci_text_package() {
     dart pub get
     dart bin/main.dart model -m textclassification
     popd
-
-    echo `pwd`
-    ls -lah
 }
 
 function ci_package () {
@@ -41,6 +38,18 @@ function ci_package () {
         then
             flutter test
         fi
+
+        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos/
+        echo `pwd`
+        ls -lah
+        popd
+        
+        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/build/
+        echo 'dry-run'
+        cat dryrun-build-log.txt
+        echo 'live-run'
+        cat live-run-build-log.txt
+        popd
 
         # Run any example tests if they exist
         if [ -d "example/test" ]
