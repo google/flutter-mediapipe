@@ -39,18 +39,6 @@ function ci_package () {
             flutter test
         fi
 
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos/
-        echo `pwd`
-        ls -lah
-        popd
-        
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/build/
-        echo 'dry-run'
-        cat dryrun-build-log.txt
-        echo 'live-run'
-        cat live-run-build-log.txt
-        popd
-
         # Run any example tests if they exist
         if [ -d "example/test" ]
         then
@@ -72,5 +60,19 @@ function ci_package () {
         fi
 
         popd
+
+
+        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos/
+        echo `pwd`
+        ls -lah
+        popd
+        
+        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/build/
+        echo 'dry-run'
+        cat dryrun-build-log.txt
+        echo 'live-run'
+        cat live-run-build-log.txt
+        popd
+
     done
 }
