@@ -118,23 +118,23 @@ class _TextClassificationResultsState extends State<TextClassificationResults> {
 
   @override
   Widget build(BuildContext context) {
-      Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: <Widget>[
-                TextField(controller: _controller),
-                ...results,
-              ],
-            ),
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              TextField(controller: _controller),
+              ...results,
+            ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _isProcessing != null && _controller.text != ''
-              ? null
-              : _classify,
-          child: const Icon(Icons.search),
-        ),
-      );
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed:
+            _isProcessing != null && _controller.text != '' ? null : _classify,
+        child: const Icon(Icons.search),
+      ),
+    );
+  }
 }

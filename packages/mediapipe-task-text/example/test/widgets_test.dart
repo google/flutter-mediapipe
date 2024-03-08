@@ -8,24 +8,26 @@ class FakeTextClassifier extends TextClassifier {
   FakeTextClassifier(TextClassifierOptions options) : super(options);
 
   @override
-  Future<TextClassifierResult> classify(String text) { Future.value(
-        TextClassifierResult(
-          classifications: <Classifications>[
-            Classifications(
-              categories: <Category>[
-                Category(
-                  index: 0,
-                  score: 0.9,
-                  categoryName: 'happy-go-lucky',
-                  displayName: null,
-                ),
-              ],
-              headIndex: 0,
-              headName: 'whatever',
-            ),
-          ],
-        ),
-      );
+  Future<TextClassifierResult> classify(String text) {
+    return Future.value(
+      TextClassifierResult(
+        classifications: <Classifications>[
+          Classifications(
+            categories: <Category>[
+              Category(
+                index: 0,
+                score: 0.9,
+                categoryName: 'happy-go-lucky',
+                displayName: null,
+              ),
+            ],
+            headIndex: 0,
+            headName: 'whatever',
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 void main() {
