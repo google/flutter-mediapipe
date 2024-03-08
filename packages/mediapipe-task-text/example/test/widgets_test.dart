@@ -8,7 +8,7 @@ class FakeTextClassifier extends TextClassifier {
   FakeTextClassifier(TextClassifierOptions options) : super(options);
 
   @override
-  Future<TextClassifierResult> classify(String text) => Future.value(
+  Future<TextClassifierResult> classify(String text) { Future.value(
         TextClassifierResult(
           classifications: <Classifications>[
             Classifications(
