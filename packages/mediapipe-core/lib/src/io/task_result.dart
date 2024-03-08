@@ -14,7 +14,7 @@ mixin TaskResult {}
 /// {@macro ClassifierResult}
 abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
   /// {@macro ClassifierResult.fake}
-  ClassifierResult({required List<Classifications> classifications})
+  ClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
 
@@ -22,15 +22,15 @@ abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
 
   /// Internal storage for [classifications], used to cache values pulled out
   /// of native memory, or passed in via the [fake] constructor.
-  late final List<Classifications>? _classifications;
+  late final Iterable<Classifications>? _classifications;
 
   @override
-  List<Classifications> get classifications =>
+  Iterable<Classifications> get classifications =>
       _classifications ??= _getClassifications();
 
   /// Fallback for [classifications] if no direct value was supplied and native
   /// memory has not yet been read.
-  List<Classifications> _getClassifications() {
+  Iterable<Classifications> _getClassifications() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
         'No native memory for ClassifierResult.classifications',
@@ -48,7 +48,7 @@ abstract class TimestampedClassifierResult extends ClassifierResult
     with TimestampedResult {
   /// {@macro TimestampedClassifierResult}
   TimestampedClassifierResult({
-    required List<Classifications> classifications,
+    required Iterable<Classifications> classifications,
     required Duration? timestamp,
   })  : _timestamp = timestamp,
         super(classifications: classifications);

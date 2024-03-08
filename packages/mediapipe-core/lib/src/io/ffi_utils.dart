@@ -112,7 +112,6 @@ extension DartAwarePointerChars on Pointer<Pointer<Char>> {
       count++;
     }
     calloc.free(this);
-    // TODO: Should we somehow set ourselves as a `nullptr`?
   }
 }
 

@@ -48,7 +48,7 @@ abstract class BaseCategory extends Equatable {
 abstract base class BaseClassifications extends Equatable {
   /// A list of [Category] objects which contain the actual classification
   /// information, including human-readable labels and probability scores.
-  List<BaseCategory> get categories;
+  Iterable<BaseCategory> get categories;
 
   /// The index of the classifier head these entries refer to.
   int get headIndex;

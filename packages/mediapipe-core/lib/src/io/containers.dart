@@ -83,15 +83,13 @@ class Category extends BaseCategory {
 
   /// Accepts a pointer to a list of structs, and a count representing the length
   /// of the list, and returns a list of pure-Dart [Category] instances.
-  static List<Category> fromNativeArray(
+  static Iterable<Category> fromNativeArray(
     Pointer<bindings.Category> structs,
     int count,
-  ) {
-    final categories = <Category>[];
+  ) sync* {
     for (int i = 0; i < count; i++) {
-      categories.add(Category.native(structs + i));
+      yield Category.native(structs + i);
     }
-    return categories;
   }
 }
 
@@ -100,7 +98,7 @@ class Category extends BaseCategory {
 base class Classifications extends BaseClassifications {
   /// {@macro Classifications.fake}
   Classifications({
-    required List<Category> categories,
+    required Iterable<Category> categories,
     required int headIndex,
     required String? headName,
   })  : _categories = categories,
@@ -115,10 +113,10 @@ base class Classifications extends BaseClassifications {
 
   final Pointer<bindings.Classifications>? _pointer;
 
-  List<Category>? _categories;
+  Iterable<Category>? _categories;
   @override
-  List<Category> get categories => _categories ??= _getCategories();
-  List<Category> _getCategories() {
+  Iterable<Category> get categories => _categories ??= _getCategories();
+  Iterable<Category> _getCategories() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
         'Could not determine value for Classifications.categories',
@@ -156,14 +154,12 @@ base class Classifications extends BaseClassifications {
 
   /// Accepts a pointer to a list of structs, and a count representing the length
   /// of the list, and returns a list of pure-Dart [Classifications] instances.
-  static List<Classifications> fromNativeArray(
+  static Iterable<Classifications> fromNativeArray(
     Pointer<bindings.Classifications> structs,
     int count,
-  ) {
-    final classifications = <Classifications>[];
+  ) sync* {
     for (int i = 0; i < count; i++) {
-      classifications.add(Classifications.native(structs + i));
+      yield Classifications.native(structs + i);
     }
-    return classifications;
   }
 }

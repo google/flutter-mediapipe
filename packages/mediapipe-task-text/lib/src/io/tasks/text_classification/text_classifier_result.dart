@@ -12,7 +12,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 /// {@macro TextClassifierResult}
 class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
   /// {@macro ClassifierResult.fake}
-  TextClassifierResult({required List<Classifications> classifications})
+  TextClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
 
@@ -27,11 +27,11 @@ class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
 
   Pointer<bindings.TextClassifierResult>? _pointer;
 
-  List<Classifications>? _classifications;
+  Iterable<Classifications>? _classifications;
   @override
-  List<Classifications> get classifications =>
+  Iterable<Classifications> get classifications =>
       _classifications ??= _getClassifications();
-  List<Classifications> _getClassifications() {
+  Iterable<Classifications> _getClassifications() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
         'No native memory for TextClassifierResult.classifications',

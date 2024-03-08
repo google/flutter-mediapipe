@@ -61,7 +61,7 @@ void main() {
           index: 2,
           score: 0.01,
         );
-        final categories = Category.fromNativeArray(ptrs, 2);
+        final categories = Category.fromNativeArray(ptrs, 2).toList();
         expect(categories, hasLength(2));
         expect(categories[0].categoryName, 'Positive');
         expect(categories[0].index, 1);

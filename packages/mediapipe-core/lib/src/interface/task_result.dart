@@ -19,7 +19,7 @@ abstract class BaseClassifierResult extends TaskResult {
   /// {@template ClassifierResult.classifications}
   /// The classification results for each head of the model.
   /// {@endtemplate}
-  List<BaseClassifications> get classifications;
+  Iterable<BaseClassifications> get classifications;
 
   /// Convenience helper for the first [Classifications] object.
   BaseClassifications? get firstClassification =>

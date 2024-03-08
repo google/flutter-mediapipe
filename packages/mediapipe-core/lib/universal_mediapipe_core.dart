@@ -11,10 +11,11 @@ class ClassifierResult extends BaseClassifierResult {
   /// {@template ClassifierResult.fake}
   /// Instantiates a [ClassifierResult] instance with fake values for testing.
   /// {@endtemplate}
-  ClassifierResult({required List<Classifications> classifications});
+  ClassifierResult({required Iterable<Classifications> classifications});
 
   @override
-  List<BaseClassifications> get classifications => throw UnimplementedError();
+  Iterable<BaseClassifications> get classifications =>
+      throw UnimplementedError();
 
   @override
   void dispose() => throw UnimplementedError();
@@ -51,13 +52,13 @@ base class Classifications extends BaseClassifications {
   /// Instantiates a [Classifications] object with fake values for testing.
   /// {@endtemplate}
   Classifications({
-    required List<Category> categories,
+    required Iterable<Category> categories,
     required int headIndex,
     required String? headName,
   });
 
   @override
-  List<BaseCategory> get categories => throw UnimplementedError();
+  Iterable<BaseCategory> get categories => throw UnimplementedError();
 
   @override
   int get headIndex => throw UnimplementedError();
