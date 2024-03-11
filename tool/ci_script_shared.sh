@@ -76,14 +76,14 @@ function ci_package () {
         
         pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/.dart_tool/native_assets_builder/e3c4d6cb53c6119f2a9c03f0f880d05f/out
         echo `pwd`
-        echo ls -lah
+        ls -lah
         echo 'build_output.yaml'
         cat build_output.yaml
         popd
 
         pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos
         echo `pwd`
-        echo ls -lah
+        ls -lah
         echo 'native-assets.yaml'
         cat native-assets.yaml
         popd
