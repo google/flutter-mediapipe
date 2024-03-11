@@ -74,5 +74,12 @@ function ci_package () {
         cat live-run-build-log.txt
         popd
 
+        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos
+        echo `pwd`
+        echo ls-lah
+        echo 'native-assets.yaml'
+        cat native-assets.yaml
+        popd
+
     done
 }
