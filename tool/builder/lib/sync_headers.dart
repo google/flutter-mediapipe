@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:args/command_runner.dart';
+import 'package:builder/extensions.dart';
 import 'package:builder/repo_finder.dart';
 import 'package:io/ansi.dart';
 import 'package:path/path.dart' as path;
@@ -15,6 +16,7 @@ final containers = 'mediapipe/tasks/c/components/containers';
 final processors = 'mediapipe/tasks/c/components/processors';
 final core = 'mediapipe/tasks/c/core';
 final tc = 'mediapipe/tasks/c/text/text_classifier';
+final te = 'mediapipe/tasks/c/text/text_embedder';
 
 /// google/flutter-mediapipe package paths
 final corePackage = 'packages/mediapipe-core/third_party';
@@ -27,9 +29,12 @@ final textPackage = 'packages/mediapipe-task-text/third_party';
 List<(String, String, String, Function(io.File)?)> headerPaths = [
   (containers, corePackage, 'category.h', null),
   (containers, corePackage, 'classification_result.h', null),
+  (containers, corePackage, 'embedding_result.h', null),
   (core, corePackage, 'base_options.h', null),
   (processors, corePackage, 'classifier_options.h', null),
+  (processors, corePackage, 'embedder_options.h', null),
   (tc, textPackage, 'text_classifier.h', relativeIncludes),
+  (te, textPackage, 'text_embedder.h', relativeIncludes),
 ];
 
 /// Command to copy all necessary C header files into this repository.
@@ -149,21 +154,24 @@ class Options {
   final io.Directory flutterMediaPipeDir;
 }
 
-void relativeIncludes(io.File textClassifierHeader) {
-  assert(textClassifierHeader.path.endsWith('text_classifier.h'));
-  String contents = textClassifierHeader.readAsStringSync();
-
+void relativeIncludes(io.File file) {
+  assert(file.path.endsWith('.h'));
   Map<String, String> rewrites = {
-    'mediapipe/tasks/c/components/containers/classification_result.h':
-        '../../../../../../../mediapipe-core/third_party/mediapipe/tasks/c/components/containers/classification_result.h',
-    'mediapipe/tasks/c/components/processors/classifier_options.h':
-        '../../../../../../../mediapipe-core/third_party/mediapipe/tasks/c/components/processors/classifier_options.h',
-    'mediapipe/tasks/c/core/base_options.h':
-        '../../../../../../../mediapipe-core/third_party/mediapipe/tasks/c/core/base_options.h',
+    containers: '../../../../../../../mediapipe-core/third_party/$containers',
+    processors: '../../../../../../../mediapipe-core/third_party/$processors',
+    core: '../../../../../../../mediapipe-core/third_party/$core',
   };
+  String contents = file.readAsStringSync();
 
   for (final rewrite in rewrites.entries) {
     contents = contents.replaceAll(rewrite.key, rewrite.value);
   }
-  textClassifierHeader.writeAsStringSync(contents);
+  file.writeAsStringSync(contents);
+  io.stderr.writeln(
+    wrapWith(
+      'Made includes relative for '
+      '${lastChunk(file.absolute.path, delimiter: io.Platform.pathSeparator)}',
+      [green],
+    ),
+  );
 }
