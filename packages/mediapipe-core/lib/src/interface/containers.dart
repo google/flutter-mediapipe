@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 /// {@template Category}
@@ -45,7 +47,7 @@ abstract class BaseCategory extends Equatable {
 /// See also:
 ///  * [MediaPipe's Classifications documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/components/containers/Classifications)
 /// {@endtemplate}
-abstract base class BaseClassifications extends Equatable {
+abstract class BaseClassifications extends Equatable {
   /// A list of [Category] objects which contain the actual classification
   /// information, including human-readable labels and probability scores.
   Iterable<BaseCategory> get categories;
@@ -70,4 +72,72 @@ abstract base class BaseClassifications extends Equatable {
 
   @override
   List<Object?> get props => [categories, headIndex, headName];
+}
+
+/// Marker for which flavor of analysis was performed for a specific
+/// [Embedding] instance.
+enum EmbeddingType {
+  /// Indicates an [Embedding] object has a non-null value for
+  /// [Embedding.floatEmbedding].
+  float,
+
+  /// Indicates an [Embedding] object has a non-null value for
+  /// [Embedding.quantizedEmbedding].
+  quantized;
+
+  /// Returns the opposite type.
+  EmbeddingType get opposite => switch (this) {
+        EmbeddingType.float => EmbeddingType.quantized,
+        EmbeddingType.quantized => EmbeddingType.float,
+      };
+}
+
+/// {@template Embedding}
+/// Represents the embedding for a given embedder head. Typically used in
+/// embedding tasks.
+///
+/// One and only one of 'floatEmbedding' and 'quantizedEmbedding' will contain
+/// data, based on whether or not the embedder was configured to perform scala
+/// quantization.
+/// {@endtemplate}
+abstract class BaseEmbedding extends Equatable {
+  /// Length of this embedding.
+  int get length;
+
+  /// The index of the embedder head to which these entries refer.
+  int get headIndex;
+
+  /// The optional name of the embedder head, which is the corresponding tensor
+  /// metadata name.
+  String? get headName;
+
+  /// Floating-point embedding. [null] if the embedder was configured to perform
+  /// scalar-quantization.
+  Float32List? get floatEmbedding;
+
+  /// Scalar-quantized embedding. [null] if the embedder was not configured to
+  /// perform scalar quantization.
+  Uint8List? get quantizedEmbedding;
+
+  /// [True] if this embedding came from an embedder configured to perform
+  /// scalar quantization.
+  bool get isQuantized => quantizedEmbedding != null;
+
+  /// [True] if this embedding came from an embedder that was not configured to
+  /// perform scalar quantization.
+  bool get isFloat => floatEmbedding != null;
+
+  @override
+  String toString() {
+    return 'Embedding(quantizedEmbedding=$quantizedEmbedding, floatEmbedding='
+        '$floatEmbedding, headIndex=$headIndex, headName=$headName)';
+  }
+
+  @override
+  List<Object?> get props => [
+        quantizedEmbedding,
+        floatEmbedding,
+        headIndex,
+        headName,
+      ];
 }

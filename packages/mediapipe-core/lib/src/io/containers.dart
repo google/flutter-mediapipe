@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:typed_data';
 import 'package:mediapipe_core/interface.dart';
 import 'package:mediapipe_core/src/io/mediapipe_core.dart';
 import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
@@ -27,7 +28,7 @@ class Category extends BaseCategory {
   ///
   /// {@template Container.memoryManagement}
   /// This memory is not owned or managed by this class, because all inner
-  /// container instances only exist as details within a larget "task result"
+  /// container instances only exist as details within a larger "task result"
   /// object. These task result objects have their own native dispose methods
   /// which cascade down their full tree of structs, releasing everything
   /// properly. Thus, it is not the job of this instance to ever release this
@@ -59,7 +60,7 @@ class Category extends BaseCategory {
 
   String? _categoryName;
   @override
-  String? get categoryName => _categoryName ?? _getCategoryName();
+  String? get categoryName => _categoryName ??= _getCategoryName();
   String? _getCategoryName() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception('Could not determine value for Category.categoryName');
@@ -71,7 +72,7 @@ class Category extends BaseCategory {
 
   String? _displayName;
   @override
-  String? get displayName => _displayName ?? _getDisplayName();
+  String? get displayName => _displayName ??= _getDisplayName();
   String? _getDisplayName() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception('Could not determine value for Category.displayName');
@@ -95,7 +96,7 @@ class Category extends BaseCategory {
 
 /// {@macro Classifications}
 // ignore: must_be_immutable
-base class Classifications extends BaseClassifications {
+class Classifications extends BaseClassifications {
   /// {@macro Classifications.fake}
   Classifications({
     required Iterable<Category> categories,
@@ -142,7 +143,7 @@ base class Classifications extends BaseClassifications {
 
   String? _headName;
   @override
-  String? get headName => _headName ?? _getHeadName();
+  String? get headName => _headName ??= _getHeadName();
   String? _getHeadName() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception('Could not determine value for Classifications.headName');
@@ -160,6 +161,115 @@ base class Classifications extends BaseClassifications {
   ) sync* {
     for (int i = 0; i < count; i++) {
       yield Classifications.native(structs + i);
+    }
+  }
+}
+
+/// {@macro Embedding}
+// ignore: must_be_immutable
+class Embedding extends BaseEmbedding {
+  /// {@macro Embedding.fakeQuantized}
+  Embedding.quantized(
+    Uint8List quantizedEmbedding, {
+    required int headIndex,
+    String? headName,
+  })  : _floatEmbedding = null,
+        _quantizedEmbedding = quantizedEmbedding,
+        _pointer = null,
+        _type = EmbeddingType.quantized;
+
+  /// {@macro Embedding.fakeFloat}
+  Embedding.float(
+    Float32List floatEmbedding, {
+    required int headIndex,
+    String? headName,
+  })  : _floatEmbedding = floatEmbedding,
+        _quantizedEmbedding = null,
+        _pointer = null,
+        _type = EmbeddingType.float;
+
+  /// Instatiates a [Classifications] object as a wrapper around native memory.
+  ///
+  /// {@macro Container.memoryManagement}
+  Embedding.native(this._pointer)
+      : _type = _pointer!.ref.float_embedding.isNotNullAndIsNotNullPointer
+            ? EmbeddingType.float
+            : EmbeddingType.quantized;
+
+  final Pointer<bindings.Embedding>? _pointer;
+  final EmbeddingType _type;
+
+  int? _headIndex;
+  @override
+  int get headIndex => _headIndex ??= _getHeadIndex();
+  int _getHeadIndex() {
+    if (_pointer.isNullOrNullPointer) {
+      throw Exception(
+        'Could not determine value for Embedding.headIndex',
+      );
+    }
+    return _pointer!.ref.head_index;
+  }
+
+  String? _headName;
+  @override
+  String? get headName => _headName ??= _getHeadName();
+  String? _getHeadName() {
+    if (_pointer.isNullOrNullPointer) {
+      throw Exception('Could not determine value for Embedding.headName');
+    }
+    return _pointer!.ref.head_name.isNotNullPointer
+        ? _pointer!.ref.head_name.toDartString()
+        : null;
+  }
+
+  Uint8List? _quantizedEmbedding;
+  @override
+  Uint8List? get quantizedEmbedding =>
+      _quantizedEmbedding ??= _getQuantizedEmbedding();
+  Uint8List? _getQuantizedEmbedding() {
+    if (_pointer.isNullOrNullPointer) {
+      throw Exception(
+        'Could not determine value for Embedding.quantizedEmbedding',
+      );
+    }
+    return _pointer!.ref.quantized_embedding.isNotNullPointer
+        ? _pointer!.ref.quantized_embedding
+            .toUint8List(_pointer!.ref.values_count)
+        : null;
+  }
+
+  Float32List? _floatEmbedding;
+  @override
+  Float32List? get floatEmbedding => _floatEmbedding ??= _getFloatEmbedding();
+  Float32List? _getFloatEmbedding() {
+    if (_pointer.isNullOrNullPointer) {
+      throw Exception('Could not determine value for Embedding.floatEmbedding');
+    }
+    return _pointer!.ref.float_embedding.isNotNullPointer
+        ? _pointer!.ref.float_embedding
+            .toFloat32List(_pointer!.ref.values_count)
+        : null;
+  }
+
+  @override
+  int get length {
+    if (_pointer.isNotNullAndIsNotNullPointer) {
+      return _pointer!.ref.values_count;
+    }
+    return _type == EmbeddingType.float
+        ? _floatEmbedding!.length
+        : _quantizedEmbedding!.length;
+  }
+
+  /// Accepts a pointer to a list of structs, and a count representing the length
+  /// of the list, and returns a list of pure-Dart [Embedding] instances.
+  static Iterable<Embedding> fromNativeArray(
+    Pointer<bindings.Embedding> structs,
+    int count,
+  ) sync* {
+    for (int i = 0; i < count; i++) {
+      yield Embedding.native(structs + i);
     }
   }
 }

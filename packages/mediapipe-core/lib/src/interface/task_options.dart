@@ -125,3 +125,33 @@ abstract class BaseClassifierOptions extends BaseInnerTaskOptions {
         ...(categoryDenylist ?? []),
       ];
 }
+
+/// {@template EmbedderOptions}
+/// Dart representation of MediaPipe's "EmbedderOptions" concept.
+///
+/// Embedder options shared across MediaPipe embedding tasks.
+///
+/// See also:
+///  * [MediaPipe's EmbedderOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/textembedder/TextEmbedder.TextEmbedderOptions)
+///  * [BaseOptions], which is often used in conjunction to specify a
+///    embedder's desired behavior.
+/// {@endtemplate}
+abstract class BaseEmbedderOptions extends BaseInnerTaskOptions {
+  /// {@macro EmbedderOptions}
+  const BaseEmbedderOptions();
+
+  /// Whether to normalize the returned feature vector with L2 norm. Use this
+  /// option only if the model does not already contain a native L2_NORMALIZATION
+  /// TF Lite Op. In most cases, this is already the case and L2 norm is thus
+  /// achieved through TF Lite inference.
+  bool get l2Normalize;
+
+  /// Whether the returned embedding should be quantized to bytes via scalar
+  /// quantization. Embeddings are implicitly assumed to be unit-norm and
+  /// therefore any dimension is guaranteed to have a value in [-1.0, 1.0]. Use
+  /// the l2_normalize option if this is not the case.
+  bool get quantize;
+
+  @override
+  List<Object?> get props => [l2Normalize, quantize];
+}
