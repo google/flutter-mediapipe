@@ -112,6 +112,9 @@ class Embedding extends BaseEmbedding {
 
   @override
   Uint8List? get quantizedEmbedding => throw UnimplementedError();
+
+  @override
+  EmbeddingType get type => throw UnimplementedError();
 }
 
 /// {@macro BaseOptions}
@@ -174,8 +177,8 @@ class ClassifierOptions extends BaseClassifierOptions {
 class EmbedderOptions extends BaseEmbedderOptions {
   /// {@macro EmbedderOptions}
   const EmbedderOptions({
-    required bool l2Normalize,
-    required bool quantize,
+    bool l2Normalize = false,
+    bool quantize = false,
   });
 
   @override

@@ -176,7 +176,7 @@ class Embedding extends BaseEmbedding {
   })  : _floatEmbedding = null,
         _quantizedEmbedding = quantizedEmbedding,
         _pointer = null,
-        _type = EmbeddingType.quantized;
+        type = EmbeddingType.quantized;
 
   /// {@macro Embedding.fakeFloat}
   Embedding.float(
@@ -186,18 +186,23 @@ class Embedding extends BaseEmbedding {
   })  : _floatEmbedding = floatEmbedding,
         _quantizedEmbedding = null,
         _pointer = null,
-        _type = EmbeddingType.float;
+        type = EmbeddingType.float;
 
   /// Instatiates a [Classifications] object as a wrapper around native memory.
   ///
   /// {@macro Container.memoryManagement}
   Embedding.native(this._pointer)
-      : _type = _pointer!.ref.float_embedding.isNotNullAndIsNotNullPointer
+      : type = _pointer!.ref.float_embedding.isNotNullAndIsNotNullPointer
             ? EmbeddingType.float
             : EmbeddingType.quantized;
 
   final Pointer<bindings.Embedding>? _pointer;
-  final EmbeddingType _type;
+
+  /// Read-only access to the internal pointer.
+  Pointer<bindings.Embedding>? get pointer => _pointer;
+
+  @override
+  final EmbeddingType type;
 
   int? _headIndex;
   @override
@@ -257,7 +262,7 @@ class Embedding extends BaseEmbedding {
     if (_pointer.isNotNullAndIsNotNullPointer) {
       return _pointer!.ref.values_count;
     }
-    return _type == EmbeddingType.float
+    return type == EmbeddingType.float
         ? _floatEmbedding!.length
         : _quantizedEmbedding!.length;
   }

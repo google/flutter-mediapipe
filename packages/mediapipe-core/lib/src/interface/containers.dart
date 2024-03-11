@@ -121,11 +121,14 @@ abstract class BaseEmbedding extends Equatable {
 
   /// [True] if this embedding came from an embedder configured to perform
   /// scalar quantization.
-  bool get isQuantized => quantizedEmbedding != null;
+  bool get isQuantized => type == EmbeddingType.quantized;
 
   /// [True] if this embedding came from an embedder that was not configured to
   /// perform scalar quantization.
-  bool get isFloat => floatEmbedding != null;
+  bool get isFloat => type == EmbeddingType.float;
+
+  /// Indicator for the type of results in this embedding.
+  EmbeddingType get type;
 
   @override
   String toString() {

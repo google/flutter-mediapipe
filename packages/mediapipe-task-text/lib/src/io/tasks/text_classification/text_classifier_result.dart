@@ -11,7 +11,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 
 /// {@macro TextClassifierResult}
 class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
-  /// {@macro ClassifierResult.fake}
+  /// {@macro TextClassifierResult.fake}
   TextClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
@@ -25,7 +25,12 @@ class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
   /// {@endtemplate}
   TextClassifierResult.native(this._pointer);
 
-  Pointer<bindings.TextClassifierResult>? _pointer;
+  bool _isClosed = false;
+
+  /// [True] if [dispose] has been called.
+  bool get isClosed => _isClosed;
+
+  final Pointer<bindings.TextClassifierResult>? _pointer;
 
   Iterable<Classifications>? _classifications;
   @override
@@ -45,9 +50,9 @@ class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
 
   @override
   void dispose() {
-    if (_pointer != null) {
+    if (_pointer != null && !_isClosed) {
       bindings.text_classifier_close_result(_pointer!);
-      _pointer = null;
     }
+    _isClosed = true;
   }
 }

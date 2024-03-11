@@ -12,14 +12,9 @@ import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_
 
 final _log = Logger('TextTaskExecutor');
 
-/// {@template TextClassifierExecutor}
 /// Executes MediaPipe's "classifyText" task.
 ///
-/// [TextClassifierExecutor] is separated from [TextClassifier] because
-/// MediaPipe has no concept of asynchrony or futures, so this pattern allows a
-/// [TextClassifier] to create an executor on a separate isolate, and for
-/// Flutter apps to await the results of MediaPipe tasks.
-/// {@endtemplate}
+/// {@macro TaskExecutor}
 class TextClassifierExecutor extends TaskExecutor<
     bindings.TextClassifierOptions,
     TextClassifierOptions,
