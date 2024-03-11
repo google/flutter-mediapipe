@@ -1,11 +1,13 @@
 format_version: 1.0.0
 files:
-  package:mediapipe_core/src/third_party/mediapipe/generated/mediapipe_common_bindings.dart:
+  package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart:
     used-config:
       ffi-native: false
     symbols:
       c:@S@BaseOptions:
         name: BaseOptions
+      c:@S@Categories:
+        name: Categories
       c:@S@Category:
         name: Category
       c:@S@ClassificationResult:

@@ -16,6 +16,8 @@ limitations under the License.
 #ifndef MEDIAPIPE_TASKS_C_COMPONENTS_CONTAINERS_CATEGORY_H_
 #define MEDIAPIPE_TASKS_C_COMPONENTS_CONTAINERS_CATEGORY_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,11 +38,17 @@ struct Category {
 
   // The optional ID for the category, read from the label map packed in the
   // TFLite Model Metadata if present. Not necessarily human-readable.
-  const char* category_name;
+  char* category_name;
 
   // The optional human-readable name for the category, read from the label map
   // packed in the TFLite Model Metadata if present.
-  const char* display_name;
+  char* display_name;
+};
+
+// A list of categories.
+struct Categories {
+  struct Category* categories;
+  uint32_t categories_count;
 };
 
 #ifdef __cplusplus
