@@ -66,6 +66,7 @@ extern "C" {
   // allocated for the error message.
   MP_EXPORT int text_embedder_close(void* embedder, char** error_msg);
 
+<<<<<<< HEAD
   // Utility function to compute cosine similarity [1] between two embeddings.
   // May return an InvalidArgumentError if e.g. the embeddings are of different
   // types (quantized vs. float), have different sizes, or have a an L2-norm of
@@ -76,6 +77,18 @@ extern "C" {
     const struct Embedding* v,
     double* similarity,
     char** error_msg);
+=======
+// Utility function to compute cosine similarity [1] between two embeddings.
+// May return an InvalidArgumentError if e.g. the embeddings are of different
+// types (quantized vs. float), have different sizes, or have a an L2-norm of
+// 0.
+//
+// [1]: https://en.wikipedia.org/wiki/Cosine_similarity
+MP_EXPORT int text_embedder_cosine_similarity(const struct Embedding* u,
+                                              const struct Embedding* v,
+                                              double* similarity,
+                                              char** error_msg);                                       
+>>>>>>> 500710f (fixed embedding header file and bindings)
 
 #ifdef __cplusplus
 }  // extern C
