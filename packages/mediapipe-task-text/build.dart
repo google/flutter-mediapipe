@@ -87,7 +87,7 @@ Future<void> downloadAsset(String assetUrl, Uri destinationFile) async {
       downloadedFile.deleteSync();
     }
     downloadedFile.createSync();
-    log('Saving file to ${downloadedFile.absolute.path}');
+    log('Saved file to ${downloadedFile.absolute.path}\n');
     downloadedFile.writeAsBytes(downloadResponse.bodyBytes);
   } else {
     log('${downloadResponse.statusCode} :: ${downloadResponse.body}');
