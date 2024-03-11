@@ -61,32 +61,36 @@ function ci_package () {
 
         popd
 
+        if [[ $PACKAGE_NAME == "mediapipe-task-text" ]]; then
 
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos/
-        echo `pwd`
-        ls -lah
-        popd
-        
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/build/
-        echo 'dry-run'
-        cat dryrun-build-log.txt
-        echo 'live-run'
-        cat live-run-build-log.txt
-        popd
-        
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/.dart_tool/native_assets_builder/e3c4d6cb53c6119f2a9c03f0f880d05f/out
-        echo `pwd`
-        ls -lah
-        echo 'build_output.yaml'
-        cat build_output.yaml
-        popd
 
-        pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos
-        echo `pwd`
-        ls -lah
-        echo 'native-assets.yaml'
-        cat native-assets.yaml
-        popd
+            pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos/
+            echo `pwd`
+            ls -lah
+            popd
+            
+            pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/build/
+            echo 'dry-run'
+            cat dryrun-build-log.txt
+            echo 'live-run'
+            cat live-run-build-log.txt
+            popd
+            
+            pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/example/.dart_tool/native_assets_builder/e3c4d6cb53c6119f2a9c03f0f880d05f/out
+            echo `pwd`
+            ls -lah
+            echo 'build_output.yaml'
+            cat build_output.yaml
+            popd
+
+            pushd /Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/native_assets/macos
+            echo `pwd`
+            ls -lah
+            echo 'native_assets.yaml'
+            cat native_assets.yaml
+            popd
+
+        fi
 
 
     done
