@@ -174,6 +174,8 @@ class Embedding extends BaseEmbedding {
     required int headIndex,
     String? headName,
   })  : _floatEmbedding = null,
+        _headIndex = headIndex,
+        _headName = headName,
         _quantizedEmbedding = quantizedEmbedding,
         _pointer = null,
         type = EmbeddingType.quantized;
@@ -184,6 +186,8 @@ class Embedding extends BaseEmbedding {
     required int headIndex,
     String? headName,
   })  : _floatEmbedding = floatEmbedding,
+        _headIndex = headIndex,
+        _headName = headName,
         _quantizedEmbedding = null,
         _pointer = null,
         type = EmbeddingType.float;
@@ -233,6 +237,9 @@ class Embedding extends BaseEmbedding {
   Uint8List? get quantizedEmbedding =>
       _quantizedEmbedding ??= _getQuantizedEmbedding();
   Uint8List? _getQuantizedEmbedding() {
+    if (type != EmbeddingType.quantized) {
+      return null;
+    }
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
         'Could not determine value for Embedding.quantizedEmbedding',
@@ -248,6 +255,9 @@ class Embedding extends BaseEmbedding {
   @override
   Float32List? get floatEmbedding => _floatEmbedding ??= _getFloatEmbedding();
   Float32List? _getFloatEmbedding() {
+    if (type != EmbeddingType.float) {
+      return null;
+    }
     if (_pointer.isNullOrNullPointer) {
       throw Exception('Could not determine value for Embedding.floatEmbedding');
     }
