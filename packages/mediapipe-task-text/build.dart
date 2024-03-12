@@ -50,7 +50,13 @@ Future<void> main(List<String> args) async {
   buildOutput.dependencies.dependencies
       .add(buildConfig.packageRoot.resolve('sdk_downloads.dart'));
 
-  final archKeys = sdkDownloadUrls[targetOs]!.keys;
+  // final archKeys = sdkDownloadUrls[targetOs]!.keys;
+  final Iterable<String> archKeys;
+  if (buildConfig.dryRun) {
+    archKeys = sdkDownloadUrls[targetOs]!.keys;
+  } else {
+    archKeys = [buildConfig.targetArchitecture.toString()];
+  }
   for (final String arch in archKeys) {
     final assetUrl = sdkDownloadUrls[targetOs]![arch]!;
     final downloadFileLocation = buildConfig.outDir.resolve(
