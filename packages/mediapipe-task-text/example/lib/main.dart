@@ -1,22 +1,10 @@
-import 'dart:io' as io;
-import 'dart:typed_data';
-import 'package:logging/logging.dart';
 import 'package:flutter/material.dart';
-import 'package:mediapipe_text/mediapipe_text.dart';
-
-final _log = Logger('TextClassificationExample');
+import 'logging.dart';
+import 'text_classification_demo.dart';
+import 'text_embedding_demo.dart';
 
 void main() {
-  Logger.root.level = Level.FINEST;
-  Logger.root.onRecord.listen((record) {
-    io.stdout.writeln('${record.level.name} [${record.loggerName}]'
-        '['
-        '${record.time.hour.toString()}:'
-        '${record.time.minute.toString().padLeft(2, "0")}:'
-        '${record.time.second.toString().padLeft(2, "0")}.'
-        '${record.time.millisecond.toString().padRight(3, "0")}'
-        '] ${record.message}');
-  });
+  initLogging();
   runApp(const MainApp());
 }
 
@@ -28,112 +16,74 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late Future<TextClassifier> _classifier;
+  @override
+  Widget build(BuildContext context) =>
+      const MaterialApp(home: TextTaskPages());
+}
+
+class TextTaskPages extends StatefulWidget {
+  const TextTaskPages({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _classifier = _initClassifier();
-  }
+  State<TextTaskPages> createState() => TextTaskPagesState();
+}
 
-  Future<TextClassifier> _initClassifier() async {
-    ByteData? classifierBytes = await DefaultAssetBundle.of(context)
-        .load('assets/bert_classifier.tflite');
+class TextTaskPagesState extends State<TextTaskPages> {
+  final PageController controller = PageController();
 
-    TextClassifier classifier = TextClassifier(
-      TextClassifierOptions.fromAssetBuffer(
-        classifierBytes.buffer.asUint8List(),
-      ),
+  final titles = <String>['Classify', 'Embed'];
+  int titleIndex = 0;
+
+  void switchToPage(int index) {
+    controller.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
     );
-    classifierBytes = null;
-    return classifier;
-  }
-
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-        home: TextClassificationResults(
-          classifier: _classifier,
-        ),
-      );
-}
-
-class TextClassificationResults extends StatefulWidget {
-  const TextClassificationResults({super.key, required this.classifier});
-
-  final Future<TextClassifier> classifier;
-
-  @override
-  State<TextClassificationResults> createState() =>
-      _TextClassificationResultsState();
-}
-
-class _TextClassificationResultsState extends State<TextClassificationResults> {
-  final TextEditingController _controller = TextEditingController();
-  List<Widget> results = [];
-  String? _isProcessing;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.text = 'Hello, world!';
-  }
-
-  void _prepareForClassification() {
     setState(() {
-      _isProcessing = _controller.text;
-      results.add(const CircularProgressIndicator.adaptive());
+      titleIndex = index;
     });
-  }
-
-  void _showClassificationResults(TextClassifierResult result) {
-    setState(() {
-      final categoryName =
-          result.firstClassification?.firstCategory?.categoryName;
-      final score = result.firstClassification?.firstCategory?.score;
-      // Replace "..." with the results
-      final message = '"$_isProcessing" $categoryName :: $score';
-      _log.info(message);
-      results.last = Card(
-        key: Key('Classification::"$_isProcessing" ${results.length}'),
-        margin: const EdgeInsets.all(10),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Text(message),
-        ),
-      );
-      _isProcessing = null;
-    });
-
-    // Value is safe to immediately dispose because we have pulled out all of
-    // the parts we care about into our Flutter application code.
-    result.dispose();
-  }
-
-  Future<void> _classify() async {
-    _prepareForClassification();
-    TextClassifier classifier = await widget.classifier;
-    final classification = await classifier.classify(_controller.text);
-    _showClassificationResults(classification);
   }
 
   @override
   Widget build(BuildContext context) {
+    const activeTextStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.orange,
+    );
+    const inactiveTextStyle = TextStyle(
+      color: Colors.white,
+    );
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: <Widget>[
-              TextField(controller: _controller),
-              ...results,
-            ],
-          ),
-        ),
+      appBar: AppBar(title: Text(titles[titleIndex])),
+      body: PageView(
+        controller: controller,
+        children: const <Widget>[
+          TextClassificationDemo(),
+          TextEmbeddingDemo(),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed:
-            _isProcessing != null && _controller.text != '' ? null : _classify,
-        child: const Icon(Icons.search),
+      bottomNavigationBar: ColoredBox(
+        color: Colors.blueGrey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            TextButton(
+              onPressed: () => switchToPage(0),
+              child: Text(
+                'Classify',
+                style: titleIndex == 0 ? activeTextStyle : inactiveTextStyle,
+              ),
+            ),
+            TextButton(
+              onPressed: () => switchToPage(1),
+              child: Text(
+                'Embed',
+                style: titleIndex == 1 ? activeTextStyle : inactiveTextStyle,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

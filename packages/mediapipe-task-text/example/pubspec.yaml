@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  getwidget: ^4.0.0
   logging: ^1.2.0
   mediapipe_core:
     path: ../../mediapipe-core
@@ -27,3 +28,4 @@ flutter:
 
   assets:
     - assets/bert_classifier.tflite
+    - assets/universal_sentence_encoder.tflite

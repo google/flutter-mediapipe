@@ -209,3 +209,30 @@ class ClassifierOptions extends BaseClassifierOptions
     }
   }
 }
+
+/// {@macro EmbedderOptions}
+class EmbedderOptions extends BaseEmbedderOptions
+    with InnerTaskOptions<bindings.EmbedderOptions> {
+  /// {@macro EmbedderOptions}
+  const EmbedderOptions({
+    this.l2Normalize = false,
+    this.quantize = false,
+  });
+
+  @override
+  final bool l2Normalize;
+
+  @override
+  final bool quantize;
+
+  @override
+  void assignToStruct(bindings.EmbedderOptions struct) {
+    struct.l2_normalize = l2Normalize;
+    struct.quantize = quantize;
+  }
+
+  @override
+  void freeStructFields(bindings.EmbedderOptions struct) {
+    // no-op; nothing to free
+  }
+}

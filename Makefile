@@ -2,6 +2,12 @@
 headers:
 	cd tool/builder && dart bin/main.dart headers
 
+# Downloads all necessary task models
+models:
+	cd tool/builder && dart bin/main.dart model -m textclassification
+	cd tool/builder && dart bin/main.dart model -m textembedding
+
+
 # Runs `ffigen` for all packages
 generate: generate_core generate_text
 

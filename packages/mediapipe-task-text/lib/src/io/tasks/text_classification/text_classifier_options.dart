@@ -48,12 +48,14 @@ class TextClassifierOptions extends BaseTextClassifierOptions
   @override
   final ClassifierOptions classifierOptions;
 
+  /// {@template TaskOptions.memory}
   /// Cache of the pointer to the native memory created in [copyToNative].
   /// This pointer is held locally to make `free` an instance method, which is
   /// simpler to call in [TaskExecutor], which only knows about a [TaskOptions]
   /// type and does not know the final type until runtime. This is relevant
   /// because `TaskOptions.free` should be static if it accepted the pointer to
   /// release, but Dart cannot call static methods off a generic type.
+  /// {@endtemplate}
   Pointer<bindings.TextClassifierOptions>? _pointer;
 
   bool _isClosed = false;

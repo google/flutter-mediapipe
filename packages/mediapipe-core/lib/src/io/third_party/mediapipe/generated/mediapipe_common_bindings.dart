@@ -28,6 +28,14 @@ final class BaseOptions extends ffi.Struct {
   external ffi.Pointer<ffi.Char> model_asset_path;
 }
 
+final class EmbedderOptions extends ffi.Struct {
+  @ffi.Bool()
+  external bool l2_normalize;
+
+  @ffi.Bool()
+  external bool quantize;
+}
+
 final class __mbstate_t extends ffi.Union {
   @ffi.Array.multi([128])
   external ffi.Array<ffi.Char> __mbstate8;
@@ -159,6 +167,33 @@ final class Categories extends ffi.Struct {
   external int categories_count;
 }
 
+final class Embedding extends ffi.Struct {
+  external ffi.Pointer<ffi.Float> float_embedding;
+
+  external ffi.Pointer<ffi.Char> quantized_embedding;
+
+  @ffi.Uint32()
+  external int values_count;
+
+  @ffi.Int()
+  external int head_index;
+
+  external ffi.Pointer<ffi.Char> head_name;
+}
+
+final class EmbeddingResult extends ffi.Struct {
+  external ffi.Pointer<Embedding> embeddings;
+
+  @ffi.Uint32()
+  external int embeddings_count;
+
+  @ffi.Int64()
+  external int timestamp_ms;
+
+  @ffi.Bool()
+  external bool has_timestamp_ms;
+}
+
 final class Classifications extends ffi.Struct {
   external ffi.Pointer<Category> categories;
 
@@ -183,6 +218,12 @@ final class ClassificationResult extends ffi.Struct {
   @ffi.Bool()
   external bool has_timestamp_ms;
 }
+
+const int __bool_true_false_are_defined = 1;
+
+const int true1 = 1;
+
+const int false1 = 0;
 
 const int __WORDSIZE = 64;
 
@@ -349,9 +390,3 @@ const int WINT_MAX = 2147483647;
 const int SIG_ATOMIC_MIN = -2147483648;
 
 const int SIG_ATOMIC_MAX = 2147483647;
-
-const int __bool_true_false_are_defined = 1;
-
-const int true1 = 1;
-
-const int false1 = 0;

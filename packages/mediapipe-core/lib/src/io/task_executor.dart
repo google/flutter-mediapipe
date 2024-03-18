@@ -20,6 +20,11 @@ final _log = Logger('TaskExecutor');
 /// on any error communicating with the native workers. It is the job of
 /// application code to surround those task-specific methods with try-catch
 /// clauses.
+///
+/// Executors are separated from their public API counterparts because FFI and
+/// MediaPipe have no concept of asynchrony or futures, so this pattern allows a
+/// public-facing task handler to create an executor on a separate isolate, and
+/// for Flutter apps to await the results of MediaPipe tasks.
 /// {@endtemplate}
 abstract class TaskExecutor<
     NativeOptions extends Struct,
