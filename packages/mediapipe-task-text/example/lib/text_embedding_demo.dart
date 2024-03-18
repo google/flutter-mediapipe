@@ -304,16 +304,9 @@ class TextEmbedderResultDisplay extends StatelessWidget {
       return const CircularProgressIndicator.adaptive();
     }
     final embedding = embeddedText.result!.embeddings.last;
-    late String embeddingDisplay;
-    switch (embedding.type) {
-      case EmbeddingType.float:
-        {
-          embeddingDisplay = '${embedding.floatEmbedding!}';
-        }
-      case EmbeddingType.quantized:
-        {
-          embeddingDisplay = '${embedding.quantizedEmbedding!}';
-        }
+    String embeddingDisplay = switch (embedding.type) {
+      EmbeddingType.float => '${embedding.floatEmbedding!}',
+      EmbeddingType.quantized =>'${embedding.quantizedEmbedding!}',
     }
     // Replace "..." with the results
     final message = '"${embeddedText.value}"\n$embeddingDisplay';
