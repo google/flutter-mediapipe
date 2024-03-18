@@ -39,6 +39,7 @@ void main() {
       final TextEmbedderResult result2 = executor.embed('Hello, world!');
       expect(result2.embeddings, isNotEmpty);
       result.dispose();
+      result2.dispose();
       executor.dispose();
     });
 

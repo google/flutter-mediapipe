@@ -167,7 +167,7 @@ void relativeIncludes(io.File file) {
     contents = contents.replaceAll(rewrite.key, rewrite.value);
   }
   file.writeAsStringSync(contents);
-  io.stderr.writeln(
+  io.stdout.writeln(
     wrapWith(
       'Made includes relative for '
       '${lastChunk(file.absolute.path, delimiter: io.Platform.pathSeparator)}',
