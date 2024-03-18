@@ -272,9 +272,10 @@ class Embedding extends BaseEmbedding {
     if (_pointer.isNotNullAndIsNotNullPointer) {
       return _pointer!.ref.values_count;
     }
-    return type == EmbeddingType.float
-        ? _floatEmbedding!.length
-        : _quantizedEmbedding!.length;
+    return switch (type) {
+        EmbeddingType.float =>  _floatEmbedding!.length,
+        EmbeddingType.quantized => _quantizedEmbedding!.length,
+      }
   }
 
   /// Accepts a pointer to a list of structs, and a count representing the length
