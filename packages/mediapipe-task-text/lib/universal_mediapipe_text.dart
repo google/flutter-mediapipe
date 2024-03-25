@@ -18,8 +18,8 @@ class TextClassifier extends BaseTextClassifier {
   Future<TextClassifierResult> classify(String text) =>
       throw UnimplementedError();
 
-  /// Cleans up all resources.
-  void dispose() {}
+  @override
+  void dispose() => throw UnimplementedError();
 }
 
 /// {@macro TextClassifierOptions}
@@ -75,8 +75,8 @@ class TextEmbedder extends BaseTextEmbedder {
   Future<double> cosineSimilarity(Embedding a, Embedding b) =>
       throw UnimplementedError();
 
-  /// Cleans up all resources.
-  void dispose() {}
+  @override
+  void dispose() => throw UnimplementedError();
 }
 
 /// {@macro TextEmbedderOptions}

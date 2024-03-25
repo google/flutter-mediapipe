@@ -33,6 +33,7 @@ class TextEmbedder extends BaseTextEmbedder {
   final TextEmbedderOptions _options;
 
   /// Closes down the background isolate, releasing all resources.
+  @override
   void dispose() => _sendPort.send(null);
 
   /// {@macro TextEmbedder.embed}

@@ -12,4 +12,7 @@ abstract class BaseTextClassifier {
   /// Sends a [String] value to MediaPipe for classification.
   /// {@endtemplate}
   Future<BaseTextClassifierResult> classify(String text);
+
+  /// Cleans up all resources.
+  void dispose();
 }

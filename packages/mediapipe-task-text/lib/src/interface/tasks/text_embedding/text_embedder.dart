@@ -18,4 +18,7 @@ abstract class BaseTextEmbedder {
   /// Sends a [String] value to MediaPipe for conversion into an [Embedding].
   /// {@endtemplate}
   Future<double> cosineSimilarity(Embedding a, Embedding b);
+
+  /// Cleans up all resources.
+  void dispose();
 }
