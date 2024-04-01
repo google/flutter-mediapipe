@@ -56,7 +56,7 @@ void main() {
         headName: 'Embedding',
       );
 
-      expect(embedding.quantizedEmbedding, isNull);
+      expect(() => embedding.quantizedEmbedding, throwsA(isA<Exception>()));
       expect(embedding.headIndex, 99);
       expect(embedding.headName, 'Embedding');
       expect(embedding.isFloat, isTrue);
@@ -74,7 +74,7 @@ void main() {
         headName: 'Embedding',
       );
 
-      expect(embedding.floatEmbedding, isNull);
+      expect(() => embedding.floatEmbedding, throwsA(isA<Exception>()));
       expect(embedding.headIndex, 99);
       expect(embedding.headName, 'Embedding');
       expect(embedding.isFloat, isFalse);

@@ -50,7 +50,7 @@ void main() {
       final TextEmbedderResult result = executor.embed('Hello, world!');
       final embedding = result.embeddings.first;
       expect(embedding.headName, 'response_encoding');
-      expect(embedding.quantizedEmbedding, isNull);
+      expect(() => embedding.quantizedEmbedding, throwsA(isA<Exception>()));
       expect(embedding.floatEmbedding, isNotNull);
       expect(embedding.length, 100);
       expect(embedding.type, equals(EmbeddingType.float));
@@ -70,7 +70,7 @@ void main() {
       final embedding = result.embeddings.first;
       expect(embedding.headName, 'response_encoding');
       expect(embedding.quantizedEmbedding, isNotNull);
-      expect(embedding.floatEmbedding, isNull);
+      expect(() => embedding.floatEmbedding, throwsA(isA<Exception>()));
       expect(embedding.quantizedEmbedding![0], 127);
       expect(embedding.length, 100);
       expect(embedding.type, equals(EmbeddingType.quantized));
@@ -88,7 +88,7 @@ void main() {
       final TextEmbedderResult result = executor.embed('Hello, world!');
       final embedding = result.embeddings.first;
       expect(embedding.headName, 'response_encoding');
-      expect(embedding.quantizedEmbedding, isNull);
+      expect(() => embedding.quantizedEmbedding, throwsA(isA<Exception>()));
       expect(embedding.floatEmbedding, isNotNull);
       expect(embedding.floatEmbedding![0], closeTo(0.1560, 0.0001));
       expect(embedding.length, 100);
