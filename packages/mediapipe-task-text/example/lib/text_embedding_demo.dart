@@ -251,7 +251,7 @@ class _TextEmbeddingDemoState extends State<TextEmbeddingDemo> {
                             // are looping through the list in reverse order
                             onPressed: () => _compare(feed.length - index - 1),
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
+                              backgroundColor: WidgetStateProperty.all(
                                 Colors.purple[100],
                               ),
                             ),
