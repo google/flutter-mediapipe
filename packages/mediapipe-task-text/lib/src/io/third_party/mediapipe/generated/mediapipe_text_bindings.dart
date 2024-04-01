@@ -19,6 +19,41 @@ import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_
     as imp1;
 
 @ffi.Native<
+    ffi.Pointer<ffi.Void> Function(ffi.Pointer<LanguageDetectorOptions>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_create')
+external ffi.Pointer<ffi.Void> language_detector_create(
+  ffi.Pointer<LanguageDetectorOptions> options,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Char>,
+        ffi.Pointer<LanguageDetectorResult>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_detect')
+external int language_detector_detect(
+  ffi.Pointer<ffi.Void> detector,
+  ffi.Pointer<ffi.Char> utf8_str,
+  ffi.Pointer<LanguageDetectorResult> result,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<LanguageDetectorResult>)>(
+    symbol: 'language_detector_close_result')
+external void language_detector_close_result(
+  ffi.Pointer<LanguageDetectorResult> result,
+);
+
+@ffi.Native<
+    ffi.Int Function(ffi.Pointer<ffi.Void>,
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_close')
+external int language_detector_close(
+  ffi.Pointer<ffi.Void> detector,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
+);
+
+@ffi.Native<
     ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextClassifierOptions>,
         ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_create')
 external ffi.Pointer<ffi.Void> text_classifier_create(
@@ -102,6 +137,26 @@ external int text_embedder_cosine_similarity(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
+final class LanguageDetectorPrediction extends ffi.Struct {
+  external ffi.Pointer<ffi.Char> language_code;
+
+  @ffi.Float()
+  external double probability;
+}
+
+final class LanguageDetectorResult extends ffi.Struct {
+  external ffi.Pointer<LanguageDetectorPrediction> predictions;
+
+  @ffi.Uint32()
+  external int predictions_count;
+}
+
+final class LanguageDetectorOptions extends ffi.Struct {
+  external imp1.BaseOptions base_options;
+
+  external imp1.ClassifierOptions classifier_options;
+}
+
 final class TextClassifierOptions extends ffi.Struct {
   external imp1.BaseOptions base_options;
 
@@ -117,12 +172,6 @@ final class TextEmbedderOptions extends ffi.Struct {
 }
 
 typedef TextEmbedderResult = imp1.EmbeddingResult;
-
-const int __bool_true_false_are_defined = 1;
-
-const int true1 = 1;
-
-const int false1 = 0;
 
 const int __WORDSIZE = 64;
 
@@ -289,3 +338,9 @@ const int WINT_MAX = 2147483647;
 const int SIG_ATOMIC_MIN = -2147483648;
 
 const int SIG_ATOMIC_MAX = 2147483647;
+
+const int __bool_true_false_are_defined = 1;
+
+const int true1 = 1;
+
+const int false1 = 0;

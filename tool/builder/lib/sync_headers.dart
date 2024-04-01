@@ -17,6 +17,7 @@ final processors = 'mediapipe/tasks/c/components/processors';
 final core = 'mediapipe/tasks/c/core';
 final tc = 'mediapipe/tasks/c/text/text_classifier';
 final te = 'mediapipe/tasks/c/text/text_embedder';
+final ld = 'mediapipe/tasks/c/text/language_detector';
 
 /// google/flutter-mediapipe package paths
 final corePackage = 'packages/mediapipe-core/third_party';
@@ -35,6 +36,7 @@ List<(String, String, String, Function(io.File)?)> headerPaths = [
   (processors, corePackage, 'embedder_options.h', null),
   (tc, textPackage, 'text_classifier.h', relativeIncludes),
   (te, textPackage, 'text_embedder.h', relativeIncludes),
+  (ld, textPackage, 'language_detector.h', relativeIncludes),
 ];
 
 /// Command to copy all necessary C header files into this repository.

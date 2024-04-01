@@ -15,7 +15,8 @@ abstract class BaseTextEmbedder {
   Future<BaseEmbedderResult> embed(String text);
 
   /// {@template TextEmbedder.cosineSimilarity}
-  /// Sends a [String] value to MediaPipe for conversion into an [Embedding].
+  /// Compares the similarity between two [Embedding] values. Identical
+  /// embeddings will yield a similarity value of 1.0.
   /// {@endtemplate}
   Future<double> cosineSimilarity(Embedding a, Embedding b);
 
