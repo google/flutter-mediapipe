@@ -13,9 +13,13 @@ import 'package:equatable/equatable.dart';
 /// including a descendent of the universal options struct, [BaseBaseOptions].
 /// The second field will be task-specific.
 /// {@endtemplate}
+///
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
 abstract class BaseTaskOptions extends Equatable {
   /// {@macro TaskOptions}
-  const BaseTaskOptions();
+  BaseTaskOptions();
 
   /// {@template TaskOptions.baseOptions}
   /// Options class shared by all MediaPipe tasks - namely, how to find and load

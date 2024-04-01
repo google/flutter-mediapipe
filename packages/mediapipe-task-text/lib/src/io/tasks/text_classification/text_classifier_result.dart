@@ -25,11 +25,6 @@ class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
   /// {@endtemplate}
   TextClassifierResult.native(this._pointer);
 
-  bool _isClosed = false;
-
-  /// [True] if [dispose] has been called.
-  bool get isClosed => _isClosed;
-
   final Pointer<bindings.TextClassifierResult>? _pointer;
 
   Iterable<Classifications>? _classifications;
@@ -50,9 +45,22 @@ class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
 
   @override
   void dispose() {
-    if (_pointer != null && !_isClosed) {
+    assert(() {
+      if (isClosed) {
+        throw Exception(
+          'A TextClassifierResult was closed after it had already been closed. '
+          'TextClassifierResult objects should only be closed when they are at'
+          'their end of life and will never be used again.',
+        );
+      }
+      return true;
+    }());
+    if (_pointer != null) {
+      // Only call the native finalizer if there actually is native memory,
+      // because tests may verify that faked results are also closed and calling
+      // this method in that scenario would cause a segfault.
       bindings.text_classifier_close_result(_pointer!);
     }
-    _isClosed = true;
+    super.dispose();
   }
 }

@@ -23,6 +23,10 @@ class TextClassifier extends BaseTextClassifier {
 }
 
 /// {@macro TextClassifierOptions}
+///
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
 class TextClassifierOptions extends BaseTextClassifierOptions {
   /// {@template TextClassifierOptions.fromAssetPath}
   /// Convenience constructor that looks for the model asset at the given file
@@ -60,6 +64,7 @@ class TextClassifierResult extends BaseTextClassifierResult {
       throw UnimplementedError();
 
   @override
+  // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }
 
@@ -80,6 +85,9 @@ class TextEmbedder extends BaseTextEmbedder {
 }
 
 /// {@macro TextEmbedderOptions}
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
 class TextEmbedderOptions extends BaseTextEmbedderOptions {
   /// {@template TextEmbedderOptions.fromAssetPath}
   /// Convenience constructor that looks for the model asset at the given file
@@ -116,5 +124,6 @@ class TextEmbedderResult extends BaseEmbedderResult {
   Iterable<Embedding> get embeddings => throw UnimplementedError();
 
   @override
+  // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }

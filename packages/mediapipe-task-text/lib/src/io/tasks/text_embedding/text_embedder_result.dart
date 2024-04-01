@@ -22,11 +22,6 @@ class TextEmbedderResult extends BaseEmbedderResult with IOTaskResult {
   /// {@endtemplate}
   TextEmbedderResult.native(this._pointer);
 
-  bool _isClosed = false;
-
-  /// [True] if [dispose] has been called.
-  bool get isClosed => _isClosed;
-
   Pointer<bindings.TextEmbedderResult>? _pointer;
 
   Iterable<Embedding>? _embeddings;
@@ -46,9 +41,22 @@ class TextEmbedderResult extends BaseEmbedderResult with IOTaskResult {
 
   @override
   void dispose() {
-    if (_pointer != null && !_isClosed) {
+    assert(() {
+      if (isClosed) {
+        throw Exception(
+          'A TextEmbedderResult was closed after it had already been closed. '
+          'TextEmbedderResult objects should only be closed when they are at'
+          'their end of life and will never be used again.',
+        );
+      }
+      return true;
+    }());
+    if (_pointer != null) {
+      // Only call the native finalizer if there actually is native memory,
+      // because tests may verify that faked results are also closed and calling
+      // this method in that scenario would cause a segfault.
       bindings.text_embedder_close_result(_pointer!);
     }
-    _isClosed = true;
+    super.dispose();
   }
 }

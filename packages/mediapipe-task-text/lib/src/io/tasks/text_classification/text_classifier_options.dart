@@ -61,8 +61,6 @@ class TextClassifierOptions extends BaseTextClassifierOptions
   /// {@endtemplate}
   Pointer<bindings.TextClassifierOptions>? _pointer;
 
-  bool _isClosed = false;
-
   @override
   Pointer<bindings.TextClassifierOptions> copyToNative() {
     _pointer = calloc<bindings.TextClassifierOptions>();
@@ -71,9 +69,30 @@ class TextClassifierOptions extends BaseTextClassifierOptions
     return _pointer!;
   }
 
+  bool _isClosed = false;
+
+  /// Tracks whether [dispose] has been called.
+  bool get isClosed => _isClosed;
+
   @override
   void dispose() {
-    if (_isClosed) return;
+    assert(() {
+      if (isClosed) {
+        throw Exception(
+          'Attempted to call dispose on an already-disposed task options'
+          'object. Task options should only ever be disposed after they are at '
+          'end-of-life and will never be accessed again.',
+        );
+      }
+      if (_pointer == null) {
+        throw Exception(
+          'Attempted to call dispose on a TextClassifierOptions object which '
+          'was never used by a TextClassifier. Did you forget to create your '
+          'TextClassifier?',
+        );
+      }
+      return true;
+    }());
     baseOptions.freeStructFields(_pointer!.ref.base_options);
     classifierOptions.freeStructFields(_pointer!.ref.classifier_options);
     calloc.free(_pointer!);

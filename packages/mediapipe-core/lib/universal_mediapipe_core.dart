@@ -18,6 +18,10 @@ class ClassifierResult extends BaseClassifierResult {
       throw UnimplementedError();
 
   @override
+  bool get isClosed => throw UnimplementedError();
+
+  @override
+  // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }
 

@@ -30,6 +30,9 @@ mixin TaskOptions<T extends Struct> on BaseTaskOptions {
 
   /// {@template TaskOptions.dispose}
   /// Releases native memory created by [copyToNative].
+  ///
+  /// This method is called within the IO implementation and should not be
+  /// callable or even visible to end developers.
   /// {@endtemplate}
   void dispose() {
     throw UnimplementedError('Must implement method `$runtimeType.dispose`');

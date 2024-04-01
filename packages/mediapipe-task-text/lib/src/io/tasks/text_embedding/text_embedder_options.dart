@@ -54,8 +54,6 @@ class TextEmbedderOptions extends BaseTextEmbedderOptions
   /// {@macro TaskOptions.memory}
   Pointer<bindings.TextEmbedderOptions>? _pointer;
 
-  bool _isClosed = false;
-
   @override
   Pointer<bindings.TextEmbedderOptions> copyToNative() {
     _pointer = calloc<bindings.TextEmbedderOptions>();
@@ -64,9 +62,30 @@ class TextEmbedderOptions extends BaseTextEmbedderOptions
     return _pointer!;
   }
 
+  bool _isClosed = false;
+
+  /// Tracks whether [dispose] has been called.
+  bool get isClosed => _isClosed;
+
   @override
   void dispose() {
-    if (_isClosed) return;
+    assert(() {
+      if (isClosed) {
+        throw Exception(
+          'A TextEmbedderResult was closed after it had already been closed. '
+          'TextEmbedderResult objects should only be closed when they are at'
+          'their end of life and will never be used again.',
+        );
+      }
+      if (_pointer == null) {
+        throw Exception(
+          'Attempted to call dispose on a TextEmbedderOptions object which '
+          'was never used by a TextEmbedder. Did you forget to create your '
+          'TextEmbedder?',
+        );
+      }
+      return true;
+    }());
     baseOptions.freeStructFields(_pointer!.ref.base_options);
     embedderOptions.freeStructFields(_pointer!.ref.embedder_options);
     calloc.free(_pointer!);

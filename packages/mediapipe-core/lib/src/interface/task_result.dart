@@ -3,13 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:mediapipe_core/interface.dart';
+import 'package:meta/meta.dart';
 
 /// Anchor class for all result objects from MediaPipe tasks.
 abstract class TaskResult {
   /// {@template TaskResult.dispose}
-  /// Releases platform memory if any is held.
+  /// Releases all resources for this object.
+  ///
+  /// See also:
+  ///   * [isClosed] which tracks whether this method has been called.
   /// {@endtemplate}
-  void dispose();
+  @mustCallSuper
+  void dispose() {
+    _isClosed = true;
+  }
+
+  /// {@template TaskResult.isClosed}
+  /// Tracks whether this object has been properly released via `dispose`.
+  ///
+  /// See also:
+  ///   * [dispose], whose calling should set this to `true`.
+  /// {@endtemplate}
+  bool get isClosed => _isClosed;
+
+  /// Inner tracker for whether [dispose] has been called;
+  bool _isClosed = false;
 }
 
 /// {@template ClassifierResult}
