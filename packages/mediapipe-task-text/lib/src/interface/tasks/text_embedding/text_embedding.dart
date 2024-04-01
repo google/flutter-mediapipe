@@ -4,4 +4,3 @@
 
 export 'text_embedder.dart';
 export 'text_embedder_options.dart';
-export 'text_embedder_result.dart';

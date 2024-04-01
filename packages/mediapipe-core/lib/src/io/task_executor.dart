@@ -30,7 +30,7 @@ abstract class TaskExecutor<
     NativeOptions extends Struct,
     Options extends TaskOptions<NativeOptions>,
     NativeResult extends Struct,
-    Result extends TaskResult> {
+    Result extends IOTaskResult> {
   /// {@macro TaskExecutor}
   TaskExecutor(this.options);
 

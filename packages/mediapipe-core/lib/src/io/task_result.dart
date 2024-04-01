@@ -9,10 +9,10 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// Anchor class for native memory implementations of task results.
-mixin TaskResult {}
+mixin IOTaskResult {}
 
 /// {@macro ClassifierResult}
-abstract class ClassifierResult extends BaseClassifierResult with TaskResult {
+abstract class ClassifierResult extends BaseClassifierResult with IOTaskResult {
   /// {@macro ClassifierResult.fake}
   ClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,

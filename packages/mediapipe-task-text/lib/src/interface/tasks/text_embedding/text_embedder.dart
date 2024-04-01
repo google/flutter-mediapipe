@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:mediapipe_core/interface.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
-import 'text_embedding.dart';
 
 /// {@template TextEmbedder}
 /// Utility to convert text into an embedding suitable for other MediaPipe tasks.
@@ -12,7 +12,7 @@ abstract class BaseTextEmbedder {
   /// {@template TextEmbedder.embed}
   /// Sends a [String] value to MediaPipe for conversion into an [Embedding].
   /// {@endtemplate}
-  Future<BaseTextEmbedderResult> embed(String text);
+  Future<BaseEmbedderResult> embed(String text);
 
   /// {@template TextEmbedder.cosineSimilarity}
   /// Sends a [String] value to MediaPipe for conversion into an [Embedding].

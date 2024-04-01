@@ -10,7 +10,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// {@macro TextClassifierResult}
-class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
+class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
   /// {@macro TextClassifierResult.fake}
   TextClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,

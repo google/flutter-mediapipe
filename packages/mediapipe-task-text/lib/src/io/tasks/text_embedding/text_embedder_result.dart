@@ -4,12 +4,12 @@
 
 import 'dart:ffi';
 import 'package:mediapipe_core/io.dart';
-import 'package:mediapipe_text/interface.dart';
+import 'package:mediapipe_core/interface.dart';
 import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// {@macro TextEmbedderResult}
-class TextEmbedderResult extends BaseTextEmbedderResult with TaskResult {
+class TextEmbedderResult extends BaseEmbedderResult with IOTaskResult {
   /// {@macro TextEmbedderResult.fake}
   TextEmbedderResult({required Iterable<Embedding> embeddings});
 
