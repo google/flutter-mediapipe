@@ -11,7 +11,7 @@ import 'package:equatable/equatable.dart';
 ///
 /// Category is a util class that contains a [categoryName], its [displayName],
 /// a float value as [score], and the [index] of the label in the corresponding
-/// label file. It is Typically used as result of classification or detection
+/// label file. It is typically used as result of classification or detection
 /// tasks.
 ///
 /// See more:
