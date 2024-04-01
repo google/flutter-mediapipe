@@ -247,7 +247,9 @@ class Embedding extends BaseEmbedding {
       _quantizedEmbedding ??= _getQuantizedEmbedding();
   Uint8List? _getQuantizedEmbedding() {
     if (type != EmbeddingType.quantized) {
-      return null;
+      throw Exception(
+        'Unexpected access of `quantizedEmbedding` for float embedding',
+      );
     }
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
@@ -265,7 +267,9 @@ class Embedding extends BaseEmbedding {
   Float32List? get floatEmbedding => _floatEmbedding ??= _getFloatEmbedding();
   Float32List? _getFloatEmbedding() {
     if (type != EmbeddingType.float) {
-      return null;
+      throw Exception(
+        'Unexpected access of `floatEmbedding` for quantized embedding',
+      );
     }
     if (_pointer.isNullOrNullPointer) {
       throw Exception('Could not determine value for Embedding.floatEmbedding');
@@ -282,9 +286,9 @@ class Embedding extends BaseEmbedding {
       return _pointer!.ref.values_count;
     }
     return switch (type) {
-        EmbeddingType.float =>  _floatEmbedding!.length,
-        EmbeddingType.quantized => _quantizedEmbedding!.length,
-      }
+      EmbeddingType.float => _floatEmbedding!.length,
+      EmbeddingType.quantized => _quantizedEmbedding!.length,
+    };
   }
 
   /// Accepts a pointer to a list of structs, and a count representing the length
