@@ -12,6 +12,9 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// {@macro TextEmbedderOptions}
+///
+/// This io-friendly implementation is not immutable strictly for memoization of
+/// computed fields. All values used by pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
 class TextEmbedderOptions extends BaseTextEmbedderOptions
     with TaskOptions<bindings.TextEmbedderOptions> {

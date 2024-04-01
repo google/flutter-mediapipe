@@ -144,12 +144,18 @@ abstract class BaseEmbedderOptions extends BaseInnerTaskOptions {
   /// option only if the model does not already contain a native L2_NORMALIZATION
   /// TF Lite Op. In most cases, this is already the case and L2 norm is thus
   /// achieved through TF Lite inference.
+  ///
+  /// See also:
+  ///   * [TutorialsPoint guide on L2 normalization](https://www.tutorialspoint.com/machine_learning_with_python/machine_learning_with_python_ltwo_normalization.htm)
   bool get l2Normalize;
 
   /// Whether the returned embedding should be quantized to bytes via scalar
   /// quantization. Embeddings are implicitly assumed to be unit-norm and
   /// therefore any dimension is guaranteed to have a value in [-1.0, 1.0]. Use
   /// the l2_normalize option if this is not the case.
+  ///
+  /// See also:
+  ///   * [l2Normalize]
   bool get quantize;
 
   @override

@@ -10,6 +10,9 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as bindings;
 
 /// {@macro Category}
+///
+/// This io-friendly implementation is not immutable strictly for memoization of
+/// computed fields. All values used by pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
 class Category extends BaseCategory {
   /// {@macro Category.fake}
@@ -95,6 +98,9 @@ class Category extends BaseCategory {
 }
 
 /// {@macro Classifications}
+///
+/// This io-friendly implementation is not immutable strictly for memoization of
+/// computed fields. All values used by pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
 class Classifications extends BaseClassifications {
   /// {@macro Classifications.fake}
@@ -166,6 +172,9 @@ class Classifications extends BaseClassifications {
 }
 
 /// {@macro Embedding}
+///
+/// This io-friendly implementation is not immutable strictly for memoization of
+/// computed fields. All values used by pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
 class Embedding extends BaseEmbedding {
   /// {@macro Embedding.fakeQuantized}

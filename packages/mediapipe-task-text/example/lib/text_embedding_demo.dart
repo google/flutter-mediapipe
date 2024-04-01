@@ -306,8 +306,8 @@ class TextEmbedderResultDisplay extends StatelessWidget {
     final embedding = embeddedText.result!.embeddings.last;
     String embeddingDisplay = switch (embedding.type) {
       EmbeddingType.float => '${embedding.floatEmbedding!}',
-      EmbeddingType.quantized =>'${embedding.quantizedEmbedding!}',
-    }
+      EmbeddingType.quantized => '${embedding.quantizedEmbedding!}',
+    };
     // Replace "..." with the results
     final message = '"${embeddedText.value}"\n$embeddingDisplay';
     return Card(
