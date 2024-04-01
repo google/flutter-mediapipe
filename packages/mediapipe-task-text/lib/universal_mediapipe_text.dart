@@ -171,7 +171,7 @@ class TextEmbedderOptions extends BaseTextEmbedderOptions {
 }
 
 /// {@macro TextEmbedderResult}
-class TextEmbedderResult extends BaseTextEmbedderResult {
+class TextEmbedderResult extends BaseEmbedderResult {
   /// {@template TextEmbedderResult.fake}
   /// Instantiates a [TextEmbedderResult] with fake data for testing.
   /// {@endtemplate}
