@@ -325,35 +325,11 @@ class TextEmbedderResultDisplay extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     if (embedding.type == EmbeddingType.float)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GFButton(
-                          onPressed: null,
-                          text: 'Float',
-                          shape: GFButtonShape.pills,
-                          color: Colors.blue[300]!,
-                        ),
-                      ),
+                      _embeddingAttribute('Float', Colors.blue[300]!),
                     if (embedding.type == EmbeddingType.quantized)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GFButton(
-                          onPressed: null,
-                          text: 'Quantized',
-                          shape: GFButtonShape.pills,
-                          color: Colors.orange[300]!,
-                        ),
-                      ),
+                      _embeddingAttribute('Quantized', Colors.orange[300]!),
                     if (embeddedText.l2Normalized)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GFButton(
-                          onPressed: null,
-                          text: 'L2 Normalized',
-                          shape: GFButtonShape.pills,
-                          color: Colors.green[300]!,
-                        ),
-                      ),
+                      _embeddingAttribute('L2 Normalized', Colors.green[300]!),
                   ],
                 ),
                 Text(embeddedText.computedAt.toIso8601String()),
@@ -361,6 +337,18 @@ class TextEmbedderResultDisplay extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _embeddingAttribute(String text, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GFButton(
+        onPressed: null,
+        text: text,
+        shape: GFButtonShape.pills,
+        color: color,
       ),
     );
   }
