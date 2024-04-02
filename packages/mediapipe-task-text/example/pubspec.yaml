@@ -28,4 +28,5 @@ flutter:
 
   assets:
     - assets/bert_classifier.tflite
+    - assets/language_detector.tflite
     - assets/universal_sentence_encoder.tflite

@@ -8,7 +8,6 @@ import 'dart:isolate';
 import 'package:async/async.dart';
 import 'package:logging/logging.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
-import 'package:mediapipe_core/io.dart' as core_io;
 import 'package:mediapipe_text/interface.dart';
 import 'package:mediapipe_text/io.dart';
 
@@ -104,35 +103,4 @@ Future<void> _languageDetectionService(
   }
   executor.dispose();
   Isolate.exit();
-}
-
-enum _EmbedderTaskType { _embed, _cosineSimilarity }
-
-class _EmbedderTask {
-  _EmbedderTask._({
-    required this.type,
-    required this.text,
-    required this.a,
-    required this.b,
-  });
-
-  factory _EmbedderTask.embed(String text) => _EmbedderTask._(
-        type: _EmbedderTaskType._embed,
-        text: text,
-        a: null,
-        b: null,
-      );
-
-  factory _EmbedderTask.cosineSimilarity(Embedding a, Embedding b) =>
-      _EmbedderTask._(
-        type: _EmbedderTaskType._cosineSimilarity,
-        text: null,
-        a: a,
-        b: b,
-      );
-
-  final _EmbedderTaskType type;
-  final String? text;
-  final Embedding? a;
-  final Embedding? b;
 }

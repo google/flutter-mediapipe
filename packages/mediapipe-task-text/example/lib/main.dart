@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'language_detection_demo.dart';
 import 'logging.dart';
 import 'text_classification_demo.dart';
 import 'text_embedding_demo.dart';
@@ -31,7 +32,7 @@ class TextTaskPages extends StatefulWidget {
 class TextTaskPagesState extends State<TextTaskPages> {
   final PageController controller = PageController();
 
-  final titles = <String>['Classify', 'Embed'];
+  final titles = <String>['Classify', 'Embed', 'Detect Languages'];
   int titleIndex = 0;
 
   void switchToPage(int index) {
@@ -61,28 +62,39 @@ class TextTaskPagesState extends State<TextTaskPages> {
         children: const <Widget>[
           TextClassificationDemo(),
           TextEmbeddingDemo(),
+          LanguageDetectionDemo(),
         ],
       ),
-      bottomNavigationBar: ColoredBox(
-        color: Colors.blueGrey,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            TextButton(
-              onPressed: () => switchToPage(0),
-              child: Text(
-                'Classify',
-                style: titleIndex == 0 ? activeTextStyle : inactiveTextStyle,
+      bottomNavigationBar: SizedBox(
+        height: 50,
+        child: ColoredBox(
+          color: Colors.blueGrey,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              TextButton(
+                onPressed: () => switchToPage(0),
+                child: Text(
+                  'Classify',
+                  style: titleIndex == 0 ? activeTextStyle : inactiveTextStyle,
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () => switchToPage(1),
-              child: Text(
-                'Embed',
-                style: titleIndex == 1 ? activeTextStyle : inactiveTextStyle,
+              TextButton(
+                onPressed: () => switchToPage(1),
+                child: Text(
+                  'Embed',
+                  style: titleIndex == 1 ? activeTextStyle : inactiveTextStyle,
+                ),
               ),
-            ),
-          ],
+              TextButton(
+                onPressed: () => switchToPage(2),
+                child: Text(
+                  'Detect Languages',
+                  style: titleIndex == 2 ? activeTextStyle : inactiveTextStyle,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
