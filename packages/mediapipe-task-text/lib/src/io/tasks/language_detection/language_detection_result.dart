@@ -9,7 +9,7 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// {@macro LanguageDetectionResult}
-class LanguageDetectorResult extends BaseLanguageDetectionResult
+class LanguageDetectorResult extends BaseLanguageDetectorResult
     with IOTaskResult {
   /// {@macro LanguageDetectionResult}
   LanguageDetectorResult({

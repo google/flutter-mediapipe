@@ -10,7 +10,7 @@ abstract class BaseLanguageDetector {
   /// {@template LanguageDetector.detect}
   /// Sends a [String] value to MediaPipe for language detection.
   /// {@endtemplate}
-  Future<BaseLanguageDetectionResult> detect(String text);
+  Future<BaseLanguageDetectorResult> detect(String text);
 
   /// Cleans up all resources.
   void dispose();

@@ -127,3 +127,67 @@ class TextEmbedderResult extends BaseEmbedderResult {
   // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }
+
+/// {@macro LanguageDetector}
+class LanguageDetector extends BaseLanguageDetector {
+  /// {@macro LanguageDetector}
+  LanguageDetector(LanguageDetectorOptions options);
+
+  @override
+  Future<LanguageDetectorResult> detect(String text) =>
+      throw UnimplementedError();
+
+  @override
+  void dispose() => throw UnimplementedError();
+}
+
+/// {@macro LanguageDetectorOptions}
+class LanguageDetectorOptions extends BaseLanguageDetectorOptions {
+  /// {@template LanguageDetectorOptions.fromAssetPath}
+  /// Convenience constructor that looks for the model asset at the given file
+  /// system location.
+  /// {@endtemplate}
+  LanguageDetectorOptions.fromAssetPath(
+    String assetPath, {
+    ClassifierOptions classifierOptions = const ClassifierOptions(),
+  });
+
+  /// {@template LanguageDetectorOptions.fromAssetBuffer}
+  /// Convenience constructor that uses a model existing in memory.
+  /// {@endtemplate}
+  LanguageDetectorOptions.fromAssetBuffer(
+    Uint8List assetBuffer, {
+    ClassifierOptions classifierOptions = const ClassifierOptions(),
+  });
+
+  @override
+  BaseOptions get baseOptions => throw UnimplementedError();
+
+  @override
+  ClassifierOptions get classifierOptions => throw UnimplementedError();
+}
+
+/// {@macro LanguageDetectorResult}
+class LanguageDetectorResult extends BaseLanguageDetectorResult {
+  /// {@template LanguageDetectorResult.fake}
+  /// Instantiates a [LanguageDetectorResult] with fake data for testing.
+  /// {@endtemplate}
+  LanguageDetectorResult(
+      {required Iterable<LanguagePrediction> classifications});
+
+  @override
+  Iterable<LanguagePrediction> get predictions => throw UnimplementedError();
+
+  @override
+  // ignore: must_call_super
+  void dispose() => throw UnimplementedError();
+}
+
+/// {@macro LanguagePrediction}
+class LanguagePrediction extends BaseLanguagePrediction {
+  @override
+  String get languageCode => throw UnimplementedError();
+
+  @override
+  double get probability => throw UnimplementedError();
+}

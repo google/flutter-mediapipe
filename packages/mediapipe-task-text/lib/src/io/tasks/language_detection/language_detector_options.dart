@@ -13,8 +13,8 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 
 /// {@macro LanguageDetectorOptions}
 ///
-/// This io-friendly implementation is not immutable strictly for memoization of
-/// computed fields. All values used by pkg:equatable are in fact immutable.
+/// This io-friendly implementation is not immutable strictly to track whether
+/// [dispose] has been called.
 // ignore: must_be_immutable
 class LanguageDetectorOptions extends BaseLanguageDetectorOptions
     with TaskOptions<bindings.LanguageDetectorOptions> {
@@ -80,8 +80,8 @@ class LanguageDetectorOptions extends BaseLanguageDetectorOptions
       if (_pointer == null) {
         throw Exception(
           'Attempted to call dispose on a LanguageDetectorOptions object which '
-          'was never used by a TextClassifier. Did you forget to create your '
-          'TextClassifier?',
+          'was never used by a LanguageDetector. Did you forget to create your '
+          'LanguageDetector?',
         );
       }
       return true;
