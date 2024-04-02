@@ -60,8 +60,7 @@ class TextClassifierResult extends BaseTextClassifierResult {
   TextClassifierResult({required Iterable<Classifications> classifications});
 
   @override
-  Iterable<BaseClassifications> get classifications =>
-      throw UnimplementedError();
+  Iterable<Classifications> get classifications => throw UnimplementedError();
 
   @override
   // ignore: must_call_super

@@ -62,7 +62,7 @@ class Classifications extends BaseClassifications {
   });
 
   @override
-  Iterable<BaseCategory> get categories => throw UnimplementedError();
+  Iterable<Category> get categories => throw UnimplementedError();
 
   @override
   int get headIndex => throw UnimplementedError();
