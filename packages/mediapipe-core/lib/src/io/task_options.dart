@@ -30,6 +30,9 @@ mixin TaskOptions<T extends Struct> on BaseTaskOptions {
 
   /// {@template TaskOptions.dispose}
   /// Releases native memory created by [copyToNative].
+  ///
+  /// This method is called within the IO implementation and should not be
+  /// callable or even visible to end developers.
   /// {@endtemplate}
   void dispose() {
     throw UnimplementedError('Must implement method `$runtimeType.dispose`');
@@ -207,5 +210,32 @@ class ClassifierOptions extends BaseClassifierOptions
     if (struct.category_denylist.address != 0) {
       calloc.free(struct.category_denylist);
     }
+  }
+}
+
+/// {@macro EmbedderOptions}
+class EmbedderOptions extends BaseEmbedderOptions
+    with InnerTaskOptions<bindings.EmbedderOptions> {
+  /// {@macro EmbedderOptions}
+  const EmbedderOptions({
+    this.l2Normalize = false,
+    this.quantize = false,
+  });
+
+  @override
+  final bool l2Normalize;
+
+  @override
+  final bool quantize;
+
+  @override
+  void assignToStruct(bindings.EmbedderOptions struct) {
+    struct.l2_normalize = l2Normalize;
+    struct.quantize = quantize;
+  }
+
+  @override
+  void freeStructFields(bindings.EmbedderOptions struct) {
+    // no-op; nothing to free
   }
 }

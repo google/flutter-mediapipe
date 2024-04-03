@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:math';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'package:mediapipe_core/src/io/mediapipe_core.dart';
@@ -55,4 +57,48 @@ void populateClassifications(
   }
   classifications.head_name = headName.copyToNative();
   classifications.head_index = headIndex;
+}
+
+/// Hydrates a faked [core_bindings.Embedding] object.
+void populateEmbedding(
+  core_bindings.Embedding embedding, {
+  bool quantize = false,
+  bool l2Normalize = false,
+  int length = 100,
+  String headName = 'response_encoding',
+  int headIndex = 1,
+}) {
+  embedding.values_count = length;
+  embedding.head_name = headName.copyToNative();
+  embedding.head_index = headIndex;
+
+  Random rnd = Random();
+
+  if (quantize) {
+    embedding.quantized_embedding = Uint8List.fromList(
+      _genInts(length, rnd: rnd).toList(),
+    ).copyToNative();
+  } else {
+    embedding.float_embedding = Float32List.fromList(
+      _genFloats(length, l2Normalize: l2Normalize, rnd: rnd).toList(),
+    ).copyToNative();
+  }
+}
+
+Iterable<int> _genInts(int count, {required Random rnd}) sync* {
+  int index = 0;
+  while (index < count) {
+    yield rnd.nextInt(127);
+    index++;
+  }
+}
+
+Iterable<double> _genFloats(int count,
+    {required bool l2Normalize, required Random rnd}) sync* {
+  int index = 0;
+  while (index < count) {
+    final dbl = rnd.nextDouble();
+    yield l2Normalize ? dbl : dbl * 127;
+    index++;
+  }
 }

@@ -18,11 +18,15 @@ class ClassifierResult extends BaseClassifierResult {
       throw UnimplementedError();
 
   @override
+  bool get isClosed => throw UnimplementedError();
+
+  @override
+  // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }
 
 /// {@macro Category}
-base class Category extends BaseCategory {
+class Category extends BaseCategory {
   /// {@template Category.fake}
   /// Initializes a [Category] instance with mock values for testing.
   /// {@endtemplate}
@@ -47,7 +51,7 @@ base class Category extends BaseCategory {
 }
 
 /// {@macro Classifications}
-base class Classifications extends BaseClassifications {
+class Classifications extends BaseClassifications {
   /// {@template Classifications.fake}
   /// Instantiates a [Classifications] object with fake values for testing.
   /// {@endtemplate}
@@ -65,6 +69,56 @@ base class Classifications extends BaseClassifications {
 
   @override
   String? get headName => throw UnimplementedError();
+}
+
+/// {@macro Embedding}
+class Embedding extends BaseEmbedding {
+  /// {@template Embedding.fakeQuantized}
+  /// Instantiates a quantized [Embedding] object with fake values for testing.
+  ///
+  /// Usage:
+  /// ```dart
+  /// Embedding.quantized(Uint8List.fromList([1,2,3]), headIndex: 1);
+  /// ```
+  /// {@endtemplate}
+  Embedding.quantized(
+    Uint8List quantizedEmbedding, {
+    required int headIndex,
+    String? headName,
+  });
+
+  /// {@template Embedding.fakeFloat}
+  /// Instantiates a floating point [Embedding] object with fake values for
+  /// testing.
+  ///
+  /// Usage:
+  /// ```dart
+  /// Embedding.float(Float32List.fromList([0.1, 0.2, 0.3]), headIndex: 1);
+  /// ```
+  /// {@endtemplate}
+  Embedding.float(
+    Float32List floatEmbedding, {
+    required int headIndex,
+    String? headName,
+  });
+
+  @override
+  Float32List? get floatEmbedding => throw UnimplementedError();
+
+  @override
+  int get headIndex => throw UnimplementedError();
+
+  @override
+  String? get headName => throw UnimplementedError();
+
+  @override
+  int get length => throw UnimplementedError();
+
+  @override
+  Uint8List? get quantizedEmbedding => throw UnimplementedError();
+
+  @override
+  EmbeddingType get type => throw UnimplementedError();
 }
 
 /// {@macro BaseOptions}
@@ -121,4 +175,19 @@ class ClassifierOptions extends BaseClassifierOptions {
 
   @override
   double? get scoreThreshold => throw UnimplementedError();
+}
+
+/// {@macro EmbedderOptions}
+class EmbedderOptions extends BaseEmbedderOptions {
+  /// {@macro EmbedderOptions}
+  const EmbedderOptions({
+    bool l2Normalize = false,
+    bool quantize = false,
+  });
+
+  @override
+  bool get l2Normalize => throw UnimplementedError();
+
+  @override
+  bool get quantize => throw UnimplementedError();
 }

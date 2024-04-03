@@ -13,7 +13,7 @@ import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_
     as bindings;
 
 void main() {
-  group('TextClassifierResult.structToDart should', () {
+  group('TextClassifierResult.native should', () {
     test('load an empty object', () {
       final Pointer<bindings.TextClassifierResult> ptr =
           calloc<bindings.TextClassifierResult>();

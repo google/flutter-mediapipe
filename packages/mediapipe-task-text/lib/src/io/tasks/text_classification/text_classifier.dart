@@ -39,6 +39,7 @@ class TextClassifier extends BaseTextClassifier {
   }
 
   /// Closes down the background isolate, releasing all resources.
+  @override
   void dispose() => _sendPort.send(null);
 }
 

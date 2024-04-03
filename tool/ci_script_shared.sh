@@ -4,6 +4,8 @@ function ci_text_package() {
     pushd ../../tool/builder
     dart pub get
     dart bin/main.dart model -m textclassification
+    echo "Downloading TextEmbedding model"
+    dart bin/main.dart model -m textembedding
     popd
 }
 

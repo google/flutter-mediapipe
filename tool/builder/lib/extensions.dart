@@ -20,9 +20,9 @@ extension EasyOutput on Process {
 /// From "/an/awesome/url", returns "url".
 /// From "/an/awesome/url/", with a depth of 1, returns "awesome"
 /// From "/an/awesome/url", with a depth of 1, returns "awesome"
-String lastChunk(String url, {int depth = 0}) {
-  final indexOffset = (url.endsWith('/')) ? -2 - depth : -1 - depth;
-  final splitUrl = url.split('/');
+String lastChunk(String url, {int depth = 0, String delimiter = '/'}) {
+  final indexOffset = (url.endsWith(delimiter)) ? -2 - depth : -1 - depth;
+  final splitUrl = url.split(delimiter);
   return splitUrl[splitUrl.length + indexOffset];
 }
 

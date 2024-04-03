@@ -10,8 +10,8 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
 
 /// {@macro TextClassifierResult}
-class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
-  /// {@macro ClassifierResult.fake}
+class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
+  /// {@macro TextClassifierResult.fake}
   TextClassifierResult({required Iterable<Classifications> classifications})
       : _classifications = classifications,
         _pointer = null;
@@ -25,7 +25,7 @@ class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
   /// {@endtemplate}
   TextClassifierResult.native(this._pointer);
 
-  Pointer<bindings.TextClassifierResult>? _pointer;
+  final Pointer<bindings.TextClassifierResult>? _pointer;
 
   Iterable<Classifications>? _classifications;
   @override
@@ -45,9 +45,22 @@ class TextClassifierResult extends BaseTextClassifierResult with TaskResult {
 
   @override
   void dispose() {
+    assert(() {
+      if (isClosed) {
+        throw Exception(
+          'A TextClassifierResult was closed after it had already been closed. '
+          'TextClassifierResult objects should only be closed when they are at'
+          'their end of life and will never be used again.',
+        );
+      }
+      return true;
+    }());
     if (_pointer != null) {
+      // Only call the native finalizer if there actually is native memory,
+      // because tests may verify that faked results are also closed and calling
+      // this method in that scenario would cause a segfault.
       bindings.text_classifier_close_result(_pointer!);
-      _pointer = null;
     }
+    super.dispose();
   }
 }

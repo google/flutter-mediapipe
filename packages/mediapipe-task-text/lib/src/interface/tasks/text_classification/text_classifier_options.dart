@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: implementation_imports
 import 'package:mediapipe_core/interface.dart';
 
 /// {@template TextClassifierOptions}
@@ -11,14 +10,16 @@ import 'package:mediapipe_core/interface.dart';
 /// See also:
 ///  * [MediaPipe's TextClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/js/tasks-text.textclassifieroptions)
 /// {@endtemplate}
+///
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
 abstract class BaseTextClassifierOptions extends BaseTaskOptions {
-  /// {@template TextClassifierOptions.classifierOptions}
   /// Contains parameter options for how this classifier should behave,
   /// including allow and denylists, thresholds, maximum results, etc.
   ///
   /// See also:
-  ///  * [IClassifierOptions] for each available field.
-  /// {@endtemplate}
+  ///  * [BaseClassifierOptions] for each available field.
   BaseClassifierOptions get classifierOptions;
 
   @override

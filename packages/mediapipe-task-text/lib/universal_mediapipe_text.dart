@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_core/interface.dart';
+export 'package:mediapipe_core/interface.dart' show EmbeddingType;
 import 'package:mediapipe_text/interface.dart';
 
 /// {@macro TextClassifier}
@@ -16,9 +17,16 @@ class TextClassifier extends BaseTextClassifier {
   @override
   Future<TextClassifierResult> classify(String text) =>
       throw UnimplementedError();
+
+  @override
+  void dispose() => throw UnimplementedError();
 }
 
 /// {@macro TextClassifierOptions}
+///
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
 class TextClassifierOptions extends BaseTextClassifierOptions {
   /// {@template TextClassifierOptions.fromAssetPath}
   /// Convenience constructor that looks for the model asset at the given file
@@ -46,7 +54,7 @@ class TextClassifierOptions extends BaseTextClassifierOptions {
 
 /// {@macro TextClassifierResult}
 class TextClassifierResult extends BaseTextClassifierResult {
-  /// {@template ClassifierResult.fake}
+  /// {@template TextClassifierResult.fake}
   /// Instantiates a [TextClassifierResult] with fake data for testing.
   /// {@endtemplate}
   TextClassifierResult({required Iterable<Classifications> classifications});
@@ -56,5 +64,66 @@ class TextClassifierResult extends BaseTextClassifierResult {
       throw UnimplementedError();
 
   @override
+  // ignore: must_call_super
+  void dispose() => throw UnimplementedError();
+}
+
+/// {@macro TextEmbedder}
+class TextEmbedder extends BaseTextEmbedder {
+  /// {@macro TextEmbedder}
+  TextEmbedder(TextEmbedderOptions options);
+
+  @override
+  Future<TextEmbedderResult> embed(String text) => throw UnimplementedError();
+
+  @override
+  Future<double> cosineSimilarity(Embedding a, Embedding b) =>
+      throw UnimplementedError();
+
+  @override
+  void dispose() => throw UnimplementedError();
+}
+
+/// {@macro TextEmbedderOptions}
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
+class TextEmbedderOptions extends BaseTextEmbedderOptions {
+  /// {@template TextEmbedderOptions.fromAssetPath}
+  /// Convenience constructor that looks for the model asset at the given file
+  /// system location.
+  /// {@endtemplate}
+  TextEmbedderOptions.fromAssetPath(
+    String assetPath, {
+    EmbedderOptions embedderOptions = const EmbedderOptions(),
+  });
+
+  /// {@template TextEmbedderOptions.fromAssetBuffer}
+  /// Convenience constructor that uses a model existing in memory.
+  /// {@endtemplate}
+  TextEmbedderOptions.fromAssetBuffer(
+    Uint8List assetBuffer, {
+    EmbedderOptions embedderOptions = const EmbedderOptions(),
+  });
+
+  @override
+  BaseOptions get baseOptions => throw UnimplementedError();
+
+  @override
+  EmbedderOptions get embedderOptions => throw UnimplementedError();
+}
+
+/// {@macro TextEmbedderResult}
+class TextEmbedderResult extends BaseEmbedderResult {
+  /// {@template TextEmbedderResult.fake}
+  /// Instantiates a [TextEmbedderResult] with fake data for testing.
+  /// {@endtemplate}
+  TextEmbedderResult({required Iterable<Embedding> embeddings});
+
+  @override
+  Iterable<Embedding> get embeddings => throw UnimplementedError();
+
+  @override
+  // ignore: must_call_super
   void dispose() => throw UnimplementedError();
 }

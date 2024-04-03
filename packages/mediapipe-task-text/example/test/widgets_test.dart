@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
-import 'package:example/main.dart';
+import 'package:example/text_classification_demo.dart';
 
 class FakeTextClassifier extends TextClassifier {
   FakeTextClassifier(TextClassifierOptions options) : super(options);
@@ -35,11 +35,9 @@ void main() {
   testWidgets('TextClassificationResults should show results',
       (WidgetTester tester) async {
     final app = MaterialApp(
-      home: TextClassificationResults(
-        classifier: Future.value(
-          FakeTextClassifier(
-            TextClassifierOptions.fromAssetPath('fake'),
-          ),
+      home: TextClassificationDemo(
+        classifier: FakeTextClassifier(
+          TextClassifierOptions.fromAssetPath('fake'),
         ),
       ),
     );
