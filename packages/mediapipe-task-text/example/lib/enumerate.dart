@@ -3,21 +3,29 @@
 // found in the LICENSE file.
 
 extension EnumeratableList<T> on List<T> {
-  Iterable<S> enumerate<S>(S Function(T, int) fn) sync* {
+  Iterable<S> enumerate<S>(S Function(T, int) fn, {int? max}) sync* {
     int count = 0;
     while (count < length) {
       yield fn(this[count], count);
       count++;
+
+      if (max != null && count >= max) {
+        return;
+      }
     }
   }
 }
 
 extension EnumeratableIterable<T> on Iterable<T> {
-  Iterable<S> enumerate<S>(S Function(T, int) fn) sync* {
+  Iterable<S> enumerate<S>(S Function(T, int) fn, {int? max}) sync* {
     int count = 0;
     for (final T obj in this) {
       yield fn(obj, count);
       count++;
+
+      if (max != null && count >= max) {
+        return;
+      }
     }
   }
 }

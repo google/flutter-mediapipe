@@ -14,7 +14,8 @@ class LanguageDetectorResult extends BaseLanguageDetectorResult
   /// {@macro LanguageDetectionResult}
   LanguageDetectorResult({
     required Iterable<LanguagePrediction> predictions,
-  }) : _pointer = null;
+  })  : _predictions = predictions,
+        _pointer = null;
 
   /// {@template LanguageDetectorResult.native}
   /// Initializes a [LanguageDetectorResult] instance as a wrapper around native
@@ -49,8 +50,9 @@ class LanguagePrediction extends BaseLanguagePrediction {
   /// {@macro LanguagePrediction}
   LanguagePrediction({
     required String languageCode,
-    required double durability,
+    required double probability,
   })  : _languageCode = languageCode,
+        _probability = probability,
         _pointer = null;
 
   /// Initializes a [LanguagePrediction] instance as a wrapper around native

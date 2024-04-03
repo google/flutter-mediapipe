@@ -10,7 +10,9 @@ import 'package:mediapipe_text/mediapipe_text.dart';
 import 'enumerate.dart';
 
 class LanguageDetectionDemo extends StatefulWidget {
-  const LanguageDetectionDemo({super.key});
+  const LanguageDetectionDemo({super.key, this.detector});
+
+  final LanguageDetector? detector;
 
   @override
   State<LanguageDetectionDemo> createState() => _LanguageDetectionDemoState();
@@ -19,8 +21,7 @@ class LanguageDetectionDemo extends StatefulWidget {
 class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
     with AutomaticKeepAliveClientMixin<LanguageDetectionDemo> {
   final TextEditingController _controller = TextEditingController();
-  LanguageDetector? _detector;
-  Completer<LanguageDetector>? _completer;
+  final Completer<LanguageDetector> _completer = Completer<LanguageDetector>();
   final results = <Widget>[];
   String? _isProcessing;
 
@@ -32,18 +33,19 @@ class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
   }
 
   Future<void> _initDetector() async {
-    _detector?.dispose();
-    _completer = Completer<LanguageDetector>();
+    if (widget.detector != null) {
+      return _completer.complete(widget.detector!);
+    }
 
     ByteData? bytes = await DefaultAssetBundle.of(context)
         .load('assets/language_detector.tflite');
 
-    _detector = LanguageDetector(
+    final detector = LanguageDetector(
       LanguageDetectorOptions.fromAssetBuffer(
         bytes.buffer.asUint8List(),
       ),
     );
-    _completer!.complete(_detector);
+    _completer.complete(detector);
     bytes = null;
   }
 
@@ -56,7 +58,7 @@ class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
 
   Future<void> _detect() async {
     _prepareForDetection();
-    _completer!.future.then((detector) async {
+    _completer.future.then((detector) async {
       final result = await detector.detect(_controller.text);
       _showDetectionResults(result);
       result.dispose();
@@ -67,7 +69,7 @@ class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
     setState(
       () {
         results.last = Card(
-          key: Key('prediction-$_isProcessing-${results.length}'),
+          key: Key('prediction-"$_isProcessing" ${results.length}'),
           margin: const EdgeInsets.all(10),
           child: Column(
             children: [
@@ -80,15 +82,14 @@ class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
                 child: Wrap(
                   children: <Widget>[
                     ...result.predictions
-                        .toList()
-                        // Take first 4 because the model spits out dozens of
-                        // astronomically low probability language predictions
-                        .sublist(0, predictionColors.length)
                         .enumerate<Widget>(
                           (prediction, index) => _languagePrediction(
                             prediction,
                             predictionColors[index],
                           ),
+                          // Take first 4 because the model spits out dozens of
+                          // astronomically low probability language predictions
+                          max: predictionColors.length,
                         )
                         .toList(),
                   ],

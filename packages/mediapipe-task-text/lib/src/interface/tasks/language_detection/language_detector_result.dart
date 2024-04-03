@@ -11,9 +11,6 @@ import 'package:mediapipe_core/interface.dart';
 ///  * [MediaPipe's LanguageDetectionResult documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/text/languagedetector/LanguageDetectorResult)
 /// {@endtemplate}
 abstract class BaseLanguageDetectorResult extends TaskResult {
-  /// {@macro LanguageDetectionResult}
-  BaseLanguageDetectorResult();
-
   /// A list of predictions from the LanguageDetector.
   Iterable<BaseLanguagePrediction> get predictions;
 }

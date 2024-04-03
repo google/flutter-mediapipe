@@ -22,11 +22,9 @@ class TextClassificationDemo extends StatefulWidget {
 class _TextClassificationDemoState extends State<TextClassificationDemo>
     with AutomaticKeepAliveClientMixin<TextClassificationDemo> {
   final TextEditingController _controller = TextEditingController();
+  final Completer<TextClassifier> _completer = Completer<TextClassifier>();
   final results = <Widget>[];
   String? _isProcessing;
-
-  TextClassifier? _classifier;
-  Completer<TextClassifier>? _completer;
 
   @override
   void initState() {
@@ -35,28 +33,20 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
     _initClassifier();
   }
 
-  Future<TextClassifier> get classifier {
-    if (widget.classifier != null) {
-      return Future.value(widget.classifier!);
-    }
-    if (_completer == null) {
-      _initClassifier();
-    }
-    return _completer!.future;
-  }
-
   Future<void> _initClassifier() async {
-    _classifier?.dispose();
-    _completer = Completer<TextClassifier>();
+    if (widget.classifier != null) {
+      return _completer.complete(widget.classifier!);
+    }
+
     ByteData? classifierBytes = await DefaultAssetBundle.of(context)
         .load('assets/bert_classifier.tflite');
 
-    TextClassifier classifier = TextClassifier(
+    final classifier = TextClassifier(
       TextClassifierOptions.fromAssetBuffer(
         classifierBytes.buffer.asUint8List(),
       ),
     );
-    _completer!.complete(classifier);
+    _completer.complete(classifier);
     classifierBytes = null;
   }
 
@@ -76,7 +66,7 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
     setState(
       () {
         results.last = Card(
-          key: Key('prediction-$_isProcessing-${results.length}'),
+          key: Key('Classification::"$_isProcessing" ${results.length}'),
           margin: const EdgeInsets.all(10),
           child: Column(
             children: [
@@ -107,25 +97,6 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
     Colors.red[300]!,
   ];
 
-  //   setState(() {
-  //     final categoryName =
-  //         classification.firstClassification?.firstCategory?.categoryName;
-  //     final score = classification.firstClassification?.firstCategory?.score;
-  //     // Replace "..." with the results
-  //     final message = '"$_isProcessing" $categoryName :: $score';
-  //     log.info(message);
-  //     results.last = Card(
-  //       key: Key('Classification::"$_isProcessing" ${results.length}'),
-  //       margin: const EdgeInsets.all(10),
-  //       child: Padding(
-  //         padding: const EdgeInsets.all(10),
-  //         child: Text(message),
-  //       ),
-  //     );
-  //     _isProcessing = null;
-  //   });
-  // }
-
   List<Widget> _textClassifications(Classifications classifications) {
     return classifications.categories
         .enumerate<Widget>((category, index) =>
@@ -148,8 +119,10 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
 
   Future<void> _classify() async {
     _prepareForClassification();
-    final classification = await (await classifier).classify(_controller.text);
-    _showClassificationResults(classification);
+    _completer.future.then((classifier) async {
+      final result = await classifier.classify(_controller.text);
+      _showClassificationResults(result);
+    });
   }
 
   @override

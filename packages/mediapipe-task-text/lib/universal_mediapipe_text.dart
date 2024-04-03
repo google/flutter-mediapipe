@@ -171,8 +171,7 @@ class LanguageDetectorResult extends BaseLanguageDetectorResult {
   /// {@template LanguageDetectorResult.fake}
   /// Instantiates a [LanguageDetectorResult] with fake data for testing.
   /// {@endtemplate}
-  LanguageDetectorResult(
-      {required Iterable<LanguagePrediction> classifications});
+  LanguageDetectorResult({required Iterable<LanguagePrediction> predictions});
 
   @override
   Iterable<LanguagePrediction> get predictions => throw UnimplementedError();
@@ -184,6 +183,12 @@ class LanguageDetectorResult extends BaseLanguageDetectorResult {
 
 /// {@macro LanguagePrediction}
 class LanguagePrediction extends BaseLanguagePrediction {
+  /// {@macro LanguagePrediction}
+  LanguagePrediction({
+    required String languageCode,
+    required double probability,
+  });
+
   @override
   String get languageCode => throw UnimplementedError();
 
