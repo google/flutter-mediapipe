@@ -28,43 +28,43 @@ limitations under the License.
 extern "C" {
 #endif
 
-  typedef struct EmbeddingResult TextEmbedderResult;
+typedef struct EmbeddingResult TextEmbedderResult;
 
-  // The options for configuring a MediaPipe text embedder task.
-  struct TextEmbedderOptions {
-    // Base options for configuring MediaPipe Tasks, such as specifying the model
-    // file with metadata, accelerator options, op resolver, etc.
-    struct BaseOptions base_options;
+// The options for configuring a MediaPipe text embedder task.
+struct TextEmbedderOptions {
+  // Base options for configuring MediaPipe Tasks, such as specifying the model
+  // file with metadata, accelerator options, op resolver, etc.
+  struct BaseOptions base_options;
 
-    // Options for configuring the embedder behavior, such as l2_normalize
-    // and quantize.
-    struct EmbedderOptions embedder_options;
-  };
+  // Options for configuring the embedder behavior, such as l2_normalize
+  // and quantize.
+  struct EmbedderOptions embedder_options;
+};
 
-  // Creates a TextEmbedder from the provided `options`.
-  // Returns a pointer to the text embedder on success.
-  // If an error occurs, returns `nullptr` and sets the error parameter to an
-  // an error message (if `error_msg` is not `nullptr`). You must free the memory
-  // allocated for the error message.
-  MP_EXPORT void* text_embedder_create(struct TextEmbedderOptions* options,
-    char** error_msg);
+// Creates a TextEmbedder from the provided `options`.
+// Returns a pointer to the text embedder on success.
+// If an error occurs, returns `nullptr` and sets the error parameter to an
+// an error message (if `error_msg` is not `nullptr`). You must free the memory
+// allocated for the error message.
+MP_EXPORT void* text_embedder_create(struct TextEmbedderOptions* options,
+                                     char** error_msg);
 
-  // Performs embedding extraction on the input `text`. Returns `0` on success.
-  // If an error occurs, returns an error code and sets the error parameter to an
-  // an error message (if `error_msg` is not `nullptr`). You must free the memory
-  // allocated for the error message.
-  MP_EXPORT int text_embedder_embed(void* embedder, const char* utf8_str,
-    TextEmbedderResult* result, char** error_msg);
+// Performs embedding extraction on the input `text`. Returns `0` on success.
+// If an error occurs, returns an error code and sets the error parameter to an
+// an error message (if `error_msg` is not `nullptr`). You must free the memory
+// allocated for the error message.
+MP_EXPORT int text_embedder_embed(void* embedder, const char* utf8_str,
+                                  TextEmbedderResult* result, char** error_msg);
 
-  // Frees the memory allocated inside a TextEmbedderResult result. Does not
-  // free the result pointer itself.
-  MP_EXPORT void text_embedder_close_result(TextEmbedderResult* result);
+// Frees the memory allocated inside a TextEmbedderResult result. Does not
+// free the result pointer itself.
+MP_EXPORT void text_embedder_close_result(TextEmbedderResult* result);
 
-  // Shuts down the TextEmbedder when all the work is done. Frees all memory.
-  // If an error occurs, returns an error code and sets the error parameter to an
-  // an error message (if `error_msg` is not `nullptr`). You must free the memory
-  // allocated for the error message.
-  MP_EXPORT int text_embedder_close(void* embedder, char** error_msg);
+// Shuts down the TextEmbedder when all the work is done. Frees all memory.
+// If an error occurs, returns an error code and sets the error parameter to an
+// an error message (if `error_msg` is not `nullptr`). You must free the memory
+// allocated for the error message.
+MP_EXPORT int text_embedder_close(void* embedder, char** error_msg);
 
 // Utility function to compute cosine similarity [1] between two embeddings.
 // May return an InvalidArgumentError if e.g. the embeddings are of different
@@ -75,7 +75,7 @@ extern "C" {
 MP_EXPORT int text_embedder_cosine_similarity(const struct Embedding* u,
                                               const struct Embedding* v,
                                               double* similarity,
-                                              char** error_msg);                                       
+                                              char** error_msg);
 
 #ifdef __cplusplus
 }  // extern C

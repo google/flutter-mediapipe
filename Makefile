@@ -59,3 +59,7 @@ test_text:
 
 example_text:
 	cd packages/mediapipe-task-text/example && flutter run -d macos
+
+# Inference ---
+generate_inference:
+	cd packages/mediapipe-task-inference && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml

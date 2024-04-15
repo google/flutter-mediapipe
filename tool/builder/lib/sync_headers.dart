@@ -18,10 +18,12 @@ final core = 'mediapipe/tasks/c/core';
 final tc = 'mediapipe/tasks/c/text/text_classifier';
 final te = 'mediapipe/tasks/c/text/text_embedder';
 final ld = 'mediapipe/tasks/c/text/language_detector';
+final inference = 'mediapipe/tasks/cc/genai/inference/c';
 
 /// google/flutter-mediapipe package paths
 final corePackage = 'packages/mediapipe-core/third_party';
 final textPackage = 'packages/mediapipe-task-text/third_party';
+final inferencePackage = 'packages/mediapipe-task-inference/third_party';
 
 /// First string is its relative location in both repositories,
 /// Second string is its package location in `google/flutter-mediapipe`,
@@ -37,6 +39,7 @@ List<(String, String, String, Function(io.File)?)> headerPaths = [
   (tc, textPackage, 'text_classifier.h', relativeIncludes),
   (te, textPackage, 'text_embedder.h', relativeIncludes),
   (ld, textPackage, 'language_detector.h', relativeIncludes),
+  (inference, inferencePackage, 'llm_inference_engine.h', null),
 ];
 
 /// Command to copy all necessary C header files into this repository.
