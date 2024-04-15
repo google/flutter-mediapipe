@@ -11,10 +11,15 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  ffi: ^2.1.0
   flutter:
     sdk: flutter
+  http: ^1.1.0
   mediapipe_core:
     path: ../mediapipe-core
+  native_assets_cli: ^0.3.0
+  native_toolchain_c: ^0.3.0
+  path: ^1.8.3
 
 dev_dependencies:
   ffigen: ^9.0.1
