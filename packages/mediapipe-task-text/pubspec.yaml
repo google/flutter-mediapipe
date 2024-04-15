@@ -1,5 +1,5 @@
 name: mediapipe_text
-description: A new Flutter package project.
+description: Provides access to MediaPipe's text-based ODML tasks.
 version: 0.0.1
 repository: https://github.com/google/flutter-mediapipe
 issue_tracker: https://github.com/google/flutter-mediapipe/issues/

@@ -1,0 +1,23 @@
+name: mediapipe_inference
+description: Provides access to MediaPipe's inference-based ODML tasks.
+version: 0.0.1
+publish_to: none
+
+repository: https://github.com/google/flutter-mediapipe
+issue_tracker: https://github.com/google/flutter-mediapipe/issues
+
+environment:
+  sdk: ">=3.5.0-6.0.dev <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mediapipe_core:
+    path: ../mediapipe-core
+
+dev_dependencies:
+  ffigen: ^9.0.1
+  flutter_lints: ^3.0.0
+  flutter_test:
+    sdk: flutter
