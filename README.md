@@ -2,6 +2,13 @@
 
 This repository will be home to the source code for the mediapipe_task_vision, mediapipe_task_audio, and mediapipe_task_text plugins for Flutter.
 
+## Packages
+
+| Package | Description | Version |
+| --- | --- | --- |
+| [mediapipe_core](packages/mediapipe-core/) | Shared logic and utilities required by other MediaPipe Task packages. |  |
+| [mediapipe_text](packages/mediapipe-task-text/) | An implementation of the MediaPipe Tasks Text APIs |  |
+
 ## Releasing
 
 ### Updating MediaPipe SDKs
