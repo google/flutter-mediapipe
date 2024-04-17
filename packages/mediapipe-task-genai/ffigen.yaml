@@ -1,7 +1,7 @@
-name: "MediaPipeInferenceBindings"
-description: "Bindings for MediaPipe inference tasks"
+name: "MediaPipeGenAiBindings"
+description: "Bindings for MediaPipe GenAI tasks"
 output:
-  bindings: "lib/src/io/third_party/mediapipe/generated/mediapipe_inference_bindings.dart"
+  bindings: "lib/src/io/third_party/mediapipe/generated/mediapipe_genai_bindings.dart"
 headers:
   entry-points:
     - "third_party/mediapipe/tasks/cc/**.h"

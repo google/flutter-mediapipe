@@ -1,4 +1,4 @@
-name: mediapipe_inference
+name: mediapipe_genai
 description: Provides access to MediaPipe's inference-based ODML tasks.
 version: 0.0.1
 publish_to: none
@@ -11,6 +11,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  equatable: ^2.0.5
   ffi: ^2.1.0
   flutter:
     sdk: flutter

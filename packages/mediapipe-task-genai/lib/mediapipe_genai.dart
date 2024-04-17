@@ -6,6 +6,6 @@
 /// audio-based tasks.
 library mediapipe_core;
 
-export 'universal_mediapipe_inference.dart'
-    if (dart.library.html) 'src/web/mediapipe_core.dart'
-    if (dart.library.io) 'src/io/mediapipe_core.dart';
+export 'universal_mediapipe_genai.dart'
+    if (dart.library.html) 'src/web/mediapipe_genai.dart'
+    if (dart.library.io) 'src/io/mediapipe_genai.dart';
