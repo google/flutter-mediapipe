@@ -23,7 +23,7 @@ jobs:
         sdk: [stable]
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v1
+      - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
 
