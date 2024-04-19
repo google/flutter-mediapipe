@@ -1,2 +1,2 @@
 // Generated file. Do not manually edit.
-final Map<String, Map<String, String>> sdkDownloadUrls = {};
+final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = {};
