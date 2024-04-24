@@ -4,11 +4,10 @@ name: Main Branch CI
 permissions: read-all
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [ main ]
+  push:
     branches: [main, ffi-wrapper, ffi-wrapper-text-pkg]
-  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *" # Every day at midnight
 

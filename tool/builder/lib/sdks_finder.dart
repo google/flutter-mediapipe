@@ -1,14 +1,19 @@
+// Copyright 2024 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
-import 'dart:io';
 import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:builder/extensions.dart';
-import 'package:builder/repo_finder.dart';
 import 'package:io/ansi.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:path/path.dart' as path;
+
+import 'extensions.dart';
+import 'repo_finder.dart';
 
 final _log = Logger('SDKsFinder');
 
@@ -71,7 +76,7 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
   }
   @override
   String description =
-      'Updates MediaPipe SDK manifest files for the current build target';
+      'Updates MediaPipe SDK manifest files for the current build target.';
 
   @override
   String name = 'sdks';
@@ -257,7 +262,7 @@ class _OsFinder {
     );
   }
 
-  /// Receives a [Path] like ".../[os_folder]/release/[build_number]/[date]/"
+  /// Receives a path like `".../[os_folder]/release/[build_number]/[date]/"`
   /// and yields all matching architecture folders within.
   Stream<String> _getArchitectectures(String path) async* {
     final pathsWithinBuild = <String>[];
