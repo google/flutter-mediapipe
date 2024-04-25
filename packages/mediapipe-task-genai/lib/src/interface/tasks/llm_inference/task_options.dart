@@ -11,6 +11,9 @@ import 'package:equatable/equatable.dart';
 ///  * [MediaPipe's LlmInferenceOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/genai/llminference/LlmInference.LlmInferenceOptions)
 /// {@endtemplate}
 abstract class BaseLlmInferenceOptions extends Equatable {
+  /// The path that points to the tflite model file to use for inference.
+  String get modelPath;
+
   /// The total length of the kv-cache.
   int get maxTokens;
 

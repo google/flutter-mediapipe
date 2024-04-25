@@ -6,6 +6,7 @@ import 'dart:ffi';
 import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/interface.dart';
+import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_genai/interface.dart';
 
 import '../../third_party/mediapipe/generated/mediapipe_genai_bindings.dart'
@@ -20,13 +21,17 @@ import '../../third_party/mediapipe/generated/mediapipe_genai_bindings.dart'
 class LlmInferenceOptions extends BaseLlmInferenceOptions {
   /// {@macro LlmInferenceOptions}
   LlmInferenceOptions({
-    int? randomSeed,
+    required this.modelPath,
     required this.maxTokens,
     required this.temperature,
     required this.topK,
+    int? randomSeed,
   }) : randomSeed = randomSeed ?? Random().nextInt(1 << 32);
 
   Pointer<bindings.LlmSessionConfig>? _pointer;
+
+  @override
+  final String modelPath;
 
   @override
   final int maxTokens;
@@ -43,6 +48,7 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   /// Copies this options object into native memory for use by an engine.
   Pointer<bindings.LlmSessionConfig> copyToNative() {
     _pointer = malloc<bindings.LlmSessionConfig>();
+    _pointer!.ref.model_path = modelPath.copyToNative();
     _pointer!.ref.max_tokens = maxTokens;
     _pointer!.ref.random_seed = randomSeed;
     _pointer!.ref.temperature = temperature;
@@ -73,6 +79,7 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
       }
       return true;
     }());
+    calloc.free(_pointer!.ref.model_path);
     calloc.free(_pointer!);
     _isClosed = true;
   }

@@ -31,11 +31,17 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
 
   Pointer<Void> get _session {
     if (__session == null) {
+      print('creating __session');
+      final nativeOptions = _options.copyToNative();
+      print(nativeOptions.ref.model_path);
+      print('copied options to native');
       __session = bindings.LlmInferenceEngine_CreateSession(
-        _options.copyToNative(),
+        nativeOptions,
       );
+      print('__session: $__session');
       // Releases the pointer created by `copyToNative`
       _options.dispose();
+      print('disposed of options');
     }
     return __session!;
   }
@@ -53,32 +59,42 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
     }());
     _responseController = StreamController<String>();
     final textPtr = text.copyToNative();
-    final sessionContext = malloc<Void>();
+    print('copied $text to native');
     final callback = NativeCallable<LlmResponseCallback>.listener(
       (
         Pointer<Void> context,
-        bindings.LlmResponseContext response,
+        bindings.LlmResponseContext response_context,
       ) {
+        print('in callback');
         if (_responseController == null) {
           // Short-circuit if the caller has cancelled this query before receiving
           // the complete output.
           return;
         }
-        final responseChunk =
-            response.response_array.toDartStrings(response.response_count);
+        final responseChunk = response_context.response_array
+            .toDartStrings(response_context.response_count);
+        print('responseChunk :: $responseChunk');
         _responseController!.add(responseChunk.join(' '));
-        if (response.done) {
+        if (response_context.done) {
           _finalizeResponse();
         }
       },
     );
-
-    bindings.LlmInferenceEngine_Session_PredictAsync(
+    print('created callback');
+    // bindings.LlmInferenceEngine_Session_PredictAsync(
+    //   _session,
+    //   nullptr,
+    //   textPtr,
+    //   callback.nativeFunction,
+    // );
+    final response = bindings.LlmInferenceEngine_Session_PredictSync(
       _session,
-      sessionContext,
+      // nullptr,
       textPtr,
-      callback.nativeFunction,
+      // callback.nativeFunction,
     );
+    print('response: ${response.response_array}');
+    // print('called predictAsync');
     return _responseController!.stream;
   }
 
