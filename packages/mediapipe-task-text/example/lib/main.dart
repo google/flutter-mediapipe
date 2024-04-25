@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'language_detection_demo.dart';
-=======
->>>>>>> main
 import 'logging.dart';
 import 'text_classification_demo.dart';
 import 'text_embedding_demo.dart';
@@ -35,11 +32,7 @@ class TextTaskPages extends StatefulWidget {
 class TextTaskPagesState extends State<TextTaskPages> {
   final PageController controller = PageController();
 
-<<<<<<< HEAD
   final titles = <String>['Classify', 'Embed', 'Detect Languages'];
-=======
-  final titles = <String>['Classify', 'Embed'];
->>>>>>> main
   int titleIndex = 0;
 
   void switchToPage(int index) {
