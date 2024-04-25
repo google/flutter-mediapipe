@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+
 import 'package:args/command_runner.dart';
-import 'package:builder/repo_finder.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+
+import 'repo_finder.dart';
 
 final _log = Logger('DownloadModelCommand');
 
@@ -86,7 +88,7 @@ class DownloadModelCommand extends Command with RepoFinderMixin {
   Model get model {
     final value = Model.values.asNameMap()[argResults!['model']];
     if (value == null) {
-      throw ('Unexpected Model value ${argResults!['model']}');
+      throw Exception('Unexpected Model value ${argResults!['model']}');
     }
     return value;
   }

@@ -3,7 +3,7 @@ description: Shared logic and utilities required by other MediaPipe Task package
 version: 0.0.1-wip
 publish_to: none
 
-repository: https://github.com/google/flutter-mediapipe
+repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-core
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 
 environment:

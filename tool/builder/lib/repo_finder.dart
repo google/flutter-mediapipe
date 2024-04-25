@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:io/ansi.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
-import 'package:io/ansi.dart';
 
 /// Mixin to help [Command] subclasses locate both `google/mediapipe` and
 /// the root of `google/flutter-mediapipe` (this repository).

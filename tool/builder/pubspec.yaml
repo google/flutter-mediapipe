@@ -1,12 +1,11 @@
 name: builder
-description: Performs build operations for google/flutter-mediapipe that depend
-  on contents in this repository.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: Performs build operations for google/flutter-mediapipe.
+
+publish_to: none
+
 environment:
   sdk: ^3.1.5
 
-# Add regular dependencies here.
 dependencies:
   args: ^2.4.2
   http: ^1.1.0

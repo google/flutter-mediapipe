@@ -6,7 +6,10 @@ headers:
 models:
 	cd tool/builder && dart bin/main.dart model -m textclassification
 	cd tool/builder && dart bin/main.dart model -m textembedding
+<<<<<<< HEAD
 	cd tool/builder && dart bin/main.dart model -m languagedetection
+=======
+>>>>>>> main
 
 
 # Runs `ffigen` for all packages

@@ -4,12 +4,14 @@
 
 import 'dart:convert';
 import 'dart:io' as io;
+
 import 'package:args/command_runner.dart';
-import 'package:builder/extensions.dart';
-import 'package:builder/repo_finder.dart';
 import 'package:io/ansi.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+
+import 'extensions.dart';
+import 'repo_finder.dart';
 
 /// Relative header paths (in both repositories)
 final containers = 'mediapipe/tasks/c/components/containers';
@@ -54,7 +56,7 @@ List<(String, String, String, Function(io.File)?)> headerPaths = [
 /// disrupted by the move.
 class SyncHeadersCommand extends Command with RepoFinderMixin {
   @override
-  String description = 'Syncs header files to google/flutter-mediapipe';
+  String description = 'Syncs header files to google/flutter-mediapipe.';
   @override
   String name = 'headers';
 
