@@ -81,20 +81,14 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
       },
     );
     print('created callback');
-    // bindings.LlmInferenceEngine_Session_PredictAsync(
-    //   _session,
-    //   nullptr,
-    //   textPtr,
-    //   callback.nativeFunction,
-    // );
-    final response = bindings.LlmInferenceEngine_Session_PredictSync(
+    bindings.LlmInferenceEngine_Session_PredictAsync(
       _session,
-      // nullptr,
+      nullptr,
       textPtr,
-      // callback.nativeFunction,
+      callback.nativeFunction,
     );
     print('response: ${response.response_array}');
-    // print('called predictAsync');
+    print('called predictAsync');
     return _responseController!.stream;
   }
 

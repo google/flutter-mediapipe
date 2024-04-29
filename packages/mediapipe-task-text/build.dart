@@ -35,6 +35,7 @@ Future<void> main(List<String> args) async {
 
   log(args.join(' '));
   final String targetOs = buildConfig.targetOs.toString();
+  log('targetOs: $targetOs');
 
   log('dir.current: ${Directory.current.absolute.path}');
 
@@ -50,15 +51,15 @@ Future<void> main(List<String> args) async {
   buildOutput.dependencies.dependencies
       .add(buildConfig.packageRoot.resolve('sdk_downloads.dart'));
 
-  // final archKeys = sdkDownloadUrls[targetOs]!.keys;
+  final modelName = 'libtext';
   final Iterable<String> archKeys;
   if (buildConfig.dryRun) {
-    archKeys = sdkDownloadUrls[targetOs]!.keys;
+    archKeys = sdkDownloadUrls[targetOs]![modelName]!.keys;
   } else {
     archKeys = [buildConfig.targetArchitecture.toString()];
   }
   for (final String arch in archKeys) {
-    final assetUrl = sdkDownloadUrls[targetOs]![arch]!;
+    final assetUrl = sdkDownloadUrls[targetOs]!['libtext']![arch]!;
     final downloadFileLocation = buildConfig.outDir.resolve(
       '${arch}_${assetUrl.split('/').last}',
     );
@@ -83,7 +84,6 @@ Future<void> main(List<String> args) async {
 Future<void> downloadAsset(String assetUrl, Uri destinationFile) async {
   final downloadUri = Uri.parse(assetUrl);
   final downloadedFile = File(destinationFile.toFilePath());
-  print('Saving file to ${downloadedFile.absolute.path}');
 
   final downloadResponse = await http.get(downloadUri);
   log('Download response: ${downloadResponse.statusCode}');

@@ -12,6 +12,7 @@ abstract class ModelStorageInterface {
     ModelPaths initialModelLocations,
   ) async {
     for (final (model, location) in initialModelLocations.items) {
+      _log.finer('${model.name} :: $location');
       if (location.isEmpty) continue;
       final uri = Uri.parse(location);
 

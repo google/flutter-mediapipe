@@ -23,8 +23,6 @@ class _LlmInferenceDemoState extends State<LlmInferenceDemo>
   Completer<LlmInferenceEngine?> _completer = Completer<LlmInferenceEngine?>();
   final results = <Widget>[];
 
-  double? percentDownloaded;
-
   LlmInferenceEngine? _engine;
 
   Map<LlmModel, List<ChatMessage>> transcript = {};
@@ -213,7 +211,6 @@ class ModelsRowEntry extends StatelessWidget {
         ? Colors.green
         : Colors.orange;
 
-    print('$binarySize :: $path');
     return Container(
       height: 100,
       width: 100,

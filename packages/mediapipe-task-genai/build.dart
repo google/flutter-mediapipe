@@ -50,22 +50,33 @@ Future<void> main(List<String> args) async {
   buildOutput.dependencies.dependencies
       .add(buildConfig.packageRoot.resolve('sdk_downloads.dart'));
 
-  // final archKeys = sdkDownloadUrls[targetOs]!.keys;
+  final modelName = 'libllm_inference_engine';
   final Iterable<String> archKeys;
   if (buildConfig.dryRun) {
-    archKeys = sdkDownloadUrls[targetOs]!.keys;
+    archKeys = sdkDownloadUrls[targetOs]![modelName]!.keys;
   } else {
     archKeys = [buildConfig.targetArchitecture.toString()];
   }
-  for (final String arch in archKeys) {
-    final assetUrl = sdkDownloadUrls[targetOs]![arch]!;
+  for (String arch in archKeys) {
+    arch = getArchAlias(arch);
+    log("arch: $arch");
+    log("sdkDownloadUrls[targetOs]: ${sdkDownloadUrls[targetOs]}");
+    log("sdkDownloadUrls[targetOs]['$modelName']: ${sdkDownloadUrls[targetOs]![modelName]}");
+    log("sdkDownloadUrls[targetOs]['$modelName'][$arch]: ${sdkDownloadUrls[targetOs]![modelName]![arch]}");
+
+    if (!sdkDownloadUrls[targetOs]!['libllm_inference_engine']!
+        .containsKey(arch)) {
+      continue;
+    }
+    final assetUrl =
+        sdkDownloadUrls[targetOs]!['libllm_inference_engine']![arch]!;
     final downloadFileLocation = buildConfig.outDir.resolve(
       '${arch}_${assetUrl.split('/').last}',
     );
     log('downloadFileLocation: $downloadFileLocation');
     buildOutput.assets.add(
       Asset(
-        id: 'package:mediapipe_inference/src/io/third_party/mediapipe/generated/mediapipe_inference_bindings.dart',
+        id: 'package:mediapipe_genai/src/io/third_party/mediapipe/generated/mediapipe_genai_bindings.dart',
         linkMode: LinkMode.dynamic,
         target: Target.fromArchitectureAndOs(
             Architecture.fromString(arch), buildConfig.targetOs),
@@ -100,4 +111,12 @@ Future<void> downloadAsset(String assetUrl, Uri destinationFile) async {
     throw Exception(
         '${downloadResponse.statusCode} :: ${downloadResponse.body}');
   }
+}
+
+/// Translates native-assets architecture names into MediaPipe architecture names
+String getArchAlias(String arch) {
+  return <String, String>{
+        'arm': 'arm64',
+      }[arch] ??
+      arch;
 }

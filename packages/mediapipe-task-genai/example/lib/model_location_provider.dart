@@ -69,12 +69,24 @@ class ModelLocationProvider extends ChangeNotifier {
 
   final _ready = Completer<void>();
 
+  // Useful for quick development if there is any friction around passing
+  // environment variables
+  static const hardcodedLocations = <LlmModel, String>{
+    LlmModel.gemma4bCpu:
+        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int4.bin',
+  };
+
   static ModelPaths _getModelLocationsFromEnvironment() {
     final locations = <LlmModel, String>{};
     for (final model in LlmModel.values) {
-      final location = Platform.environment[model.environmentVariableUriName];
+      String location = hardcodedLocations[model] ??
+          Platform.environment[model.environmentVariableUriName] ??
+          model.dartDefine;
       _log.info('${model.environmentVariableUriName} :: $location');
-      if (location != null && location != '') {
+
+      // `model.dartDefine` has an empty state of an empty string, not null,
+      // which is why `location` is a `String` and not a `String?`
+      if (location.isNotEmpty) {
         locations[model] = location;
       }
     }

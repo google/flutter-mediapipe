@@ -4,6 +4,13 @@ enum LlmModel {
   gemma8bCpu,
   gemma8bGpu;
 
+  String get dartDefine => switch (this) {
+        gemma4bCpu => const String.fromEnvironment('GEMMA_4B_CPU_URI'),
+        gemma4bGpu => const String.fromEnvironment('GEMMA_4B_GPU_URI'),
+        gemma8bCpu => const String.fromEnvironment('GEMMA_8B_CPU_URI'),
+        gemma8bGpu => const String.fromEnvironment('GEMMA_8B_GPU_URI'),
+      };
+
   String get environmentVariableUriName => switch (this) {
         gemma4bCpu => 'GEMMA_4B_CPU_URI',
         gemma4bGpu => 'GEMMA_4B_GPU_URI',

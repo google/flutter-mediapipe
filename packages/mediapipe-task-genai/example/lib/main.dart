@@ -32,7 +32,7 @@ class GenAiPages extends StatefulWidget {
 class GenAiPagesState extends State<GenAiPages> {
   final PageController controller = PageController();
   final ModelLocationProvider provider = ModelLocationProvider.fromEnvironment(
-    LlmModel.gemma4bGpu,
+    LlmModel.gemma4bCpu,
   );
 
   final titles = <String>['Inference'];

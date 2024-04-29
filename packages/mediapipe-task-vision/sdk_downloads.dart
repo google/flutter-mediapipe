@@ -3,7 +3,7 @@ final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = {
   'android': {
     'libvision': {
       'arm64':
-          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/gcp_ubuntu_flutter/release/26/20240118-142736/android_arm64/libvision.so'
+          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/gcp_ubuntu_flutter/release/40/20240419-150307/android_arm64/libvision.so'
     }
   },
   'macos': {

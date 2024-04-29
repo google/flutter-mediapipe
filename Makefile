@@ -63,3 +63,12 @@ example_text:
 # Inference ---
 generate_inference:
 	cd packages/mediapipe-task-inference && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
+
+# Example genai invocation.
+# Note that `GEMMA_4B_CPU_URI` can either be a local path or web URL. Similar values exist for
+# 8B and GPU variants.
+#
+# For desktop development, standard environment variables like this work great.
+# $ GEMMA_4B_CPU_URI=/path/to/gemma-2b-it-cpu-int4.bin flutter run -d [macos, windows, linux]
+# For emulator or attached device testing, use `--dart-define` for the same values.
+# $ flutter run -d [<device_id>] --dart-define=GEMMA_4B_CPU_URI=https://url/to.com/gemma-2b-it-cpu-int4.bin
