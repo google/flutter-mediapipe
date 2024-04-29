@@ -49,6 +49,7 @@ class _LlmInferenceDemoState extends State<LlmInferenceDemo>
 
   Future<void> _initEngine() async {
     String modelPath = await _downloadModel(selectedModel);
+    print('using model at $modelPath');
 
     _engine = LlmInferenceEngine(
       LlmInferenceOptions(

@@ -33,7 +33,7 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
     if (__session == null) {
       print('creating __session');
       final nativeOptions = _options.copyToNative();
-      print(nativeOptions.ref.model_path);
+      print('native model_path :: ${nativeOptions.ref.model_path.toDartString()});
       print('copied options to native');
       __session = bindings.LlmInferenceEngine_CreateSession(
         nativeOptions,
@@ -87,6 +87,7 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
       textPtr,
       callback.nativeFunction,
     );
+    response.response_array;
     print('response: ${response.response_array}');
     print('called predictAsync');
     return _responseController!.stream;
