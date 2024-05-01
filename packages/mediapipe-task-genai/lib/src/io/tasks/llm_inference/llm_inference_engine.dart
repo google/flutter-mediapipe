@@ -33,7 +33,8 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
     if (__session == null) {
       print('creating __session');
       final nativeOptions = _options.copyToNative();
-      print('native model_path :: ${nativeOptions.ref.model_path.toDartString()});
+      print(
+          'native model_path :: ${nativeOptions.ref.model_path.toDartString()}');
       print('copied options to native');
       __session = bindings.LlmInferenceEngine_CreateSession(
         nativeOptions,
@@ -63,7 +64,7 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
     final callback = NativeCallable<LlmResponseCallback>.listener(
       (
         Pointer<Void> context,
-        bindings.LlmResponseContext response_context,
+        bindings.LlmResponseContext responseContext,
       ) {
         print('in callback');
         if (_responseController == null) {
@@ -71,11 +72,11 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
           // the complete output.
           return;
         }
-        final responseChunk = response_context.response_array
-            .toDartStrings(response_context.response_count);
+        final responseChunk = responseContext.response_array
+            .toDartStrings(responseContext.response_count);
         print('responseChunk :: $responseChunk');
         _responseController!.add(responseChunk.join(' '));
-        if (response_context.done) {
+        if (responseContext.done) {
           _finalizeResponse();
         }
       },
@@ -87,8 +88,6 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
       textPtr,
       callback.nativeFunction,
     );
-    response.response_array;
-    print('response: ${response.response_array}');
     print('called predictAsync');
     return _responseController!.stream;
   }

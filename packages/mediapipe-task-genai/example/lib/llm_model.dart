@@ -1,8 +1,17 @@
+enum Hardware { cpu, gpu }
+
 enum LlmModel {
   gemma4bCpu,
   gemma4bGpu,
   gemma8bCpu,
   gemma8bGpu;
+
+  Hardware get hardware => switch (this) {
+        gemma4bCpu => Hardware.cpu,
+        gemma4bGpu => Hardware.gpu,
+        gemma8bCpu => Hardware.cpu,
+        gemma8bGpu => Hardware.gpu,
+      };
 
   String get dartDefine => switch (this) {
         gemma4bCpu => const String.fromEnvironment('GEMMA_4B_CPU_URI'),

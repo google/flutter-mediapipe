@@ -5,7 +5,6 @@
 import 'dart:ffi';
 import 'dart:math';
 import 'package:ffi/ffi.dart';
-import 'package:mediapipe_core/interface.dart';
 import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_genai/interface.dart';
 
@@ -19,19 +18,48 @@ import '../../third_party/mediapipe/generated/mediapipe_genai_bindings.dart'
 /// pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
 class LlmInferenceOptions extends BaseLlmInferenceOptions {
-  /// {@macro LlmInferenceOptions}
-  LlmInferenceOptions({
+  /// {@macro LlmInferenceOptions.cpu}
+  LlmInferenceOptions.cpu({
     required this.modelPath,
+    // `cacheDir` is optional on the class as a whole, but is required for the
+    // CPU scenario - thus we do not use `this.cacheDir` so as to upgrade the
+    // parameter requirements and remove nullability
+    required String cacheDir,
     required this.maxTokens,
     required this.temperature,
     required this.topK,
     int? randomSeed,
-  }) : randomSeed = randomSeed ?? Random().nextInt(1 << 32);
+    // ignore: prefer_initializing_formals
+  })  : cacheDir = cacheDir,
+        sequenceBatchSize = 0,
+        decodeStepsPerSync = 0,
+        randomSeed = randomSeed ?? Random().nextInt(1 << 32);
+
+  /// {@macro LlmInferenceOptions.gpu}
+  LlmInferenceOptions.gpu({
+    required this.modelPath,
+    required this.sequenceBatchSize,
+    required this.maxTokens,
+    required this.temperature,
+    required this.topK,
+    this.decodeStepsPerSync = 3,
+    int? randomSeed,
+  })  : cacheDir = null,
+        randomSeed = randomSeed ?? Random().nextInt(1 << 32);
 
   Pointer<bindings.LlmSessionConfig>? _pointer;
 
   @override
   final String modelPath;
+
+  @override
+  final String? cacheDir;
+
+  @override
+  final int sequenceBatchSize;
+
+  @override
+  final int decodeStepsPerSync;
 
   @override
   final int maxTokens;
@@ -49,6 +77,9 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   Pointer<bindings.LlmSessionConfig> copyToNative() {
     _pointer = malloc<bindings.LlmSessionConfig>();
     _pointer!.ref.model_path = modelPath.copyToNative();
+    _pointer!.ref.cache_dir = cacheDir?.copyToNative() ?? nullptr;
+    _pointer!.ref.sequence_batch_size = sequenceBatchSize;
+    _pointer!.ref.num_decode_steps_per_sync = decodeStepsPerSync;
     _pointer!.ref.max_tokens = maxTokens;
     _pointer!.ref.random_seed = randomSeed;
     _pointer!.ref.temperature = temperature;

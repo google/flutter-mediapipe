@@ -59,7 +59,6 @@ class GenAiPagesState extends State<GenAiPages> {
       color: Colors.white,
     );
     return Scaffold(
-      appBar: AppBar(title: Text(titles[titleIndex])),
       body: PageView(
         controller: controller,
         children: <Widget>[
