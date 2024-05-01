@@ -21,16 +21,12 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   /// {@macro LlmInferenceOptions.cpu}
   LlmInferenceOptions.cpu({
     required this.modelPath,
-    // `cacheDir` is optional on the class as a whole, but is required for the
-    // CPU scenario - thus we do not use `this.cacheDir` so as to upgrade the
-    // parameter requirements and remove nullability
-    required String cacheDir,
+    required this.cacheDir,
     required this.maxTokens,
     required this.temperature,
     required this.topK,
     int? randomSeed,
-    // ignore: prefer_initializing_formals
-  })  : cacheDir = cacheDir,
+  })  : loraPath = '',
         sequenceBatchSize = 0,
         decodeStepsPerSync = 0,
         randomSeed = randomSeed ?? Random().nextInt(1 << 32);
@@ -44,7 +40,8 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
     required this.topK,
     this.decodeStepsPerSync = 3,
     int? randomSeed,
-  })  : cacheDir = null,
+  })  : cacheDir = '',
+        loraPath = '',
         randomSeed = randomSeed ?? Random().nextInt(1 << 32);
 
   Pointer<bindings.LlmSessionConfig>? _pointer;
@@ -53,7 +50,10 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   final String modelPath;
 
   @override
-  final String? cacheDir;
+  final String cacheDir;
+
+  @override
+  final String loraPath;
 
   @override
   final int sequenceBatchSize;
@@ -77,7 +77,8 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   Pointer<bindings.LlmSessionConfig> copyToNative() {
     _pointer = malloc<bindings.LlmSessionConfig>();
     _pointer!.ref.model_path = modelPath.copyToNative();
-    _pointer!.ref.cache_dir = cacheDir?.copyToNative() ?? nullptr;
+    _pointer!.ref.cache_dir = cacheDir.copyToNative();
+    _pointer!.ref.lora_path = loraPath.copyToNative();
     _pointer!.ref.sequence_batch_size = sequenceBatchSize;
     _pointer!.ref.num_decode_steps_per_sync = decodeStepsPerSync;
     _pointer!.ref.max_tokens = maxTokens;

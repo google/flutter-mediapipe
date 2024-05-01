@@ -26,12 +26,15 @@ external void LlmInferenceEngine_CloseResponseContext(
 );
 
 @ffi.Native<
-        ffi.Pointer<LlmInferenceEngine_Session> Function(
-            ffi.Pointer<LlmSessionConfig>)>(
+        ffi.Int Function(
+            ffi.Pointer<LlmSessionConfig>,
+            ffi.Pointer<ffi.Pointer<LlmInferenceEngine_Session>>,
+            ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
     symbol: 'LlmInferenceEngine_CreateSession')
-external ffi.Pointer<LlmInferenceEngine_Session>
-    LlmInferenceEngine_CreateSession(
+external int LlmInferenceEngine_CreateSession(
   ffi.Pointer<LlmSessionConfig> session_config,
+  ffi.Pointer<ffi.Pointer<LlmInferenceEngine_Session>> session_out,
+  ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 @ffi.Native<ffi.Void Function(ffi.Pointer<LlmInferenceEngine_Session>)>(
@@ -197,6 +200,8 @@ final class LlmSessionConfig extends ffi.Struct {
 
   @ffi.Size()
   external int random_seed;
+
+  external ffi.Pointer<ffi.Char> lora_path;
 }
 
 final class LlmResponseContext extends ffi.Struct {

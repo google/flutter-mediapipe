@@ -5,11 +5,14 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'package:logging/logging.dart';
 import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_genai/interface.dart';
 import 'package:mediapipe_genai/io.dart';
 import 'package:mediapipe_genai/src/io/third_party/mediapipe/generated/mediapipe_genai_bindings.dart'
     as bindings;
+
+final _log = Logger('LlmInferenceEngine');
 
 /// Shape of the function MediaPipe calls with each additional response chunk
 /// from the LLM.
@@ -27,24 +30,48 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
 
   StreamController<String>? _responseController;
 
-  Pointer<Void>? __session;
+  Pointer<Pointer<Void>>? __session;
 
-  Pointer<Void> get _session {
+  Pointer<Pointer<Void>> get _session {
     if (__session == null) {
       print('creating __session');
       final nativeOptions = _options.copyToNative();
+      __session = malloc<Pointer<bindings.LlmInferenceEngine_Session>>();
+      final errorMessageMemory = calloc<Pointer<Char>>();
       print(
           'native model_path :: ${nativeOptions.ref.model_path.toDartString()}');
       print('copied options to native');
-      __session = bindings.LlmInferenceEngine_CreateSession(
+      final status = bindings.LlmInferenceEngine_CreateSession(
         nativeOptions,
+        __session!,
+        errorMessageMemory,
       );
+      if (status != 0) {}
       print('__session: $__session');
       // Releases the pointer created by `copyToNative`
       _options.dispose();
       print('disposed of options');
     }
     return __session!;
+  }
+
+  /// Throws an exception if [errorMessage] is non-empty.
+  void handleErrorMessage(Pointer<Pointer<Char>> errorMessage, [int? status]) {
+    if (errorMessage.isNotNullPointer && errorMessage[0].isNotNullPointer) {
+      final dartErrorMessage = errorMessage.toDartStrings(1);
+      _log.severe('Inference Error: $dartErrorMessage');
+
+      // If there is an exception, release this memory because the calling code
+      // will not get a chance to.
+      errorMessage.free(1);
+
+      // Raise the exception.
+      if (status == null) {
+        throw Exception('Inference Error: $dartErrorMessage');
+      } else {
+        throw Exception('Inference Error: Status $status :: $dartErrorMessage');
+      }
+    }
   }
 
   @override
@@ -83,7 +110,7 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
     );
     print('created callback');
     bindings.LlmInferenceEngine_Session_PredictAsync(
-      _session,
+      _session.value,
       nullptr,
       textPtr,
       callback.nativeFunction,
@@ -111,7 +138,7 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
   /// Releases all native resources and closes any open streams.
   void dispose() {
     if (__session != null) {
-      bindings.LlmInferenceEngine_Session_Delete(__session!);
+      bindings.LlmInferenceEngine_Session_Delete(__session!.value);
     }
     if (_responseController != null) {
       _finalizeResponse();

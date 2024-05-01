@@ -25,7 +25,7 @@ final inference = 'mediapipe/tasks/cc/genai/inference/c';
 /// google/flutter-mediapipe package paths
 final corePackage = 'packages/mediapipe-core/third_party';
 final textPackage = 'packages/mediapipe-task-text/third_party';
-final inferencePackage = 'packages/mediapipe-task-inference/third_party';
+final inferencePackage = 'packages/mediapipe-task-genai/third_party';
 
 /// First string is its relative location in both repositories,
 /// Second string is its package location in `google/flutter-mediapipe`,

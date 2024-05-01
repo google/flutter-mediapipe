@@ -53,7 +53,10 @@ class LlmInferenceOptions extends BaseLlmInferenceOptions {
   String get modelPath => throw UnimplementedError();
 
   @override
-  String? get cacheDir => throw UnimplementedError();
+  String get cacheDir => throw UnimplementedError();
+
+  @override
+  String get loraPath => throw UnimplementedError();
 
   @override
   int get sequenceBatchSize => throw UnimplementedError();

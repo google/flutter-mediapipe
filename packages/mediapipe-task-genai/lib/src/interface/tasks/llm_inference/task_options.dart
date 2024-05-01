@@ -17,7 +17,11 @@ abstract class BaseLlmInferenceOptions extends Equatable {
   /// Directory path for storing model related tokenizer and cache weights. The
   /// user is responsible for providing the directory that can be writable by the
   /// program. Used by CPU only.
-  String? get cacheDir;
+  String get cacheDir;
+
+  /// Path to the LoRA tflite flatbuffer file. Optional (default is empty string).
+  /// This is only compatible with GPU models.
+  String get loraPath;
 
   /// Sequence batch size for encoding. Used by GPU only. Number of input tokens
   /// to process at a time for batch processing. Setting this value to 1 means

@@ -6,4 +6,4 @@ linter:
 
 analyzer:
   exclude:
-    - "**/mediapipe_text_bindings.dart"
+    - "**/mediapipe_genai_bindings.dart"

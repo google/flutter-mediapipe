@@ -29,10 +29,10 @@ class _LlmInferenceDemoState extends State<LlmInferenceDemo>
 
   Map<LlmModel, List<ChatMessage>> transcript = {};
 
-  int maxTokens = 10;
-  ValueNotifier<double> temperature = ValueNotifier<double>(0.5);
-  ValueNotifier<int> topK = ValueNotifier<int>(10);
-  int sequenceBatchSize = 10;
+  int maxTokens = 512;
+  ValueNotifier<double> temperature = ValueNotifier<double>(0.8);
+  ValueNotifier<int> topK = ValueNotifier<int>(40);
+  int sequenceBatchSize = 20;
   late int randomSeed;
 
   @override

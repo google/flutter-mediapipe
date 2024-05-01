@@ -60,9 +60,9 @@ test_text:
 example_text:
 	cd packages/mediapipe-task-text/example && flutter run -d macos
 
-# Inference ---
-generate_inference:
-	cd packages/mediapipe-task-inference && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
+# GenAI ---
+generate_genai:
+	cd packages/mediapipe-task-genai && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
 
 # Example genai invocation.
 # Note that `GEMMA_4B_CPU_URI` can either be a local path or web URL. Similar values exist for
