@@ -2,152 +2,101 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:example/models/models.dart';
+import 'package:example/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-class ConversationLog extends StatelessWidget {
+class ConversationLog extends StatefulWidget {
   const ConversationLog({required this.transcript, super.key});
 
   final List<ChatMessage> transcript;
 
   @override
+  State<ConversationLog> createState() => _ConversationLogState();
+}
+
+class _ConversationLogState extends State<ConversationLog> {
+  @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return ListView.builder(
-        reverse: true,
-        itemCount: transcript.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: SizedBox(
-              width: constraints.maxWidth * 0.6,
-              child: ChatMessageBubble(
-                  message: transcript[transcript.length - index - 1]),
-            ),
-          );
-        },
-      );
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView.builder(
+          reverse: true,
+          itemCount: widget.transcript.length,
+          itemBuilder: (context, index) {
+            final messageIndex = widget.transcript.length - index - 1;
+            final message = widget.transcript[messageIndex];
+
+            if (!message.displayingFullString) {
+              Future.delayed(const Duration(milliseconds: 50)).then((_) {
+                SchedulerBinding.instance.addPostFrameCallback(
+                  (_) {
+                    setState(message.advanceCursor);
+                  },
+                  debugLabel: 'Updating ChatMessage',
+                );
+              });
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: message.displayString != ''
+                  ? SizedBox(
+                      width: constraints.maxWidth * 0.7,
+                      child: ChatMessageBubble(
+                        message: message,
+                        width: constraints.maxWidth * 0.6,
+                        key: ValueKey('message-${message.id}'),
+                      ),
+                    )
+                  : const TypingIndicator(
+                      showIndicator: true,
+                    ),
+            );
+          },
+        );
+      },
+    );
   }
 }
 
 class ChatMessageBubble extends StatelessWidget {
   const ChatMessageBubble({
     required this.message,
+    required this.width,
     super.key,
   });
 
   final ChatMessage message;
+  final double width;
+
+  // Colors.blue[400]
+  static const llmBgColor = Color(0xFF42A5F5);
+
+  // Colors.orange[400]
+  static const userBgColor = Color(0xFFFFA726);
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: message.origin.alignmentFromTextDirection(
-        Directionality.of(context),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(50)),
-          color: message.backgroundColor,
+    return Row(
+      children: [
+        if (message.origin.isUser) Flexible(flex: 2, child: Container()),
+        Flexible(
+          flex: 4,
+          child: BubbleSpecialThree(
+            text: message.displayString,
+            color: message.origin.isUser ? userBgColor : llmBgColor,
+            isSender: message.origin.isUser,
+            textStyle: const TextStyle(color: Colors.white),
+            sent: message.isComplete,
+            delivered: message.isComplete,
+            seen: message.isComplete,
+          ),
         ),
-        child: Text(
-          message.body,
-          style: const TextStyle(color: Colors.white),
-          textAlign: message.origin.isLlm //
-              ? TextAlign.start
-              : TextAlign.end,
-        ),
-      ),
+        if (message.origin.isLlm) Flexible(flex: 2, child: Container()),
+      ],
     );
   }
-}
-
-class ChatMessage {
-  const ChatMessage._({
-    required this.body,
-    required this.backgroundColor,
-    required this.origin,
-  });
-
-  factory ChatMessage.origin(String body, MessageOrigin origin) =>
-      origin == MessageOrigin.user
-          ? ChatMessage.user(body)
-          : ChatMessage.llm(body);
-
-  factory ChatMessage.llm(String body, {Color? backgroundColor}) =>
-      ChatMessage._(
-        body: body,
-        backgroundColor: backgroundColor ?? defaultLlmBackgroundColor,
-        origin: MessageOrigin.llm,
-      );
-
-  factory ChatMessage.user(String body, {Color? backgroundColor}) =>
-      ChatMessage._(
-        body: body,
-        backgroundColor: backgroundColor ?? defaultUserBackgroundColor,
-        origin: MessageOrigin.user,
-      );
-
-  ChatMessage continueBody(String continuation) {
-    assert(() {
-      if (origin.isUser) {
-        throw Exception(
-          'Only expected to extend messages from the LLM. '
-          'Did you call continueBody on the wrong ChatMessage?',
-        );
-      }
-      return true;
-    }());
-    return ChatMessage.llm(
-      '$body $continuation',
-      backgroundColor: backgroundColor,
-    );
-  }
-
-  final MessageOrigin origin;
-  final String body;
-  final Color backgroundColor;
-
-  // Colors.blue[400]
-  static const defaultLlmBackgroundColor = Color(0xFF42A5F5);
-
-  // Colors.orange[400]
-  static const defaultUserBackgroundColor = Color(0xFFFFA726);
-}
-
-enum MessageOrigin {
-  user,
-  llm;
-
-  bool get isUser => switch (this) {
-        MessageOrigin.user => true,
-        MessageOrigin.llm => false,
-      };
-
-  bool get isLlm => switch (this) {
-        MessageOrigin.user => false,
-        MessageOrigin.llm => true,
-      };
-
-  Alignment alignmentFromTextDirection(TextDirection textDirection) =>
-      switch (textDirection) {
-        TextDirection.ltr =>
-          isUser ? Alignment.centerRight : Alignment.centerLeft,
-        TextDirection.rtl =>
-          isUser ? Alignment.centerLeft : Alignment.centerRight,
-      };
-}
-
-/// Indicates whether the message should appear on the left, indicating it was
-/// sent by the other conversation participant, or on the right, indicating it
-/// was sent by the user themselves. This assumes LTR text directionality, and
-/// thus the actual layout is flipped if text directionality is RTL.
-enum MessageAlignment {
-  start,
-  end;
-
-  bool get isStart => switch (this) {
-        MessageAlignment.start => true,
-        MessageAlignment.end => false,
-      };
 }

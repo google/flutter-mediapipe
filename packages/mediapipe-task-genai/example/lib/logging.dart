@@ -5,7 +5,7 @@
 import 'dart:io' as io;
 import 'package:logging/logging.dart';
 
-final log = Logger('TextTask');
+final log = Logger('Genai');
 
 void initLogging() {
   Logger.root.level = Level.FINEST;

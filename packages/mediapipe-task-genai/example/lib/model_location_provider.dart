@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:example/models/models.dart';
 import 'package:example/model_storage/model_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
-import '../llm_model.dart';
 
 final _log = Logger('ModelLocationProvider');
 
@@ -18,56 +17,46 @@ final _log = Logger('ModelLocationProvider');
 /// Usage:
 /// ```dart
 /// final provider = ModelLocationProvider.fromEnvironment();
-/// final (path, downloadStream) = provider.getModelLocation(LlmModel.gemma8bGpu);
-/// if (downloadStream != null) {
-///   // The file is being downloaded.
-///   await for (final percent in downloadStream) {
-///     print('$percent% done downloading')
+/// provider.getModelLocation(LlmModel.gemma8bGpu).then(
+///   (String location) {
+///      doSomethingWith(location);
+///   },
+/// );
+/// final download = provider.getInProgressDownload(LlmModel.gemma8bGpu);
+/// if (download != null) {
+///   await for (final percent in download) {
+///     showDownloadPercentage(percent);
 ///   }
-/// }
-/// if (await file.exists()) {
-///   final options = LlmInferenceOptions(
-///     modelPath: path,
-///   );
-/// } else {
-///   // Download error!
 /// }
 /// ```
 ///
 /// See also:
 ///  * [LlmModel], the enum which tracks each available LLM.
-class ModelLocationProvider extends ChangeNotifier {
+class ModelLocationProvider {
   ModelLocationProvider._({
     required ModelPaths modelLocations,
-    required LlmModel selectedModel,
-  }) : _selectedModel = selectedModel {
+    required this.selectedModel,
+  }) {
     storage = ModelStorage()
       ..setInitialModelLocations(modelLocations).then(
         (_) {
           _ready.complete();
-          notifyListeners();
         },
       );
   }
-  factory ModelLocationProvider.fromEnvironment(
-    LlmModel selectedModel,
-  ) {
+  factory ModelLocationProvider.fromEnvironment(LlmModel selectedModel) {
     return ModelLocationProvider._(
       modelLocations: ModelLocationProvider._getModelLocationsFromEnvironment(),
       selectedModel: selectedModel,
     );
   }
 
-  LlmModel _selectedModel;
-  LlmModel get selectedModel => _selectedModel;
-  set selectedModel(LlmModel value) {
-    _selectedModel = value;
-    notifyListeners();
-  }
+  LlmModel selectedModel;
 
   late final ModelStorageInterface storage;
 
   final _ready = Completer<void>();
+  Future<void> get ready => _ready.future;
 
   // Useful for quick development if there is any friction around passing
   // environment variables
@@ -82,7 +71,6 @@ class ModelLocationProvider extends ChangeNotifier {
       String location = hardcodedLocations[model] ??
           Platform.environment[model.environmentVariableUriName] ??
           model.dartDefine;
-      _log.info('${model.environmentVariableUriName} :: $location');
 
       // `model.dartDefine` has an empty state of an empty string, not null,
       // which is why `location` is a `String` and not a `String?`
@@ -90,7 +78,6 @@ class ModelLocationProvider extends ChangeNotifier {
         locations[model] = location;
       }
     }
-    _log.info('Env locations: $locations');
     return locations;
   }
 
@@ -98,30 +85,40 @@ class ModelLocationProvider extends ChangeNotifier {
   Future<bool> downloadExists(String downloadLocation) =>
       storage.downloadExists(downloadLocation);
 
-  Future<void> delete(LlmModel model) async {
-    await storage.delete(model);
-    notifyListeners();
+  Future<bool> downloadExistsForModel(LlmModel model) async {
+    String? path = storage.pathFor(model);
+    return path == null ? false : storage.downloadExists(path);
   }
+
+  Future<void> delete(LlmModel model) async => await storage.delete(model);
 
   /// {@macro binarySize}
   int binarySize(String location) => storage.binarySize(location);
 
+  /// Accepts a model and returns the size on disk for said model if it is
+  /// already downloaded and fully available.
+  int? binarySizeForModel(LlmModel model) {
+    final location = pathFor(model);
+    return location != null ? storage.binarySize(location) : null;
+  }
+
+  /// {@macro pathFor}
   String? pathFor(LlmModel model) => storage.pathFor(model);
+
+  /// {@macro urlFor}
   Uri? urlFor(LlmModel model) => storage.urlFor(model);
 
   /// Storage for the controllers tied to in-progress downloads, each of which
   /// should emit download progress updates as a percentage.
-  final _downloadControllers = <LlmModel, StreamController<double>>{};
+  final _downloadControllers = <LlmModel, StreamController<int>>{};
 
-  /// Returns a tuple of type a String and a nullable Stream of ints. If the
-  /// stream is null, then the file is on disk and ready to go right now. If the
-  /// stream is not null, the file is being downloaded and the Stream will emit
-  /// values from 0 to 100 to represent the download completion percentage. Once
-  /// the stream is exhausted, if the download was successful then the model's
-  /// binary will be available at the given path.
-  Future<String> getModelLocation(LlmModel model) async {
-    _log.info('Requested model for $model');
-    await _ready.future;
+  /// Asychronously returns the String for the location of a locally available
+  /// copy of the requested model and an optional download progress stream if
+  /// the model is downloading.
+  Future<(Future<String>, Stream<int>?)> getModelLocation(
+    LlmModel model,
+  ) async {
+    await ready;
     final path = storage.pathFor(model);
     if (path != null) {
       if (!await storage.downloadExists(path)) {
@@ -133,13 +130,13 @@ class ModelLocationProvider extends ChangeNotifier {
 
       final binarySize = storage.binarySize(path);
       if (binarySize > 0) {
-        _log.fine(
+        _log.finer(
           'Returning already downloaded model for $model of '
           '$binarySize bytes',
         );
-        return path;
+        return (Future.value(path), null);
       }
-      _log.fine('Deleting existing $model of 0 bytes');
+      _log.finer('Deleting existing $model of 0 bytes');
       storage.delete(model);
     }
 
@@ -155,24 +152,34 @@ class ModelLocationProvider extends ChangeNotifier {
     );
   }
 
-  /// Returns a stream for download progress for a model if said model is in the
-  /// process of being downloaded. Otherwise, returns null.
-  Stream<double>? getInProgressDownload(LlmModel model) =>
-      _downloadControllers[model]?.stream;
-
-  Future<String> _getOrStartDownload(LlmModel model, Uri url) async {
+  /// Either initiates a fresh download or returns an ongoing download.
+  Future<(Future<String>, Stream<int>?)> _getOrStartDownload(
+    LlmModel model,
+    Uri url,
+  ) async {
     final downloadDestination = await storage.urlToDownloadDestination(url);
 
     // This is the way to figure out if the file is still being downloaded.
-    // Checking the file's existence could return true while it is still being
-    // written.
+    // If there is a download controller for the model, we must await its
+    // completion.
     if (!_downloadControllers.containsKey(model)) {
-      await _downloadFile(model, url, downloadDestination);
+      return (
+        Future.value(downloadDestination),
+        await _downloadFile(model, url, downloadDestination)
+      );
     }
-    return downloadDestination;
+    return (
+      Future.value(downloadDestination),
+      _downloadControllers[model]!.stream
+    );
   }
 
-  Future<void> _downloadFile(
+  /// Downloads the file, creating and updating a stream with progress.
+  ///
+  /// This method does not return the location of the file, and in fact should
+  /// not be called directly. Call [getModelLocation], which makes use of
+  /// [_getOrStartDownload] if the file is not yet available on disk.
+  Future<Stream<int>> _downloadFile(
     LlmModel model,
     Uri location,
     String downloadDestination,
@@ -183,7 +190,6 @@ class ModelLocationProvider extends ChangeNotifier {
           'which expects to only be called when said model location is empty. '
           'Unexpectedly occupied file location was ${location.path}');
     }
-    _log.info('Beginning download of $model bin from ${location.toString()}');
     final downloadSink = await storage.create(downloadDestination);
 
     // Setup the request itself and read preliminary headers.
@@ -193,19 +199,21 @@ class ModelLocationProvider extends ChangeNotifier {
     _log.finer('File download: $contentLength bytes');
     final downloadCompleter = Completer<bool>();
     int downloadedBytes = 0;
-    double lastPercentEmitted = 0;
+    int lastPercentEmitted = 0;
 
-    // Setup our reporting stream.
-    _downloadControllers[model] = StreamController<double>();
+    // Setup our reporting stream. Use a broadcast stream because calls to
+    // `_getOrStartDownload` will need to resubscribe if the file is already
+    // being downloaded.
+    _downloadControllers[model] = StreamController<int>.broadcast();
 
     // Actually begin downloading
     response.stream.listen(
       (List<int> bytes) {
         downloadSink.add(bytes);
         downloadedBytes += bytes.length;
-        double percent = downloadedBytes / contentLength;
-        // Update every tenth of a percent, or a thousand times in total
-        if ((percent - lastPercentEmitted) > 0.001) {
+        int percent = ((downloadedBytes / contentLength) * 100).toInt();
+        if ((percent > lastPercentEmitted)) {
+          _log.finest('ModelLocationProvider :: $percent%');
           _downloadControllers[model]!.add(percent);
           lastPercentEmitted = percent;
         }
@@ -231,12 +239,7 @@ class ModelLocationProvider extends ChangeNotifier {
       // download is complete.
       _downloadControllers[model]?.close();
       _downloadControllers.remove(model);
-
-      // Alert listeners that the download has completed.
-      notifyListeners();
     });
-
-    // Alert listeners that the download has started.
-    notifyListeners();
+    return _downloadControllers[model]!.stream;
   }
 }

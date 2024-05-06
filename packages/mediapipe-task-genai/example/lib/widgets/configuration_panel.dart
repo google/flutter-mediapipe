@@ -10,14 +10,22 @@ class InferenceConfigurationPanel extends StatelessWidget {
   const InferenceConfigurationPanel({
     required this.topK,
     required this.temp,
+    required this.changeTemp,
+    required this.changeTopK,
     super.key,
   });
 
   /// Top K number of tokens to be sampled from for each decoding step.
-  final ValueNotifier<int> topK;
+  final int topK;
+
+  /// Handler for updating the [topK] value.
+  final void Function(int) changeTopK;
 
   /// Randomness when decoding the next token.
-  final ValueNotifier<double> temp;
+  final double temp;
+
+  /// Handler for updating the [temp] value.
+  final void Function(double) changeTemp;
 
   @override
   Widget build(BuildContext context) {
@@ -26,56 +34,36 @@ class InferenceConfigurationPanel extends StatelessWidget {
         Text('Top K', style: Theme.of(context).textTheme.bodyLarge),
         Text('Number of tokens to be sampled from for each decoding step.',
             style: Theme.of(context).textTheme.bodySmall),
-        ValueListenableBuilder(
-          valueListenable: topK,
-          builder: (context, topKValue, child) {
-            return Slider(
-              value: topKValue.toDouble(),
-              min: 1,
-              max: 100,
-              divisions: 100,
-              onChanged: (newTopK) => topK.value = newTopK.toInt(),
-            );
-          },
+        Slider(
+          value: topK.toDouble(),
+          min: 1,
+          max: 100,
+          divisions: 100,
+          onChanged: (newTopK) => changeTopK(newTopK.toInt()),
         ),
-        ValueListenableBuilder(
-          valueListenable: topK,
-          builder: (context, topKValue, child) {
-            return Text(
-              topKValue.toString(),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.grey),
-            );
-          },
+        Text(
+          topK.toString(),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: Colors.grey),
         ),
         const Divider(),
         Text('Temperature', style: Theme.of(context).textTheme.bodyLarge),
         Text('Randomness when decoding the next token.',
             style: Theme.of(context).textTheme.bodySmall),
-        ValueListenableBuilder(
-          valueListenable: temp,
-          builder: (context, temperature, child) {
-            return Slider(
-              value: temperature,
-              min: 0,
-              max: 1,
-              onChanged: (newtemp) => temp.value = newtemp,
-            );
-          },
+        Slider(
+          value: temp,
+          min: 0,
+          max: 1,
+          onChanged: changeTemp,
         ),
-        ValueListenableBuilder(
-          valueListenable: temp,
-          builder: (context, temperature, child) {
-            return Text(
-              temperature.roundTo(3).toString(),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.grey),
-            );
-          },
+        Text(
+          temp.roundTo(3).toString(),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: Colors.grey),
         ),
         const Divider(),
         GestureDetector(

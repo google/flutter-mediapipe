@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:example/llm_model.dart';
+import 'package:example/models/models.dart';
 import 'package:logging/logging.dart';
 
 typedef ModelPaths = Map<LlmModel, String>;

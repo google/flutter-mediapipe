@@ -1,13 +1,48 @@
-import 'package:example/llm_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'model_location_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'llm_inference_demo.dart';
 import 'logging.dart';
 
+/// {@template AppBlocObserver}
+/// Logger of all things related to `pkg:flutter_bloc`.
+/// {@endtemplate}
+class AppBlocObserver extends BlocObserver {
+  /// {@macro AppBlocObserver}
+  const AppBlocObserver();
+
+  @override
+  void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
+    super.onChange(bloc, change);
+    // print('onChange(${bloc.runtimeType}, $change)');
+  }
+
+  @override
+  void onEvent(Bloc<dynamic, dynamic> bloc, Object? event) {
+    // print('onEvent($event)');
+    super.onEvent(bloc, event);
+  }
+
+  @override
+  void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
+    // print('onError(${bloc.runtimeType}, $error, $stackTrace)');
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
 void main() {
   initLogging();
-  runApp(const MainApp());
+  Bloc.observer = const AppBlocObserver();
+  runApp(
+    const MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate, // This is required
+      ],
+      home: MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatefulWidget {
@@ -18,22 +53,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  @override
-  Widget build(BuildContext context) => const MaterialApp(home: GenAiPages());
-}
-
-class GenAiPages extends StatefulWidget {
-  const GenAiPages({super.key});
-
-  @override
-  State<GenAiPages> createState() => GenAiPagesState();
-}
-
-class GenAiPagesState extends State<GenAiPages> {
   final PageController controller = PageController();
-  final ModelLocationProvider provider = ModelLocationProvider.fromEnvironment(
-    LlmModel.gemma4bCpu,
-  );
 
   final titles = <String>['Inference'];
   int titleIndex = 0;
@@ -61,11 +81,8 @@ class GenAiPagesState extends State<GenAiPages> {
     return Scaffold(
       body: PageView(
         controller: controller,
-        children: <Widget>[
-          ChangeNotifierProvider<ModelLocationProvider>.value(
-            value: provider,
-            child: const LlmInferenceDemo(),
-          ),
+        children: const <Widget>[
+          LlmInferenceDemo(),
         ],
       ),
       bottomNavigationBar: SizedBox(

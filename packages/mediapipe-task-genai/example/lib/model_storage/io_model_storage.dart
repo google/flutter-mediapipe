@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:example/llm_model.dart';
+import 'package:example/models/models.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
