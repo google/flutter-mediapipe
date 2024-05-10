@@ -17,26 +17,21 @@ final _log = Logger('ModelLocationProvider');
 /// Usage:
 /// ```dart
 /// final provider = ModelLocationProvider.fromEnvironment();
-/// provider.getModelLocation(LlmModel.gemma8bGpu).then(
-///   (String location) {
-///      doSomethingWith(location);
-///   },
-/// );
-/// final download = provider.getInProgressDownload(LlmModel.gemma8bGpu);
-/// if (download != null) {
-///   await for (final percent in download) {
+/// (Future<String> locationFuture, Stream<int> downloadProgress,) =
+///    await provider.getModelLocation(LlmModel.gemma8bGpu);
+/// if (downloadProgress != null) {
+///   await for (final percent in downloadProgress) {
 ///     showDownloadPercentage(percent);
 ///   }
 /// }
+/// // Should complete instantly
+/// final location = await locationFuture;
 /// ```
 ///
 /// See also:
 ///  * [LlmModel], the enum which tracks each available LLM.
 class ModelLocationProvider {
-  ModelLocationProvider._({
-    required ModelPaths modelLocations,
-    required this.selectedModel,
-  }) {
+  ModelLocationProvider._({required ModelPaths modelLocations}) {
     storage = ModelStorage()
       ..setInitialModelLocations(modelLocations).then(
         (_) {
@@ -44,14 +39,11 @@ class ModelLocationProvider {
         },
       );
   }
-  factory ModelLocationProvider.fromEnvironment(LlmModel selectedModel) {
+  factory ModelLocationProvider.fromEnvironment() {
     return ModelLocationProvider._(
       modelLocations: ModelLocationProvider._getModelLocationsFromEnvironment(),
-      selectedModel: selectedModel,
     );
   }
-
-  LlmModel selectedModel;
 
   late final ModelStorageInterface storage;
 
@@ -63,6 +55,12 @@ class ModelLocationProvider {
   static const hardcodedLocations = <LlmModel, String>{
     LlmModel.gemma4bCpu:
         'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int4.bin',
+    LlmModel.gemma4bGpu:
+        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int4.bin',
+    LlmModel.gemma8bCpu:
+        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int8.bin',
+    LlmModel.gemma8bGpu:
+        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int8.bin',
   };
 
   static ModelPaths _getModelLocationsFromEnvironment() {

@@ -6,10 +6,14 @@
 /// Utility to query an LLM with a prompt and receive its response as a stream.
 /// {@endtemplate}
 abstract class BaseLlmInferenceEngine {
+  /// {@template generateResponse}
   /// Generates a response based on the input text.
+  /// {@endtemplate}
   Stream<String> generateResponse(String text);
 
+  /// {@template sizeInTokens}
   /// Runs an invocation of only the tokenization for the LLM, and returns the
   /// size (in tokens) of the result.
-  int sizeInTokens(String text);
+  /// {@endtemplate}
+  Future<int> sizeInTokens(String text);
 }

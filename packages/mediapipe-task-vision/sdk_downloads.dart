@@ -8,10 +8,8 @@ final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = {
   },
   'macos': {
     'libvision': {
-      'arm64':
-          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/macos_flutter/release/12/20240418-141744/darwin_arm64/libvision.dylib',
       'x64':
-          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/macos_flutter/release/12/20240418-141744/darwin_x86_64/libvision.dylib'
+          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/macos_flutter/release/24/20240429-091615/darwin_x86_64/libvision.dylib'
     }
   }
 };

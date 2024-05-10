@@ -60,7 +60,7 @@ external LlmResponseContext LlmInferenceEngine_Session_PredictSync(
             ffi.Pointer<
                 ffi.NativeFunction<
                     ffi.Void Function(ffi.Pointer<ffi.Void> callback_context,
-                        LlmResponseContext response_context)>>)>(
+                        ffi.Pointer<LlmResponseContext> response_context)>>)>(
     symbol: 'LlmInferenceEngine_Session_PredictAsync')
 external void LlmInferenceEngine_Session_PredictAsync(
   ffi.Pointer<LlmInferenceEngine_Session> session,
@@ -69,7 +69,7 @@ external void LlmInferenceEngine_Session_PredictAsync(
   ffi.Pointer<
           ffi.NativeFunction<
               ffi.Void Function(ffi.Pointer<ffi.Void> callback_context,
-                  LlmResponseContext response_context)>>
+                  ffi.Pointer<LlmResponseContext> response_context)>>
       callback,
 );
 

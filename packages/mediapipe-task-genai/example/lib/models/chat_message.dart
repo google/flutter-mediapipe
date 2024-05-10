@@ -28,6 +28,7 @@ class ChatMessage with _$ChatMessage {
           : ChatMessage.llm(body);
 
   factory ChatMessage.llm(String body, {int? cursorPosition}) => ChatMessage(
+        // Sometimes the LLM starts a response with multiple empty newlines
         body: body,
         origin: MessageOrigin.llm,
         cursorPosition: cursorPosition ?? 0,
@@ -42,19 +43,6 @@ class ChatMessage with _$ChatMessage {
         isComplete: true,
         id: const Uuid().v4(),
       );
-
-  ChatMessage continueBody(String continuation) {
-    assert(() {
-      if (origin.isUser) {
-        throw Exception(
-          'Only expected to extend messages from the LLM. '
-          'Did you call continueBody on the wrong ChatMessage?',
-        );
-      }
-      return true;
-    }());
-    return copyWith(body: '$body $continuation');
-  }
 
   ChatMessage complete() {
     assert(() {
@@ -89,6 +77,11 @@ enum MessageOrigin {
   bool get isLlm => switch (this) {
         MessageOrigin.user => false,
         MessageOrigin.llm => true,
+      };
+
+  String get transcriptName => switch (this) {
+        MessageOrigin.user => 'USER',
+        MessageOrigin.llm => 'LLM',
       };
 
   Alignment alignmentFromTextDirection(TextDirection textDirection) =>

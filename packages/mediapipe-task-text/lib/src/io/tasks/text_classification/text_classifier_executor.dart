@@ -12,9 +12,11 @@ import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_
 
 final _log = Logger('TextTaskExecutor');
 
+/// {@template TextClassifierExecutor}
 /// Executes MediaPipe's "classifyText" task.
 ///
 /// {@macro TaskExecutor}
+/// {@endtemplate}
 class TextClassifierExecutor extends TaskExecutor<
     bindings.TextClassifierOptions,
     TextClassifierOptions,

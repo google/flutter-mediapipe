@@ -27,6 +27,10 @@ mixin _$ModelInfo {
   /// Location of the model if it is available on disk.
   String? get path => throw _privateConstructorUsedError;
 
+  /// Location from which the model can be downloaded if it is not already
+  /// available.
+  Uri? get remoteLocation => throw _privateConstructorUsedError;
+
   @JsonKey(ignore: true)
   $ModelInfoCopyWith<ModelInfo> get copyWith =>
       throw _privateConstructorUsedError;
@@ -37,7 +41,11 @@ abstract class $ModelInfoCopyWith<$Res> {
   factory $ModelInfoCopyWith(ModelInfo value, $Res Function(ModelInfo) then) =
       _$ModelInfoCopyWithImpl<$Res, ModelInfo>;
   @useResult
-  $Res call({int? downloadedBytes, int? downloadPercent, String? path});
+  $Res call(
+      {int? downloadedBytes,
+      int? downloadPercent,
+      String? path,
+      Uri? remoteLocation});
 }
 
 /// @nodoc
@@ -56,6 +64,7 @@ class _$ModelInfoCopyWithImpl<$Res, $Val extends ModelInfo>
     Object? downloadedBytes = freezed,
     Object? downloadPercent = freezed,
     Object? path = freezed,
+    Object? remoteLocation = freezed,
   }) {
     return _then(_value.copyWith(
       downloadedBytes: freezed == downloadedBytes
@@ -70,6 +79,10 @@ class _$ModelInfoCopyWithImpl<$Res, $Val extends ModelInfo>
           ? _value.path
           : path // ignore: cast_nullable_to_non_nullable
               as String?,
+      remoteLocation: freezed == remoteLocation
+          ? _value.remoteLocation
+          : remoteLocation // ignore: cast_nullable_to_non_nullable
+              as Uri?,
     ) as $Val);
   }
 }
@@ -82,7 +95,11 @@ abstract class _$$ModelInfoImplCopyWith<$Res>
       __$$ModelInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int? downloadedBytes, int? downloadPercent, String? path});
+  $Res call(
+      {int? downloadedBytes,
+      int? downloadPercent,
+      String? path,
+      Uri? remoteLocation});
 }
 
 /// @nodoc
@@ -99,6 +116,7 @@ class __$$ModelInfoImplCopyWithImpl<$Res>
     Object? downloadedBytes = freezed,
     Object? downloadPercent = freezed,
     Object? path = freezed,
+    Object? remoteLocation = freezed,
   }) {
     return _then(_$ModelInfoImpl(
       downloadedBytes: freezed == downloadedBytes
@@ -113,6 +131,10 @@ class __$$ModelInfoImplCopyWithImpl<$Res>
           ? _value.path
           : path // ignore: cast_nullable_to_non_nullable
               as String?,
+      remoteLocation: freezed == remoteLocation
+          ? _value.remoteLocation
+          : remoteLocation // ignore: cast_nullable_to_non_nullable
+              as Uri?,
     ));
   }
 }
@@ -120,7 +142,11 @@ class __$$ModelInfoImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ModelInfoImpl extends _ModelInfo {
-  const _$ModelInfoImpl({this.downloadedBytes, this.downloadPercent, this.path})
+  const _$ModelInfoImpl(
+      {this.downloadedBytes,
+      this.downloadPercent,
+      this.path,
+      this.remoteLocation})
       : super._();
 
   /// Size of the on-disk location of this model. A null value here either
@@ -137,9 +163,14 @@ class _$ModelInfoImpl extends _ModelInfo {
   @override
   final String? path;
 
+  /// Location from which the model can be downloaded if it is not already
+  /// available.
+  @override
+  final Uri? remoteLocation;
+
   @override
   String toString() {
-    return 'ModelInfo(downloadedBytes: $downloadedBytes, downloadPercent: $downloadPercent, path: $path)';
+    return 'ModelInfo(downloadedBytes: $downloadedBytes, downloadPercent: $downloadPercent, path: $path, remoteLocation: $remoteLocation)';
   }
 
   @override
@@ -151,12 +182,14 @@ class _$ModelInfoImpl extends _ModelInfo {
                 other.downloadedBytes == downloadedBytes) &&
             (identical(other.downloadPercent, downloadPercent) ||
                 other.downloadPercent == downloadPercent) &&
-            (identical(other.path, path) || other.path == path));
+            (identical(other.path, path) || other.path == path) &&
+            (identical(other.remoteLocation, remoteLocation) ||
+                other.remoteLocation == remoteLocation));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, downloadedBytes, downloadPercent, path);
+  int get hashCode => Object.hash(
+      runtimeType, downloadedBytes, downloadPercent, path, remoteLocation);
 
   @JsonKey(ignore: true)
   @override
@@ -169,7 +202,8 @@ abstract class _ModelInfo extends ModelInfo {
   const factory _ModelInfo(
       {final int? downloadedBytes,
       final int? downloadPercent,
-      final String? path}) = _$ModelInfoImpl;
+      final String? path,
+      final Uri? remoteLocation}) = _$ModelInfoImpl;
   const _ModelInfo._() : super._();
 
   @override
@@ -186,6 +220,11 @@ abstract class _ModelInfo extends ModelInfo {
 
   /// Location of the model if it is available on disk.
   String? get path;
+  @override
+
+  /// Location from which the model can be downloaded if it is not already
+  /// available.
+  Uri? get remoteLocation;
   @override
   @JsonKey(ignore: true)
   _$$ModelInfoImplCopyWith<_$ModelInfoImpl> get copyWith =>

@@ -13,7 +13,10 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
   Stream<String> generateResponse(String text) => throw UnimplementedError();
 
   @override
-  int sizeInTokens(String text) => throw UnimplementedError();
+  Future<int> sizeInTokens(String text) => throw UnimplementedError();
+
+  /// Releases all native resources.
+  void dispose() => throw UnimplementedError();
 }
 
 /// {@macro LlmInferenceOptions}

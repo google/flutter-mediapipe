@@ -36,10 +36,10 @@ enum LlmModel {
       };
 
   String get displayName => switch (this) {
-        gemma4bCpu => 'Gemma\n4b CPU',
-        gemma4bGpu => 'Gemma\n4b GPU',
-        gemma8bCpu => 'Gemma\n8b CPU',
-        gemma8bGpu => 'Gemma\n8b GCPU',
+        gemma4bCpu => 'Gemma 4b CPU',
+        gemma4bGpu => 'Gemma 4b GPU',
+        gemma8bCpu => 'Gemma 8b CPU',
+        gemma8bGpu => 'Gemma 8b GPU',
       };
 }
 
@@ -57,6 +57,10 @@ class ModelInfo with _$ModelInfo {
 
     /// Location of the model if it is available on disk.
     String? path,
+
+    /// Location from which the model can be downloaded if it is not already
+    /// available.
+    Uri? remoteLocation,
   }) = _ModelInfo;
 
   ModelState get state {

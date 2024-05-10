@@ -17,7 +17,7 @@ final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = {
   'ios': {
     'libllm_inference_engine': {
       'arm64':
-          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/macos_flutter/release/12/20240418-141744/darwin_arm64/libllm_inference_engine.dylib',
+          'https://storage.googleapis.com/random-storage-asdf/inference/ios/libllm_inference_engine.v8.dylib',
       'x64':
           'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/macos_flutter/release/12/20240418-141744/darwin_x86_64/libllm_inference_engine.dylib'
     }

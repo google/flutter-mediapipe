@@ -17,7 +17,8 @@ import '../../third_party/mediapipe/generated/mediapipe_genai_bindings.dart'
 /// native memory has been created and ultimately released. All values used by
 /// pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
-class LlmInferenceOptions extends BaseLlmInferenceOptions {
+class LlmInferenceOptions extends BaseLlmInferenceOptions
+    with TaskOptions<bindings.LlmSessionConfig> {
   /// {@macro LlmInferenceOptions.cpu}
   LlmInferenceOptions.cpu({
     required this.modelPath,

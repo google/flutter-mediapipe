@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:equatable/equatable.dart';
+import 'package:mediapipe_core/interface.dart';
 
 /// {@template LlmInferenceOptions}
 /// Configuration object for a MediaPipe text classifier.
@@ -10,7 +10,7 @@ import 'package:equatable/equatable.dart';
 /// See also:
 ///  * [MediaPipe's LlmInferenceOptions documentation](https://developers.google.com/mediapipe/api/solutions/java/com/google/mediapipe/tasks/genai/llminference/LlmInference.LlmInferenceOptions)
 /// {@endtemplate}
-abstract class BaseLlmInferenceOptions extends Equatable {
+abstract class BaseLlmInferenceOptions extends Options {
   /// The path that points to the tflite model file to use for inference.
   String get modelPath;
 
@@ -46,5 +46,28 @@ abstract class BaseLlmInferenceOptions extends Equatable {
   int get topK;
 
   @override
-  List<Object?> get props => [maxTokens, randomSeed, temperature, topK];
+  List<Object?> get props => [
+        modelPath,
+        cacheDir,
+        loraPath,
+        sequenceBatchSize,
+        decodeStepsPerSync,
+        maxTokens,
+        randomSeed,
+        temperature,
+        topK,
+      ];
+
+  @override
+  String toString() => '$runtimeType('
+      'modelPath: $modelPath, '
+      'cacheDir: $cacheDir, '
+      'loraPath: $loraPath, '
+      'sequenceBatchSize: $sequenceBatchSize, '
+      'decodeStepsPerSync: $decodeStepsPerSync, '
+      'maxTokens: $maxTokens, '
+      'randomSeed: $randomSeed, '
+      'temperature: $temperature, '
+      'topK: $topK'
+      ')';
 }

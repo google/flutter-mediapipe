@@ -10,22 +10,18 @@ class InferenceConfigurationPanel extends StatelessWidget {
   const InferenceConfigurationPanel({
     required this.topK,
     required this.temp,
-    required this.changeTemp,
-    required this.changeTopK,
+    required this.maxTokens,
     super.key,
   });
 
   /// Top K number of tokens to be sampled from for each decoding step.
-  final int topK;
+  final ValueNotifier<int> topK;
 
-  /// Handler for updating the [topK] value.
-  final void Function(int) changeTopK;
+  /// Context size window for the LLM.
+  final ValueNotifier<int> maxTokens;
 
   /// Randomness when decoding the next token.
-  final double temp;
-
-  /// Handler for updating the [temp] value.
-  final void Function(double) changeTemp;
+  final ValueNotifier<double> temp;
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +31,14 @@ class InferenceConfigurationPanel extends StatelessWidget {
         Text('Number of tokens to be sampled from for each decoding step.',
             style: Theme.of(context).textTheme.bodySmall),
         Slider(
-          value: topK.toDouble(),
+          value: topK.value.toDouble(),
           min: 1,
           max: 100,
           divisions: 100,
-          onChanged: (newTopK) => changeTopK(newTopK.toInt()),
+          onChanged: (newTopK) => topK.value = newTopK.toInt(),
         ),
         Text(
-          topK.toString(),
+          topK.value.toString(),
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -53,13 +49,32 @@ class InferenceConfigurationPanel extends StatelessWidget {
         Text('Randomness when decoding the next token.',
             style: Theme.of(context).textTheme.bodySmall),
         Slider(
-          value: temp,
+          value: temp.value,
           min: 0,
           max: 1,
-          onChanged: changeTemp,
+          onChanged: (double newValue) => temp.value = newValue,
         ),
         Text(
-          temp.roundTo(3).toString(),
+          temp.value.roundTo(3).toString(),
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: Colors.grey),
+        ),
+        const Divider(),
+        Text('Max Tokens', style: Theme.of(context).textTheme.bodyLarge),
+        Text(
+            'Maximum context window for the LLM. Larger windows can tax '
+            'certain devices.',
+            style: Theme.of(context).textTheme.bodySmall),
+        Slider(
+          value: maxTokens.value.toDouble(),
+          min: 512,
+          max: 8192,
+          onChanged: (newValue) => maxTokens.value = newValue.toInt(),
+        ),
+        Text(
+          maxTokens.value.toString(),
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -68,7 +83,10 @@ class InferenceConfigurationPanel extends StatelessWidget {
         const Divider(),
         GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: Text('Close', style: Theme.of(context).textTheme.bodySmall),
+          child: Text(
+            'Close',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
         ),
       ],
     );

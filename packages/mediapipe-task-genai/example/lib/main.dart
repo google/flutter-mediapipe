@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logging/logging.dart';
 import 'llm_inference_demo.dart';
 import 'logging.dart';
 
@@ -11,6 +12,8 @@ class AppBlocObserver extends BlocObserver {
   /// {@macro AppBlocObserver}
   const AppBlocObserver();
 
+  static final _log = Logger('AppBlocObserver');
+
   @override
   void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
     super.onChange(bloc, change);
@@ -19,7 +22,7 @@ class AppBlocObserver extends BlocObserver {
 
   @override
   void onEvent(Bloc<dynamic, dynamic> bloc, Object? event) {
-    // print('onEvent($event)');
+    _log.finer('onEvent($event)');
     super.onEvent(bloc, event);
   }
 

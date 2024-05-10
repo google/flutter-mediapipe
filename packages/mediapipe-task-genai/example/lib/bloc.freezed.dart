@@ -20,8 +20,9 @@ mixin _$TranscriptState {
   /// message logs found on the [TranscriptBloc].
   List<ChatMessage> get transcript => throw _privateConstructorUsedError;
 
-  /// Model receiving focus from the pool of available models.
-  LlmModel get selectedModel => throw _privateConstructorUsedError;
+  /// True only after the [ModelLocationProvider] has sorted out the initial
+  /// state.
+  bool get modelsReady => throw _privateConstructorUsedError;
 
   /// Engine for the current [selectedModel].
   LlmInferenceEngine? get engine => throw _privateConstructorUsedError;
@@ -38,6 +39,9 @@ mixin _$TranscriptState {
 
   /// Top K number of tokens to be sampled from for each decoding step.
   int get topK => throw _privateConstructorUsedError;
+
+  /// The LLM's maximum context window.
+  int get maxTokens => throw _privateConstructorUsedError;
 
   /// Randomness seed.
   int get randomSeed => throw _privateConstructorUsedError;
@@ -58,12 +62,13 @@ abstract class $TranscriptStateCopyWith<$Res> {
   @useResult
   $Res call(
       {List<ChatMessage> transcript,
-      LlmModel selectedModel,
+      bool modelsReady,
       LlmInferenceEngine? engine,
       dynamic isLlmTyping,
       Map<LlmModel, ModelInfo> modelInfoMap,
       double temperature,
       int topK,
+      int maxTokens,
       int randomSeed,
       String? error});
 }
@@ -82,12 +87,13 @@ class _$TranscriptStateCopyWithImpl<$Res, $Val extends TranscriptState>
   @override
   $Res call({
     Object? transcript = null,
-    Object? selectedModel = null,
+    Object? modelsReady = null,
     Object? engine = freezed,
     Object? isLlmTyping = freezed,
     Object? modelInfoMap = null,
     Object? temperature = null,
     Object? topK = null,
+    Object? maxTokens = null,
     Object? randomSeed = null,
     Object? error = freezed,
   }) {
@@ -96,10 +102,10 @@ class _$TranscriptStateCopyWithImpl<$Res, $Val extends TranscriptState>
           ? _value.transcript
           : transcript // ignore: cast_nullable_to_non_nullable
               as List<ChatMessage>,
-      selectedModel: null == selectedModel
-          ? _value.selectedModel
-          : selectedModel // ignore: cast_nullable_to_non_nullable
-              as LlmModel,
+      modelsReady: null == modelsReady
+          ? _value.modelsReady
+          : modelsReady // ignore: cast_nullable_to_non_nullable
+              as bool,
       engine: freezed == engine
           ? _value.engine
           : engine // ignore: cast_nullable_to_non_nullable
@@ -119,6 +125,10 @@ class _$TranscriptStateCopyWithImpl<$Res, $Val extends TranscriptState>
       topK: null == topK
           ? _value.topK
           : topK // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxTokens: null == maxTokens
+          ? _value.maxTokens
+          : maxTokens // ignore: cast_nullable_to_non_nullable
               as int,
       randomSeed: null == randomSeed
           ? _value.randomSeed
@@ -142,12 +152,13 @@ abstract class _$$TranscriptStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {List<ChatMessage> transcript,
-      LlmModel selectedModel,
+      bool modelsReady,
       LlmInferenceEngine? engine,
       dynamic isLlmTyping,
       Map<LlmModel, ModelInfo> modelInfoMap,
       double temperature,
       int topK,
+      int maxTokens,
       int randomSeed,
       String? error});
 }
@@ -164,12 +175,13 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? transcript = null,
-    Object? selectedModel = null,
+    Object? modelsReady = null,
     Object? engine = freezed,
     Object? isLlmTyping = freezed,
     Object? modelInfoMap = null,
     Object? temperature = null,
     Object? topK = null,
+    Object? maxTokens = null,
     Object? randomSeed = null,
     Object? error = freezed,
   }) {
@@ -178,10 +190,10 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
           ? _value._transcript
           : transcript // ignore: cast_nullable_to_non_nullable
               as List<ChatMessage>,
-      selectedModel: null == selectedModel
-          ? _value.selectedModel
-          : selectedModel // ignore: cast_nullable_to_non_nullable
-              as LlmModel,
+      modelsReady: null == modelsReady
+          ? _value.modelsReady
+          : modelsReady // ignore: cast_nullable_to_non_nullable
+              as bool,
       engine: freezed == engine
           ? _value.engine
           : engine // ignore: cast_nullable_to_non_nullable
@@ -198,6 +210,10 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
       topK: null == topK
           ? _value.topK
           : topK // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxTokens: null == maxTokens
+          ? _value.maxTokens
+          : maxTokens // ignore: cast_nullable_to_non_nullable
               as int,
       randomSeed: null == randomSeed
           ? _value.randomSeed
@@ -216,12 +232,13 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
 class _$TranscriptStateImpl extends _TranscriptState {
   _$TranscriptStateImpl(
       {final List<ChatMessage> transcript = const <ChatMessage>[],
-      required this.selectedModel,
+      this.modelsReady = false,
       this.engine,
       this.isLlmTyping = false,
       required final Map<LlmModel, ModelInfo> modelInfoMap,
       this.temperature = 0.8,
       this.topK = 40,
+      this.maxTokens = 1024,
       required this.randomSeed,
       this.error})
       : _transcript = transcript,
@@ -242,9 +259,11 @@ class _$TranscriptStateImpl extends _TranscriptState {
     return EqualUnmodifiableListView(_transcript);
   }
 
-  /// Model receiving focus from the pool of available models.
+  /// True only after the [ModelLocationProvider] has sorted out the initial
+  /// state.
   @override
-  final LlmModel selectedModel;
+  @JsonKey()
+  final bool modelsReady;
 
   /// Engine for the current [selectedModel].
   @override
@@ -276,6 +295,11 @@ class _$TranscriptStateImpl extends _TranscriptState {
   @JsonKey()
   final int topK;
 
+  /// The LLM's maximum context window.
+  @override
+  @JsonKey()
+  final int maxTokens;
+
   /// Randomness seed.
   @override
   final int randomSeed;
@@ -286,7 +310,7 @@ class _$TranscriptStateImpl extends _TranscriptState {
 
   @override
   String toString() {
-    return 'TranscriptState(transcript: $transcript, selectedModel: $selectedModel, engine: $engine, isLlmTyping: $isLlmTyping, modelInfoMap: $modelInfoMap, temperature: $temperature, topK: $topK, randomSeed: $randomSeed, error: $error)';
+    return 'TranscriptState(transcript: $transcript, modelsReady: $modelsReady, engine: $engine, isLlmTyping: $isLlmTyping, modelInfoMap: $modelInfoMap, temperature: $temperature, topK: $topK, maxTokens: $maxTokens, randomSeed: $randomSeed, error: $error)';
   }
 
   @override
@@ -296,8 +320,8 @@ class _$TranscriptStateImpl extends _TranscriptState {
             other is _$TranscriptStateImpl &&
             const DeepCollectionEquality()
                 .equals(other._transcript, _transcript) &&
-            (identical(other.selectedModel, selectedModel) ||
-                other.selectedModel == selectedModel) &&
+            (identical(other.modelsReady, modelsReady) ||
+                other.modelsReady == modelsReady) &&
             (identical(other.engine, engine) || other.engine == engine) &&
             const DeepCollectionEquality()
                 .equals(other.isLlmTyping, isLlmTyping) &&
@@ -306,6 +330,8 @@ class _$TranscriptStateImpl extends _TranscriptState {
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
             (identical(other.topK, topK) || other.topK == topK) &&
+            (identical(other.maxTokens, maxTokens) ||
+                other.maxTokens == maxTokens) &&
             (identical(other.randomSeed, randomSeed) ||
                 other.randomSeed == randomSeed) &&
             (identical(other.error, error) || other.error == error));
@@ -315,12 +341,13 @@ class _$TranscriptStateImpl extends _TranscriptState {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_transcript),
-      selectedModel,
+      modelsReady,
       engine,
       const DeepCollectionEquality().hash(isLlmTyping),
       const DeepCollectionEquality().hash(_modelInfoMap),
       temperature,
       topK,
+      maxTokens,
       randomSeed,
       error);
 
@@ -335,12 +362,13 @@ class _$TranscriptStateImpl extends _TranscriptState {
 abstract class _TranscriptState extends TranscriptState {
   factory _TranscriptState(
       {final List<ChatMessage> transcript,
-      required final LlmModel selectedModel,
+      final bool modelsReady,
       final LlmInferenceEngine? engine,
       final dynamic isLlmTyping,
       required final Map<LlmModel, ModelInfo> modelInfoMap,
       final double temperature,
       final int topK,
+      final int maxTokens,
       required final int randomSeed,
       final String? error}) = _$TranscriptStateImpl;
   _TranscriptState._() : super._();
@@ -352,8 +380,9 @@ abstract class _TranscriptState extends TranscriptState {
   List<ChatMessage> get transcript;
   @override
 
-  /// Model receiving focus from the pool of available models.
-  LlmModel get selectedModel;
+  /// True only after the [ModelLocationProvider] has sorted out the initial
+  /// state.
+  bool get modelsReady;
   @override
 
   /// Engine for the current [selectedModel].
@@ -376,6 +405,10 @@ abstract class _TranscriptState extends TranscriptState {
   int get topK;
   @override
 
+  /// The LLM's maximum context window.
+  int get maxTokens;
+  @override
+
   /// Randomness seed.
   int get randomSeed;
   @override
@@ -392,63 +425,77 @@ abstract class _TranscriptState extends TranscriptState {
 mixin _$TranscriptEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -456,14 +503,16 @@ mixin _$TranscriptEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -471,14 +520,16 @@ mixin _$TranscriptEvent {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -503,196 +554,6 @@ class _$TranscriptEventCopyWithImpl<$Res, $Val extends TranscriptEvent>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-}
-
-/// @nodoc
-abstract class _$$ChangeModelImplCopyWith<$Res> {
-  factory _$$ChangeModelImplCopyWith(
-          _$ChangeModelImpl value, $Res Function(_$ChangeModelImpl) then) =
-      __$$ChangeModelImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({LlmModel model});
-}
-
-/// @nodoc
-class __$$ChangeModelImplCopyWithImpl<$Res>
-    extends _$TranscriptEventCopyWithImpl<$Res, _$ChangeModelImpl>
-    implements _$$ChangeModelImplCopyWith<$Res> {
-  __$$ChangeModelImplCopyWithImpl(
-      _$ChangeModelImpl _value, $Res Function(_$ChangeModelImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? model = null,
-  }) {
-    return _then(_$ChangeModelImpl(
-      null == model
-          ? _value.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as LlmModel,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$ChangeModelImpl implements ChangeModel {
-  const _$ChangeModelImpl(this.model);
-
-  @override
-  final LlmModel model;
-
-  @override
-  String toString() {
-    return 'TranscriptEvent.changeModel(model: $model)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ChangeModelImpl &&
-            (identical(other.model, model) || other.model == model));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, model);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ChangeModelImplCopyWith<_$ChangeModelImpl> get copyWith =>
-      __$$ChangeModelImplCopyWithImpl<_$ChangeModelImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
-    required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
-    required TResult Function(LlmModel model, int percentDownloaded)
-        setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
-    required TResult Function(double value) updateTemperature,
-    required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
-  }) {
-    return changeModel(model);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
-    TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
-    TResult? Function(LlmModel model, int percentDownloaded)?
-        setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
-    TResult? Function(double value)? updateTemperature,
-    TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
-  }) {
-    return changeModel?.call(model);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
-    TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
-    TResult Function(LlmModel model, int percentDownloaded)?
-        setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
-    TResult Function(double value)? updateTemperature,
-    TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
-    required TResult orElse(),
-  }) {
-    if (changeModel != null) {
-      return changeModel(model);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
-    required TResult Function(CheckForModel value) checkForModel,
-    required TResult Function(DownloadModel value) downloadModel,
-    required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
-    required TResult Function(DeleteModel value) deleteModel,
-    required TResult Function(InitEngine value) initEngine,
-    required TResult Function(UpdateTemperature value) updateTemperature,
-    required TResult Function(UpdateTopK value) updateTopK,
-    required TResult Function(AddMessage value) addMessage,
-    required TResult Function(ExtendMessage value) extendMessage,
-    required TResult Function(CompleteResponse value) completeResponse,
-  }) {
-    return changeModel(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
-    TResult? Function(CheckForModel value)? checkForModel,
-    TResult? Function(DownloadModel value)? downloadModel,
-    TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
-    TResult? Function(DeleteModel value)? deleteModel,
-    TResult? Function(InitEngine value)? initEngine,
-    TResult? Function(UpdateTemperature value)? updateTemperature,
-    TResult? Function(UpdateTopK value)? updateTopK,
-    TResult? Function(AddMessage value)? addMessage,
-    TResult? Function(ExtendMessage value)? extendMessage,
-    TResult? Function(CompleteResponse value)? completeResponse,
-  }) {
-    return changeModel?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
-    TResult Function(CheckForModel value)? checkForModel,
-    TResult Function(DownloadModel value)? downloadModel,
-    TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
-    TResult Function(DeleteModel value)? deleteModel,
-    TResult Function(InitEngine value)? initEngine,
-    TResult Function(UpdateTemperature value)? updateTemperature,
-    TResult Function(UpdateTopK value)? updateTopK,
-    TResult Function(AddMessage value)? addMessage,
-    TResult Function(ExtendMessage value)? extendMessage,
-    TResult Function(CompleteResponse value)? completeResponse,
-    required TResult orElse(),
-  }) {
-    if (changeModel != null) {
-      return changeModel(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class ChangeModel implements TranscriptEvent {
-  const factory ChangeModel(final LlmModel model) = _$ChangeModelImpl;
-
-  LlmModel get model;
-  @JsonKey(ignore: true)
-  _$$ChangeModelImplCopyWith<_$ChangeModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -759,18 +620,22 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
     return checkForModel(model);
   }
@@ -778,18 +643,22 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
     return checkForModel?.call(model);
   }
@@ -797,18 +666,22 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (checkForModel != null) {
@@ -820,14 +693,16 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -838,14 +713,16 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -856,14 +733,16 @@ class _$CheckForModelImpl implements CheckForModel {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -890,6 +769,8 @@ abstract class _$$DownloadModelImplCopyWith<$Res> {
   factory _$$DownloadModelImplCopyWith(
           _$DownloadModelImpl value, $Res Function(_$DownloadModelImpl) then) =
       __$$DownloadModelImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({LlmModel model});
 }
 
 /// @nodoc
@@ -899,84 +780,120 @@ class __$$DownloadModelImplCopyWithImpl<$Res>
   __$$DownloadModelImplCopyWithImpl(
       _$DownloadModelImpl _value, $Res Function(_$DownloadModelImpl) _then)
       : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? model = null,
+  }) {
+    return _then(_$DownloadModelImpl(
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$DownloadModelImpl implements DownloadModel {
-  const _$DownloadModelImpl();
+  const _$DownloadModelImpl(this.model);
+
+  @override
+  final LlmModel model;
 
   @override
   String toString() {
-    return 'TranscriptEvent.downloadModel()';
+    return 'TranscriptEvent.downloadModel(model: $model)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$DownloadModelImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$DownloadModelImpl &&
+            (identical(other.model, model) || other.model == model));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, model);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DownloadModelImplCopyWith<_$DownloadModelImpl> get copyWith =>
+      __$$DownloadModelImplCopyWithImpl<_$DownloadModelImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return downloadModel();
+    return downloadModel(model);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return downloadModel?.call();
+    return downloadModel?.call(model);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (downloadModel != null) {
-      return downloadModel();
+      return downloadModel(model);
     }
     return orElse();
   }
@@ -984,14 +901,16 @@ class _$DownloadModelImpl implements DownloadModel {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1002,14 +921,16 @@ class _$DownloadModelImpl implements DownloadModel {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1020,14 +941,16 @@ class _$DownloadModelImpl implements DownloadModel {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1041,7 +964,12 @@ class _$DownloadModelImpl implements DownloadModel {
 }
 
 abstract class DownloadModel implements TranscriptEvent {
-  const factory DownloadModel() = _$DownloadModelImpl;
+  const factory DownloadModel(final LlmModel model) = _$DownloadModelImpl;
+
+  LlmModel get model;
+  @JsonKey(ignore: true)
+  _$$DownloadModelImplCopyWith<_$DownloadModelImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1119,18 +1047,22 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
     return setPercentDownloaded(model, percentDownloaded);
   }
@@ -1138,18 +1070,22 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
     return setPercentDownloaded?.call(model, percentDownloaded);
   }
@@ -1157,18 +1093,22 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (setPercentDownloaded != null) {
@@ -1180,14 +1120,16 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1198,14 +1140,16 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1216,14 +1160,16 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1253,6 +1199,8 @@ abstract class _$$DeleteModelImplCopyWith<$Res> {
   factory _$$DeleteModelImplCopyWith(
           _$DeleteModelImpl value, $Res Function(_$DeleteModelImpl) then) =
       __$$DeleteModelImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({LlmModel model});
 }
 
 /// @nodoc
@@ -1262,84 +1210,120 @@ class __$$DeleteModelImplCopyWithImpl<$Res>
   __$$DeleteModelImplCopyWithImpl(
       _$DeleteModelImpl _value, $Res Function(_$DeleteModelImpl) _then)
       : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? model = null,
+  }) {
+    return _then(_$DeleteModelImpl(
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$DeleteModelImpl implements DeleteModel {
-  const _$DeleteModelImpl();
+  const _$DeleteModelImpl(this.model);
+
+  @override
+  final LlmModel model;
 
   @override
   String toString() {
-    return 'TranscriptEvent.deleteModel()';
+    return 'TranscriptEvent.deleteModel(model: $model)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$DeleteModelImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$DeleteModelImpl &&
+            (identical(other.model, model) || other.model == model));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, model);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DeleteModelImplCopyWith<_$DeleteModelImpl> get copyWith =>
+      __$$DeleteModelImplCopyWithImpl<_$DeleteModelImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return deleteModel();
+    return deleteModel(model);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return deleteModel?.call();
+    return deleteModel?.call(model);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (deleteModel != null) {
-      return deleteModel();
+      return deleteModel(model);
     }
     return orElse();
   }
@@ -1347,14 +1331,16 @@ class _$DeleteModelImpl implements DeleteModel {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1365,14 +1351,16 @@ class _$DeleteModelImpl implements DeleteModel {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1383,14 +1371,16 @@ class _$DeleteModelImpl implements DeleteModel {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1404,7 +1394,12 @@ class _$DeleteModelImpl implements DeleteModel {
 }
 
 abstract class DeleteModel implements TranscriptEvent {
-  const factory DeleteModel() = _$DeleteModelImpl;
+  const factory DeleteModel(final LlmModel model) = _$DeleteModelImpl;
+
+  LlmModel get model;
+  @JsonKey(ignore: true)
+  _$$DeleteModelImplCopyWith<_$DeleteModelImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1412,6 +1407,8 @@ abstract class _$$InitEngineImplCopyWith<$Res> {
   factory _$$InitEngineImplCopyWith(
           _$InitEngineImpl value, $Res Function(_$InitEngineImpl) then) =
       __$$InitEngineImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({LlmModel model});
 }
 
 /// @nodoc
@@ -1421,84 +1418,120 @@ class __$$InitEngineImplCopyWithImpl<$Res>
   __$$InitEngineImplCopyWithImpl(
       _$InitEngineImpl _value, $Res Function(_$InitEngineImpl) _then)
       : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? model = null,
+  }) {
+    return _then(_$InitEngineImpl(
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$InitEngineImpl implements InitEngine {
-  const _$InitEngineImpl();
+  const _$InitEngineImpl(this.model);
+
+  @override
+  final LlmModel model;
 
   @override
   String toString() {
-    return 'TranscriptEvent.initEngine()';
+    return 'TranscriptEvent.initEngine(model: $model)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$InitEngineImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$InitEngineImpl &&
+            (identical(other.model, model) || other.model == model));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, model);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$InitEngineImplCopyWith<_$InitEngineImpl> get copyWith =>
+      __$$InitEngineImplCopyWithImpl<_$InitEngineImpl>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return initEngine();
+    return initEngine(model);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return initEngine?.call();
+    return initEngine?.call(model);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (initEngine != null) {
-      return initEngine();
+      return initEngine(model);
     }
     return orElse();
   }
@@ -1506,14 +1539,16 @@ class _$InitEngineImpl implements InitEngine {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1524,14 +1559,16 @@ class _$InitEngineImpl implements InitEngine {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1542,14 +1579,16 @@ class _$InitEngineImpl implements InitEngine {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1563,7 +1602,190 @@ class _$InitEngineImpl implements InitEngine {
 }
 
 abstract class InitEngine implements TranscriptEvent {
-  const factory InitEngine() = _$InitEngineImpl;
+  const factory InitEngine(final LlmModel model) = _$InitEngineImpl;
+
+  LlmModel get model;
+  @JsonKey(ignore: true)
+  _$$InitEngineImplCopyWith<_$InitEngineImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$InitializeModelInfoImplCopyWith<$Res> {
+  factory _$$InitializeModelInfoImplCopyWith(_$InitializeModelInfoImpl value,
+          $Res Function(_$InitializeModelInfoImpl) then) =
+      __$$InitializeModelInfoImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$InitializeModelInfoImplCopyWithImpl<$Res>
+    extends _$TranscriptEventCopyWithImpl<$Res, _$InitializeModelInfoImpl>
+    implements _$$InitializeModelInfoImplCopyWith<$Res> {
+  __$$InitializeModelInfoImplCopyWithImpl(_$InitializeModelInfoImpl _value,
+      $Res Function(_$InitializeModelInfoImpl) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$InitializeModelInfoImpl implements InitializeModelInfo {
+  const _$InitializeModelInfoImpl();
+
+  @override
+  String toString() {
+    return 'TranscriptEvent.initializeModelInfo()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$InitializeModelInfoImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(LlmModel model) checkForModel,
+    required TResult Function(LlmModel model) downloadModel,
+    required TResult Function(LlmModel model, int percentDownloaded)
+        setPercentDownloaded,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
+    required TResult Function(double value) updateTemperature,
+    required TResult Function(int value) updateTopK,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
+  }) {
+    return initializeModelInfo();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(LlmModel model)? checkForModel,
+    TResult? Function(LlmModel model)? downloadModel,
+    TResult? Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
+    TResult? Function(double value)? updateTemperature,
+    TResult? Function(int value)? updateTopK,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
+  }) {
+    return initializeModelInfo?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(LlmModel model)? checkForModel,
+    TResult Function(LlmModel model)? downloadModel,
+    TResult Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
+    TResult Function(double value)? updateTemperature,
+    TResult Function(int value)? updateTopK,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (initializeModelInfo != null) {
+      return initializeModelInfo();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(CheckForModel value) checkForModel,
+    required TResult Function(DownloadModel value) downloadModel,
+    required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
+    required TResult Function(DeleteModel value) deleteModel,
+    required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
+    required TResult Function(UpdateTemperature value) updateTemperature,
+    required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
+    required TResult Function(AddMessage value) addMessage,
+    required TResult Function(ExtendMessage value) extendMessage,
+    required TResult Function(CompleteResponse value) completeResponse,
+  }) {
+    return initializeModelInfo(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(CheckForModel value)? checkForModel,
+    TResult? Function(DownloadModel value)? downloadModel,
+    TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult? Function(DeleteModel value)? deleteModel,
+    TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult? Function(UpdateTemperature value)? updateTemperature,
+    TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
+    TResult? Function(AddMessage value)? addMessage,
+    TResult? Function(ExtendMessage value)? extendMessage,
+    TResult? Function(CompleteResponse value)? completeResponse,
+  }) {
+    return initializeModelInfo?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(CheckForModel value)? checkForModel,
+    TResult Function(DownloadModel value)? downloadModel,
+    TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult Function(DeleteModel value)? deleteModel,
+    TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult Function(UpdateTemperature value)? updateTemperature,
+    TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
+    TResult Function(AddMessage value)? addMessage,
+    TResult Function(ExtendMessage value)? extendMessage,
+    TResult Function(CompleteResponse value)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (initializeModelInfo != null) {
+      return initializeModelInfo(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class InitializeModelInfo implements TranscriptEvent {
+  const factory InitializeModelInfo() = _$InitializeModelInfoImpl;
 }
 
 /// @nodoc
@@ -1631,18 +1853,22 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
     return updateTemperature(value);
   }
@@ -1650,18 +1876,22 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
     return updateTemperature?.call(value);
   }
@@ -1669,18 +1899,22 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (updateTemperature != null) {
@@ -1692,14 +1926,16 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1710,14 +1946,16 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1728,14 +1966,16 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1821,18 +2061,22 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
     return updateTopK(value);
   }
@@ -1840,18 +2084,22 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
     return updateTopK?.call(value);
   }
@@ -1859,18 +2107,22 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (updateTopK != null) {
@@ -1882,14 +2134,16 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1900,14 +2154,16 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1918,14 +2174,16 @@ class _$UpdateTopKImpl implements UpdateTopK {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1948,12 +2206,429 @@ abstract class UpdateTopK implements TranscriptEvent {
 }
 
 /// @nodoc
+abstract class _$$UpdateMaxTokensImplCopyWith<$Res> {
+  factory _$$UpdateMaxTokensImplCopyWith(_$UpdateMaxTokensImpl value,
+          $Res Function(_$UpdateMaxTokensImpl) then) =
+      __$$UpdateMaxTokensImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({int value});
+}
+
+/// @nodoc
+class __$$UpdateMaxTokensImplCopyWithImpl<$Res>
+    extends _$TranscriptEventCopyWithImpl<$Res, _$UpdateMaxTokensImpl>
+    implements _$$UpdateMaxTokensImplCopyWith<$Res> {
+  __$$UpdateMaxTokensImplCopyWithImpl(
+      _$UpdateMaxTokensImpl _value, $Res Function(_$UpdateMaxTokensImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? value = null,
+  }) {
+    return _then(_$UpdateMaxTokensImpl(
+      null == value
+          ? _value.value
+          : value // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
+  const _$UpdateMaxTokensImpl(this.value);
+
+  @override
+  final int value;
+
+  @override
+  String toString() {
+    return 'TranscriptEvent.updateMaxTokens(value: $value)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateMaxTokensImpl &&
+            (identical(other.value, value) || other.value == value));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, value);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateMaxTokensImplCopyWith<_$UpdateMaxTokensImpl> get copyWith =>
+      __$$UpdateMaxTokensImplCopyWithImpl<_$UpdateMaxTokensImpl>(
+          this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(LlmModel model) checkForModel,
+    required TResult Function(LlmModel model) downloadModel,
+    required TResult Function(LlmModel model, int percentDownloaded)
+        setPercentDownloaded,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
+    required TResult Function(double value) updateTemperature,
+    required TResult Function(int value) updateTopK,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
+  }) {
+    return updateMaxTokens(value);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(LlmModel model)? checkForModel,
+    TResult? Function(LlmModel model)? downloadModel,
+    TResult? Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
+    TResult? Function(double value)? updateTemperature,
+    TResult? Function(int value)? updateTopK,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
+  }) {
+    return updateMaxTokens?.call(value);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(LlmModel model)? checkForModel,
+    TResult Function(LlmModel model)? downloadModel,
+    TResult Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
+    TResult Function(double value)? updateTemperature,
+    TResult Function(int value)? updateTopK,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (updateMaxTokens != null) {
+      return updateMaxTokens(value);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(CheckForModel value) checkForModel,
+    required TResult Function(DownloadModel value) downloadModel,
+    required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
+    required TResult Function(DeleteModel value) deleteModel,
+    required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
+    required TResult Function(UpdateTemperature value) updateTemperature,
+    required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
+    required TResult Function(AddMessage value) addMessage,
+    required TResult Function(ExtendMessage value) extendMessage,
+    required TResult Function(CompleteResponse value) completeResponse,
+  }) {
+    return updateMaxTokens(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(CheckForModel value)? checkForModel,
+    TResult? Function(DownloadModel value)? downloadModel,
+    TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult? Function(DeleteModel value)? deleteModel,
+    TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult? Function(UpdateTemperature value)? updateTemperature,
+    TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
+    TResult? Function(AddMessage value)? addMessage,
+    TResult? Function(ExtendMessage value)? extendMessage,
+    TResult? Function(CompleteResponse value)? completeResponse,
+  }) {
+    return updateMaxTokens?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(CheckForModel value)? checkForModel,
+    TResult Function(DownloadModel value)? downloadModel,
+    TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult Function(DeleteModel value)? deleteModel,
+    TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult Function(UpdateTemperature value)? updateTemperature,
+    TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
+    TResult Function(AddMessage value)? addMessage,
+    TResult Function(ExtendMessage value)? extendMessage,
+    TResult Function(CompleteResponse value)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (updateMaxTokens != null) {
+      return updateMaxTokens(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class UpdateMaxTokens implements TranscriptEvent {
+  const factory UpdateMaxTokens(final int value) = _$UpdateMaxTokensImpl;
+
+  int get value;
+  @JsonKey(ignore: true)
+  _$$UpdateMaxTokensImplCopyWith<_$UpdateMaxTokensImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$SetTranscriptImplCopyWith<$Res> {
+  factory _$$SetTranscriptImplCopyWith(
+          _$SetTranscriptImpl value, $Res Function(_$SetTranscriptImpl) then) =
+      __$$SetTranscriptImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({LlmModel model});
+}
+
+/// @nodoc
+class __$$SetTranscriptImplCopyWithImpl<$Res>
+    extends _$TranscriptEventCopyWithImpl<$Res, _$SetTranscriptImpl>
+    implements _$$SetTranscriptImplCopyWith<$Res> {
+  __$$SetTranscriptImplCopyWithImpl(
+      _$SetTranscriptImpl _value, $Res Function(_$SetTranscriptImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? model = null,
+  }) {
+    return _then(_$SetTranscriptImpl(
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$SetTranscriptImpl implements SetTranscript {
+  const _$SetTranscriptImpl(this.model);
+
+  @override
+  final LlmModel model;
+
+  @override
+  String toString() {
+    return 'TranscriptEvent.setTranscript(model: $model)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SetTranscriptImpl &&
+            (identical(other.model, model) || other.model == model));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, model);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SetTranscriptImplCopyWith<_$SetTranscriptImpl> get copyWith =>
+      __$$SetTranscriptImplCopyWithImpl<_$SetTranscriptImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(LlmModel model) checkForModel,
+    required TResult Function(LlmModel model) downloadModel,
+    required TResult Function(LlmModel model, int percentDownloaded)
+        setPercentDownloaded,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
+    required TResult Function(double value) updateTemperature,
+    required TResult Function(int value) updateTopK,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
+  }) {
+    return setTranscript(model);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(LlmModel model)? checkForModel,
+    TResult? Function(LlmModel model)? downloadModel,
+    TResult? Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
+    TResult? Function(double value)? updateTemperature,
+    TResult? Function(int value)? updateTopK,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
+  }) {
+    return setTranscript?.call(model);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(LlmModel model)? checkForModel,
+    TResult Function(LlmModel model)? downloadModel,
+    TResult Function(LlmModel model, int percentDownloaded)?
+        setPercentDownloaded,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
+    TResult Function(double value)? updateTemperature,
+    TResult Function(int value)? updateTopK,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (setTranscript != null) {
+      return setTranscript(model);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(CheckForModel value) checkForModel,
+    required TResult Function(DownloadModel value) downloadModel,
+    required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
+    required TResult Function(DeleteModel value) deleteModel,
+    required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
+    required TResult Function(UpdateTemperature value) updateTemperature,
+    required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
+    required TResult Function(AddMessage value) addMessage,
+    required TResult Function(ExtendMessage value) extendMessage,
+    required TResult Function(CompleteResponse value) completeResponse,
+  }) {
+    return setTranscript(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(CheckForModel value)? checkForModel,
+    TResult? Function(DownloadModel value)? downloadModel,
+    TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult? Function(DeleteModel value)? deleteModel,
+    TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult? Function(UpdateTemperature value)? updateTemperature,
+    TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
+    TResult? Function(AddMessage value)? addMessage,
+    TResult? Function(ExtendMessage value)? extendMessage,
+    TResult? Function(CompleteResponse value)? completeResponse,
+  }) {
+    return setTranscript?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(CheckForModel value)? checkForModel,
+    TResult Function(DownloadModel value)? downloadModel,
+    TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
+    TResult Function(DeleteModel value)? deleteModel,
+    TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
+    TResult Function(UpdateTemperature value)? updateTemperature,
+    TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
+    TResult Function(AddMessage value)? addMessage,
+    TResult Function(ExtendMessage value)? extendMessage,
+    TResult Function(CompleteResponse value)? completeResponse,
+    required TResult orElse(),
+  }) {
+    if (setTranscript != null) {
+      return setTranscript(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class SetTranscript implements TranscriptEvent {
+  const factory SetTranscript(final LlmModel model) = _$SetTranscriptImpl;
+
+  LlmModel get model;
+  @JsonKey(ignore: true)
+  _$$SetTranscriptImplCopyWith<_$SetTranscriptImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
 abstract class _$$AddMessageImplCopyWith<$Res> {
   factory _$$AddMessageImplCopyWith(
           _$AddMessageImpl value, $Res Function(_$AddMessageImpl) then) =
       __$$AddMessageImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({ChatMessage message});
+  $Res call({ChatMessage message, LlmModel model});
 
   $ChatMessageCopyWith<$Res> get message;
 }
@@ -1970,12 +2645,17 @@ class __$$AddMessageImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? message = null,
+    Object? model = null,
   }) {
     return _then(_$AddMessageImpl(
       null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
               as ChatMessage,
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
     ));
   }
 
@@ -1991,14 +2671,16 @@ class __$$AddMessageImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$AddMessageImpl implements AddMessage {
-  const _$AddMessageImpl(this.message);
+  const _$AddMessageImpl(this.message, this.model);
 
   @override
   final ChatMessage message;
+  @override
+  final LlmModel model;
 
   @override
   String toString() {
-    return 'TranscriptEvent.addMessage(message: $message)';
+    return 'TranscriptEvent.addMessage(message: $message, model: $model)';
   }
 
   @override
@@ -2006,11 +2688,12 @@ class _$AddMessageImpl implements AddMessage {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AddMessageImpl &&
-            (identical(other.message, message) || other.message == message));
+            (identical(other.message, message) || other.message == message) &&
+            (identical(other.model, model) || other.model == model));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
+  int get hashCode => Object.hash(runtimeType, message, model);
 
   @JsonKey(ignore: true)
   @override
@@ -2021,60 +2704,72 @@ class _$AddMessageImpl implements AddMessage {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return addMessage(message);
+    return addMessage(message, model);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return addMessage?.call(message);
+    return addMessage?.call(message, model);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (addMessage != null) {
-      return addMessage(message);
+      return addMessage(message, model);
     }
     return orElse();
   }
@@ -2082,14 +2777,16 @@ class _$AddMessageImpl implements AddMessage {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2100,14 +2797,16 @@ class _$AddMessageImpl implements AddMessage {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2118,14 +2817,16 @@ class _$AddMessageImpl implements AddMessage {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2139,9 +2840,11 @@ class _$AddMessageImpl implements AddMessage {
 }
 
 abstract class AddMessage implements TranscriptEvent {
-  const factory AddMessage(final ChatMessage message) = _$AddMessageImpl;
+  const factory AddMessage(final ChatMessage message, final LlmModel model) =
+      _$AddMessageImpl;
 
   ChatMessage get message;
+  LlmModel get model;
   @JsonKey(ignore: true)
   _$$AddMessageImplCopyWith<_$AddMessageImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -2153,7 +2856,7 @@ abstract class _$$ExtendMessageImplCopyWith<$Res> {
           _$ExtendMessageImpl value, $Res Function(_$ExtendMessageImpl) then) =
       __$$ExtendMessageImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({String chunk, int index});
+  $Res call({String chunk, int index, LlmModel model, bool first, bool last});
 }
 
 /// @nodoc
@@ -2169,6 +2872,9 @@ class __$$ExtendMessageImplCopyWithImpl<$Res>
   $Res call({
     Object? chunk = null,
     Object? index = null,
+    Object? model = null,
+    Object? first = null,
+    Object? last = null,
   }) {
     return _then(_$ExtendMessageImpl(
       chunk: null == chunk
@@ -2179,6 +2885,18 @@ class __$$ExtendMessageImplCopyWithImpl<$Res>
           ? _value.index
           : index // ignore: cast_nullable_to_non_nullable
               as int,
+      model: null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+      first: null == first
+          ? _value.first
+          : first // ignore: cast_nullable_to_non_nullable
+              as bool,
+      last: null == last
+          ? _value.last
+          : last // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -2186,16 +2904,27 @@ class __$$ExtendMessageImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ExtendMessageImpl implements ExtendMessage {
-  const _$ExtendMessageImpl({required this.chunk, required this.index});
+  const _$ExtendMessageImpl(
+      {required this.chunk,
+      required this.index,
+      required this.model,
+      required this.first,
+      required this.last});
 
   @override
   final String chunk;
   @override
   final int index;
+  @override
+  final LlmModel model;
+  @override
+  final bool first;
+  @override
+  final bool last;
 
   @override
   String toString() {
-    return 'TranscriptEvent.extendMessage(chunk: $chunk, index: $index)';
+    return 'TranscriptEvent.extendMessage(chunk: $chunk, index: $index, model: $model, first: $first, last: $last)';
   }
 
   @override
@@ -2204,11 +2933,15 @@ class _$ExtendMessageImpl implements ExtendMessage {
         (other.runtimeType == runtimeType &&
             other is _$ExtendMessageImpl &&
             (identical(other.chunk, chunk) || other.chunk == chunk) &&
-            (identical(other.index, index) || other.index == index));
+            (identical(other.index, index) || other.index == index) &&
+            (identical(other.model, model) || other.model == model) &&
+            (identical(other.first, first) || other.first == first) &&
+            (identical(other.last, last) || other.last == last));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, chunk, index);
+  int get hashCode =>
+      Object.hash(runtimeType, chunk, index, model, first, last);
 
   @JsonKey(ignore: true)
   @override
@@ -2219,60 +2952,72 @@ class _$ExtendMessageImpl implements ExtendMessage {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return extendMessage(chunk, index);
+    return extendMessage(chunk, index, model, first, last);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return extendMessage?.call(chunk, index);
+    return extendMessage?.call(chunk, index, model, first, last);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (extendMessage != null) {
-      return extendMessage(chunk, index);
+      return extendMessage(chunk, index, model, first, last);
     }
     return orElse();
   }
@@ -2280,14 +3025,16 @@ class _$ExtendMessageImpl implements ExtendMessage {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2298,14 +3045,16 @@ class _$ExtendMessageImpl implements ExtendMessage {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2316,14 +3065,16 @@ class _$ExtendMessageImpl implements ExtendMessage {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2339,10 +3090,16 @@ class _$ExtendMessageImpl implements ExtendMessage {
 abstract class ExtendMessage implements TranscriptEvent {
   const factory ExtendMessage(
       {required final String chunk,
-      required final int index}) = _$ExtendMessageImpl;
+      required final int index,
+      required final LlmModel model,
+      required final bool first,
+      required final bool last}) = _$ExtendMessageImpl;
 
   String get chunk;
   int get index;
+  LlmModel get model;
+  bool get first;
+  bool get last;
   @JsonKey(ignore: true)
   _$$ExtendMessageImplCopyWith<_$ExtendMessageImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -2353,6 +3110,8 @@ abstract class _$$CompleteResponseImplCopyWith<$Res> {
   factory _$$CompleteResponseImplCopyWith(_$CompleteResponseImpl value,
           $Res Function(_$CompleteResponseImpl) then) =
       __$$CompleteResponseImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({LlmModel model});
 }
 
 /// @nodoc
@@ -2362,84 +3121,121 @@ class __$$CompleteResponseImplCopyWithImpl<$Res>
   __$$CompleteResponseImplCopyWithImpl(_$CompleteResponseImpl _value,
       $Res Function(_$CompleteResponseImpl) _then)
       : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? model = null,
+  }) {
+    return _then(_$CompleteResponseImpl(
+      null == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as LlmModel,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$CompleteResponseImpl implements CompleteResponse {
-  const _$CompleteResponseImpl();
+  const _$CompleteResponseImpl(this.model);
+
+  @override
+  final LlmModel model;
 
   @override
   String toString() {
-    return 'TranscriptEvent.completeResponse()';
+    return 'TranscriptEvent.completeResponse(model: $model)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$CompleteResponseImpl);
+        (other.runtimeType == runtimeType &&
+            other is _$CompleteResponseImpl &&
+            (identical(other.model, model) || other.model == model));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, model);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$CompleteResponseImplCopyWith<_$CompleteResponseImpl> get copyWith =>
+      __$$CompleteResponseImplCopyWithImpl<_$CompleteResponseImpl>(
+          this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) changeModel,
     required TResult Function(LlmModel model) checkForModel,
-    required TResult Function() downloadModel,
+    required TResult Function(LlmModel model) downloadModel,
     required TResult Function(LlmModel model, int percentDownloaded)
         setPercentDownloaded,
-    required TResult Function() deleteModel,
-    required TResult Function() initEngine,
+    required TResult Function(LlmModel model) deleteModel,
+    required TResult Function(LlmModel model) initEngine,
+    required TResult Function() initializeModelInfo,
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
-    required TResult Function(ChatMessage message) addMessage,
-    required TResult Function(String chunk, int index) extendMessage,
-    required TResult Function() completeResponse,
+    required TResult Function(int value) updateMaxTokens,
+    required TResult Function(LlmModel model) setTranscript,
+    required TResult Function(ChatMessage message, LlmModel model) addMessage,
+    required TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)
+        extendMessage,
+    required TResult Function(LlmModel model) completeResponse,
   }) {
-    return completeResponse();
+    return completeResponse(model);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? changeModel,
     TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function()? downloadModel,
+    TResult? Function(LlmModel model)? downloadModel,
     TResult? Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult? Function()? deleteModel,
-    TResult? Function()? initEngine,
+    TResult? Function(LlmModel model)? deleteModel,
+    TResult? Function(LlmModel model)? initEngine,
+    TResult? Function()? initializeModelInfo,
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
-    TResult? Function(ChatMessage message)? addMessage,
-    TResult? Function(String chunk, int index)? extendMessage,
-    TResult? Function()? completeResponse,
+    TResult? Function(int value)? updateMaxTokens,
+    TResult? Function(LlmModel model)? setTranscript,
+    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult? Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult? Function(LlmModel model)? completeResponse,
   }) {
-    return completeResponse?.call();
+    return completeResponse?.call(model);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? changeModel,
     TResult Function(LlmModel model)? checkForModel,
-    TResult Function()? downloadModel,
+    TResult Function(LlmModel model)? downloadModel,
     TResult Function(LlmModel model, int percentDownloaded)?
         setPercentDownloaded,
-    TResult Function()? deleteModel,
-    TResult Function()? initEngine,
+    TResult Function(LlmModel model)? deleteModel,
+    TResult Function(LlmModel model)? initEngine,
+    TResult Function()? initializeModelInfo,
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
-    TResult Function(ChatMessage message)? addMessage,
-    TResult Function(String chunk, int index)? extendMessage,
-    TResult Function()? completeResponse,
+    TResult Function(int value)? updateMaxTokens,
+    TResult Function(LlmModel model)? setTranscript,
+    TResult Function(ChatMessage message, LlmModel model)? addMessage,
+    TResult Function(
+            String chunk, int index, LlmModel model, bool first, bool last)?
+        extendMessage,
+    TResult Function(LlmModel model)? completeResponse,
     required TResult orElse(),
   }) {
     if (completeResponse != null) {
-      return completeResponse();
+      return completeResponse(model);
     }
     return orElse();
   }
@@ -2447,14 +3243,16 @@ class _$CompleteResponseImpl implements CompleteResponse {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
-    required TResult Function(ChangeModel value) changeModel,
     required TResult Function(CheckForModel value) checkForModel,
     required TResult Function(DownloadModel value) downloadModel,
     required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
     required TResult Function(DeleteModel value) deleteModel,
     required TResult Function(InitEngine value) initEngine,
+    required TResult Function(InitializeModelInfo value) initializeModelInfo,
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
+    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
+    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2465,14 +3263,16 @@ class _$CompleteResponseImpl implements CompleteResponse {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(ChangeModel value)? changeModel,
     TResult? Function(CheckForModel value)? checkForModel,
     TResult? Function(DownloadModel value)? downloadModel,
     TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult? Function(DeleteModel value)? deleteModel,
     TResult? Function(InitEngine value)? initEngine,
+    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
+    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2483,14 +3283,16 @@ class _$CompleteResponseImpl implements CompleteResponse {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
-    TResult Function(ChangeModel value)? changeModel,
     TResult Function(CheckForModel value)? checkForModel,
     TResult Function(DownloadModel value)? downloadModel,
     TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
     TResult Function(DeleteModel value)? deleteModel,
     TResult Function(InitEngine value)? initEngine,
+    TResult Function(InitializeModelInfo value)? initializeModelInfo,
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
+    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
+    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2504,5 +3306,10 @@ class _$CompleteResponseImpl implements CompleteResponse {
 }
 
 abstract class CompleteResponse implements TranscriptEvent {
-  const factory CompleteResponse() = _$CompleteResponseImpl;
+  const factory CompleteResponse(final LlmModel model) = _$CompleteResponseImpl;
+
+  LlmModel get model;
+  @JsonKey(ignore: true)
+  _$$CompleteResponseImplCopyWith<_$CompleteResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
