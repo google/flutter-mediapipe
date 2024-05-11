@@ -30,7 +30,6 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
           downloadModel: (e) => _downloadModel(e, emit),
           deleteModel: (e) => _deleteModel(e, emit),
           setPercentDownloaded: (e) => _setPercentDownloaded(e, emit),
-          setTranscript: (e) => _setTranscript(e, emit),
           updateTemperature: (e) => _updateTemperature(e, emit),
           updateTopK: (e) => _updateTopK(e, emit),
           updateMaxTokens: (e) => _updateMaxTokens(e, emit),
@@ -39,9 +38,6 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
         );
       },
     );
-    for (final model in LlmModel.values) {
-      transcript[model] = <ChatMessage>[];
-    }
     final cacheDirFuture = path_provider.getApplicationCacheDirectory();
     modelProvider.ready.then((_) async {
       cacheDir = (await cacheDirFuture).absolute.path;
@@ -53,13 +49,6 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
 
   /// Utility which knows how to download and store the model file.
   ModelLocationProvider modelProvider;
-
-  /// Container for one message log per [LlmModel]. Mutable data type.
-  /// Initialized to contain empty lists for each [LlmModel]. At any given time,
-  /// one of these lists should be mirrored in [state.transcript]. Which one
-  /// depends on the [model] value attached to the most recent model-specific
-  /// event.
-  final Map<LlmModel, List<ChatMessage>> transcript = {};
 
   /// Constructor for the inference engine.
   final LlmInferenceEngine Function(LlmInferenceOptions) engineBuilder;
@@ -86,10 +75,6 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
     if (existingPath != null) {
       add(InitEngine(event.model));
     }
-  }
-
-  void _setTranscript(SetTranscript event, Emit emit) {
-    emit(state.copyWith(transcript: transcript[event.model]!));
   }
 
   ModelInfo _getInfo(LlmModel model) {
@@ -125,9 +110,6 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
   /// However, if you have already made other modifications to a state object
   /// (via copying), consider passing that copied value to the [overrideState]
   /// parameter.
-  ///
-  /// See also:
-  ///   * [_emitTranscript] for the transcript version of this method.
   void _emitNewModelInfo(
     LlmModel model,
     ModelInfo info,
@@ -220,6 +202,7 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
       );
       await Future.delayed(const Duration(milliseconds: 100));
       emit(state.copyWith(error: null));
+      return;
     }
 
     if (downloadStream != null) {
@@ -239,18 +222,12 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
     add(CheckForModel(modelToDelete));
   }
 
-  void _completeResponse(CompleteResponse e, emit) {
-    transcript[e.model]!.last = transcript[e.model]!.last.complete();
-    final newState = state.copyWith(
-      isLlmTyping: false,
-      transcript: transcript[e.model]!,
-    );
-    _emitTranscript(emit, e.model, newState);
-  }
+  void _completeResponse(CompleteResponse e, emit) =>
+      emit(state.copyWith(isLlmTyping: false).completeMessage(e.model));
 
   Future<void> _addMessage(AddMessage event, Emit emit) async {
     // Value equality will detect that this state is "new"
-    addMessageToTranscript(event, emit);
+    emit(state.addMessage(event.message, event.model));
     if (state.engine == null) {
       await _queueMessageForLlm(event, emit);
     } else {
@@ -269,16 +246,20 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
     AddMessage event,
     Emit emit,
   ) async {
-    final formattedChatHistory = _formatChatHistoryForLlm(state.transcript);
+    final formattedChatHistory =
+        _formatChatHistoryForLlm(state.transcript[event.model]!);
     final responseStream = state.engine!.generateResponse(formattedChatHistory);
 
     // Add a blank response for the LLM into which we can write its answer.
     // Create a synthetic event just to pass to this helper method, but don't
     // route it through the `add` method.
-    addMessageToTranscript(AddMessage(ChatMessage.llm(''), event.model), emit);
-    emit(state.copyWith(isLlmTyping: true));
+    emit(
+      state
+          .copyWith(isLlmTyping: true)
+          .addMessage(ChatMessage.llm(''), event.model),
+    );
 
-    final messageIndex = transcript[event.model]!.length - 1;
+    final messageIndex = state.transcript[event.model]!.length - 1;
     bool first = true;
     await for (final String chunk in responseStream) {
       add(
@@ -297,46 +278,22 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
         chunk: '',
         model: event.model,
         index: messageIndex,
-        first: false,
+        first: first,
         last: true,
       ),
     );
     add(CompleteResponse(event.model));
   }
 
-  void _extendMessage(ExtendMessage event, Emit emit) {
-    final message = transcript[event.model]![event.index];
-    transcript[event.model]![event.index] = message.copyWith(
-      body: '${message.body}${event.chunk}'.sanitize(event.first, event.last),
-    );
-    _emitTranscript(emit, event.model);
-  }
-
-  void addMessageToTranscript(AddMessage event, Emit emit) {
-    transcript[event.model]!.add(event.message);
-    _emitTranscript(emit, event.model);
-  }
-
-  /// Re-emits the current state with an updated copy of the transcript from the
-  /// Bloc's own storage. However, if you have already made other modifications
-  /// to a state object (via copying), consider passing that copied value to
-  /// the [overrideState] parameter.
-  ///
-  /// See also:
-  ///   * [_emitNewModelInfo] for the [ModelInfo] version of this method.
-  void _emitTranscript(
-    Emit emit,
-    LlmModel model, [
-    TranscriptState? overrideState,
-  ]) {
-    // It would be nice to not copy the whole list every time.
-    final newState = (overrideState ?? state).copyWith(
-      transcript: List<ChatMessage>.from(
-        transcript[model]!,
-      ),
-    );
-    emit(newState);
-  }
+  void _extendMessage(ExtendMessage event, Emit emit) => emit(
+        state.extendMessage(
+          event.chunk,
+          model: event.model,
+          index: event.index,
+          first: event.first,
+          last: event.last,
+        ),
+      );
 
   static const _begin = '<begin_transmission>';
   static const _end = '<end_transmission>';
@@ -368,13 +325,13 @@ class TranscriptBloc extends Bloc<TranscriptEvent, TranscriptState> {
   }
 }
 
-@Freezed()
+@Freezed(makeCollectionsUnmodifiable: false)
 class TranscriptState with _$TranscriptState {
   TranscriptState._();
   factory TranscriptState({
     /// Log of messages for the [selectedModel]. Other models may have other
     /// message logs found on the [TranscriptBloc].
-    @Default(<ChatMessage>[]) List<ChatMessage> transcript,
+    required Map<LlmModel, List<ChatMessage>> transcript,
 
     /// True only after the [ModelLocationProvider] has sorted out the initial
     /// state.
@@ -407,17 +364,63 @@ class TranscriptState with _$TranscriptState {
 
   factory TranscriptState.initial([int? seed]) {
     final modelInfoMap = <LlmModel, ModelInfo>{};
+    final transcript = <LlmModel, List<ChatMessage>>{};
     for (final model in LlmModel.values) {
       modelInfoMap[model] = const ModelInfo();
+      transcript[model] = <ChatMessage>[];
     }
     return TranscriptState(
-      transcript: <ChatMessage>[],
+      transcript: transcript,
       randomSeed: seed ?? Random().nextInt(1 << 32),
       modelInfoMap: modelInfoMap,
     );
   }
 
   int get sequenceBatchSize => 20;
+
+  Map<LlmModel, List<ChatMessage>> _copyTranscript() {
+    final newTranscript = <LlmModel, List<ChatMessage>>{};
+    for (final key in transcript.keys) {
+      newTranscript[key] = List<ChatMessage>.from(transcript[key]!);
+    }
+    return newTranscript;
+  }
+
+  TranscriptState addMessage(ChatMessage message, LlmModel model) {
+    final newTranscript = _copyTranscript();
+    newTranscript[model]!.add(message);
+    return copyWith(transcript: newTranscript);
+  }
+
+  TranscriptState extendMessage(
+    String chunk, {
+    required int index,
+    required LlmModel model,
+    required bool first,
+    required bool last,
+  }) {
+    final newTranscript = _copyTranscript();
+    assert(() {
+      if (newTranscript[model]!.length < index + 1) {
+        throw Exception('Tried to add to index $index, but length is '
+            'only ${newTranscript[model]!.length} for $model');
+      }
+      return true;
+    }());
+    final oldMessage = newTranscript[model]![index];
+    final newMessage = oldMessage.copyWith(
+      body: '${oldMessage.body}$chunk'.sanitize(first, last),
+    );
+    newTranscript[model]![index] = newMessage;
+    return copyWith(transcript: newTranscript);
+  }
+
+  TranscriptState completeMessage(LlmModel model) {
+    final newTranscript = _copyTranscript();
+    newTranscript[model]!.last =
+        newTranscript[model]!.last.copyWith(isComplete: true);
+    return copyWith(transcript: newTranscript);
+  }
 }
 
 @Freezed()
@@ -435,7 +438,6 @@ class TranscriptEvent with _$TranscriptEvent {
       UpdateTemperature;
   const factory TranscriptEvent.updateTopK(int value) = UpdateTopK;
   const factory TranscriptEvent.updateMaxTokens(int value) = UpdateMaxTokens;
-  const factory TranscriptEvent.setTranscript(LlmModel model) = SetTranscript;
   const factory TranscriptEvent.addMessage(
       ChatMessage message, LlmModel model) = AddMessage;
   const factory TranscriptEvent.extendMessage({

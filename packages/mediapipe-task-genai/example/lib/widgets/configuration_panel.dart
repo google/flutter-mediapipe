@@ -11,17 +11,29 @@ class InferenceConfigurationPanel extends StatelessWidget {
     required this.topK,
     required this.temp,
     required this.maxTokens,
+    required this.updateTopK,
+    required this.updateTemp,
+    required this.updateMaxTokens,
     super.key,
   });
 
   /// Top K number of tokens to be sampled from for each decoding step.
-  final ValueNotifier<int> topK;
+  final int topK;
+
+  /// Handler to update [topK].
+  final void Function(int) updateTopK;
 
   /// Context size window for the LLM.
-  final ValueNotifier<int> maxTokens;
+  final int maxTokens;
+
+  /// Handler to update [maxTokens].
+  final void Function(int) updateMaxTokens;
 
   /// Randomness when decoding the next token.
-  final ValueNotifier<double> temp;
+  final double temp;
+
+  /// Handler to update [temp].
+  final void Function(double) updateTemp;
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +43,14 @@ class InferenceConfigurationPanel extends StatelessWidget {
         Text('Number of tokens to be sampled from for each decoding step.',
             style: Theme.of(context).textTheme.bodySmall),
         Slider(
-          value: topK.value.toDouble(),
+          value: topK.toDouble(),
           min: 1,
           max: 100,
           divisions: 100,
-          onChanged: (newTopK) => topK.value = newTopK.toInt(),
+          onChanged: (newTopK) => updateTopK(newTopK.toInt()),
         ),
         Text(
-          topK.value.toString(),
+          topK.toString(),
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -49,13 +61,13 @@ class InferenceConfigurationPanel extends StatelessWidget {
         Text('Randomness when decoding the next token.',
             style: Theme.of(context).textTheme.bodySmall),
         Slider(
-          value: temp.value,
+          value: temp,
           min: 0,
           max: 1,
-          onChanged: (double newValue) => temp.value = newValue,
+          onChanged: updateTemp,
         ),
         Text(
-          temp.value.roundTo(3).toString(),
+          temp.roundTo(3).toString(),
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -68,13 +80,13 @@ class InferenceConfigurationPanel extends StatelessWidget {
             'certain devices.',
             style: Theme.of(context).textTheme.bodySmall),
         Slider(
-          value: maxTokens.value.toDouble(),
+          value: maxTokens.toDouble(),
           min: 512,
           max: 8192,
-          onChanged: (newValue) => maxTokens.value = newValue.toInt(),
+          onChanged: (newMaxTokens) => updateMaxTokens(newMaxTokens.toInt()),
         ),
         Text(
-          maxTokens.value.toString(),
+          maxTokens.toString(),
           style: Theme.of(context)
               .textTheme
               .bodySmall!

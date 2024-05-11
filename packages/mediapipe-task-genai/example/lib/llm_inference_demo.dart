@@ -64,11 +64,14 @@ class _LlmInferenceDemoState extends State<LlmInferenceDemo>
                     bloc.add(DownloadModel(model)),
                 modelInfoMap: state.modelInfoMap,
                 selectModel: (LlmModel model) {
-                  bloc.add(SetTranscript(model));
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ChatScreen(bloc, model: model),
+                      builder: (context) => ChatScreen(
+                        bloc,
+                        model: model,
+                        key: ValueKey(model.displayName),
+                      ),
                     ),
                   );
                 },

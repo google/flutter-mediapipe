@@ -24,22 +24,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   static const initialText = 'Hello, world!';
 
-  late ValueNotifier<int> maxTokens;
-  late ValueNotifier<int> topK;
-  late ValueNotifier<double> temperature;
-
   @override
   void initState() {
-    _controller.text = initialText;
+    if (widget.bloc.state.transcript[widget.model]!.isEmpty) {
+      _controller.text = initialText;
+    }
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    maxTokens.dispose();
-    topK.dispose();
-    temperature.dispose();
-    super.dispose();
   }
 
   @override
@@ -48,27 +38,18 @@ class _ChatScreenState extends State<ChatScreen> {
     return BlocBuilder<TranscriptBloc, TranscriptState>(
       bloc: bloc,
       builder: (context, state) {
-        maxTokens = ValueNotifier<int>(state.maxTokens);
-        maxTokens.addListener(
-          () => bloc.add(UpdateMaxTokens(maxTokens.value)),
-        );
-        topK = ValueNotifier<int>(state.topK);
-        topK.addListener(
-          () => bloc.add(UpdateTopK(topK.value)),
-        );
-        temperature = ValueNotifier<double>(state.temperature);
-        temperature.addListener(
-          () => bloc.add(UpdateTemperature(temperature.value)),
-        );
         return Scaffold(
           appBar: AppBar(title: Text(widget.model.displayName)),
           endDrawer: Drawer(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: InferenceConfigurationPanel(
-                topK: topK,
-                temp: temperature,
-                maxTokens: maxTokens,
+                topK: state.topK,
+                temp: state.temperature,
+                maxTokens: state.maxTokens,
+                updateTopK: (val) => bloc.add(UpdateTopK(val)),
+                updateTemp: (val) => bloc.add(UpdateTemperature(val)),
+                updateMaxTokens: (val) => bloc.add(UpdateMaxTokens(val)),
               ),
             ),
           ),
@@ -79,7 +60,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: KeyboardHider(
-                      child: ChatTranscript(state.transcript),
+                      child: ChatTranscript(state.transcript[widget.model]!),
                     ),
                   ),
                   ChatInput(

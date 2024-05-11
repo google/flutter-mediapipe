@@ -18,7 +18,8 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$TranscriptState {
   /// Log of messages for the [selectedModel]. Other models may have other
   /// message logs found on the [TranscriptBloc].
-  List<ChatMessage> get transcript => throw _privateConstructorUsedError;
+  Map<LlmModel, List<ChatMessage>> get transcript =>
+      throw _privateConstructorUsedError;
 
   /// True only after the [ModelLocationProvider] has sorted out the initial
   /// state.
@@ -61,7 +62,7 @@ abstract class $TranscriptStateCopyWith<$Res> {
       _$TranscriptStateCopyWithImpl<$Res, TranscriptState>;
   @useResult
   $Res call(
-      {List<ChatMessage> transcript,
+      {Map<LlmModel, List<ChatMessage>> transcript,
       bool modelsReady,
       LlmInferenceEngine? engine,
       dynamic isLlmTyping,
@@ -101,7 +102,7 @@ class _$TranscriptStateCopyWithImpl<$Res, $Val extends TranscriptState>
       transcript: null == transcript
           ? _value.transcript
           : transcript // ignore: cast_nullable_to_non_nullable
-              as List<ChatMessage>,
+              as Map<LlmModel, List<ChatMessage>>,
       modelsReady: null == modelsReady
           ? _value.modelsReady
           : modelsReady // ignore: cast_nullable_to_non_nullable
@@ -151,7 +152,7 @@ abstract class _$$TranscriptStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {List<ChatMessage> transcript,
+      {Map<LlmModel, List<ChatMessage>> transcript,
       bool modelsReady,
       LlmInferenceEngine? engine,
       dynamic isLlmTyping,
@@ -187,9 +188,9 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
   }) {
     return _then(_$TranscriptStateImpl(
       transcript: null == transcript
-          ? _value._transcript
+          ? _value.transcript
           : transcript // ignore: cast_nullable_to_non_nullable
-              as List<ChatMessage>,
+              as Map<LlmModel, List<ChatMessage>>,
       modelsReady: null == modelsReady
           ? _value.modelsReady
           : modelsReady // ignore: cast_nullable_to_non_nullable
@@ -200,7 +201,7 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
               as LlmInferenceEngine?,
       isLlmTyping: freezed == isLlmTyping ? _value.isLlmTyping! : isLlmTyping,
       modelInfoMap: null == modelInfoMap
-          ? _value._modelInfoMap
+          ? _value.modelInfoMap
           : modelInfoMap // ignore: cast_nullable_to_non_nullable
               as Map<LlmModel, ModelInfo>,
       temperature: null == temperature
@@ -231,33 +232,22 @@ class __$$TranscriptStateImplCopyWithImpl<$Res>
 
 class _$TranscriptStateImpl extends _TranscriptState {
   _$TranscriptStateImpl(
-      {final List<ChatMessage> transcript = const <ChatMessage>[],
+      {required this.transcript,
       this.modelsReady = false,
       this.engine,
       this.isLlmTyping = false,
-      required final Map<LlmModel, ModelInfo> modelInfoMap,
+      required this.modelInfoMap,
       this.temperature = 0.8,
       this.topK = 40,
       this.maxTokens = 1024,
       required this.randomSeed,
       this.error})
-      : _transcript = transcript,
-        _modelInfoMap = modelInfoMap,
-        super._();
-
-  /// Log of messages for the [selectedModel]. Other models may have other
-  /// message logs found on the [TranscriptBloc].
-  final List<ChatMessage> _transcript;
+      : super._();
 
   /// Log of messages for the [selectedModel]. Other models may have other
   /// message logs found on the [TranscriptBloc].
   @override
-  @JsonKey()
-  List<ChatMessage> get transcript {
-    if (_transcript is EqualUnmodifiableListView) return _transcript;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_transcript);
-  }
+  final Map<LlmModel, List<ChatMessage>> transcript;
 
   /// True only after the [ModelLocationProvider] has sorted out the initial
   /// state.
@@ -275,15 +265,8 @@ class _$TranscriptStateImpl extends _TranscriptState {
   final dynamic isLlmTyping;
 
   /// Meta download information about each [LlmModel].
-  final Map<LlmModel, ModelInfo> _modelInfoMap;
-
-  /// Meta download information about each [LlmModel].
   @override
-  Map<LlmModel, ModelInfo> get modelInfoMap {
-    if (_modelInfoMap is EqualUnmodifiableMapView) return _modelInfoMap;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_modelInfoMap);
-  }
+  final Map<LlmModel, ModelInfo> modelInfoMap;
 
   /// Randomness during token sampling selection.
   @override
@@ -319,14 +302,14 @@ class _$TranscriptStateImpl extends _TranscriptState {
         (other.runtimeType == runtimeType &&
             other is _$TranscriptStateImpl &&
             const DeepCollectionEquality()
-                .equals(other._transcript, _transcript) &&
+                .equals(other.transcript, transcript) &&
             (identical(other.modelsReady, modelsReady) ||
                 other.modelsReady == modelsReady) &&
             (identical(other.engine, engine) || other.engine == engine) &&
             const DeepCollectionEquality()
                 .equals(other.isLlmTyping, isLlmTyping) &&
             const DeepCollectionEquality()
-                .equals(other._modelInfoMap, _modelInfoMap) &&
+                .equals(other.modelInfoMap, modelInfoMap) &&
             (identical(other.temperature, temperature) ||
                 other.temperature == temperature) &&
             (identical(other.topK, topK) || other.topK == topK) &&
@@ -340,11 +323,11 @@ class _$TranscriptStateImpl extends _TranscriptState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(_transcript),
+      const DeepCollectionEquality().hash(transcript),
       modelsReady,
       engine,
       const DeepCollectionEquality().hash(isLlmTyping),
-      const DeepCollectionEquality().hash(_modelInfoMap),
+      const DeepCollectionEquality().hash(modelInfoMap),
       temperature,
       topK,
       maxTokens,
@@ -361,7 +344,7 @@ class _$TranscriptStateImpl extends _TranscriptState {
 
 abstract class _TranscriptState extends TranscriptState {
   factory _TranscriptState(
-      {final List<ChatMessage> transcript,
+      {required final Map<LlmModel, List<ChatMessage>> transcript,
       final bool modelsReady,
       final LlmInferenceEngine? engine,
       final dynamic isLlmTyping,
@@ -377,7 +360,7 @@ abstract class _TranscriptState extends TranscriptState {
 
   /// Log of messages for the [selectedModel]. Other models may have other
   /// message logs found on the [TranscriptBloc].
-  List<ChatMessage> get transcript;
+  Map<LlmModel, List<ChatMessage>> get transcript;
   @override
 
   /// True only after the [ModelLocationProvider] has sorted out the initial
@@ -435,7 +418,6 @@ mixin _$TranscriptEvent {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -455,7 +437,6 @@ mixin _$TranscriptEvent {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -475,7 +456,6 @@ mixin _$TranscriptEvent {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -495,7 +475,6 @@ mixin _$TranscriptEvent {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -512,7 +491,6 @@ mixin _$TranscriptEvent {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -529,7 +507,6 @@ mixin _$TranscriptEvent {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -630,7 +607,6 @@ class _$CheckForModelImpl implements CheckForModel {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -653,7 +629,6 @@ class _$CheckForModelImpl implements CheckForModel {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -676,7 +651,6 @@ class _$CheckForModelImpl implements CheckForModel {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -702,7 +676,6 @@ class _$CheckForModelImpl implements CheckForModel {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -722,7 +695,6 @@ class _$CheckForModelImpl implements CheckForModel {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -742,7 +714,6 @@ class _$CheckForModelImpl implements CheckForModel {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -838,7 +809,6 @@ class _$DownloadModelImpl implements DownloadModel {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -861,7 +831,6 @@ class _$DownloadModelImpl implements DownloadModel {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -884,7 +853,6 @@ class _$DownloadModelImpl implements DownloadModel {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -910,7 +878,6 @@ class _$DownloadModelImpl implements DownloadModel {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -930,7 +897,6 @@ class _$DownloadModelImpl implements DownloadModel {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -950,7 +916,6 @@ class _$DownloadModelImpl implements DownloadModel {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1057,7 +1022,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -1080,7 +1044,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1103,7 +1066,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1129,7 +1091,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1149,7 +1110,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1169,7 +1129,6 @@ class _$SetPercentDownloadedImpl implements SetPercentDownloaded {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1268,7 +1227,6 @@ class _$DeleteModelImpl implements DeleteModel {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -1291,7 +1249,6 @@ class _$DeleteModelImpl implements DeleteModel {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1314,7 +1271,6 @@ class _$DeleteModelImpl implements DeleteModel {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1340,7 +1296,6 @@ class _$DeleteModelImpl implements DeleteModel {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1360,7 +1315,6 @@ class _$DeleteModelImpl implements DeleteModel {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1380,7 +1334,6 @@ class _$DeleteModelImpl implements DeleteModel {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1476,7 +1429,6 @@ class _$InitEngineImpl implements InitEngine {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -1499,7 +1451,6 @@ class _$InitEngineImpl implements InitEngine {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1522,7 +1473,6 @@ class _$InitEngineImpl implements InitEngine {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1548,7 +1498,6 @@ class _$InitEngineImpl implements InitEngine {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1568,7 +1517,6 @@ class _$InitEngineImpl implements InitEngine {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1588,7 +1536,6 @@ class _$InitEngineImpl implements InitEngine {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1659,7 +1606,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -1682,7 +1628,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1705,7 +1650,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1731,7 +1675,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1751,7 +1694,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1771,7 +1713,6 @@ class _$InitializeModelInfoImpl implements InitializeModelInfo {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -1863,7 +1804,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -1886,7 +1826,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1909,7 +1848,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -1935,7 +1873,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -1955,7 +1892,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -1975,7 +1911,6 @@ class _$UpdateTemperatureImpl implements UpdateTemperature {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2071,7 +2006,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -2094,7 +2028,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2117,7 +2050,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2143,7 +2075,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2163,7 +2094,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2183,7 +2113,6 @@ class _$UpdateTopKImpl implements UpdateTopK {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2280,7 +2209,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -2303,7 +2231,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2326,7 +2253,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2352,7 +2278,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2372,7 +2297,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2392,7 +2316,6 @@ class _$UpdateMaxTokensImpl implements UpdateMaxTokens {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2411,214 +2334,6 @@ abstract class UpdateMaxTokens implements TranscriptEvent {
   int get value;
   @JsonKey(ignore: true)
   _$$UpdateMaxTokensImplCopyWith<_$UpdateMaxTokensImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$SetTranscriptImplCopyWith<$Res> {
-  factory _$$SetTranscriptImplCopyWith(
-          _$SetTranscriptImpl value, $Res Function(_$SetTranscriptImpl) then) =
-      __$$SetTranscriptImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({LlmModel model});
-}
-
-/// @nodoc
-class __$$SetTranscriptImplCopyWithImpl<$Res>
-    extends _$TranscriptEventCopyWithImpl<$Res, _$SetTranscriptImpl>
-    implements _$$SetTranscriptImplCopyWith<$Res> {
-  __$$SetTranscriptImplCopyWithImpl(
-      _$SetTranscriptImpl _value, $Res Function(_$SetTranscriptImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? model = null,
-  }) {
-    return _then(_$SetTranscriptImpl(
-      null == model
-          ? _value.model
-          : model // ignore: cast_nullable_to_non_nullable
-              as LlmModel,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$SetTranscriptImpl implements SetTranscript {
-  const _$SetTranscriptImpl(this.model);
-
-  @override
-  final LlmModel model;
-
-  @override
-  String toString() {
-    return 'TranscriptEvent.setTranscript(model: $model)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$SetTranscriptImpl &&
-            (identical(other.model, model) || other.model == model));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, model);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$SetTranscriptImplCopyWith<_$SetTranscriptImpl> get copyWith =>
-      __$$SetTranscriptImplCopyWithImpl<_$SetTranscriptImpl>(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(LlmModel model) checkForModel,
-    required TResult Function(LlmModel model) downloadModel,
-    required TResult Function(LlmModel model, int percentDownloaded)
-        setPercentDownloaded,
-    required TResult Function(LlmModel model) deleteModel,
-    required TResult Function(LlmModel model) initEngine,
-    required TResult Function() initializeModelInfo,
-    required TResult Function(double value) updateTemperature,
-    required TResult Function(int value) updateTopK,
-    required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
-    required TResult Function(ChatMessage message, LlmModel model) addMessage,
-    required TResult Function(
-            String chunk, int index, LlmModel model, bool first, bool last)
-        extendMessage,
-    required TResult Function(LlmModel model) completeResponse,
-  }) {
-    return setTranscript(model);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(LlmModel model)? checkForModel,
-    TResult? Function(LlmModel model)? downloadModel,
-    TResult? Function(LlmModel model, int percentDownloaded)?
-        setPercentDownloaded,
-    TResult? Function(LlmModel model)? deleteModel,
-    TResult? Function(LlmModel model)? initEngine,
-    TResult? Function()? initializeModelInfo,
-    TResult? Function(double value)? updateTemperature,
-    TResult? Function(int value)? updateTopK,
-    TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
-    TResult? Function(ChatMessage message, LlmModel model)? addMessage,
-    TResult? Function(
-            String chunk, int index, LlmModel model, bool first, bool last)?
-        extendMessage,
-    TResult? Function(LlmModel model)? completeResponse,
-  }) {
-    return setTranscript?.call(model);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(LlmModel model)? checkForModel,
-    TResult Function(LlmModel model)? downloadModel,
-    TResult Function(LlmModel model, int percentDownloaded)?
-        setPercentDownloaded,
-    TResult Function(LlmModel model)? deleteModel,
-    TResult Function(LlmModel model)? initEngine,
-    TResult Function()? initializeModelInfo,
-    TResult Function(double value)? updateTemperature,
-    TResult Function(int value)? updateTopK,
-    TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
-    TResult Function(ChatMessage message, LlmModel model)? addMessage,
-    TResult Function(
-            String chunk, int index, LlmModel model, bool first, bool last)?
-        extendMessage,
-    TResult Function(LlmModel model)? completeResponse,
-    required TResult orElse(),
-  }) {
-    if (setTranscript != null) {
-      return setTranscript(model);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(CheckForModel value) checkForModel,
-    required TResult Function(DownloadModel value) downloadModel,
-    required TResult Function(SetPercentDownloaded value) setPercentDownloaded,
-    required TResult Function(DeleteModel value) deleteModel,
-    required TResult Function(InitEngine value) initEngine,
-    required TResult Function(InitializeModelInfo value) initializeModelInfo,
-    required TResult Function(UpdateTemperature value) updateTemperature,
-    required TResult Function(UpdateTopK value) updateTopK,
-    required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
-    required TResult Function(AddMessage value) addMessage,
-    required TResult Function(ExtendMessage value) extendMessage,
-    required TResult Function(CompleteResponse value) completeResponse,
-  }) {
-    return setTranscript(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(CheckForModel value)? checkForModel,
-    TResult? Function(DownloadModel value)? downloadModel,
-    TResult? Function(SetPercentDownloaded value)? setPercentDownloaded,
-    TResult? Function(DeleteModel value)? deleteModel,
-    TResult? Function(InitEngine value)? initEngine,
-    TResult? Function(InitializeModelInfo value)? initializeModelInfo,
-    TResult? Function(UpdateTemperature value)? updateTemperature,
-    TResult? Function(UpdateTopK value)? updateTopK,
-    TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
-    TResult? Function(AddMessage value)? addMessage,
-    TResult? Function(ExtendMessage value)? extendMessage,
-    TResult? Function(CompleteResponse value)? completeResponse,
-  }) {
-    return setTranscript?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(CheckForModel value)? checkForModel,
-    TResult Function(DownloadModel value)? downloadModel,
-    TResult Function(SetPercentDownloaded value)? setPercentDownloaded,
-    TResult Function(DeleteModel value)? deleteModel,
-    TResult Function(InitEngine value)? initEngine,
-    TResult Function(InitializeModelInfo value)? initializeModelInfo,
-    TResult Function(UpdateTemperature value)? updateTemperature,
-    TResult Function(UpdateTopK value)? updateTopK,
-    TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
-    TResult Function(AddMessage value)? addMessage,
-    TResult Function(ExtendMessage value)? extendMessage,
-    TResult Function(CompleteResponse value)? completeResponse,
-    required TResult orElse(),
-  }) {
-    if (setTranscript != null) {
-      return setTranscript(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class SetTranscript implements TranscriptEvent {
-  const factory SetTranscript(final LlmModel model) = _$SetTranscriptImpl;
-
-  LlmModel get model;
-  @JsonKey(ignore: true)
-  _$$SetTranscriptImplCopyWith<_$SetTranscriptImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -2714,7 +2429,6 @@ class _$AddMessageImpl implements AddMessage {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -2737,7 +2451,6 @@ class _$AddMessageImpl implements AddMessage {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2760,7 +2473,6 @@ class _$AddMessageImpl implements AddMessage {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -2786,7 +2498,6 @@ class _$AddMessageImpl implements AddMessage {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -2806,7 +2517,6 @@ class _$AddMessageImpl implements AddMessage {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -2826,7 +2536,6 @@ class _$AddMessageImpl implements AddMessage {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -2962,7 +2671,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -2985,7 +2693,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -3008,7 +2715,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -3034,7 +2740,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -3054,7 +2759,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -3074,7 +2778,6 @@ class _$ExtendMessageImpl implements ExtendMessage {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
@@ -3180,7 +2883,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     required TResult Function(double value) updateTemperature,
     required TResult Function(int value) updateTopK,
     required TResult Function(int value) updateMaxTokens,
-    required TResult Function(LlmModel model) setTranscript,
     required TResult Function(ChatMessage message, LlmModel model) addMessage,
     required TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)
@@ -3203,7 +2905,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     TResult? Function(double value)? updateTemperature,
     TResult? Function(int value)? updateTopK,
     TResult? Function(int value)? updateMaxTokens,
-    TResult? Function(LlmModel model)? setTranscript,
     TResult? Function(ChatMessage message, LlmModel model)? addMessage,
     TResult? Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -3226,7 +2927,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     TResult Function(double value)? updateTemperature,
     TResult Function(int value)? updateTopK,
     TResult Function(int value)? updateMaxTokens,
-    TResult Function(LlmModel model)? setTranscript,
     TResult Function(ChatMessage message, LlmModel model)? addMessage,
     TResult Function(
             String chunk, int index, LlmModel model, bool first, bool last)?
@@ -3252,7 +2952,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     required TResult Function(UpdateTemperature value) updateTemperature,
     required TResult Function(UpdateTopK value) updateTopK,
     required TResult Function(UpdateMaxTokens value) updateMaxTokens,
-    required TResult Function(SetTranscript value) setTranscript,
     required TResult Function(AddMessage value) addMessage,
     required TResult Function(ExtendMessage value) extendMessage,
     required TResult Function(CompleteResponse value) completeResponse,
@@ -3272,7 +2971,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     TResult? Function(UpdateTemperature value)? updateTemperature,
     TResult? Function(UpdateTopK value)? updateTopK,
     TResult? Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult? Function(SetTranscript value)? setTranscript,
     TResult? Function(AddMessage value)? addMessage,
     TResult? Function(ExtendMessage value)? extendMessage,
     TResult? Function(CompleteResponse value)? completeResponse,
@@ -3292,7 +2990,6 @@ class _$CompleteResponseImpl implements CompleteResponse {
     TResult Function(UpdateTemperature value)? updateTemperature,
     TResult Function(UpdateTopK value)? updateTopK,
     TResult Function(UpdateMaxTokens value)? updateMaxTokens,
-    TResult Function(SetTranscript value)? setTranscript,
     TResult Function(AddMessage value)? addMessage,
     TResult Function(ExtendMessage value)? extendMessage,
     TResult Function(CompleteResponse value)? completeResponse,
