@@ -115,13 +115,14 @@ class LlmInferenceEngine extends BaseLlmInferenceEngine {
       if (response is LlmResponseContext) {
         publish(response.responseArray.join(''));
         if (response.isDone) {
+          _log.finer('response.isDone - closing controller from $publish');
           _endResponse();
         }
       } else if (response is String) {
         _log.fine(response);
       } else {
         throw Exception(
-          'Unexpected sizeInTokens result of type ${response.runtimeType} : $response',
+          'Unexpected generateResponse result of type ${response.runtimeType} : $response',
         );
       }
     }
