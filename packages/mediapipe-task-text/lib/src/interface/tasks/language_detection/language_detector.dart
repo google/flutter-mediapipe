@@ -5,6 +5,17 @@
 import 'language_detection.dart';
 
 /// {@template LanguageDetector}
+/// Predicts the language of an input text.
+///
+/// Usage:
+/// ```dart
+/// final options = LanguageDetectorOptions();  // optional parameters
+/// final detector = LanguageDetector(options);
+/// final result = await detector.detect('¿Como estas?')
+/// print(result.predictions.first.languageCode);
+/// > "es"
+/// detector.dispose();
+/// ```
 /// {@endtemplate}
 abstract class BaseLanguageDetector {
   /// {@template LanguageDetector.detect}

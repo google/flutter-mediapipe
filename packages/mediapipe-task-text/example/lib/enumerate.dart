@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 extension EnumeratableList<T> on List<T> {
+  /// Invokes the callback on each element of the list, optionally stopping
+  /// after [max] (inclusive) invocations.
   Iterable<S> enumerate<S>(S Function(T, int) fn, {int? max}) sync* {
     int count = 0;
     while (count < length) {
@@ -17,6 +19,8 @@ extension EnumeratableList<T> on List<T> {
 }
 
 extension EnumeratableIterable<T> on Iterable<T> {
+  /// Invokes the callback on each element of the iterable, optionally stopping
+  /// after [max] (inclusive) invocations.
   Iterable<S> enumerate<S>(S Function(T, int) fn, {int? max}) sync* {
     int count = 0;
     for (final T obj in this) {

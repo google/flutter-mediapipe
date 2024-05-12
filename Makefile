@@ -8,7 +8,6 @@ models:
 	cd tool/builder && dart bin/main.dart model -m textembedding
 	cd tool/builder && dart bin/main.dart model -m languagedetection
 
-
 # Runs `ffigen` for all packages
 generate: generate_core generate_text
 
