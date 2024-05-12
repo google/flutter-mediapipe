@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:example/keyboard_hider.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 import 'package:logging/logging.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
