@@ -35,6 +35,19 @@ class TextTaskPagesState extends State<TextTaskPages> {
   final titles = <String>['Classify', 'Embed', 'Detect Languages'];
   int titleIndex = 0;
 
+  @override
+  void initState() {
+    controller.addListener(() {
+      final newIndex = controller.page?.toInt();
+      if (newIndex != null && newIndex != titleIndex) {
+        setState(() {
+          titleIndex = newIndex;
+        });
+      }
+    });
+    super.initState();
+  }
+
   void switchToPage(int index) {
     controller.animateToPage(
       index,
@@ -48,13 +61,6 @@ class TextTaskPagesState extends State<TextTaskPages> {
 
   @override
   Widget build(BuildContext context) {
-    const activeTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.orange,
-    );
-    const inactiveTextStyle = TextStyle(
-      color: Colors.white,
-    );
     return Scaffold(
       appBar: AppBar(title: Text(titles[titleIndex])),
       body: PageView(
@@ -65,37 +71,26 @@ class TextTaskPagesState extends State<TextTaskPages> {
           LanguageDetectionDemo(),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 50,
-        child: ColoredBox(
-          color: Colors.blueGrey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              TextButton(
-                onPressed: () => switchToPage(0),
-                child: Text(
-                  'Classify',
-                  style: titleIndex == 0 ? activeTextStyle : inactiveTextStyle,
-                ),
-              ),
-              TextButton(
-                onPressed: () => switchToPage(1),
-                child: Text(
-                  'Embed',
-                  style: titleIndex == 1 ? activeTextStyle : inactiveTextStyle,
-                ),
-              ),
-              TextButton(
-                onPressed: () => switchToPage(2),
-                child: Text(
-                  'Detect Languages',
-                  style: titleIndex == 2 ? activeTextStyle : inactiveTextStyle,
-                ),
-              ),
-            ],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: titleIndex,
+        onTap: switchToPage,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            activeIcon: Icon(Icons.search, color: Colors.blue),
+            label: 'Classify',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.arrow_downward),
+            activeIcon: Icon(Icons.arrow_downward, color: Colors.blue),
+            label: 'Embed',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.flag),
+            activeIcon: Icon(Icons.flag, color: Colors.blue),
+            label: 'Detect Languages',
+          ),
+        ],
       ),
     );
   }

@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 final log = Logger('Genai');
 
 void initLogging() {
-  Logger.root.level = Level.FINEST;
+  Logger.root.level = Level.FINER;
   Logger.root.onRecord.listen((record) {
     io.stdout.writeln('${record.level.name} [${record.loggerName}]'
         '['

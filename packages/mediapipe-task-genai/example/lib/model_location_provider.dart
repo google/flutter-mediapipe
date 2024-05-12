@@ -52,16 +52,7 @@ class ModelLocationProvider {
 
   // Useful for quick development if there is any friction around passing
   // environment variables
-  static const hardcodedLocations = <LlmModel, String>{
-    LlmModel.gemma4bCpu:
-        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int4.bin',
-    LlmModel.gemma4bGpu:
-        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int4.bin',
-    LlmModel.gemma8bCpu:
-        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int8.bin',
-    LlmModel.gemma8bGpu:
-        'https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int8.bin',
-  };
+  static const hardcodedLocations = <LlmModel, String>{};
 
   static ModelPaths _getModelLocationsFromEnvironment() {
     final locations = <LlmModel, String>{};

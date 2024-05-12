@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:example/keyboard_hider.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
@@ -65,24 +66,26 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
 
     setState(
       () {
-        results.last = Card(
-          key: Key('Classification::"$_isProcessing" ${results.length}'),
-          margin: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(_isProcessing!),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Wrap(
-                  children: <Widget>[
-                    ...categoryWidgets,
-                  ],
+        results.last = KeyboardHider(
+          child: Card(
+            key: Key('Classification::"$_isProcessing" ${results.length}'),
+            margin: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(_isProcessing!),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Wrap(
+                    children: <Widget>[
+                      ...categoryWidgets,
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
         _isProcessing = null;
@@ -135,7 +138,7 @@ class _TextClassificationDemoState extends State<TextClassificationDemo>
           child: Column(
             children: <Widget>[
               TextField(controller: _controller),
-              ...results,
+              ...results.reversed,
             ],
           ),
         ),
