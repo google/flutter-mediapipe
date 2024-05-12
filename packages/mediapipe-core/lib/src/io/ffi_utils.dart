@@ -69,12 +69,11 @@ extension DartAwareChars on Pointer<Char> {
   ///
   /// See also:
   ///  * [toDartStrings]
-  String toDartString({int? length, bool copy = false}) {
+  String toDartString({int? length}) {
     if (isNullPointer) {
       throw Exception('Unexpectedly called `toDartString` on nullptr');
     }
-    final value = cast<Utf8>().toDartString(length: length);
-    return copy ? String.fromCharCodes(List<int>.from(value.codeUnits)) : value;
+    return cast<Utf8>().toDartString(length: length);
   }
 
   /// Releases all native memory.
@@ -91,14 +90,14 @@ extension DartAwarePointerChars on Pointer<Pointer<Char>> {
   ///
   /// See also:
   ///  * [toDartString], for a non-list equivalent.
-  List<String> toDartStrings(int length, {bool copy = false}) {
+  List<String> toDartStrings(int length) {
     if (isNullPointer) {
       throw Exception('Unexpectedly called `toDartStrings` on nullptr');
     }
     final dartStrings = <String>[];
     int counter = 0;
     while (counter < length) {
-      dartStrings.add(this[counter].toDartString(copy: copy));
+      dartStrings.add(this[counter].toDartString());
       counter++;
     }
     return dartStrings;
