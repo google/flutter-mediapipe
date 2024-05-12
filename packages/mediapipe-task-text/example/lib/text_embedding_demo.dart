@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:example/keyboard_hider.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:logging/logging.dart';
@@ -242,28 +243,30 @@ class _TextEmbeddingDemoState extends State<TextEmbeddingDemo>
                 TextField(controller: _controller),
                 ...feed.reversed.toList().enumerate<Widget>(
                   (EmbeddingFeedItem feedItem, index) {
-                    return switch (feedItem._type) {
-                      _EmbeddingFeedItemType.result =>
-                        TextEmbedderResultDisplay(
-                          embeddedText: feedItem.embeddingResult!,
-                          index: index,
-                        ),
-                      _EmbeddingFeedItemType.emptyComparison => TextButton(
-                          // Subtract `index` from `feed.length` because we
-                          // are looping through the list in reverse order
-                          onPressed: () => _compare(feed.length - index - 1),
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
-                              Colors.purple[100],
-                            ),
+                    return KeyboardHider(
+                      child: switch (feedItem._type) {
+                        _EmbeddingFeedItemType.result =>
+                          TextEmbedderResultDisplay(
+                            embeddedText: feedItem.embeddingResult!,
+                            index: index,
                           ),
-                          child: const Text('Compare'),
-                        ),
-                      _EmbeddingFeedItemType.comparison =>
-                        ComparisonDisplay(similarity: feedItem.similarity!),
-                      _EmbeddingFeedItemType.incomparable => const Text(
-                          'Embeddings of different types cannot be compared'),
-                    };
+                        _EmbeddingFeedItemType.emptyComparison => TextButton(
+                            // Subtract `index` from `feed.length` because we
+                            // are looping through the list in reverse order
+                            onPressed: () => _compare(feed.length - index - 1),
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                Colors.purple[100],
+                              ),
+                            ),
+                            child: const Text('Compare'),
+                          ),
+                        _EmbeddingFeedItemType.comparison =>
+                          ComparisonDisplay(similarity: feedItem.similarity!),
+                        _EmbeddingFeedItemType.incomparable => const Text(
+                            'Embeddings of different types cannot be compared'),
+                      },
+                    );
                   },
                 ),
               ],
@@ -315,7 +318,6 @@ class TextEmbedderResultDisplay extends StatelessWidget {
       EmbeddingType.quantized => '${embedding.quantizedEmbedding!}',
     };
     // Replace "..." with the results
-    final message = '"${embeddedText.value}"\n$embeddingDisplay';
     return Card(
       key: Key('Embedding::"${embeddedText.value}" $index'),
       margin: const EdgeInsets.all(10),
@@ -324,21 +326,20 @@ class TextEmbedderResultDisplay extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(message),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: <Widget>[
-                    if (embedding.type == EmbeddingType.float)
-                      _embeddingAttribute('Float', Colors.blue[300]!),
-                    if (embedding.type == EmbeddingType.quantized)
-                      _embeddingAttribute('Quantized', Colors.orange[300]!),
-                    if (embeddedText.l2Normalized)
-                      _embeddingAttribute('L2 Normalized', Colors.green[300]!),
-                  ],
-                ),
-                Text(embeddedText.computedAt.toIso8601String()),
+            Text('"${embeddedText.value}"',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(embeddingDisplay),
+            Wrap(
+              spacing: 4,
+              children: <Widget>[
+                if (embedding.type == EmbeddingType.float)
+                  _embeddingAttribute('Float', Colors.blue[600]!),
+                if (embedding.type == EmbeddingType.quantized)
+                  _embeddingAttribute('Quantized', Colors.orange[600]!),
+                if (embeddedText.l2Normalized)
+                  _embeddingAttribute('L2 Normalized', Colors.green[600]!),
+                _embeddingAttribute(embeddedText.computedAt.toIso8601String(),
+                    Colors.grey[600]!),
               ],
             ),
           ],
@@ -348,14 +349,13 @@ class TextEmbedderResultDisplay extends StatelessWidget {
   }
 
   Widget _embeddingAttribute(String text, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: GFButton(
-        onPressed: null,
-        text: text,
-        shape: GFButtonShape.pills,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
         color: color,
+        borderRadius: BorderRadius.circular(6),
       ),
+      child: Text(text, style: const TextStyle(color: Colors.white)),
     );
   }
 }

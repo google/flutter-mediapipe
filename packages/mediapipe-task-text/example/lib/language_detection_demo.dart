@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:example/keyboard_hider.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
@@ -68,34 +69,36 @@ class _LanguageDetectionDemoState extends State<LanguageDetectionDemo>
   void _showDetectionResults(LanguageDetectorResult result) {
     setState(
       () {
-        results.last = Card(
-          key: Key('prediction-"$_isProcessing" ${results.length}'),
-          margin: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(_isProcessing!),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Wrap(
-                  children: <Widget>[
-                    ...result.predictions
-                        .enumerate<Widget>(
-                          (prediction, index) => _languagePrediction(
-                            prediction,
-                            predictionColors[index],
-                          ),
-                          // Take first 4 because the model spits out dozens of
-                          // astronomically low probability language predictions
-                          max: predictionColors.length,
-                        )
-                        .toList(),
-                  ],
+        results.last = KeyboardHider(
+          child: Card(
+            key: Key('prediction-"$_isProcessing" ${results.length}'),
+            margin: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(_isProcessing!),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Wrap(
+                    children: <Widget>[
+                      ...result.predictions
+                          .enumerate<Widget>(
+                            (prediction, index) => _languagePrediction(
+                              prediction,
+                              predictionColors[index],
+                            ),
+                            // Take first 4 because the model spits out dozens of
+                            // astronomically low probability language predictions
+                            max: predictionColors.length,
+                          )
+                          .toList(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
         _isProcessing = null;
