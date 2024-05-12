@@ -1,0 +1,31 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:mediapipe_core/interface.dart';
+
+/// {@template TextClassifierOptions}
+/// Configuration object for a MediaPipe text classifier.
+///
+/// See also:
+///  * [MediaPipe's TextClassifierOptions documentation](https://developers.google.com/mediapipe/api/solutions/js/tasks-text.textclassifieroptions)
+/// {@endtemplate}
+///
+/// This implementation is not immutable to track whether `dispose` has been
+/// called. All values used by pkg:equatable are in fact immutable.
+// ignore: must_be_immutable
+abstract class BaseLanguageDetectorOptions extends BaseTaskOptions {
+  /// Contains parameter options for how this classifier should behave,
+  /// including allow and denylists, thresholds, maximum results, etc.
+  ///
+  /// See also:
+  ///  * [BaseClassifierOptions] for each available field.
+  BaseClassifierOptions get classifierOptions;
+
+  @override
+  String toString() => 'LanguageDetectorOptions(baseOptions: $baseOptions, '
+      'classifierOptions: $classifierOptions)';
+
+  @override
+  List<Object?> get props => [baseOptions, classifierOptions];
+}

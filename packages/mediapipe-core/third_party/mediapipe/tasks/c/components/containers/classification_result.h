@@ -28,7 +28,6 @@ struct Classifications {
   // The array of predicted categories, usually sorted by descending scores,
   // e.g. from high to low probability.
   struct Category* categories;
-
   // The number of elements in the categories array.
   uint32_t categories_count;
 
@@ -58,7 +57,6 @@ struct ClassificationResult {
   // exceed the maximum size that the model can process: to solve this, the
   // input data is split into multiple chunks starting at different timestamps.
   int64_t timestamp_ms;
-
   // Specifies whether the timestamp contains a valid value.
   bool has_timestamp_ms;
 };

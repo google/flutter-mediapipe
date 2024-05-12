@@ -1,11 +1,13 @@
 function ci_text_package() {
     # Download bert_classifier.tflite model into example/assets for integration tests
-    echo "Downloading TextClassification model"
     pushd ../../tool/builder
     dart pub get
+    echo "Downloading TextClassification model"
     dart bin/main.dart model -m textclassification
     echo "Downloading TextEmbedding model"
     dart bin/main.dart model -m textembedding
+    echo "Downloading Language Detection model"
+    dart bin/main.dart model -m languagedetection
     popd
 }
 

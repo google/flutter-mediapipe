@@ -75,7 +75,7 @@ MP_EXPORT int text_embedder_close(void* embedder, char** error_msg);
 MP_EXPORT int text_embedder_cosine_similarity(const struct Embedding* u,
                                               const struct Embedding* v,
                                               double* similarity,
-                                              char** error_msg);                                       
+                                              char** error_msg);
 
 #ifdef __cplusplus
 }  // extern C

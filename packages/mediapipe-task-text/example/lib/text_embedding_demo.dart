@@ -24,7 +24,8 @@ class TextEmbeddingDemo extends StatefulWidget {
   State<TextEmbeddingDemo> createState() => _TextEmbeddingDemoState();
 }
 
-class _TextEmbeddingDemoState extends State<TextEmbeddingDemo> {
+class _TextEmbeddingDemoState extends State<TextEmbeddingDemo>
+    with AutomaticKeepAliveClientMixin<TextEmbeddingDemo> {
   final TextEditingController _controller = TextEditingController();
   List<EmbeddingFeedItem> feed = [];
   EmbeddingType type = EmbeddingType.quantized;
@@ -178,102 +179,107 @@ class _TextEmbeddingDemoState extends State<TextEmbeddingDemo> {
   }
 
   @override
-  Widget build(BuildContext context) => //
-      Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              const Text('Float:'),
-                              Checkbox(
-                                value: type == EmbeddingType.float,
-                                onChanged: (_) {
-                                  toggleMode();
-                                },
-                              ),
-                            ],
-                          ),
-                          // Quantized checkbox
-                          Row(
-                            children: <Widget>[
-                              const Text('Quantize:'),
-                              Checkbox(
-                                value: type == EmbeddingType.quantized,
-                                onChanged: (bool? newValue) {
-                                  toggleMode();
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              const Text('L2 Normalize:'),
-                              Checkbox(
-                                value: l2Normalize,
-                                onChanged: (_) {
-                                  toggleL2Normalize();
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  // Float checkbox
-                  TextField(controller: _controller),
-                  ...feed.reversed.toList().enumerate<Widget>(
-                    (EmbeddingFeedItem feedItem, index) {
-                      return switch (feedItem._type) {
-                        _EmbeddingFeedItemType.result =>
-                          TextEmbedderResultDisplay(
-                            embeddedText: feedItem.embeddingResult!,
-                            index: index,
-                          ),
-                        _EmbeddingFeedItemType.emptyComparison => TextButton(
-                            // Subtract `index` from `feed.length` because we
-                            // are looping through the list in reverse order
-                            onPressed: () => _compare(feed.length - index - 1),
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all(
-                                Colors.purple[100],
-                              ),
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            const Text('Float:'),
+                            Checkbox(
+                              value: type == EmbeddingType.float,
+                              onChanged: (_) {
+                                toggleMode();
+                              },
                             ),
-                            child: const Text('Compare'),
+                          ],
+                        ),
+                        // Quantized checkbox
+                        Row(
+                          children: <Widget>[
+                            const Text('Quantize:'),
+                            Checkbox(
+                              value: type == EmbeddingType.quantized,
+                              onChanged: (bool? newValue) {
+                                toggleMode();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            const Text('L2 Normalize:'),
+                            Checkbox(
+                              value: l2Normalize,
+                              onChanged: (_) {
+                                toggleL2Normalize();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Float checkbox
+                TextField(controller: _controller),
+                ...feed.reversed.toList().enumerate<Widget>(
+                  (EmbeddingFeedItem feedItem, index) {
+                    return switch (feedItem._type) {
+                      _EmbeddingFeedItemType.result =>
+                        TextEmbedderResultDisplay(
+                          embeddedText: feedItem.embeddingResult!,
+                          index: index,
+                        ),
+                      _EmbeddingFeedItemType.emptyComparison => TextButton(
+                          // Subtract `index` from `feed.length` because we
+                          // are looping through the list in reverse order
+                          onPressed: () => _compare(feed.length - index - 1),
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                              Colors.purple[100],
+                            ),
                           ),
-                        _EmbeddingFeedItemType.comparison =>
-                          ComparisonDisplay(similarity: feedItem.similarity!),
-                        _EmbeddingFeedItemType.incomparable => const Text(
-                            'Embeddings of different types cannot be compared'),
-                      };
-                    },
-                  ),
-                ],
-              ),
+                          child: const Text('Compare'),
+                        ),
+                      _EmbeddingFeedItemType.comparison =>
+                        ComparisonDisplay(similarity: feedItem.similarity!),
+                      _EmbeddingFeedItemType.incomparable => const Text(
+                          'Embeddings of different types cannot be compared'),
+                    };
+                  },
+                ),
+              ],
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: isProcessing || _controller.text == '' ? null : _embed,
-          child: const Icon(Icons.search),
-        ),
-      );
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: isProcessing || _controller.text == '' ? null : _embed,
+        child: const Icon(Icons.search),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 /// Shows, in the activity feed, the results of invoking `cosineSimilarity`

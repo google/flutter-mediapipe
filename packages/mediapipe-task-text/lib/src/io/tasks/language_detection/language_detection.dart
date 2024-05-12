@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'language_detection/language_detection.dart';
-export 'text_classification/text_classification.dart';
-export 'text_embedding/text_embedding.dart';
+export 'language_detector_result.dart';
+export 'language_detector_executor.dart';
+export 'language_detector_options.dart';
+export 'language_detector.dart';
