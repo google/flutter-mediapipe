@@ -20,7 +20,7 @@ class LanguageDetectorExecutor extends TaskExecutor<
     LanguageDetectorOptions,
     bindings.LanguageDetectorResult,
     LanguageDetectorResult> {
-  /// {macro LanguageDetectorExecutor}
+  /// {@macro LanguageDetectorExecutor}
   LanguageDetectorExecutor(super.options);
 
   @override
