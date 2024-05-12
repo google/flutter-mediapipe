@@ -100,6 +100,7 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
   final _finders = <_OsFinder>[
     _OsFinder(OS.android),
     _OsFinder(OS.macOS),
+    _OsFinder(OS.iOS),
     // TODO: Add other values as their support is ready
   ];
 
@@ -125,6 +126,8 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
     _log.fine('Writing data to "${file.absolute.path}"');
     var encoder = JsonEncoder.withIndent('  ');
     file.writeAsStringSync('''// Generated file. Do not manually edit.
+// Used by the flutter toolchain (via build.dart) during compilation of any
+// Flutter app using this package.
 final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = ${encoder.convert(results).replaceAll('"', "'")};
 ''');
     io.Process.start('dart', ['format', file.absolute.path]);
@@ -191,7 +194,7 @@ class _OsFinder {
   /// [SdksFinderCommand._bucketName].
   static const _gcsFolderPaths = <OS, String?>{
     OS.android: 'gcp_ubuntu_flutter',
-    OS.iOS: null,
+    OS.iOS: 'macos_flutter',
     OS.macOS: 'macos_flutter',
   };
 
@@ -208,7 +211,9 @@ class _OsFinder {
     OS.android: {
       'android_arm64': Architecture.arm64,
     },
-    OS.iOS: {},
+    OS.iOS: {
+      'ios_arm64': Architecture.arm64,
+    },
     OS.macOS: {
       'darwin_arm64': Architecture.arm64,
       'darwin_x86_64': Architecture.x64,
