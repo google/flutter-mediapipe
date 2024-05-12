@@ -60,7 +60,6 @@ class TextEmbedder extends BaseTextEmbedder {
   @override
   Future<double> cosineSimilarity(Embedding a, Embedding b) async {
     await _ready;
-    (a as core_io.Embedding).pointer;
     _sendPort.send(_EmbedderTask.cosineSimilarity(a, b));
     while (true) {
       final response = await _events.next;

@@ -6,9 +6,12 @@ import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 
-/// {@template TaskOptions}
+/// {@template BaseOptions}
 /// Root class for options classes for MediaPipe tasks.
-///
+/// {@endtemplate}
+abstract class Options extends Equatable {}
+
+/// {@template TaskOptions}
 /// Implementing classes will contain two [BaseInnerTaskOptions] subclasses,
 /// including a descendent of the universal options struct, [BaseBaseOptions].
 /// The second field will be task-specific.
@@ -17,7 +20,7 @@ import 'package:equatable/equatable.dart';
 /// This implementation is not immutable to track whether `dispose` has been
 /// called. All values used by pkg:equatable are in fact immutable.
 // ignore: must_be_immutable
-abstract class BaseTaskOptions extends Equatable {
+abstract class BaseTaskOptions extends Options {
   /// {@macro TaskOptions}
   BaseTaskOptions();
 

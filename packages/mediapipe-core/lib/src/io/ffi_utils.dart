@@ -90,11 +90,11 @@ extension DartAwarePointerChars on Pointer<Pointer<Char>> {
   ///
   /// See also:
   ///  * [toDartString], for a non-list equivalent.
-  List<String?> toDartStrings(int length) {
+  List<String> toDartStrings(int length) {
     if (isNullPointer) {
       throw Exception('Unexpectedly called `toDartStrings` on nullptr');
     }
-    final dartStrings = <String?>[];
+    final dartStrings = <String>[];
     int counter = 0;
     while (counter < length) {
       dartStrings.add(this[counter].toDartString());

@@ -11,7 +11,8 @@ import '../../third_party/mediapipe/generated/mediapipe_text_bindings.dart'
 /// {@macro TextEmbedderResult}
 class TextEmbedderResult extends BaseEmbedderResult with IOTaskResult {
   /// {@macro TextEmbedderResult.fake}
-  TextEmbedderResult({required Iterable<Embedding> embeddings});
+  TextEmbedderResult({required Iterable<Embedding> embeddings})
+      : _embeddings = embeddings;
 
   /// {@template TextEmbedderResult.native}
   /// Initializes a [TextEmbedderResult] instance as a wrapper around native
@@ -30,7 +31,7 @@ class TextEmbedderResult extends BaseEmbedderResult with IOTaskResult {
   Iterable<Embedding> _getEmbeddings() {
     if (_pointer.isNullOrNullPointer) {
       throw Exception(
-        'No native memory for TextClassifierResult.classifications',
+        'No native memory for TextEmbedderResult.embeddings',
       );
     }
     return Embedding.fromNativeArray(

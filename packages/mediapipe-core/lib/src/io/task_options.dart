@@ -15,7 +15,7 @@ import 'third_party/mediapipe/generated/mediapipe_common_bindings.dart'
 /// should manage their [InnerTaskOptions] fields. The two suggested methods are
 /// [copyToNative] and [dispose].
 /// {@endtemplate}
-mixin TaskOptions<T extends Struct> on BaseTaskOptions {
+mixin TaskOptions<T extends Struct> on Options {
   /// {@template TaskOptions.copyToNative}
   /// Copies these task options into native memory. Any fields of type
   /// [InnerTaskOptions] should have their `assignToStruct` method called.

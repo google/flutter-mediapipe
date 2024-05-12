@@ -21,23 +21,34 @@ final _log = Logger('SDKsFinder');
 /// Format is:
 ///   {
 ///     <os>: {
-///       <arch>: <fullpath>,
-///       ...
+///       <sdk>: {
+///         <arch>: <fullpath>,
+///         ...
+///       },
 ///     },
 ///     ...
 ///   }
-typedef _FlatResults = Map<String, Map<String, String>>;
+typedef _FlatResults = Map<String, Map<String, Map<String, String>>>;
 
 /// Container for the three flavors of MediaPipe tasks.
 enum MediaPipeSdk {
+  genai,
   libaudio,
   libtext,
   libvision;
 
   String toPackageDir() => switch (this) {
+        MediaPipeSdk.genai => 'mediapipe-task-genai',
         MediaPipeSdk.libaudio => 'mediapipe-task-audio',
         MediaPipeSdk.libtext => 'mediapipe-task-text',
         MediaPipeSdk.libvision => 'mediapipe-task-vision',
+      };
+
+  String binaryName() => switch (this) {
+        MediaPipeSdk.genai => 'libllm_inference_engine',
+        MediaPipeSdk.libaudio => MediaPipeSdk.libaudio.name,
+        MediaPipeSdk.libtext => MediaPipeSdk.libtext.name,
+        MediaPipeSdk.libvision => MediaPipeSdk.libvision.name,
       };
 }
 
@@ -89,6 +100,7 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
   final _finders = <_OsFinder>[
     _OsFinder(OS.android),
     _OsFinder(OS.macOS),
+    _OsFinder(OS.iOS),
     // TODO: Add other values as their support is ready
   ];
 
@@ -114,7 +126,9 @@ class SdksFinderCommand extends Command with RepoFinderMixin {
     _log.fine('Writing data to "${file.absolute.path}"');
     var encoder = JsonEncoder.withIndent('  ');
     file.writeAsStringSync('''// Generated file. Do not manually edit.
-final Map<String, Map<String, String>> sdkDownloadUrls = ${encoder.convert(results).replaceAll('"', "'")};
+// Used by the flutter toolchain (via build.dart) during compilation of any
+// Flutter app using this package.
+final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = ${encoder.convert(results).replaceAll('"', "'")};
 ''');
     io.Process.start('dart', ['format', file.absolute.path]);
   }
@@ -180,7 +194,7 @@ class _OsFinder {
   /// [SdksFinderCommand._bucketName].
   static const _gcsFolderPaths = <OS, String?>{
     OS.android: 'gcp_ubuntu_flutter',
-    OS.iOS: null,
+    OS.iOS: 'macos_flutter',
     OS.macOS: 'macos_flutter',
   };
 
@@ -197,7 +211,9 @@ class _OsFinder {
     OS.android: {
       'android_arm64': Architecture.arm64,
     },
-    OS.iOS: {},
+    OS.iOS: {
+      'ios_arm64': Architecture.arm64,
+    },
     OS.macOS: {
       'darwin_arm64': Architecture.arm64,
       'darwin_x86_64': Architecture.x64,
@@ -211,10 +227,13 @@ class _OsFinder {
 
   /// Scans the appropriate GCS location for all build Ids for the given OS and
   /// returns the highest integer found.
-  Future<int> _getBuildNumber(String path) async {
-    int highestBuildNumber = 0;
-
-    for (final folder in await _gsUtil(path)) {
+  ///
+  /// Returns a future iterator, instead of a stream, because it's one async
+  /// gap up front and then we want synchronous iterator behavior across the
+  /// build ids.
+  Iterable<int> _getBuildNumbers(List<String> paths) sync* {
+    List<int> buildIds = [];
+    for (final folder in paths) {
       late int buildId;
       try {
         // Grab last chunk, since we're looking for a folder of the
@@ -224,12 +243,13 @@ class _OsFinder {
         // Probably the `{id}_$folder$` directory
         continue;
       }
-      if (buildId > highestBuildNumber) {
-        highestBuildNumber = buildId;
-      }
+      buildIds.add(buildId);
     }
-    _log.fine('Highest build number for $os is $highestBuildNumber');
-    return highestBuildNumber;
+
+    buildIds.sort();
+    for (final buildId in buildIds.reversed) {
+      yield buildId;
+    }
   }
 
   /// Extracts the date within a build directory, which is where the final
@@ -289,7 +309,7 @@ class _OsFinder {
   /// Additionally, checks whether that file actually exists and returns the
   /// String value if it does, or `null` if it does not.
   Future<String?> _getAndCheckFullPath(String path, MediaPipeSdk sdk) async {
-    final pathToCheck = '$path/${sdk.name}.${_sdkExtensions[os]!}';
+    final pathToCheck = '$path/${sdk.binaryName()}.${_sdkExtensions[os]!}';
     final output = await _gsUtil(pathToCheck);
     if (output.isEmpty) {
       return null;
@@ -300,29 +320,35 @@ class _OsFinder {
   Stream<_SdkLocation> find() async* {
     _log.info('Finding SDKs for $os');
     String path = folderPath;
-    final buildNumber = await _getBuildNumber(path);
-    path = '$path/$buildNumber';
-    _log.finest('$os :: build number :: $path');
-    final buildDate = await _getDateOfBuildNumber(path);
-    path = '$path/$buildDate';
-    _log.finest('$os :: date :: $path');
+    for (final buildNumber in _getBuildNumbers(await _gsUtil(path))) {
+      path = '$folderPath/$buildNumber';
+      _log.finest('$os :: build number :: $path');
+      final buildDate = await _getDateOfBuildNumber(path);
+      path = '$path/$buildDate';
+      _log.finest('$os :: date :: $path');
 
-    await for (final String archPath in _getArchitectectures(path)) {
-      String pathWithArch = '$path/$archPath';
-      _log.finest('$os :: $archPath :: $pathWithArch');
-      for (final sdk in MediaPipeSdk.values) {
-        final maybeFinalPath = await _getAndCheckFullPath(pathWithArch, sdk);
-        _log.finest('$os :: maybeFinalPath :: $maybeFinalPath');
-        if (maybeFinalPath != null) {
-          _log.fine('Found "$maybeFinalPath"');
-          yield _SdkLocation(
-            os: os,
-            arch: targetFolders[os]![archPath]!,
-            sdk: sdk,
-            fullPath: '${SdksFinderCommand._gcsPrefix}/'
-                '${SdksFinderCommand._bucketName}/$maybeFinalPath',
-          );
+      bool buildNumberFoundSdks = false;
+      await for (final String archPath in _getArchitectectures(path)) {
+        String pathWithArch = '$path/$archPath';
+        _log.finest('$os :: $archPath :: $pathWithArch');
+        for (final sdk in MediaPipeSdk.values) {
+          final maybeFinalPath = await _getAndCheckFullPath(pathWithArch, sdk);
+          _log.finest('$os :: maybeFinalPath :: $maybeFinalPath');
+          if (maybeFinalPath != null) {
+            _log.info('Found "$maybeFinalPath"');
+            buildNumberFoundSdks = true;
+            yield _SdkLocation(
+              os: os,
+              arch: targetFolders[os]![archPath]!,
+              sdk: sdk,
+              fullPath: '${SdksFinderCommand._gcsPrefix}/'
+                  '${SdksFinderCommand._bucketName}/$maybeFinalPath',
+            );
+          }
         }
+      }
+      if (buildNumberFoundSdks) {
+        return;
       }
     }
   }
@@ -392,10 +418,15 @@ class _SdkLocations {
   _FlatResults toMap(MediaPipeSdk sdk) {
     if (!_locations.containsKey(sdk)) return {};
 
-    final _FlatResults results = <String, Map<String, String>>{};
+    final _FlatResults results = <String, Map<String, Map<String, String>>>{};
     for (_SdkLocation loc in _locations[sdk]!) {
-      results.setDefault(loc.os.toString(), <String, String>{});
-      results[loc.os.toString()]![loc.arch.toString()] = loc.fullPath;
+      results.setDefault(loc.os.toString(), <String, Map<String, String>>{});
+      results[loc.os.toString()]!.setDefault(
+        loc.sdk.binaryName(),
+        <String, String>{},
+      );
+      results[loc.os.toString()]![loc.sdk.binaryName()]![loc.arch.toString()] =
+          loc.fullPath;
     }
 
     return results;

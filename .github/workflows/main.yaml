@@ -5,7 +5,7 @@ permissions: read-all
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
     branches: [main, ffi-wrapper, ffi-wrapper-text-pkg]
   schedule:
