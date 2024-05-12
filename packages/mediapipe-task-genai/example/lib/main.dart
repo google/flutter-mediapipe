@@ -28,7 +28,7 @@ class AppBlocObserver extends BlocObserver {
 
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
-    // print('onError(${bloc.runtimeType}, $error, $stackTrace)');
+    _log.shout('onError(${bloc.runtimeType}, $error, $stackTrace)');
     super.onError(bloc, error, stackTrace);
   }
 }
@@ -61,6 +61,19 @@ class _MainAppState extends State<MainApp> {
   final titles = <String>['Inference'];
   int titleIndex = 0;
 
+  @override
+  void initState() {
+    controller.addListener(() {
+      final newIndex = controller.page?.toInt();
+      if (newIndex != null && newIndex != titleIndex) {
+        setState(() {
+          titleIndex = newIndex;
+        });
+      }
+    });
+    super.initState();
+  }
+
   void switchToPage(int index) {
     controller.animateToPage(
       index,
@@ -74,13 +87,6 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    const activeTextStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.orange,
-    );
-    const inactiveTextStyle = TextStyle(
-      color: Colors.white,
-    );
     return Scaffold(
       body: PageView(
         controller: controller,
@@ -88,31 +94,21 @@ class _MainAppState extends State<MainApp> {
           LlmInferenceDemo(),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 50 + MediaQuery.of(context).viewPadding.bottom / 2,
-        child: ColoredBox(
-          color: Colors.blueGrey,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  TextButton(
-                    onPressed: () => switchToPage(0),
-                    child: Text(
-                      'Inference',
-                      style:
-                          titleIndex == 0 ? activeTextStyle : inactiveTextStyle,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).viewPadding.bottom / 2,
-              ),
-            ],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: titleIndex,
+        onTap: switchToPage,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble),
+            activeIcon: Icon(Icons.chat_bubble, color: Colors.blue),
+            label: 'Inference',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.cancel),
+            activeIcon: Icon(Icons.cancel, color: Colors.blue),
+            label: 'Coming soon',
+          ),
+        ],
       ),
     );
   }
