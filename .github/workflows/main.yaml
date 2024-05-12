@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, ffi-wrapper, ffi-wrapper-text-pkg]
+    branches: [main]
   schedule:
     - cron: "0 0 * * *" # Every day at midnight
 
@@ -17,14 +17,14 @@ defaults:
 
 jobs:
   flutter-tests:
-    name: Test mediapipe_core against ${{ matrix.flutter_version }}
+    name: Test mediapipe against ${{ matrix.flutter_version }}
     runs-on: ${{ matrix.os }}
     # Skip running job on forks
     if: github.repository == 'google/flutter-mediapipe'
     strategy:
       fail-fast: false
       matrix:
-        flutter_version: [master]
+        flutter_version: [beta, master]
         # TODO(craiglabenz): reverse once CI works
         # flutter_version: [stable, beta, master]
         # TODO(craiglabenz): Add `ubuntu-latest` and `windows-latest` when those artifacts exist
