@@ -80,8 +80,8 @@ class LanguageDetectorOptions extends BaseLanguageDetectorOptions
       if (_pointer == null) {
         throw Exception(
           'Attempted to call dispose on a LanguageDetectorOptions object which '
-          'was never used by a LanguageDetector. Did you forget to create your '
-          'LanguageDetector?',
+          'was never used by a LanguageDetector, which you do not need to do. '
+          'Did you forget to create your LanguageDetector?',
         );
       }
       return true;
