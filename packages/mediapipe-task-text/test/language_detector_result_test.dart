@@ -4,11 +4,11 @@
 
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_text/io.dart';
 import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
+import 'package:test/test.dart';
 
 void main() {
   group('LanguageDetectorResult.native should', () {

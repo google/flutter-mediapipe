@@ -40,7 +40,7 @@ class LanguageDetectorResult extends BaseLanguageDetectorResult
     }
     return LanguagePrediction.fromNativeArray(
       _pointer!.ref.predictions,
-      _pointer!.ref.predictions_count,
+      _pointer.ref.predictions_count,
     );
   }
 }
@@ -77,7 +77,7 @@ class LanguagePrediction extends BaseLanguagePrediction {
     if (_pointer!.ref.language_code.isNullPointer) {
       throw Exception('Corrupted memory in LanguagePrediction');
     }
-    return _pointer!.ref.language_code.toDartString();
+    return _pointer.ref.language_code.toDartString();
   }
 
   double? _probability;

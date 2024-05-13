@@ -1,6 +1,6 @@
 name: mediapipe_core
 description: Shared logic and utilities required by other MediaPipe Task packages.
-version: 0.0.1
+version: 0.0.1+1
 
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-core
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
@@ -8,13 +8,15 @@ issue_tracker: https://github.com/google/flutter-mediapipe/issues
 platforms:
   android:
   ios:
-  # linux:
+  linux:
   macos:
   # web:
-  # windows:
+  windows:
 
 environment:
-  sdk: ^3.1.0
+  # For now, `native-assets` is a Flutter experiment, which can only be
+  # enabled on the `master` channel.
+  sdk: ^3.4.0
 
 # Add regular dependencies here.
 dependencies:

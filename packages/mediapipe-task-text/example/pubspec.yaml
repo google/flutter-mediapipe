@@ -4,15 +4,14 @@ publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ">=3.1.0 <4.0.0"
+  sdk: ^3.4.0
 
 dependencies:
   flutter:
     sdk: flutter
   getwidget: ^4.0.0
   logging: ^1.2.0
-  mediapipe_core:
-    path: ../../mediapipe-core
+  mediapipe_core: ^0.0.1
   mediapipe_text:
     path: ../
   path: ^1.8.3

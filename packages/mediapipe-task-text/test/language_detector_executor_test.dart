@@ -7,10 +7,10 @@
 @Tags(['native-assets'])
 
 import 'dart:io' as io;
-import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:mediapipe_core/io.dart';
 import 'package:mediapipe_text/io.dart';
+import 'package:test/test.dart';
 
 void main() {
   final pathToModel = path.joinAll([

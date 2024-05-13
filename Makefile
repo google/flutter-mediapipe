@@ -34,6 +34,7 @@ sdks:
 analyze:
 	cd packages/mediapipe-core && dart format -o write .
 	cd packages/mediapipe-task-text && dart format -o write .
+	cd packages/mediapipe-task-genai && dart format -o write .
 
 # Core ---
 
@@ -53,7 +54,7 @@ generate_text:
 
 # Runs all text tests
 test_text:
-	cd packages/mediapipe-task-text && flutter test
+	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets test
 	cd packages/mediapipe-task-text/example && flutter test
 
 example_text:
