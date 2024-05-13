@@ -10,8 +10,6 @@ To learn more about MediaPipe, please visit the [MediaPipe website](https://deve
 
 To get started with MediaPipe, please [see the documentation](https://developers.google.com/mediapipe/solutions/guide).
 
-## Supported tasks
-
 ## Supported Tasks
 
 <table>
@@ -55,8 +53,8 @@ To get started with MediaPipe, please [see the documentation](https://developers
 
 ## Usage
 
-To get started with this plugin, you must be on the `beta` channel, using at
-least Dart 3.4.0. Second, you will need to opt-in to the `native-assets` experiment,
+To get started with this plugin, you must be on the `master` channel.
+Second, you will need to opt-in to the `native-assets` experiment,
 using the `--enable-experiment=native-assets` flag whenever you run any commands
 using the `$ dart` command line tool.
 
