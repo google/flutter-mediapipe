@@ -1,13 +1,20 @@
 name: mediapipe_genai
 description: Provides access to MediaPipe's inference-based ODML tasks.
 version: 0.0.1
-publish_to: none
 
 repository: https://github.com/google/flutter-mediapipe
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 
+platforms:
+  android:
+  ios:
+  # linux:
+  macos:
+  # web:
+  # windows:
+
 environment:
-  sdk: ">=3.5.0-6.0.dev <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
@@ -18,8 +25,7 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   logging: ^1.2.0
-  mediapipe_core:
-    path: ../mediapipe-core
+  mediapipe_core: ^0.0.1
   native_assets_cli: ^0.3.0
   native_toolchain_c: ^0.3.0
   path: ^1.8.3

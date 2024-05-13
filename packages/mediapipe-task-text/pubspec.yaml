@@ -1,10 +1,17 @@
 name: mediapipe_text
 description: An implementation of the MediaPipe Tasks Text APIs.
 version: 0.0.1
-publish_to: none
 
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text
 issue_tracker: https://github.com/google/flutter-mediapipe/issues/
+
+platforms:
+  android:
+  ios:
+  # linux:
+  macos:
+  # web:
+  # windows:
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -17,8 +24,7 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   logging: ^1.2.0
-  mediapipe_core:
-    path: ../mediapipe-core
+  mediapipe_core: ^0.0.1
   native_assets_cli: ^0.3.0
   native_toolchain_c: ^0.3.0
   path: ^1.8.3
