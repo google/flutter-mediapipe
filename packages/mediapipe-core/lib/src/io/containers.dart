@@ -69,7 +69,7 @@ class Category extends BaseCategory {
       throw Exception('Could not determine value for Category.categoryName');
     }
     return _pointer!.ref.category_name.isNotNullPointer
-        ? _pointer!.ref.category_name.toDartString()
+        ? _pointer.ref.category_name.toDartString()
         : null;
   }
 
@@ -81,7 +81,7 @@ class Category extends BaseCategory {
       throw Exception('Could not determine value for Category.displayName');
     }
     return _pointer!.ref.display_name.isNotNullPointer
-        ? _pointer!.ref.display_name.toDartString()
+        ? _pointer.ref.display_name.toDartString()
         : null;
   }
 
@@ -131,7 +131,7 @@ class Classifications extends BaseClassifications {
     }
     return Category.fromNativeArray(
       _pointer!.ref.categories,
-      _pointer!.ref.categories_count,
+      _pointer.ref.categories_count,
     );
   }
 
@@ -155,7 +155,7 @@ class Classifications extends BaseClassifications {
       throw Exception('Could not determine value for Classifications.headName');
     }
     return _pointer!.ref.head_name.isNotNullPointer
-        ? _pointer!.ref.head_name.toDartString()
+        ? _pointer.ref.head_name.toDartString()
         : null;
   }
 
@@ -237,7 +237,7 @@ class Embedding extends BaseEmbedding {
       throw Exception('Could not determine value for Embedding.headName');
     }
     return _pointer!.ref.head_name.isNotNullPointer
-        ? _pointer!.ref.head_name.toDartString()
+        ? _pointer.ref.head_name.toDartString()
         : null;
   }
 
@@ -257,8 +257,8 @@ class Embedding extends BaseEmbedding {
       );
     }
     return _pointer!.ref.quantized_embedding.isNotNullPointer
-        ? _pointer!.ref.quantized_embedding
-            .toUint8List(_pointer!.ref.values_count)
+        ? _pointer.ref.quantized_embedding
+            .toUint8List(_pointer.ref.values_count)
         : null;
   }
 
@@ -275,8 +275,7 @@ class Embedding extends BaseEmbedding {
       throw Exception('Could not determine value for Embedding.floatEmbedding');
     }
     return _pointer!.ref.float_embedding.isNotNullPointer
-        ? _pointer!.ref.float_embedding
-            .toFloat32List(_pointer!.ref.values_count)
+        ? _pointer.ref.float_embedding.toFloat32List(_pointer.ref.values_count)
         : null;
   }
 

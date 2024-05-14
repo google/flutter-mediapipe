@@ -39,7 +39,7 @@ class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
     }
     return Classifications.fromNativeArray(
       _pointer!.ref.classifications,
-      _pointer!.ref.classifications_count,
+      _pointer.ref.classifications_count,
     );
   }
 
@@ -59,7 +59,7 @@ class TextClassifierResult extends BaseTextClassifierResult with IOTaskResult {
       // Only call the native finalizer if there actually is native memory,
       // because tests may verify that faked results are also closed and calling
       // this method in that scenario would cause a segfault.
-      bindings.text_classifier_close_result(_pointer!);
+      bindings.text_classifier_close_result(_pointer);
     }
     super.dispose();
   }

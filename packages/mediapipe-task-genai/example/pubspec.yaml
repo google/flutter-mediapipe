@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.5.0-6.0.dev <4.0.0"
+  sdk: ^3.4.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -41,8 +41,7 @@ dependencies:
   http: ^1.2.1
   intl: ^0.19.0
   logging: ^1.2.0
-  mediapipe_core:
-    path: ../../mediapipe-core
+  mediapipe_core: ^0.0.1
   mediapipe_genai:
     path: ../
   path: ^1.9.0

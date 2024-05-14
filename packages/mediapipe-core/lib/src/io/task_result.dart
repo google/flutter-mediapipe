@@ -38,7 +38,7 @@ abstract class ClassifierResult extends BaseClassifierResult with IOTaskResult {
     }
     return Classifications.fromNativeArray(
       _pointer!.ref.classifications,
-      _pointer!.ref.classifications_count,
+      _pointer.ref.classifications_count,
     );
   }
 }
@@ -63,7 +63,7 @@ abstract class TimestampedClassifierResult extends ClassifierResult
       );
     }
     return _pointer!.ref.has_timestamp_ms
-        ? Duration(milliseconds: _pointer!.ref.timestamp_ms)
+        ? Duration(milliseconds: _pointer.ref.timestamp_ms)
         : null;
   }
 

@@ -40,7 +40,7 @@ function ci_package () {
         # Run the actual tests if they exist.
         if [ -d "test" ]
         then
-            flutter test
+            dart --enable-experiment=native-assets test
         fi
 
         # Run any example tests if they exist

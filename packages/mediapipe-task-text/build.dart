@@ -85,6 +85,8 @@ Future<void> downloadAsset(String assetUrl, Uri destinationFile) async {
   final downloadUri = Uri.parse(assetUrl);
   final downloadedFile = File(destinationFile.toFilePath());
 
+  log('Downloading file from $downloadUri');
+
   final downloadResponse = await http.get(downloadUri);
   log('Download response: ${downloadResponse.statusCode}');
 

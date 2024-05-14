@@ -4,13 +4,13 @@
 
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mediapipe_core/src/io/test_utils.dart';
 import 'package:mediapipe_text/io.dart';
 import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
     as core_bindings;
 import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
+import 'package:test/test.dart';
 
 void main() {
   group('TextClassifierResult.native should', () {

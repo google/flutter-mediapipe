@@ -1,24 +1,29 @@
 name: mediapipe_text
-description: An implementation of the MediaPipe Tasks Text APIs.
+description: An implementation of MediaPipe text-based Tasks.
 version: 0.0.1
-publish_to: none
 
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text
 issue_tracker: https://github.com/google/flutter-mediapipe/issues/
 
+platforms:
+  android:
+  ios:
+  # linux:
+  macos:
+  # web:
+  # windows:
+
 environment:
-  sdk: ">=3.1.0 <4.0.0"
-  flutter: ">=1.17.0"
+  # For now, `native-assets` is a Flutter experiment, which can only be
+  # enabled on the `master` channel.
+  sdk: ^3.4.0
 
 dependencies:
   async: ^2.11.0
   ffi: ^2.1.0
-  flutter:
-    sdk: flutter
   http: ^1.1.0
   logging: ^1.2.0
-  mediapipe_core:
-    path: ../mediapipe-core
+  mediapipe_core: ^0.0.1
   native_assets_cli: ^0.3.0
   native_toolchain_c: ^0.3.0
   path: ^1.8.3
@@ -26,5 +31,4 @@ dependencies:
 dev_dependencies:
   ffigen: ^9.0.1
   flutter_lints: ^2.0.0
-  flutter_test:
-    sdk: flutter
+  test: ^1.21.0
