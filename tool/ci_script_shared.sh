@@ -37,6 +37,11 @@ function ci_package () {
         # Turn on the native-assets feature required by flutter-mediapipe
         flutter config --enable-native-assets
 
+        # Run the actual tests if they exist.
+        if [ -d "test" ]
+        then
+            dart --enable-experiment=native-assets test
+        fi
 
         # Run any example tests if they exist
         if [ -d "example/test" ]
@@ -57,35 +62,6 @@ function ci_package () {
 
             popd
         fi
-
-        # Run the actual tests if they exist.
-        if [ -d "test" ]
-        then
-            # dart --enable-experiment=native-assets test
-            flutter test
-        fi
-
-        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/live-run-build-log.txt" ]
-        then
-            echo "live-run-build-log.txt"
-            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/live-run-build-log.txt"; echo
-        fi
-
-        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/dryrun-build-log.txt" ]
-        then
-            echo "dryrun-build-log.txt"
-            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/dryrun-build-log.txt"; echo
-        fi
-
-        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/.dart_tool/native_assets.yaml" ]
-        then
-            echo "native_assets.yaml"
-            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/.dart_tool/native_assets.yaml"; echo
-        fi
-
-
-        echo "arm64_libtext.dylib meta info:"
-        find .dart_tool -name "arm64_libtext.dylib" | head -n 1 | xargs ls -l
 
         popd
     done

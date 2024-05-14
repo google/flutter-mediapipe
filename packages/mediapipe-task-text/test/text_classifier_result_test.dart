@@ -10,7 +10,7 @@ import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_
     as core_bindings;
 import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
     as bindings;
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TextClassifierResult.native should', () {
