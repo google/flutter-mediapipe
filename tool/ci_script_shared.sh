@@ -61,7 +61,8 @@ function ci_package () {
         # Run the actual tests if they exist.
         if [ -d "test" ]
         then
-            dart --enable-experiment=native-assets test
+            # dart --enable-experiment=native-assets test
+            flutter test
         fi
 
         if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/live-run-build-log.txt" ]
