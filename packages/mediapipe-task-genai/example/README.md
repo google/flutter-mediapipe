@@ -33,7 +33,7 @@ enum and then satisfy all analysis errors for exhaustiveness checks.
 Once you launch the UI, you will see a model selection screen outlining all the
 models declared in the `LlmModel` enum.
 
-<img height="600" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/empty-models.png" />
+<img height="600" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/empty-models.png" />
 
 > This shows the app in a state where Gemma 4b-CPU has been provided, but not
 > the other three.
