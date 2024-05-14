@@ -24,12 +24,12 @@ To get started with MediaPipe, please [see the documentation](https://developers
     </tr>
     <tr>
         <td>Inference</td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/readme-improvements/assets/no.png"/></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
+        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
     </tr>
 </table>
 
