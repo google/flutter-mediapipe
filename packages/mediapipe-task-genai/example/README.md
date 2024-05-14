@@ -76,7 +76,7 @@ to your phone's file system and provide an on-disk location via the same paramet
 
 ```sh
 $ adb push /path/on/computer/to/gemma-2b-it-gpu-int8.bin /path/on/phone/to/gemma-2b-it-gpu-int8.bin
-$ flutter run -d <android_device_id> /path/on/phone/to/gemma-2b-it-gpu-int8.bin
+$ flutter run -d <android_device_id> --dart-define=GEMMA_8B_GPU_URI=/path/on/phone/to/gemma-2b-it-gpu-int8.bin
 ```
 
 This pattern is useful for local testing, but of course is less suitable for
