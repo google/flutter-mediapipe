@@ -43,6 +43,24 @@ function ci_package () {
             dart --enable-experiment=native-assets test
         fi
 
+        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/live-run-build-log.txt" ]
+        then
+            echo "live-run-build-log.txt"
+            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/live-run-build-log.txt"
+        fi
+
+        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/dryrun-build-log.txt" ]
+        then
+            echo "dryrun-build-log.txt"
+            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/build/dryrun-build-log.txt"
+        fi
+
+        if [ -f "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/.dart_tool/native_assets.yaml" ]
+        then
+            echo "native_assets.yaml"
+            cat "/Users/runner/work/flutter-mediapipe/flutter-mediapipe/packages/mediapipe-task-text/.dart_tool/native_assets.yaml"
+        fi
+
         # Run any example tests if they exist
         if [ -d "example/test" ]
         then
