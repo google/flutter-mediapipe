@@ -26,7 +26,6 @@ void log(String msg) {
 
 Future<void> main(List<String> args) async {
   await build(args, (buildConfig, buildOutput) async {
-    // final buildConfig = await BuildConfig(args);
     logFile = File(
       path.joinAll([
         Directory.current.path, // root dir of app using `mediapipe-task-xyz`
@@ -46,7 +45,6 @@ Future<void> main(List<String> args) async {
           'Supported values are: ${sdkDownloadUrls.keys.toSet()}');
     }
 
-    // final buildOutput = BuildOutput();
     buildOutput.addDependencies([
       buildConfig.packageRoot.resolve('build.dart'),
       buildConfig.packageRoot.resolve('sdk_downloads.dart'),
