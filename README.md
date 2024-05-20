@@ -6,9 +6,9 @@ This repository will be home to the source code for the `mediapipe_vision`, `med
 
 | Package | Description | Version |
 | --- | --- | --- |
-| [mediapipe_core](packages/mediapipe-core/) | Shared logic and utilities required by other MediaPipe Task packages. | 0.0.1 |
-| [mediapipe_text](packages/mediapipe-task-text/) | An implementation of the MediaPipe Text APIs | 0.0.1 |
-| [mediapipe_genai](packages/mediapipe-task-genai/) | An implementation of the MediaPipe GenAI APIs | 0.0.1 |
+| [mediapipe_core](packages/mediapipe-core/) | Shared logic and utilities required by other MediaPipe Task packages. | ![pub package](https://img.shields.io/pub/v/mediapipe_core) |
+| [mediapipe_text](packages/mediapipe-task-text/) | An implementation of the MediaPipe Text APIs | ![pub package](https://img.shields.io/pub/v/mediapipe_text) |
+| [mediapipe_genai](packages/mediapipe-task-genai/) | An implementation of the MediaPipe GenAI APIs | ![pub package](https://img.shields.io/pub/v/mediapipe_genai) |
 
 ## Supported Tasks
 
@@ -27,42 +27,42 @@ This repository will be home to the source code for the `mediapipe_vision`, `med
     </tr>
     <tr>
         <td>Classification</td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center">✅</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
+        <td align="center">-</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
     </tr>
     <tr>
         <td>Embedding</td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center">✅</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
+        <td align="center">-</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
     </tr>
     <tr>
         <td>Language Detection</td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center">✅</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
+        <td align="center">-</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
     </tr>
     <tr>
         <td colspan="7" align="center"><strong>GenAI</strong></td>
     </tr>
     <tr>
         <td>Inference</td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/yes.png" /></td>
-        <td align="center"><img height="16" width="16" src="https://raw.githubusercontent.com/google/flutter-mediapipe/main/assets/no.png"/></td>
+        <td align="center">✅</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
+        <td align="center">-</td>
+        <td align="center">✅</td>
+        <td align="center">-</td>
     </tr>
     <tr>
         <td colspan="7" align="center"><strong>Audio</strong></td>
@@ -86,6 +86,8 @@ The Google Cloud Storage bucket in question only gives read-list access to a spe
 
 After this, create and merge a PR with the changes and then proceed to `Releasing to pub.dev`.
 
+<!--
 ### Releasing to pub.dev
 
 TODO
+-->
