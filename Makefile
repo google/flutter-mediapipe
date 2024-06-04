@@ -17,16 +17,6 @@ test: generate_core test_core generate_text test_text
 # Runs all tests for all packages
 test_only: test_core test_text
 
-# Rebuilds the MediaPipe task for macOS
-# Assumes google/mediapipe and google/flutter-mediapipe are siblings on the file system
-compile_text_classifier_macos_arm:
-	cd ../mediapipe && bazel build --linkopt -s --config darwin_arm64 --strip always --define MEDIAPIPE_DISABLE_GPU=1 mediapipe/tasks/c/text/text_classifier:libtext_classifier.dylib
-	cd ../mediapipe && sudo cp bazel-bin/mediapipe/tasks/c/text/text_classifier/libtext_classifier.dylib ../flutter-mediapipe/packages/mediapipe-task-text/example/assets/libtext_classifier_arm64.dylib
-
-compile_text_classifier_macos_x86:
-	cd ../mediapipe && bazel build --linkopt -s --config darwin_x86_64 --strip always --define MEDIAPIPE_DISABLE_GPU=1 mediapipe/tasks/c/text/text_classifier:libtext_classifier.dylib
-	cd ../mediapipe && sudo cp bazel-bin/mediapipe/tasks/c/text/text_classifier/libtext_classifier.dylib ../flutter-mediapipe/packages/mediapipe-task-text/example/assets/libtext_classifier_x64.dylib
-
 # Runs `sdks_finder` to update manifest files
 sdks:
 	dart tool/builder/bin/main.dart sdks

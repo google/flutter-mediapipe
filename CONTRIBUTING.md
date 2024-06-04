@@ -43,15 +43,175 @@ MediaPipe coding style.
 
 #### License
 
-Include a license at the top of new files.
+Include the Flutter license at the top of each new file you create.
 
-TODO: Examples
+## Developing the plugins
 
-#### Coding styles for various languages
+### Non-Dart code pre-work
 
-* [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
-* [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
-* [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
-* [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
-* [Google Shell Style Guide](https://google.github.io/styleguide/shell.xml)
-* [Google Objective-C Style Guide](https://google.github.io/styleguide/objcguide.html)
+> Note: For now, because `google/flutter-mediapipe` uses a Flutter experiment, and
+> Flutter experiments are only available on the `master` channel, development or
+> use of any plugins found in this repository is only possible on the `master`
+> channel. This restriction will be listed when the `native-assets` experiment
+> is added to the stable channel.
+
+As described above, switch to the `master` channel to work on or use the various
+`flutter-mediapipe` plugins:
+
+```sh
+$ flutter channel master
+$ flutter doctor
+```
+
+#### Checking out the `google/mediapipe` repository
+
+Some of `google/flutter-mediapipe` repository's tooling requires a local checkout
+of the `google/mediapipe` repository. By default, this tooling assumes both
+repositories are colocated within the same directory, but if you prefer to
+checkout the `google/mediapipe` repository elsewhere, then you can specify its
+absolute path on your machine via the `--source` or `-s` flag.
+
+#### Updating header files
+
+The reason a local checkout of `google/mediapipe` is required is that 
+`google/flutter-mediapipe` uses copies of header files found in the former. To
+sync the latest versions of all header files from `google/mediapipe` to
+`google/flutter-mediapipe`, run the `sync_headers` command found in the `tool`
+directory like so:
+
+```sh
+$ cd tool/builder && dart bin/main.dart headers
+```
+
+Alternatively, users of POSIX systems can use the shortcut found in the `Makefile`:
+
+```sh
+$ make headers
+```
+
+#### Adding new header files
+
+If you are adding new tasks, it is highly likely you will need to include new headers
+in the sweep executed by the `sync_headers` command. To do this, open
+`tool/builder/lib/sync_headers.dart` and review the directives collected in the 
+`headerPaths` variable. Add any new paths you need to collect, and then modify any
+relative import paths using the `relativeIncludes` method if necessary. It is also
+possible that `relativeIncludes` is not sufficient for all scenarios that the
+MediaPipe library will ever encounter, so do not hesitate to modify `relativeIncludes`
+or add a new function if necessary.
+
+Once you have modified this script, re-run the headers command to pull your new files
+out of `google/mediapipe` and into `google/flutter-mediapipe`. Pre-existing header
+files should not have any changes, but your new files should appear.
+
+If pre-existing header files do change because they have genuinely evolved within
+`google/mediapipe` since anyone else last ran the command, those changes should be
+resolved within their own PR.
+
+#### Running ffigen
+
+Any time the header file definitions change, `ffigen` must be re-run for that plugin.
+To do this, open the `ffigen.yaml` file within a given plugin and ensure list of
+blob paths at `headers/entry-points` includes any new header files you have added.
+Then, re-run `ffigen` like so:
+
+```sh
+$ cd packages/<pkg-name> && dart run ffigen --config=ffigen.yaml
+```
+
+Alternatively, users of POSIX systems can use the shortcut found in the `Makefile`:
+
+```sh
+$ make generate_<pkg-suffix>
+```
+
+Consult the `Makefile` for the appropriate command for your plugin, or add one
+if you are contributing the first header files for a given plugin.
+
+#### Updating the MediaPipe SDKs
+
+> Note: This task can only be run from a Googler's corp laptop with LIST read
+> permissions on the MediaPipe bucket in Google Cloud Storage. Non-Googlers should
+> not encounter a need to run the command, but if you believe you have, file an issue.
+
+Flutter collects MediaPipe artifacts and at build time and compiles them into your
+binary using the experimental new feature, named "Native Assets".
+
+> Note: As described above, this feature is only available on the `master` channel
+> (as experiments in general are only available on the `master` channel).
+
+The locations of the latest MediaPipe SDK binaries for each task are stored in the
+`sdk_downloads.dart` manifest files for each package. If you need to test against 
+different versions of an SDK but cannot run the command, you can manually edit the
+`sdk_downloads.dart` file, though these manual edits should not be committed.
+
+Finally, if you are a Googler and able to run the command, you can update each
+plugin's manifest file in one maneuver by running the command:
+
+```sh
+$ cd tool/builder && dart bin/main.dart sdks
+```
+
+Alternatively, users of POSIX systems can use the shortcut found in the `Makefile`:
+
+```sh
+$ make sdks
+```
+
+You do not need to take any manual steps to download or include an SDK at build-
+time, as the `$ flutter run|build` command handles that for you.
+
+### Write your Dart code
+
+It is finally time to write some Dart code!
+
+#### Adding a new task
+
+##### Adding the IO implementation
+
+If you are contributing a new task, you should have added new header files to the
+`sync_headers.dart` script and run the command yourself. This should have copied
+those specified headers out of `google/mediapipe` and into your git clone of 
+`google/flutter-mediapipe`. To begin implementing your new MediaPipe task, add
+a new folder to the appropriate `<pkg_name>/lib/src/interface/tasks/` directory and
+add apporpriate exports to the `tasks.dart` barrel file. Then add abstract
+definitions for any structs newly introduced to the repository through the new
+task you are adding. For reference on how these interface definitions should look,
+consult existing interface definitions from other tasks, or from `mediapipe_core`.
+
+Next, add concrete implementations for this task by adding an appropriate folder
+to the `<pkg_name>/lib/src/io/tasks/` directory and appropriate exports to the 
+`tasks.dart` barrel file. Your task's `Options` class will typically originate
+from Dart code, and so should know how to allocate itself into native memory and
+then later deallocate that memory. Most other classes originate within native
+memory itself and are returned to Dart by calling the task's methods. These classes
+should have `.native()` factory constructors which accept a pointer and hydrate
+private fields. They should also have direct constructors which accept pure Dart
+values and are only suitable for testing. Reference other task's implementations
+for inspiration on how to handle this memory management.
+
+##### Adding the web implementation
+
+Next, if your task has a web folder with contents, add a web implementation. As
+of this writing, no web implementations yet exist.
+
+##### Adding the sample
+
+New task implementations should include a new screen in the example app. Add a
+new element to the `PageView`'s children, then add your sample within that widget.
+For reference on how to initialize the MediaPipe SDK for your task, consult existing
+examples. It is recommended that you use this example as the primary way of proving
+to yourself that your new task implementation works as intended.
+
+#### Improving an existing task
+
+If you are improving an existing task, either by adding overlooked functionality
+or fixing a bug, your task should be much simpler than that of adding an entirely
+new task. If you get stuck, open a PR with everything you have accomplished and 
+request assistance from Craig Labenz.
+
+#### Adding tests
+
+All new PRs should include tests that demonstrate correctness. Integration tests
+are demonstrated by the `mediapipe_text` plugin, but as of this writing, are not
+implemented in the `mediapipe_genai` plugin.
