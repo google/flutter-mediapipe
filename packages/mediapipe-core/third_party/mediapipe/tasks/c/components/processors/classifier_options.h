@@ -22,35 +22,35 @@ limitations under the License.
 extern "C" {
 #endif
 
-// Classifier options for MediaPipe C classification Tasks.
-struct ClassifierOptions {
-  // The locale to use for display names specified through the TFLite Model
-  // Metadata, if any. Defaults to English.
-  const char* display_names_locale;
+  // Classifier options for MediaPipe C classification Tasks.
+  struct ClassifierOptions {
+    // The locale to use for display names specified through the TFLite Model
+    // Metadata, if any. Defaults to English.
+    const char* display_names_locale;
 
-  // The maximum number of top-scored classification results to return. If < 0,
-  // all available results will be returned. If 0, an invalid argument error is
-  // returned.
-  int max_results;
+    // The maximum number of top-scored classification results to return. If < 0,
+    // all available results will be returned. If 0, an invalid argument error is
+    // returned.
+    int max_results;
 
-  // Score threshold to override the one provided in the model metadata (if
-  // any). Results below this value are rejected.
-  float score_threshold;
+    // Score threshold to override the one provided in the model metadata (if
+    // any). Results below this value are rejected.
+    float score_threshold;
 
-  // The allowlist of category names. If non-empty, detection results whose
-  // category name is not in this set will be filtered out. Duplicate or unknown
-  // category names are ignored. Mutually exclusive with category_denylist.
-  const char** category_allowlist;
-  // The number of elements in the category allowlist.
-  uint32_t category_allowlist_count;
+    // The allowlist of category names. If non-empty, detection results whose
+    // category name is not in this set will be filtered out. Duplicate or unknown
+    // category names are ignored. Mutually exclusive with category_denylist.
+    const char** category_allowlist;
+    // The number of elements in the category allowlist.
+    uint32_t category_allowlist_count;
 
-  // The denylist of category names. If non-empty, detection results whose
-  // category name is in this set will be filtered out. Duplicate or unknown
-  // category names are ignored. Mutually exclusive with category_allowlist.
-  const char** category_denylist;
-  // The number of elements in the category denylist.
-  uint32_t category_denylist_count;
-};
+    // The denylist of category names. If non-empty, detection results whose
+    // category name is in this set will be filtered out. Duplicate or unknown
+    // category names are ignored. Mutually exclusive with category_allowlist.
+    const char** category_denylist;
+    // The number of elements in the category denylist.
+    uint32_t category_denylist_count;
+  };
 
 #ifdef __cplusplus
 }  // extern C
