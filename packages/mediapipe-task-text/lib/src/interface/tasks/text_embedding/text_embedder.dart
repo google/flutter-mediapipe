@@ -1,0 +1,25 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:mediapipe_core/interface.dart';
+import 'package:mediapipe_core/mediapipe_core.dart';
+
+/// {@template TextEmbedder}
+/// Utility to convert text into an embedding suitable for other MediaPipe tasks.
+/// {@endtemplate}
+abstract class BaseTextEmbedder {
+  /// {@template TextEmbedder.embed}
+  /// Sends a [String] value to MediaPipe for conversion into an [Embedding].
+  /// {@endtemplate}
+  Future<BaseEmbedderResult> embed(String text);
+
+  /// {@template TextEmbedder.cosineSimilarity}
+  /// Compares the similarity between two [Embedding] values. Identical
+  /// embeddings will yield a similarity value of 1.0.
+  /// {@endtemplate}
+  Future<double> cosineSimilarity(Embedding a, Embedding b);
+
+  /// Cleans up all resources.
+  void dispose();
+}

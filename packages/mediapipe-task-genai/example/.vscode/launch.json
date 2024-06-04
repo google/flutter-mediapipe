@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter",
+            "request": "launch",
+            "type": "dart",
+            "env": {
+                "GEMMA_4B_CPU_URI": "https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int4.bin",
+                "GEMMA_4B_GPU_URI": "https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int4.bin",
+                "GEMMA_8B_CPU_URI": "https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-cpu-int8.bin",
+                "GEMMA_8B_GPU_URI": "https://storage.googleapis.com/random-storage-asdf/gemma/gemma-2b-it-gpu-int8.bin",
+            },
+            "toolArgs": []
+        }
+    ]
+}
