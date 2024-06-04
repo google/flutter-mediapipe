@@ -134,7 +134,7 @@ if you are contributing the first header files for a given plugin.
 > permissions on the MediaPipe bucket in Google Cloud Storage. Non-Googlers should
 > not encounter a need to run the command, but if you believe you have, file an issue.
 
-Flutter collects MediaPipe artifacts and at build time and compiles them into your
+Flutter collects MediaPipe artifacts at build time and compiles them into your
 binary using the experimental new feature, named "Native Assets".
 
 > Note: As described above, this feature is only available on the `master` channel
@@ -185,10 +185,10 @@ to the `<pkg_name>/lib/src/io/tasks/` directory and appropriate exports to the
 from Dart code, and so should know how to allocate itself into native memory and
 then later deallocate that memory. Most other classes originate within native
 memory itself and are returned to Dart by calling the task's methods. These classes
-should have `.native()` factory constructors which accept a pointer and hydrate
-private fields. They should also have direct constructors which accept pure Dart
-values and are only suitable for testing. Reference other task's implementations
-for inspiration on how to handle this memory management.
+should have `.native()` factory constructors which accept a pointer. They should
+also have direct constructors which accept pure Dart values, set private fields,
+and are only suitable for testing. Reference other tasks' implementations for
+inspiration on how to handle this memory management.
 
 ##### Adding the web implementation
 
@@ -198,20 +198,21 @@ of this writing, no web implementations yet exist.
 ##### Adding the sample
 
 New task implementations should include a new screen in the example app. Add a
-new element to the `PageView`'s children, then add your sample within that widget.
-For reference on how to initialize the MediaPipe SDK for your task, consult existing
-examples. It is recommended that you use this example as the primary way of proving
-to yourself that your new task implementation works as intended.
+new element to the `PageView` widget's children, then add your sample within that
+new widget. For reference on how to initialize the MediaPipe SDK for your task,
+consult existing examples. It is recommended that you use this example as the
+primary way of proving to yourself that your new task implementation works as intended
+(along with tests, of course).
 
 #### Improving an existing task
 
 If you are improving an existing task, either by adding overlooked functionality
-or fixing a bug, your task should be much simpler than that of adding an entirely
+or fixing a bug, your job should be much simpler than that of adding an entirely
 new task. If you get stuck, open a PR with everything you have accomplished and 
 request assistance from Craig Labenz.
 
 #### Adding tests
 
 All new PRs should include tests that demonstrate correctness. Integration tests
-are demonstrated by the `mediapipe_text` plugin, but as of this writing, are not
+exist in the `mediapipe_text` plugin, but as of this writing, are not yet
 implemented in the `mediapipe_genai` plugin.
