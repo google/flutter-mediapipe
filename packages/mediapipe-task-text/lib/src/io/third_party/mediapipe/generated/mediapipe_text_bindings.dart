@@ -20,7 +20,7 @@ import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_
 
 @ffi.Native<
     ffi.Pointer<ffi.Void> Function(ffi.Pointer<LanguageDetectorOptions>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_create')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external ffi.Pointer<ffi.Void> language_detector_create(
   ffi.Pointer<LanguageDetectorOptions> options,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -31,7 +31,7 @@ external ffi.Pointer<ffi.Void> language_detector_create(
         ffi.Pointer<ffi.Void>,
         ffi.Pointer<ffi.Char>,
         ffi.Pointer<LanguageDetectorResult>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_detect')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int language_detector_detect(
   ffi.Pointer<ffi.Void> detector,
   ffi.Pointer<ffi.Char> utf8_str,
@@ -39,15 +39,14 @@ external int language_detector_detect(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<LanguageDetectorResult>)>(
-    symbol: 'language_detector_close_result')
+@ffi.Native<ffi.Void Function(ffi.Pointer<LanguageDetectorResult>)>()
 external void language_detector_close_result(
   ffi.Pointer<LanguageDetectorResult> result,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'language_detector_close')
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int language_detector_close(
   ffi.Pointer<ffi.Void> detector,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -55,7 +54,7 @@ external int language_detector_close(
 
 @ffi.Native<
     ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextClassifierOptions>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_create')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external ffi.Pointer<ffi.Void> text_classifier_create(
   ffi.Pointer<TextClassifierOptions> options,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
@@ -66,7 +65,7 @@ external ffi.Pointer<ffi.Void> text_classifier_create(
         ffi.Pointer<ffi.Void>,
         ffi.Pointer<ffi.Char>,
         ffi.Pointer<TextClassifierResult>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_classify')
+        ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int text_classifier_classify(
   ffi.Pointer<ffi.Void> classifier,
   ffi.Pointer<ffi.Char> utf8_str,
@@ -74,34 +73,30 @@ external int text_classifier_classify(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<TextClassifierResult>)>(
-    symbol: 'text_classifier_close_result')
+@ffi.Native<ffi.Void Function(ffi.Pointer<TextClassifierResult>)>()
 external void text_classifier_close_result(
   ffi.Pointer<TextClassifierResult> result,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_classifier_close')
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int text_classifier_close(
   ffi.Pointer<ffi.Void> classifier,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 @ffi.Native<
-    ffi.Pointer<ffi.Void> Function(ffi.Pointer<TextEmbedderOptions>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_create')
+    ffi.Pointer<ffi.Void> Function(
+        ffi.Pointer<TextEmbedderOptions>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external ffi.Pointer<ffi.Void> text_embedder_create(
   ffi.Pointer<TextEmbedderOptions> options,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 @ffi.Native<
-    ffi.Int Function(
-        ffi.Pointer<ffi.Void>,
-        ffi.Pointer<ffi.Char>,
-        ffi.Pointer<TextEmbedderResult>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_embed')
+    ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Char>,
+        ffi.Pointer<TextEmbedderResult>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int text_embedder_embed(
   ffi.Pointer<ffi.Void> embedder,
   ffi.Pointer<ffi.Char> utf8_str,
@@ -109,27 +104,22 @@ external int text_embedder_embed(
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<TextEmbedderResult>)>(
-    symbol: 'text_embedder_close_result')
+@ffi.Native<ffi.Void Function(ffi.Pointer<TextEmbedderResult>)>()
 external void text_embedder_close_result(
   ffi.Pointer<TextEmbedderResult> result,
 );
 
 @ffi.Native<
-    ffi.Int Function(ffi.Pointer<ffi.Void>,
-        ffi.Pointer<ffi.Pointer<ffi.Char>>)>(symbol: 'text_embedder_close')
+    ffi.Int Function(
+        ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int text_embedder_close(
   ffi.Pointer<ffi.Void> embedder,
   ffi.Pointer<ffi.Pointer<ffi.Char>> error_msg,
 );
 
 @ffi.Native<
-        ffi.Int Function(
-            ffi.Pointer<imp1.Embedding>,
-            ffi.Pointer<imp1.Embedding>,
-            ffi.Pointer<ffi.Double>,
-            ffi.Pointer<ffi.Pointer<ffi.Char>>)>(
-    symbol: 'text_embedder_cosine_similarity')
+    ffi.Int Function(ffi.Pointer<imp1.Embedding>, ffi.Pointer<imp1.Embedding>,
+        ffi.Pointer<ffi.Double>, ffi.Pointer<ffi.Pointer<ffi.Char>>)>()
 external int text_embedder_cosine_similarity(
   ffi.Pointer<imp1.Embedding> u,
   ffi.Pointer<imp1.Embedding> v,
@@ -174,6 +164,8 @@ final class TextEmbedderOptions extends ffi.Struct {
 typedef TextEmbedderResult = imp1.EmbeddingResult;
 
 const int __WORDSIZE = 64;
+
+const int __has_safe_buffers = 1;
 
 const int __DARWIN_ONLY_64_BIT_INO_T = 1;
 

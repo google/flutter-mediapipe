@@ -20,12 +20,12 @@ environment:
 
 dependencies:
   async: ^2.11.0
-  ffi: ^2.1.0
+  ffi: ^2.1.2
   http: ^1.1.0
   logging: ^1.2.0
   mediapipe_core: ^0.0.1
-  native_assets_cli: ^0.5.4
-  native_toolchain_c: ^0.4.1
+  native_assets_cli: ^0.6.0
+  native_toolchain_c: ^0.4.2
   path: ^1.8.3
 
 dev_dependencies:

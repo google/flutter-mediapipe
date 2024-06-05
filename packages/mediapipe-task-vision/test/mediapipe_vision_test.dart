@@ -2,6 +2,4 @@
 
 // import 'package:mediapipe_vision/mediapipe_vision.dart';
 
-void main() {
-  // TODO(craiglabenz): Write tests
-}
+void main() {}
