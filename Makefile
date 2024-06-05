@@ -28,6 +28,9 @@ analyze:
 
 # Core ---
 
+get_core:
+	cd packages/mediapipe-core && dart pub get
+
 # Runs `ffigen` for `mediapipe_core`
 generate_core:
 	cd packages/mediapipe-core && dart run ffigen --config=ffigen.yaml
@@ -36,6 +39,8 @@ generate_core:
 test_core:
 	cd packages/mediapipe-core && dart test
 
+core: get_core generate_core test_core
+
 # Text ---
 
 # Runs `ffigen` for `mediapipe_text`
@@ -43,12 +48,19 @@ generate_text:
 	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets run ffigen --config=ffigen.yaml
 
 # Runs all text tests
+
+get_text:
+	cd packages/mediapipe-task-text && dart pub get
+	cd packages/mediapipe-task-text/example && flutter pub get
+
 test_text:
 	cd packages/mediapipe-task-text && dart --enable-experiment=native-assets test
 	cd packages/mediapipe-task-text/example && flutter test
 
 example_text:
 	cd packages/mediapipe-task-text/example && flutter run -d macos
+
+text: get_text generate_text test_text
 
 # GenAI ---
 generate_genai:

@@ -23,43 +23,43 @@ limitations under the License.
 extern "C" {
 #endif
 
-  // Defines classification results for a given classifier head.
-  struct Classifications {
-    // The array of predicted categories, usually sorted by descending scores,
-    // e.g. from high to low probability.
-    struct Category* categories;
-    // The number of elements in the categories array.
-    uint32_t categories_count;
+// Defines classification results for a given classifier head.
+struct Classifications {
+  // The array of predicted categories, usually sorted by descending scores,
+  // e.g. from high to low probability.
+  struct Category* categories;
+  // The number of elements in the categories array.
+  uint32_t categories_count;
 
-    // The index of the classifier head (i.e. output tensor) these categories
-    // refer to. This is useful for multi-head models.
-    int head_index;
+  // The index of the classifier head (i.e. output tensor) these categories
+  // refer to. This is useful for multi-head models.
+  int head_index;
 
-    // The optional name of the classifier head, as provided in the TFLite Model
-    // Metadata [1] if present. This is useful for multi-head models.
-    //
-    // [1]: https://www.tensorflow.org/lite/convert/metadata
-    char* head_name;
-  };
+  // The optional name of the classifier head, as provided in the TFLite Model
+  // Metadata [1] if present. This is useful for multi-head models.
+  //
+  // [1]: https://www.tensorflow.org/lite/convert/metadata
+  char* head_name;
+};
 
-  // Defines classification results of a model.
-  struct ClassificationResult {
-    // The classification results for each head of the model.
-    struct Classifications* classifications;
-    // The number of classifications in the classifications array.
-    uint32_t classifications_count;
+// Defines classification results of a model.
+struct ClassificationResult {
+  // The classification results for each head of the model.
+  struct Classifications* classifications;
+  // The number of classifications in the classifications array.
+  uint32_t classifications_count;
 
-    // The optional timestamp (in milliseconds) of the start of the chunk of data
-    // corresponding to these results.
-    //
-    // This is only used for classification on time series (e.g. audio
-    // classification). In these use cases, the amount of data to process might
-    // exceed the maximum size that the model can process: to solve this, the
-    // input data is split into multiple chunks starting at different timestamps.
-    int64_t timestamp_ms;
-    // Specifies whether the timestamp contains a valid value.
-    bool has_timestamp_ms;
-  };
+  // The optional timestamp (in milliseconds) of the start of the chunk of data
+  // corresponding to these results.
+  //
+  // This is only used for classification on time series (e.g. audio
+  // classification). In these use cases, the amount of data to process might
+  // exceed the maximum size that the model can process: to solve this, the
+  // input data is split into multiple chunks starting at different timestamps.
+  int64_t timestamp_ms;
+  // Specifies whether the timestamp contains a valid value.
+  bool has_timestamp_ms;
+};
 
 #ifdef __cplusplus
 }  // extern C
