@@ -227,6 +227,8 @@ const int false1 = 0;
 
 const int __WORDSIZE = 64;
 
+const int __has_safe_buffers = 1;
+
 const int __DARWIN_ONLY_64_BIT_INO_T = 1;
 
 const int __DARWIN_ONLY_UNIX_CONFORMANCE = 1;

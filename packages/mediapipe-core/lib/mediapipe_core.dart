@@ -7,6 +7,7 @@
 library mediapipe_core;
 
 export 'src/extensions.dart';
+export 'src/ffi_utils.dart';
 export 'src/interface/containers.dart' show EmbeddingType;
 export 'universal_mediapipe_core.dart'
     if (dart.library.html) 'src/web/mediapipe_core.dart'
