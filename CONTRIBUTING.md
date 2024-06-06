@@ -61,21 +61,22 @@ As described above, switch to the `master` channel to work on or use the various
 ```sh
 $ flutter channel master
 $ flutter doctor
+$ flutter pub get
 ```
 
-#### Checking out the `google/mediapipe` repository
+#### Checking out the `google-ai-edge/mediapipe` repository
 
 Some of `google/flutter-mediapipe` repository's tooling requires a local checkout
-of the `google/mediapipe` repository. By default, this tooling assumes both
+of the `google-ai-edge/mediapipe` repository. By default, this tooling assumes both
 repositories are colocated within the same directory, but if you prefer to
-checkout the `google/mediapipe` repository elsewhere, then you can specify its
+checkout the `google-ai-edge/mediapipe` repository elsewhere, then you can specify its
 absolute path on your machine via the `--source` or `-s` flag.
 
 #### Updating header files
 
-The reason a local checkout of `google/mediapipe` is required is that 
+The reason a local checkout of `google-ai-edge/mediapipe` is required is that
 `google/flutter-mediapipe` uses copies of header files found in the former. To
-sync the latest versions of all header files from `google/mediapipe` to
+sync the latest versions of all header files from `google-ai-edge/mediapipe` to
 `google/flutter-mediapipe`, run the `sync_headers` command found in the `tool`
 directory like so:
 
@@ -101,11 +102,11 @@ MediaPipe library will ever encounter, so do not hesitate to modify `relativeInc
 or add a new function if necessary.
 
 Once you have modified this script, re-run the headers command to pull your new files
-out of `google/mediapipe` and into `google/flutter-mediapipe`. Pre-existing header
+out of `google-ai-edge/mediapipe` and into `google/flutter-mediapipe`. Pre-existing header
 files should not have any changes, but your new files should appear.
 
 If pre-existing header files do change because they have genuinely evolved within
-`google/mediapipe` since anyone else last ran the command, those changes should be
+`google-ai-edge/mediapipe` since anyone else last ran the command, those changes should be
 resolved within their own PR.
 
 #### Running ffigen
@@ -171,7 +172,7 @@ It is finally time to write some Dart code!
 
 If you are contributing a new task, you should have added new header files to the
 `sync_headers.dart` script and run the command yourself. This should have copied
-those specified headers out of `google/mediapipe` and into your git clone of 
+those specified headers out of `google-ai-edge/mediapipe` and into your git clone of
 `google/flutter-mediapipe`. To begin implementing your new MediaPipe task, add
 a new folder to the appropriate `<pkg_name>/lib/src/interface/tasks/` directory and
 add apporpriate exports to the `tasks.dart` barrel file. Then add abstract
