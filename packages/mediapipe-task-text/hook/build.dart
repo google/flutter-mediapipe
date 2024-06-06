@@ -53,7 +53,6 @@ Future<void> main(List<String> args) async {
     final downloadFileLocation = buildConfig.outputDirectory.resolve(
       buildConfig.targetOS.dylibFileName('text'),
     );
-    log('downloadFileLocation: $downloadFileLocation');
     buildOutput.addAsset(
       NativeCodeAsset(
         package: 'mediapipe_text',
@@ -66,6 +65,7 @@ Future<void> main(List<String> args) async {
       ),
     );
     if (!buildConfig.dryRun) {
+      log('downloadFileLocation: $downloadFileLocation');
       final arch = buildConfig.targetArchitecture.toString();
       final assetUrl = sdkDownloadUrls[targetOS]!['libtext']![arch]!;
       downloadAsset(assetUrl, downloadFileLocation);
