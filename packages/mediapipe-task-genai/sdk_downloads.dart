@@ -5,7 +5,7 @@ final Map<String, Map<String, Map<String, String>>> sdkDownloadUrls = {
   'android': {
     'libllm_inference_engine': {
       'arm64':
-          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/gcp_ubuntu_flutter/release/40/20240419-150307/android_arm64/libllm_inference_engine.so'
+          'https://storage.googleapis.com/mediapipe-nightly-public/prod/mediapipe/gcp_ubuntu_flutter/release/45/20240513-171535/android_arm64/libllm_inference_engine.so'
     }
   },
   'macos': {
