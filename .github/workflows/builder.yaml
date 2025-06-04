@@ -5,11 +5,9 @@ permissions: read-all
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * 0' # weekly
+    branches: [main]
 
 jobs:
   build:

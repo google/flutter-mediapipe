@@ -5,11 +5,9 @@ permissions: read-all
 
 on:
   pull_request:
-    branches: [main]
+    branches: []
   push:
     branches: [main, ffi-wrapper, ffi-wrapper-text-pkg]
-  schedule:
-    - cron: "0 0 * * *" # Every day at midnight
 
 defaults:
   run:
