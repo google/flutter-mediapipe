@@ -97,9 +97,9 @@ flutter:
 
 These models can be downloaded at the following locations:
 
-* [`bert_classifier.tflife`](https://storage.googleapis.com/mediapipe-models/text_classifier/bert_classifier/float32/latest/bert_classifier.tflite) (for Text Classification)
-* [`language_detector.tflite`](language_detector/language_detector/float32/latest/language_detector.tflite) (for Language Detection)
-* [`universal_sentence_encoder.tflife`](text_embedder/universal_sentence_encoder/float32/latest/universal_sentence_encoder.tflite) (for Text Embedding)
+* [`bert_classifier.tflite`](https://storage.googleapis.com/mediapipe-models/text_classifier/bert_classifier/float32/latest/bert_classifier.tflite) (for Text Classification)
+* [`language_detector.tflite`](https://storage.googleapis.com/mediapipe-models/language_detector/language_detector/float32/latest/language_detector.tflite) (for Language Detection)
+* [`universal_sentence_encoder.tflite`](https://storage.googleapis.com/mediapipe-models/text_embedder/universal_sentence_encoder/float32/latest/universal_sentence_encoder.tflite) (for Text Embedding)
 
 ### Initialize your task worker
 
