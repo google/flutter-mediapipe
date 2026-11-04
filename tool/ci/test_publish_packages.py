@@ -136,6 +136,9 @@ class PublishPackagesTest(unittest.TestCase):
         text = WORKFLOW.read_text(encoding='utf-8')
         self.assertIn('id-token: write', text)
         self.assertIn('needs: [validate, archives]', text)
+        self.assertIn('workflow_dispatch:', text)
+        self.assertNotRegex(text, r'(?m)^\s*push:')
+        self.assertNotRegex(text, r'(?m)^\s*pull_request:')
         for ref in re.findall(r'uses:\s*(\S+)', text):
             if not ref.startswith('./'):
                 self.assertRegex(ref, r'^[^@]+@[0-9a-f]{40}$')
