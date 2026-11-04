@@ -50,7 +50,9 @@ jobs:
       # warnings. Nothing is published
       # (packages/mediapipe-core/tool/publish_check.py).
       - name: Check every package publishes cleanly
-        run: python3 -B packages/mediapipe-core/tool/publish_check.py
+        run: |
+          python3 -B -m unittest tool/ci/test_publish_packages.py
+          python3 -B packages/mediapipe-core/tool/publish_check.py
       # Every public library must match its reviewed snapshot, and each
       # family's API must be identical on native and web and follow the shared
       # conventions (tool/api_parity/README.md).
