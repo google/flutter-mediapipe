@@ -3,7 +3,8 @@
 Google published `mediapipe_core` 0.0.1 in May 2024 as the shared containers
 and FFI plumbing of its `mediapipe_text` 0.0.1. This package's first release,
 0.1.0, replaces it. Apps now get core through a family's library
-(`mediapipe_vision.dart`, `mediapipe_text.dart` or `mediapipe_audio.dart`),
+(`mediapipe_vision.dart`, `mediapipe_text.dart`, `mediapipe_audio.dart`,
+`mediapipe_decision.dart` or `mediapipe_retrieval.dart`),
 which re-exports `mediapipe_core.dart`; plugins and family packages use
 `platform_interface.dart`.
 
