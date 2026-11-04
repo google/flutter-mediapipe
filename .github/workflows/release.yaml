@@ -7,18 +7,16 @@ permissions:
 # `mediapipe_decision`, `mediapipe_retrieval`, `mediapipe_text`, `mediapipe_vision`)
 # to pub.dev using GitHub Actions OIDC automated publishing (`id-token: write`).
 #
-# Triggered by pushing a version tag `v<version>` (matching pub.dev's `v{{version}}`
-# tag pattern) or by manual dispatch (`dry_run: true` validates without uploading).
+# Triggered manually via `workflow_dispatch` only (never automatically on
+# commits, pull requests, or tag pushes). To publish a release, create and push
+# tag `v<version>` and dispatch this workflow on that tag with `dry_run: false`.
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]*'
   workflow_dispatch:
     inputs:
       dry_run:
         description: Validate everything and run pub publish --dry-run without uploading to pub.dev
         type: boolean
-        default: false
+        default: true
       packages:
         description: Packages to publish (folder or pubspec names, comma- or space-separated, or all)
         type: string
