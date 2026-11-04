@@ -86,8 +86,8 @@ answers in App Store Connect must describe.
 - Google's MediaPipe runtimes: Apache-2.0. `mediapipe_core` carries the
   `LICENSE` and `NOTICE` Google ships with the libraries it pins
   (`third_party/`, identical for every family), which apps redistribute with
-  the runtime. The vision package also keeps OpenCV's
-  carotene notices (`third_party/OPENCV_CAROTENE_NOTICES`) until Google
+  the runtime, and every package keeps a copy of that `NOTICE` at its root.
+  The vision package also keeps OpenCV's carotene notices (`third_party/OPENCV_CAROTENE_NOTICES`) until Google
   confirms whether its libraries need them.
 - Google's MediaPipe task models (the pins in each family's `models.dart`):
   Apache-2.0, per Google's model cards, except the Gemma-based text models.

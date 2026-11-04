@@ -26,7 +26,8 @@ drawing topology, keeping every edge and its order.
 
 Google's `LICENSE` and `NOTICE` for the bundled library are the ones its
 October 9, 2026 build ships with every family, which `mediapipe_core` carries
-once (`mediapipe_core/third_party/`).
+once (`mediapipe_core/third_party/`). This package keeps a copy of that
+`NOTICE` at its root.
 `OPENCV_CAROTENE_NOTICES` holds OpenCV 4.12.0's hal/carotene notices, which the
 package's former source-built runtime needed; it stays until Google confirms
 the notices its own libraries need.
