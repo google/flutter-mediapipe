@@ -91,8 +91,8 @@ The first release is 0.1.0 of `mediapipe_core`, `mediapipe_vision`,
 `mediapipe_text`, `mediapipe_audio`, `mediapipe_decision` and
 `mediapipe_retrieval`, published together.
 
-On pub.dev, `mediapipe_core` and `mediapipe_text` (and the removed
-`mediapipe_genai`) are Google's 0.0.1 previews from May 2024, published from
+On pub.dev, `mediapipe_core` and `mediapipe_text` are Google's 0.0.1 previews
+from May 2024, published from
 [google/flutter-mediapipe](https://github.com/google/flutter-mediapipe).
 Only their uploaders can publish new versions of these names, and the next
 version must be above 0.0.1. Under Dart's rules for versions before 1.0, the minor version
@@ -115,10 +115,10 @@ family depends on `mediapipe_core: ^0.1.0`, as its published copy must. A
 checked-in `pubspec_overrides.yaml` beside each family pubspec (and in the
 sample, the benchmarks and every generated consumer app) points
 `mediapipe_core` at the sibling package instead, so a checkout builds against
-itself; pub leaves that file out of the published archive. Before publishing,
-run `publish_check.py`, `check_archives.py` and the bundled-model check
-above, then publish
-`mediapipe_core` first and the five families after it, never with `--force`.
+itself; pub leaves that file out of the published archive. Before publishing, run `publish_check.py`, `check_archives.py` and the
+bundled-model check above, then publish `mediapipe_core` first and the five
+families after it (`.github/workflows/release.yaml` runs those checks and
+`tool/ci/publish_packages.py` when dispatched on tag `v<version>`).
 
 ## How to add a task
 

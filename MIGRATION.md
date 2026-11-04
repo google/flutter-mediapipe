@@ -9,11 +9,9 @@ and `mediapipe_retrieval`, is the first under these names since Google's
   [the text migration guide](packages/mediapipe-task-text/MIGRATION.md).
 - **`mediapipe_core` 0.0.1:** apps rarely used it directly; see
   [the core migration guide](packages/mediapipe-core/MIGRATION.md).
-- **`mediapipe_genai` 0.0.1:** has no successor here. This repository removed
-  the package, which never moved past Google's 2024 runtime.
 
-`mediapipe_vision` and `mediapipe_audio` are new packages with nothing to
-migrate from.
+`mediapipe_vision`, `mediapipe_audio`, `mediapipe_decision` and
+`mediapipe_retrieval` are new packages with nothing to migrate from.
 
 ## From Google's `mediapipe_text` 0.0.1
 
