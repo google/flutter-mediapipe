@@ -1,0 +1,9 @@
+abstract final class TextModels
+  new TextModels()
+  static DownloadAsset bertClassifier
+  static DownloadAsset embeddingGemma
+  static DownloadAsset languageDetector
+  static DownloadAsset proofreader
+  static DownloadAsset summarizer
+  static DownloadAsset universalSentenceEncoder
+  static Map<String, DownloadAsset> byName

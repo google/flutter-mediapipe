@@ -1,0 +1,277 @@
+name: Android emulator CPU tasks
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # nightly-compare.yaml: once on the pinned build, once on a nightly.
+  workflow_call:
+    inputs:
+      side:
+        description: baseline (the pins on this ref) or nightly (the run's nightly-pin artifact).
+        type: string
+        required: true
+      scope:
+        description: daily runs nightly-compare.yaml's daily set; full runs every job.
+        type: string
+        default: full
+
+# A newer push on the same branch supersedes the queued matrix; the hosted
+# macOS pool is small enough that stale runs otherwise starve the latest one.
+concurrency:
+  group: android-emulator-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  cancel-in-progress: true
+
+# nightly-compare.yaml calls this workflow twice in one run, on the pinned
+# build and on Google's nightly; the suffix keeps the two calls' artifacts
+# apart. It is empty in every other run.
+env:
+  ARTIFACT_SUFFIX: ${{ inputs.side && format('-{0}', inputs.side) || '' }}
+
+jobs:
+  # Every family through Google's Android libraries in one app: the vision
+  # tasks, text and audio, EmbeddingGemma, Proofreader and Summarizer, Decision
+  # Maker and the retrieval tasks, so this job needs no source build. The
+  # emulator runs them on the CPU only; see gallery/tool/test_android_sdk_tasks.sh.
+  sdk-tasks:
+    name: Every phone suite / official Android SDK on an x64 emulator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: ffi
+          modern-model-cache: 'true'
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      # Google's answers for its Android libraries on the x86_64 emulator: its
+      # Linux x86_64 wheel of the same release on this runner.
+      - name: Google's references for EmbeddingGemma, Proofreader and Summarizer
+        run: |
+          cd packages/mediapipe-task-text
+          dart pub get
+          dart tool/download_models.dart embedding_gemma proofreader summarizer
+          cd ../..
+          python3 -B packages/mediapipe-task-text/tool/prepare_modern_text_reference.py \
+            --venv build/ci-tmp/official-python \
+            --output-dir build/modern-text-reference
+      # The same two commands a clean checkout runs, so CI builds what a
+      # contributor with only Dart, Flutter and the Android SDK builds; the
+      # generative text tasks are opt-in, bundled here for their suite.
+      - name: Prepare the gallery with the phone suites' tasks
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target android/x64 \
+            --tasks audio_classifier,face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,language_detector,object_detector,pose_landmarker,text_classifier,text_embedder,embedding_gemma,text_proofreader,text_summarizer,universal_embedder,semantic_retriever,decision_maker \
+            --modern-text-reference build/modern-text-reference
+          cd gallery && flutter pub get
+      - name: Enable Android emulator hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      # The emulator action downloads the system image itself and gives up on
+      # the first corrupt archive ("Error on ZipFile unknown archive",
+      # 2026-10-22), so install it here, retried, and the action finds it.
+      - name: Download the Android 35 system image
+        run: |
+          image='system-images;android-35;google_apis;x86_64'
+          for attempt in 1 2 3 4; do
+            sdkmanager --install "$image" && exit 0
+            echo "Attempt $attempt of installing $image failed." >&2
+            sleep 20
+          done
+          exit 1
+      # Gradle downloads a missing NDK or CMake during the debug and release
+      # builds and gave up on one corrupt archive (2026-10-22), so install
+      # them here, retried.
+      - uses: ./.github/actions/android-ndk
+      - name: Official references, pixel formats, rotation, VIDEO, camera and every live tile
+        id: sdk
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          # A phone profile, as flutter_litert's emulator job uses, with 4 GB:
+          # every task's models load into one app.
+          profile: pixel_6
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back emulated
+          script: bash gallery/tool/test_android_sdk_tasks.sh emulator-5554
+      - name: Record android CPU task coverage (android-sdk-emulator-text-audio)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-sdk-emulator-text-audio
+          platform: android
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder
+          outcome: ${{ steps.sdk.outcome }}
+      # The suite writes its outcome, since the emulator step runs it with the rest.
+      - name: Read the modern text suite's outcome
+        if: always()
+        id: modern_text
+        run: echo "outcome=$(cat build/coverage-outcomes/android-modern-text 2>/dev/null || echo failure)" >> "$GITHUB_OUTPUT"
+      - name: Record android CPU modern text coverage (android-sdk-emulator-modern-text)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-sdk-emulator-modern-text
+          platform: android
+          delegate: cpu
+          tasks: embedding_gemma,text_proofreader,text_summarizer
+          outcome: ${{ steps.modern_text.outputs.outcome }}
+      - name: Record android CPU retrieval coverage (android-sdk-emulator-retrieval)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-sdk-emulator-retrieval
+          platform: android
+          delegate: cpu
+          tasks: universal_embedder,semantic_retriever
+          outcome: ${{ steps.sdk.outcome }}
+      - name: Record android CPU Decision Maker coverage (android-sdk-emulator-decision)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-sdk-emulator-decision
+          platform: android
+          delegate: cpu
+          tasks: decision_maker
+          outcome: ${{ steps.sdk.outcome }}
+      - name: Record android CPU task coverage (android-sdk-emulator)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-sdk-emulator
+          platform: android
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.sdk.outcome }}
+      # Only release builds run R8, and every test above is a debug build. R8
+      # removes a field that is written but never read, so a plugin that keeps
+      # memory alive for native code that way loses it in release builds only
+      # (UP-033 in upstream-issues.md). This fails on any instance field R8
+      # removed from the plugins. The APK is the release gallery, for phones.
+      - name: Release gallery keeps every plugin field through R8
+        if: ${{ !cancelled() }}
+        run: |
+          python3 -B -m unittest tool/ci/test_check_r8_usage.py
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target android/arm64
+          cd gallery
+          flutter build apk --release --target-platform android-arm64
+          python3 -B ../tool/ci/check_r8_usage.py build/app/outputs/mapping/release/usage.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gallery-release-android-arm64${{ env.ARTIFACT_SUFFIX }}
+          path: gallery/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
+          if-no-files-found: error
+
+  # The same phone suites in a release build, which only this job runs: R8,
+  # AOT and kReleaseMode can fail what the debug job above passes. Its own job,
+  # so the debug job's coverage rows stay its own; tool/ci/run_release_suite.py
+  # builds the suites as the release app and reads their report from logcat.
+  # It runs twice: on Android 15, and on Android 9 (API 28), the oldest the
+  # packages support, which Google's libraries target too and no other
+  # emulator job runs.
+  sdk-tasks-release:
+    name: ${{ matrix.name }}
+    # Every run except nightly-compare.yaml's daily set.
+    if: ${{ inputs.scope != 'daily' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Every phone suite in a release build / official Android SDK on an x64 emulator
+            api-level: 35
+            camera: -camera-back emulated
+            defines: --define SDK_GPU=skip
+          # Every camera of the Android 9 image aborts the emulator once a
+          # stream starts ("FATAL | Unknown format: 0x18", after "Unsupported
+          # camera format ... 825382478", NV21, from the virtual scene): emulated
+          # or virtual scene, front or back, SwiftShader or guest rendering, on
+          # October 14. The job runs without one; the Pixel 3 on Test Lab covers
+          # the camera on Android 9.
+          - name: Every phone suite in a release build / official Android SDK on an x64 Android 9 emulator
+            api-level: 28
+            camera: -camera-back none -camera-front none
+            defines: --define SDK_GPU=skip --define SDK_CAMERA=none
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: ffi
+          modern-model-cache: 'true'
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Google's references for EmbeddingGemma, Proofreader and Summarizer
+        run: |
+          cd packages/mediapipe-task-text
+          dart pub get
+          dart tool/download_models.dart embedding_gemma proofreader summarizer
+          cd ../..
+          python3 -B packages/mediapipe-task-text/tool/prepare_modern_text_reference.py \
+            --venv build/ci-tmp/official-python \
+            --output-dir build/modern-text-reference
+      - name: Prepare the gallery with the phone suites' tasks
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target android/x64 \
+            --tasks audio_classifier,face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,language_detector,object_detector,pose_landmarker,text_classifier,text_embedder,embedding_gemma,text_proofreader,text_summarizer,universal_embedder,semantic_retriever,decision_maker \
+            --modern-text-reference build/modern-text-reference
+          cd gallery && flutter pub get
+      - name: Enable Android emulator hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      # The emulator action downloads the system image itself and gives up on
+      # the first corrupt archive ("Error on ZipFile unknown archive",
+      # 2026-10-22), so install it here, retried, and the action finds it.
+      - name: Download the Android ${{ matrix.api-level }} system image
+        run: |
+          image='system-images;android-${{ matrix.api-level }};google_apis;x86_64'
+          for attempt in 1 2 3 4; do
+            sdkmanager --install "$image" && exit 0
+            echo "Attempt $attempt of installing $image failed." >&2
+            sleep 20
+          done
+          exit 1
+      # As in the job above: Gradle's own NDK and CMake downloads give up on
+      # one corrupt archive.
+      - uses: ./.github/actions/android-ndk
+      - name: Every phone suite and the gallery journey in a release build
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim ${{ matrix.camera }}
+          script: python3 -B tool/ci/run_release_suite.py --target android --device emulator-5554 --suite integration_test/sdk_all_test.dart ${{ matrix.defines }} --timeout 2400

@@ -1,0 +1,558 @@
+{
+  "_comment": [
+    "Every public task on every platform and delegate. 'required' cells need a passing",
+    "row from this commit's pull-request CI; 'device' cells need one from physical hardware (the",
+    "manually dispatched device workflow, run for this commit or on main within 48 hours), and the",
+    "gate reports them as awaiting until one has run.",
+    "'pending: <step>' cells are planned; 'unsupported: <reason>' cells are Google's limits.",
+    "tool/coverage/gate.py enforces it; the vision and text packages' coverage matrix tests keep it honest."
+  ],
+  "cells": {
+    "face_detector": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Android library does not ship the LiteRT GPU plugin Face Detector's GPU needs (upstream-issues.md UP-046)"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Linux library does not ship the LiteRT GPU plugin Face Detector's GPU needs (upstream-issues.md UP-046)"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "face_landmarker": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "gesture_recognizer": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "hand_landmarker": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "holistic_landmarker": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Android library cannot open Holistic's face blendshapes model on the GPU (upstream-issues.md UP-026)"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's desktop runtimes cannot open Holistic's face blendshapes model on GPU (upstream-issues.md UP-026)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's desktop runtimes cannot open Holistic's face blendshapes model on GPU (upstream-issues.md UP-026)"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "image_classifier": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "image_embedder": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Linux 1.0.1 runtime aborts the embedder on OpenGL ES (upstream-issues.md UP-027)"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "image_segmenter": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Android library aborts the app reading the GPU mask on PowerVR and Adreno 630 GPUs, as its Java SDK did (upstream-issues.md UP-061, UP-023)"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "interactive_segmenter": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Android SDK GPU path is unreliable: Test Lab phones showed PowerVR refusing its stroke shader and Mali's mask agreeing with CPU on 94% of pixels"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's iOS SDK runs the stroke segmenter on CPU only"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS runtime cannot compile the stroke heatmap shader (upstream-issues.md UP-008)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Linux 1.0.1 runtime aborts the stroke segmenter on OpenGL ES (upstream-issues.md UP-029)"
+      },
+      "windows": {
+        "cpu": "unsupported: Google's Windows library runs the stateful segmenter at about 25 s a stroke on GitHub's runner (upstream-issues.md UP-048)",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "object_detector": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "pose_landmarker": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "device"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: step 5 (nightly Test Lab iPhones)"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's macOS library since 1.1.1 gives different Metal results from its 1.1.0 wheel, its 1.1.1 nightly wheel matches the library where compared, and Google is checking whether the change is intended (upstream-issues.md UP-057)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      }
+    },
+    "audio_classifier": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's browser task accepts the GPU delegate but runs on CPU (bit-identical outputs), so the API offers CPU only"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      }
+    },
+    "language_detector": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's browser task accepts the GPU delegate but runs on CPU (bit-identical outputs), so the API offers CPU only"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      }
+    },
+    "text_classifier": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's browser task accepts the GPU delegate but runs on CPU (bit-identical outputs), so the API offers CPU only"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      }
+    },
+    "text_embedder": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's browser task accepts the GPU delegate but runs on CPU (bit-identical outputs), so the API offers CPU only"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      }
+    },
+    "embedding_gemma": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's browser EmbeddingGemma pipeline runs on CPU only"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Android EmbeddingGemma pipeline runs on CPU only"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's iOS EmbeddingGemma pipeline runs on CPU only"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's Metal interpreter fails during EmbeddingGemma creation (observed with MediaPipe 1.0.1)"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: the pinned official runtime runs EmbeddingGemma on CPU only"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: the pinned official runtime runs EmbeddingGemma on CPU only"
+      }
+    },
+    "text_proofreader": {
+      "web": {
+        "cpu": "unsupported: @mediapipe/tasks-text 1.0.1 has no TextProofreader (upstream-issues.md UP-034)",
+        "gpu": "unsupported: @mediapipe/tasks-text 1.0.1 has no TextProofreader (upstream-issues.md UP-034)"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      }
+    },
+    "text_summarizer": {
+      "web": {
+        "cpu": "unsupported: @mediapipe/tasks-text 1.0.1 has no TextSummarizer (upstream-issues.md UP-034)",
+        "gpu": "unsupported: @mediapipe/tasks-text 1.0.1 has no TextSummarizer (upstream-issues.md UP-034)"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      }
+    },
+    "universal_embedder": {
+      "web": {
+        "cpu": "unsupported: Google's browser Universal Embedder runs only on a hardware WebGPU adapter (UP-052)",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      }
+    },
+    "semantic_retriever": {
+      "web": {
+        "cpu": "unsupported: Google's browser Universal Embedder runs only on a hardware WebGPU adapter (UP-052)",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      }
+    },
+    "decision_maker": {
+      "web": {
+        "cpu": "unsupported: Google's browser Decision Maker fails every evaluation on the CPU delegate (UP-049)",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      }
+    }
+  }
+}

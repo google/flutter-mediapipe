@@ -1,34 +1,56 @@
 name: mediapipe_text
-description: An implementation of MediaPipe text-based Tasks.
-version: 0.0.1
-
+description: "Google's MediaPipe text tasks for Flutter: text classification and embeddings, language detection, EmbeddingGemma, proofreading and summarization."
+version: 0.1.0
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text
-issue_tracker: https://github.com/google/flutter-mediapipe/issues/
+issue_tracker: https://github.com/google/flutter-mediapipe/issues
+topics:
+  - mediapipe
+  - machine-learning
+  - nlp
+  - text-classification
+  - embeddings
 
 platforms:
   android:
   ios:
-  # linux:
+  linux:
   macos:
-  # web:
-  # windows:
+  windows:
+  web:
 
 environment:
-  # For now, `native-assets` is a Flutter experiment, which can only be
-  # enabled on the `master` channel.
-  sdk: ^3.4.0
+  sdk: ^3.12.0
+  flutter: '>=3.47.0'
 
 dependencies:
-  async: ^2.11.0
-  ffi: ^2.1.2
-  http: ^1.1.0
-  logging: ^1.2.0
-  mediapipe_core: ^0.0.1
-  native_assets_cli: ^0.6.0
-  native_toolchain_c: ^0.4.2
-  path: ^1.8.3
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  code_assets: ^2.1.0
+  ffi: ^2.1.4
+  hooks: ^2.2.0
+  native_toolchain_c: ^0.19.3
+  mediapipe_core: ^0.1.0
+  meta: ^1.18.0
 
 dev_dependencies:
-  ffigen: ^12.0.0
-  flutter_lints: ^2.0.0
-  test: ^1.21.0
+  crypto: ^3.0.6
+  ffigen: ^23.0.0
+  flutter_test:
+    sdk: flutter
+  lints: ^6.1.0
+  path: ^1.9.1
+  test: ^1.31.0
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: MediaPipeTextWeb
+        fileName: mediapipe_text_web.dart
+  assets:
+    - path: assets/worker.js
+      platforms: [web]
+    - path: assets/runtime.json
+      platforms: [web]

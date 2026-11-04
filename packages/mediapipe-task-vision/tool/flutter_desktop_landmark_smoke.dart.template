@@ -1,0 +1,100 @@
+
+Future<VisionImage> _landmarkImage(String asset, int width, int height) async {
+  final pixels = await rootBundle.load(asset);
+  return VisionImage.fromPixels(
+    pixels: pixels.buffer.asUint8List(pixels.offsetInBytes, pixels.lengthInBytes),
+    width: width, height: height, format: VisionPixelFormat.rgb,
+  );
+}
+
+// Exact landmark values are compared against the same-host official reference
+// in dart test; a bundled app proves the shipped runtime detects the fixtures.
+Future<void> runLandmarkTasksSmoke() async {
+  final hands = await _landmarkImage('assets/thumb_up.rgb', 382, 406);
+  final body = await _landmarkImage('assets/pose.rgb', 1000, 667);
+  final handModel = await rootBundle.load('assets/hand_landmarker.task');
+  final hand = await HandLandmarker.create(HandLandmarkerOptions(
+    modelBytes: handModel.buffer.asUint8List(handModel.offsetInBytes,
+      handModel.lengthInBytes),
+    numHands: 2,
+    runningMode: RunningMode.video,
+  ));
+  try {
+    final requests = [for (var i = 0; i < 3; i++)
+      hand.detectForVideo(hands, timestampMilliseconds: i * 33)];
+    final closing = hand.dispose();
+    final results = await Future.wait(requests);
+    await closing;
+    for (var i = 0; i < results.length; i++) {
+      final result = results[i];
+      if (result.imageWidth != 382 || result.imageHeight != 406 ||
+          result.timestampMilliseconds != i * 33 ||
+          result.handLandmarks.length != 1 ||
+          result.handLandmarks.single.length != 21 ||
+          result.handWorldLandmarks.single.length != 21 ||
+          result.handedness.single.single.categoryName != 'Right' ||
+          result.handedness.single.single.score <= 0.9) {
+        throw StateError('Bundled Hand Landmarker inference failed.');
+      }
+    }
+  } finally {
+    await hand.dispose();
+  }
+  final gestureModel = await rootBundle.load('assets/gesture_recognizer.task');
+  final gesture = await GestureRecognizer.create(GestureRecognizerOptions(
+    modelBytes: gestureModel.buffer.asUint8List(gestureModel.offsetInBytes,
+      gestureModel.lengthInBytes),
+    numHands: 2,
+  ));
+  try {
+    final result = await gesture.recognize(hands);
+    if (result.gestures.single.single.categoryName != 'Thumb_Up' ||
+        result.gestures.single.single.index != -1 ||
+        result.gestures.single.single.score <= 0.7 ||
+        result.handLandmarks.single.length != 21) {
+      throw StateError('Bundled Gesture Recognizer inference failed.');
+    }
+  } finally {
+    await gesture.dispose();
+  }
+  final poseModel = await rootBundle.load('assets/pose_landmarker.task');
+  final pose = await PoseLandmarker.create(PoseLandmarkerOptions(
+    modelBytes: poseModel.buffer.asUint8List(poseModel.offsetInBytes,
+      poseModel.lengthInBytes),
+    outputSegmentationMasks: true,
+  ));
+  try {
+    final result = await pose.detect(body);
+    final mask = result.segmentationMasks?.single;
+    if (result.poseLandmarks.length != 1 ||
+        result.poseLandmarks.single.length != 33 ||
+        result.poseWorldLandmarks.single.length != 33 ||
+        mask == null || mask.width != 1000 || mask.height != 667 ||
+        mask.confidence.length != 1000 * 667 ||
+        !mask.confidence.every((value) => value >= 0 && value <= 1)) {
+      throw StateError('Bundled Pose Landmarker inference failed.');
+    }
+  } finally {
+    await pose.dispose();
+  }
+  final holisticModel = await rootBundle.load('assets/holistic_landmarker.task');
+  final holistic = await HolisticLandmarker.create(HolisticLandmarkerOptions(
+    modelBytes: holisticModel.buffer.asUint8List(holisticModel.offsetInBytes,
+      holisticModel.lengthInBytes),
+    outputPoseSegmentationMask: true,
+  ));
+  try {
+    final result = await holistic.detect(body);
+    final mask = result.poseSegmentationMask;
+    if (result.poseLandmarks.length != 33 ||
+        result.poseWorldLandmarks.length != 33 ||
+        result.leftHandLandmarks.length != 21 ||
+        result.rightHandLandmarks.length != 21 ||
+        mask == null || mask.width != 1000 || mask.height != 667) {
+      throw StateError('Bundled Holistic Landmarker inference failed.');
+    }
+  } finally {
+    await holistic.dispose();
+  }
+  stdout.writeln('Hand, Gesture, Pose and Holistic Landmarker CPU inference passed.');
+}

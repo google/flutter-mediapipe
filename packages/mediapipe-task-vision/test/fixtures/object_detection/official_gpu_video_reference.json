@@ -1,0 +1,63 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "source_revision": null,
+  "library_sha256": "a9d0e783f1aef73aae4a0e2df46154ced7d3dcb9ccd36989c092592921afcad6",
+  "model_sha256": "40338edf5ec70d43e318b0a716a84d4564cd1802759a7a07170c7e43796dbf58",
+  "platform": "Darwin arm64",
+  "delegate": "GPU",
+  "running_mode": "VIDEO",
+  "score_threshold": 0.3,
+  "max_results": 5,
+  "raw_derivation": "face-landmarks-ex1.jpeg official RGB decoder, [::20, ::20, :3]",
+  "input_conversion": "RGB to RGBA with opaque alpha for Metal",
+  "cases": [
+    {
+      "name": "rgb",
+      "width": 301,
+      "height": 209,
+      "timestamp_ms": 0,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 36, "origin_y": 9, "width": 208, "height": 199}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgb",
+      "width": 301,
+      "height": 209,
+      "timestamp_ms": 33,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 36, "origin_y": 9, "width": 208, "height": 199}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "blank",
+      "width": 301,
+      "height": 209,
+      "timestamp_ms": 66,
+      "rotation_degrees": 0,
+      "detections": []
+    },
+    {
+      "name": "rgb",
+      "width": 301,
+      "height": 209,
+      "timestamp_ms": 99,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 36, "origin_y": 9, "width": 208, "height": 199}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgb-rotated",
+      "width": 209,
+      "height": 301,
+      "timestamp_ms": 132,
+      "rotation_degrees": 90,
+      "detections": [{"bounding_box": {"origin_x": 9, "origin_y": 56, "width": 199, "height": 208}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    }
+  ]
+}

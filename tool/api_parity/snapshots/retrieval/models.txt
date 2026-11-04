@@ -1,0 +1,5 @@
+abstract final class RetrievalModels
+  new RetrievalModels()
+  static DownloadAsset embeddingGemma2
+  static DownloadAsset embeddingGemma2TextVision
+  static Map<String, DownloadAsset> byName

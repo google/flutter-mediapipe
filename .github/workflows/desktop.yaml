@@ -1,0 +1,246 @@
+name: Desktop tasks
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # nightly-compare.yaml: once on the pinned build, once on a nightly.
+  workflow_call:
+    inputs:
+      side:
+        description: baseline (the pins on this ref) or nightly (the run's nightly-pin artifact).
+        type: string
+        required: true
+      scope:
+        description: daily runs nightly-compare.yaml's daily set; full runs every job.
+        type: string
+        default: full
+
+# A newer push on the same branch supersedes the queued matrix; the hosted
+# macOS pool is small enough that stale runs otherwise starve the latest one.
+concurrency:
+  group: desktop-cpu-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  cancel-in-progress: true
+
+# nightly-compare.yaml calls this workflow twice in one run, on the pinned
+# build and on Google's nightly; the suffix keeps the two calls' artifacts
+# apart. It is empty in every other run.
+env:
+  ARTIFACT_SUFFIX: ${{ inputs.side && format('-{0}', inputs.side) || '' }}
+
+jobs:
+  face-tasks:
+    name: Vision tasks / ${{ matrix.os }} x64 CPU
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both, except in nightly-compare.yaml's daily set, which runs Linux.
+        os: ${{ fromJSON(inputs.scope == 'daily' && '["ubuntu-24.04"]' || '["ubuntu-24.04", "windows-2025"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: gallery
+          modern-model-cache: 'true'
+      - name: Validate Linux CPU references and debug/release consumers
+        id: linux_cpu
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python3 -B packages/mediapipe-task-vision/tool/test_desktop.py --object-detector --image-tasks --landmark-tasks --segmenter-tasks --interactive-segmenter
+      - name: Record linux CPU task coverage (linux-cpu)
+        if: always() && runner.os == 'Linux'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: linux-cpu
+          platform: linux
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.linux_cpu.outcome }}
+      # Core's shared runtime here is the vision package's wheel library; the
+      # suites compare with Google's Python on this runner.
+      - name: Text and audio against Google's Linux wheel
+        id: linux_text_audio
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: python3 -B tool/test_text_audio.py
+      - name: Record linux CPU text and audio coverage (linux-text-audio)
+        if: always() && runner.os == 'Linux'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: linux-text-audio
+          platform: linux
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder
+          outcome: ${{ steps.linux_text_audio.outcome }}
+      - name: EmbeddingGemma, Proofreader and Summarizer against Google's Linux wheel
+        id: linux_modern_text
+        if: ${{ !cancelled() && runner.os == 'Linux' }}
+        run: python3 -B tool/test_modern_text.py
+      - name: Record linux CPU modern text coverage (linux-modern-text)
+        if: always() && runner.os == 'Linux'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: linux-modern-text
+          platform: linux
+          delegate: cpu
+          tasks: embedding_gemma,text_proofreader,text_summarizer
+          outcome: ${{ steps.linux_modern_text.outcome }}
+      - name: Validate Windows CPU references and debug/release consumers
+        id: windows_cpu
+        if: runner.os == 'Windows'
+        run: python -B packages/mediapipe-task-vision/tool/test_desktop.py --object-detector --image-tasks --landmark-tasks --segmenter-tasks
+      - name: Record windows CPU task coverage (windows-cpu)
+        if: always() && runner.os == 'Windows'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: windows-cpu
+          platform: windows
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.windows_cpu.outcome }}
+      - name: Text and audio against Google's Windows wheel
+        id: windows_text_audio
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        run: python -B tool/test_text_audio.py
+      - name: Record windows CPU text and audio coverage (windows-text-audio)
+        if: always() && runner.os == 'Windows'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: windows-text-audio
+          platform: windows
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder
+          outcome: ${{ steps.windows_text_audio.outcome }}
+      - name: EmbeddingGemma, Proofreader and Summarizer against Google's Windows wheel
+        id: windows_modern_text
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        run: python -B tool/test_modern_text.py
+      - name: Record windows CPU modern text coverage (windows-modern-text)
+        if: always() && runner.os == 'Windows'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: windows-modern-text
+          platform: windows
+          delegate: cpu
+          tasks: embedding_gemma,text_proofreader,text_summarizer
+          outcome: ${{ steps.windows_modern_text.outcome }}
+      - name: Build and exercise the Linux CPU gallery
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python3 -B gallery/tool/test_desktop.py
+      - name: Build and exercise the Windows CPU gallery
+        if: runner.os == 'Windows'
+        run: python -B gallery/tool/test_desktop.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: desktop-cpu-${{ matrix.os }}${{ env.ARTIFACT_SUFFIX }}
+          path: |
+            build/ci-tmp/desktop-*/*.log
+            build/ci-tmp/desktop-*/report.json
+            build/ci-tmp/desktop-*/reference/**/*.json
+            build/ci-tmp/gallery-desktop-*/*.log
+            build/ci-tmp/gallery-desktop-*/report.json
+            build/ci-tmp/text-audio/*.log
+            build/ci-tmp/text-audio/report.json
+            build/ci-tmp/modern-text/*.log
+            build/ci-tmp/modern-text/report.json
+            build/classic-text-reference/*.json
+            build/classic-text-reference/*.log
+            build/modern-text-reference/*.json
+            build/modern-text-reference/*.log
+            build/audio-reference/*.json
+            build/audio-reference/*.log
+          if-no-files-found: error
+
+  linux-gpu:
+    name: Vision tasks / ubuntu-24.04 x64 GPU (Mesa, renamed renderer)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      MEDIAPIPE_GPU_REFERENCE_DIR: ${{ github.workspace }}/build/gpu-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: gallery
+      # Through apt-install: the setup action's cache hit runs no apt-get update.
+      - name: Install Mesa's EGL and OpenGL ES
+        uses: ./.github/actions/apt-install
+        with:
+          packages: libegl-mesa0 libgl1-mesa-dri
+      - name: Download the vision models
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart face_detector face_landmarker hand_landmarker gesture_recognizer pose_landmarker holistic_landmarker image_classifier image_embedder object_detector image_segmenter
+      - name: Official GPU references and Dart GPU suites on llvmpipe
+        id: linux_gpu
+        env:
+          # Google's runtime refuses renderers named llvmpipe or softpipe.
+          # Mesa's force_gl_renderer renames the same software renderer, so
+          # the unmodified GPU path runs. This checks results against Google's
+          # own GPU output on this runner, not support for software GPUs.
+          force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
+          # Without a display the default EGL platform fails.
+          EGL_PLATFORM: surfaceless
+        run: >-
+          python3 -B packages/mediapipe-task-vision/tool/prepare_gpu_reference.py --test
+          --landmark-tasks --object-detector --image-tasks --segmenter-tasks
+      - name: Record linux GPU task coverage (linux-gpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: linux-gpu
+          platform: linux
+          delegate: gpu
+          tasks: face_landmarker,gesture_recognizer,hand_landmarker,image_classifier,image_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.linux_gpu.outcome }}
+      - name: Without the rename, the refused GPU is reported and not replaced
+        working-directory: build/gpu-face-tests
+        env:
+          MEDIAPIPE_EXPECT_GPU_REFUSAL: '1'
+          EGL_PLATFORM: surfaceless
+        run: dart test test/face_landmarker_test.dart --name 'a refused GPU is reported' --reporter expanded
+      - name: Prepare the Linux gallery with the face and hand tasks
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target linux/x64 --tasks face_landmarker,hand_landmarker
+          cd gallery && flutter pub get
+      # The gallery runs under Xvfb with EGL's default platform, as on a
+      # desktop: Flutter renders with OpenGL while MediaPipe's GPU task runs
+      # in the same process.
+      - name: Gallery GPU inside the running Flutter app (renamed renderer)
+        working-directory: gallery
+        env:
+          force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
+        run: |
+          for task in face hand; do
+            xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+              integration_test/desktop_gpu_camera_test.dart \
+              --dart-define=GALLERY_LIVE_TASK=$task \
+              --dart-define=GALLERY_GPU_EXPECT=works --reporter expanded
+          done
+      - name: Gallery falls back to CPU visibly when the GPU is refused
+        working-directory: gallery
+        run: |
+          for task in face hand; do
+            xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+              integration_test/desktop_gpu_camera_test.dart \
+              --dart-define=GALLERY_LIVE_TASK=$task \
+              --dart-define=GALLERY_GPU_EXPECT=refused --reporter expanded
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: linux-gpu-reference${{ env.ARTIFACT_SUFFIX }}
+          path: |
+            build/gpu-reference/**/*.json
+            build/gpu-reference/*.log
+          if-no-files-found: error

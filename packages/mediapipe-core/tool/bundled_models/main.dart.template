@@ -1,0 +1,32 @@
+// Written into a fresh app by tool/test_bundled_models.py: the release build
+// runs the offline checks and exits with their result.
+import 'dart:io';
+
+import 'package:flutter/widgets.dart';
+import 'package:mediapipe_bundled_models/checks.dart';
+
+// As in the vision package's release smoke app: the test reads the process's
+// own standard output.
+void report(String message) {
+  stdout.writeln(message);
+  print(message);
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await clearModelCache();
+    HttpOverrides.global = NoNetwork();
+    await checkVision();
+    await checkText();
+    await checkAudio();
+    await checkDecision();
+    await checkRetrieval();
+    await checkRefused();
+    report('Bundled models passed in release.');
+    exit(0);
+  } catch (error, stack) {
+    report('Bundled models failed in release: $error\n$stack');
+    exit(1);
+  }
+}

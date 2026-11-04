@@ -1,0 +1,2 @@
+# Preserve raw pixel fixtures without text diffs or newline conversion.
+test/fixtures/face_detection/*.rgb binary

@@ -1,0 +1,72 @@
+name: Published archives
+
+permissions:
+  contents: read
+
+# A fresh app depends on the six packages as pub.dev would ship them: the
+# files `flutter pub publish --dry-run` lists, staged outside the repository,
+# with every family imported. It must build for every target, so a
+# `.pubignore` line or a checkout-only file breaks here, not on a user's
+# first install (tool/check_archives.py). Nothing is published.
+on:
+  push:
+    branches: [main]
+    paths:
+      - packages/**
+      - tool/check_archives.py
+      - .github/actions/setup/**
+      - .github/actions/android-ndk/**
+      - .github/workflows/archives.yaml
+  pull_request:
+    paths:
+      - packages/**
+      - tool/check_archives.py
+      - .github/actions/setup/**
+      - .github/actions/android-ndk/**
+      - .github/workflows/archives.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: archives-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Archives build / ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: linux, os: ubuntu-24.04}
+          - {target: web, os: ubuntu-24.04}
+          - {target: android, os: ubuntu-24.04}
+          - {target: macos, os: macos-15}
+          - {target: ios, os: macos-15}
+          - {target: windows, os: windows-2025}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: matrix.target == 'android'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+          linux-profile: ${{ matrix.target == 'linux' && 'gallery' || 'none' }}
+      # Gradle's own NDK and CMake downloads give up on one corrupt archive.
+      - if: matrix.target == 'android'
+        uses: ./.github/actions/android-ndk
+      - name: Build a fresh app from the archives
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} -B tool/check_archives.py ${{ matrix.target }} --scratch build/archives
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: archives-${{ matrix.target }}
+          path: build/archives/*.log
+          if-no-files-found: ignore

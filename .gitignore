@@ -1,19 +1,13 @@
 .DS_Store
 .atom/
 .idea/
-.vscode/*
-.melos_tool/*
-!.vscode/tasks.json
-!.vscode/settings.json
+.vscode/
 
 .packages
 .pub/
 .dart_tool/
 pubspec.lock
-pubspec_overrides.yaml
 flutter_export_environment.sh
-
-examples/all_plugins/pubspec.yaml
 
 Podfile.lock
 Pods/
@@ -50,24 +44,16 @@ build/
 .settings
 .last_build_id
 
-# Docs
-
-# Dependencies
+# Node, for the gallery's browser tests
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Production
-website/build
-
-# Generated files
-.docusaurus
-.cache-loader
-
-# Misc
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+__pycache__/
+*.pyc

@@ -1,0 +1,50 @@
+name: mediapipe_decision
+description: "Google's MediaPipe Decision Maker for Flutter: yes-or-no, choice and score questions about a text, answered with calibrated probabilities."
+version: 0.1.0
+repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-decision
+issue_tracker: https://github.com/google/flutter-mediapipe/issues
+topics:
+  - mediapipe
+  - machine-learning
+  - nlp
+  - classification
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  windows:
+  web:
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.47.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  code_assets: ^2.1.0
+  ffi: ^2.1.4
+  hooks: ^2.2.0
+  mediapipe_core: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^6.1.0
+  test: ^1.31.0
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: MediaPipeDecisionWeb
+        fileName: mediapipe_decision_web.dart
+  assets:
+    - path: assets/worker.js
+      platforms: [web]
+    - path: assets/runtime.json
+      platforms: [web]

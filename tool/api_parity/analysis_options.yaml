@@ -1,0 +1,8 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - always_declare_return_types
+    - directives_ordering
+    - prefer_relative_imports
+    - prefer_single_quotes

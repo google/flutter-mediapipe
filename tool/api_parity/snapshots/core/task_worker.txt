@@ -1,0 +1,11 @@
+base class TaskWorker<I extends Object, R, U>
+  Future<R> run(I input)
+  Future<void> dispose()
+  Future<void> start<O>(O options, WorkerTask<I, R, U> Function(O) create)
+  Stream<U> stream(I input)
+  new TaskWorker<I, R, U>(String _name, [void Function(MediaPipeException)? _onFailure])
+abstract base class WorkerTask<I, R, U>
+  Future<void> stream(I input, void Function(U) emit)
+  R run(I input)
+  new WorkerTask<I, R, U>()
+  void close()

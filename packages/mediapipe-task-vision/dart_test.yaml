@@ -1,0 +1,4 @@
+tags:
+  # Tests that measure the whole process (resident memory), so they run
+  # alone: `dart test --tags isolated`.
+  isolated:

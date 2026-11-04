@@ -1,0 +1,82 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  for (final delegate in Delegate.values) {
+    testWidgets(
+      'bundled ${delegate.name} face runtimes process a real portrait together',
+      (tester) async {
+        final model = await rootBundle.load('assets/model.tflite');
+        final pixels = await rootBundle.load('assets/portrait.rgb');
+        final detector = await FaceDetector.create(
+          FaceDetectorOptions(
+            delegate: delegate,
+            modelBytes: model.buffer.asUint8List(
+              model.offsetInBytes,
+              model.lengthInBytes,
+            ),
+          ),
+        );
+        try {
+          final result = await detector.detect(
+            VisionImage.fromPixels(
+              pixels: pixels.buffer.asUint8List(
+                pixels.offsetInBytes,
+                pixels.lengthInBytes,
+              ),
+              width: 301,
+              height: 209,
+              format: VisionPixelFormat.rgb,
+            ),
+          );
+          expect(result.imageWidth, 301);
+          expect(result.imageHeight, 209);
+          expect(result.detections, hasLength(1));
+          expect(result.detections.single.keypoints, hasLength(6));
+          expect(
+            result.detections.single.categories.single.score,
+            greaterThan(0.9),
+          );
+          final bundle = await rootBundle.load('assets/face_landmarker.task');
+          final landmarker = await FaceLandmarker.create(
+            FaceLandmarkerOptions(
+              delegate: delegate,
+              modelBytes: bundle.buffer.asUint8List(
+                bundle.offsetInBytes,
+                bundle.lengthInBytes,
+              ),
+              outputFaceBlendshapes: true,
+              outputFacialTransformationMatrixes: true,
+            ),
+          );
+          try {
+            final landmarks = await landmarker.detect(
+              VisionImage.fromPixels(
+                pixels: pixels.buffer.asUint8List(
+                  pixels.offsetInBytes,
+                  pixels.lengthInBytes,
+                ),
+                width: 301,
+                height: 209,
+                format: VisionPixelFormat.rgb,
+              ),
+            );
+            expect(landmarks.faceLandmarks.single, hasLength(478));
+            expect(landmarks.faceBlendshapes.single, hasLength(52));
+            expect(
+              landmarks.facialTransformationMatrixes.single.data,
+              hasLength(16),
+            );
+          } finally {
+            await landmarker.dispose();
+          }
+        } finally {
+          await detector.dispose();
+        }
+      },
+    );
+  }
+}

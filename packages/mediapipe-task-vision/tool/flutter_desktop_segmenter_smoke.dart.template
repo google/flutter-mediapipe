@@ -1,0 +1,39 @@
+
+// Exact mask bytes are compared against the same-host official reference in
+// dart test; a bundled app proves the shipped runtime segments the fixture.
+Future<void> runSegmenterTasksSmoke() async {
+  final pixels = await rootBundle.load('assets/portrait.rgb');
+  final image = VisionImage.fromPixels(
+    pixels: pixels.buffer.asUint8List(pixels.offsetInBytes, pixels.lengthInBytes),
+    width: 301, height: 209, format: VisionPixelFormat.rgb,
+  );
+  final segmenterModel = await rootBundle.load('assets/image_segmenter.tflite');
+  final segmenter = await ImageSegmenter.create(ImageSegmenterOptions(
+    modelBytes: segmenterModel.buffer.asUint8List(segmenterModel.offsetInBytes,
+      segmenterModel.lengthInBytes),
+    outputCategoryMask: true,
+    runningMode: RunningMode.video,
+  ));
+  try {
+    final requests = [for (var i = 0; i < 3; i++)
+      segmenter.segmentForVideo(image, timestampMilliseconds: i * 33)];
+    final closing = segmenter.dispose();
+    final results = await Future.wait(requests);
+    await closing;
+    for (var i = 0; i < results.length; i++) {
+      final result = results[i];
+      final category = result.categoryMask;
+      if (result.imageWidth != 301 || result.imageHeight != 209 ||
+          result.timestampMilliseconds != i * 33 ||
+          result.labels.length != 21 || result.labels.first != 'background' ||
+          result.confidenceMasks?.length != 21 ||
+          category == null || category.width != 301 || category.height != 209 ||
+          !category.categories.any((value) => value != 0)) {
+        throw StateError('Bundled Image Segmenter inference failed.');
+      }
+    }
+  } finally {
+    await segmenter.dispose();
+  }
+  stdout.writeln('Image Segmenter CPU inference passed.');
+}

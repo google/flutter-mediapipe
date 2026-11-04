@@ -1,0 +1,6 @@
+abstract interface class DecisionBackend
+  Future<Object?> run(Map<String, Object?> request)
+  Future<void> dispose()
+  new DecisionBackend()
+getter Future<DecisionBackend> Function(Map<String, Object?>)? get decisionBackendFactory
+setter set decisionBackendFactory(Future<DecisionBackend> Function(Map<String, Object?>)? value)

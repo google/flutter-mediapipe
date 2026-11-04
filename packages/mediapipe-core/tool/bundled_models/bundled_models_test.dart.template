@@ -1,0 +1,43 @@
+// Written into a fresh app by tool/test_bundled_models.py.
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mediapipe_bundled_models/checks.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(clearModelCache);
+
+  group('downloads off, no network', () {
+    HttpOverrides? previous;
+    setUp(() {
+      previous = HttpOverrides.current;
+      HttpOverrides.global = NoNetwork();
+    });
+    tearDown(() => HttpOverrides.global = previous);
+
+    testWidgets('a bundled vision model detects a face', (_) => checkVision());
+    testWidgets('a bundled text model detects French', (_) => checkText());
+    testWidgets('a bundled audio model hears a tone', (_) => checkAudio());
+    testWidgets(
+      'a bundled decision model routes a question',
+      (_) => checkDecision(),
+    );
+    testWidgets(
+      'a bundled retrieval model ranks a neighbor',
+      (_) => checkRetrieval(),
+    );
+    // Before the download below caches the model.
+    testWidgets(
+      'a model that is not bundled is refused',
+      (_) => checkRefused(),
+    );
+  });
+
+  testWidgets(
+    'downloads on, a model that is not bundled downloads at run time',
+    (_) => checkDownload(),
+  );
+}

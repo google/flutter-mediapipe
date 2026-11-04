@@ -1,0 +1,5 @@
+tags:
+  # Tests that load Google's library through the build hook and run
+  # EmbeddingGemma 2, text and vision and the full model (make models_retrieval,
+  # or MEDIAPIPE_RETRIEVAL_MODEL and MEDIAPIPE_RETRIEVAL_AUDIO_MODEL).
+  native-assets:

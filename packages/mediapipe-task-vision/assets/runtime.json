@@ -1,0 +1,23 @@
+{
+  "package": "@mediapipe/tasks-vision",
+  "version": "1.2.0-rc.20261018",
+  "integrity": "tMsBrGy8IejFxlCiduJGpSBz3rcFqlZIsJy+GQ4J7cDOOSsPhJl9ILdc1O7Y7GWylnN+i9PBGSuwVvDdI5yBOQ==",
+  "files": [
+    "vision_bundle.mjs",
+    "wasm/vision_wasm_internal.js",
+    "wasm/vision_wasm_internal.wasm",
+    "wasm/vision_wasm_nosimd_internal.js",
+    "wasm/vision_wasm_nosimd_internal.wasm",
+    "wasm/vision_wasm_module_internal.js",
+    "wasm/vision_wasm_module_internal.wasm"
+  ],
+  "sha384": {
+    "vision_bundle.mjs": "2uBUYCmIKRCQ8wXO89foDRjuR7i4xebkk/RNG9fvv/8VHh7T1y8xnRsn0OHMgOAB",
+    "wasm/vision_wasm_internal.js": "nJTPMi3a6C535ddru3riMo/kDpd2FM/gsnTCzIhFfy/zn226/SEP0YZBc11XI7EF",
+    "wasm/vision_wasm_internal.wasm": "j+urwvvuP5hEo91c331nTERE5KXC5sdXjilekDYftckKtrH15naQlELX0VWLsGR1",
+    "wasm/vision_wasm_nosimd_internal.js": "Jt8LUQMx1VKAEZx0+yCFfDrEVjgM44Q+ArUnT7b/YfRYNUbIbm7AV9340RRoeRgf",
+    "wasm/vision_wasm_nosimd_internal.wasm": "H6oCRdu66a+u0HRHEvyjjM7SVUuQAIoytOZNiVKAncqn21KBHxJu2838Z+MoWcpw",
+    "wasm/vision_wasm_module_internal.js": "mlQrrya0gaep+yf669sBoy5rdXobYXNf0KoPLfwsptYLTCnkvVtsyv02B6by6JdW",
+    "wasm/vision_wasm_module_internal.wasm": "AcgVRuU7S1qmVoSJpgv83tFJeG0oTBKnwReyzceTPG0YC0wm6JkHOxs1z7V5VqMU"
+  }
+}

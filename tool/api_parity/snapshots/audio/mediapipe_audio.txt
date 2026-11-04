@@ -1,0 +1,46 @@
+include package:mediapipe_core/mediapipe_core.dart
+final class AudioClassifier
+  AudioRunningMode get runningMode
+  Delegate get delegate
+  Future<List<AudioClassifierResult>> classify(AudioData audio)
+  Future<void> dispose()
+  Stream<AudioClassifierResult> get results
+  static Future<AudioClassifier> create(AudioClassifierOptions options)
+  void classifyAsync(AudioData block, {required int timestampMilliseconds})
+final class AudioClassifierOptions extends TaskOptions implements ClassifierSettings
+  AudioRunningMode get runningMode
+  Delegate get delegate
+  DownloadAsset? get model
+  List<String> get categoryAllowlist
+  List<String> get categoryDenylist
+  String? get displayNamesLocale
+  String? get modelPath
+  Uint8List? get modelBytes
+  double get scoreThreshold
+  int get maxResults
+  new AudioClassifierOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, AudioRunningMode runningMode = AudioRunningMode.audioClips, String? displayNamesLocale, int maxResults = -1, double scoreThreshold = 0, List<String>? categoryAllowlist, List<String>? categoryDenylist})
+final class AudioClassifierResult
+  List<Classifications> get classifications
+  String toString()
+  int get timestampMilliseconds
+  new AudioClassifierResult({required List<Classifications> classifications, required int timestampMilliseconds})
+final class AudioData
+  Float32List get samples
+  double get sampleRate
+  int get channels
+  new AudioData({required Float32List samples, required double sampleRate, int channels = 1})
+abstract final class AudioModels
+  new AudioModels()
+  static DownloadAsset yamnet
+  static Map<String, DownloadAsset> byName
+enum AudioRunningMode extends Enum
+  int get index
+  new AudioRunningMode()
+  static AudioRunningMode audioClips
+  static AudioRunningMode audioStream
+  static List<AudioRunningMode> values
+  value AudioRunningMode.audioClips
+  value AudioRunningMode.audioStream
+function TaskCapabilities audioClassifierCapabilitiesForPlatform(TaskPlatform platform)
+function AudioData decodeWav(Uint8List bytes)
+function Future<TaskCapabilities> queryAudioClassifierCapabilities()

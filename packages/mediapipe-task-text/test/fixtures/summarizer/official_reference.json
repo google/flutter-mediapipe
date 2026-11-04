@@ -1,0 +1,147 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "delegate": "CPU",
+  "library_sha256": "a9d0e783f1aef73aae4a0e2df46154ced7d3dcb9ccd36989c092592921afcad6",
+  "model_sha256": "8b2d4ef09236adb9ead3127325526ba1aa5a59feb7c5de2d3f5958f27479de59",
+  "model_url": "https://storage.googleapis.com/mediapipe-models/text_summarizer/200m/1/summarization_quant_200m_2modes.litertlm",
+  "os": "macOS-27.0-arm64-arm-64bit",
+  "machine": "arm64",
+  "cases": [
+    {
+      "name": "tldr-meeting",
+      "input": "The team met on Monday to plan the next app release. Maya will finish the camera interface by Thursday. Leo will investigate the startup crash and send a fix for review on Wednesday. Testing begins on Friday, and the release is scheduled for the following Tuesday if no critical bugs remain. The team decided to postpone the new settings screen until the next release.",
+      "mode": "TLDR",
+      "max_num_tokens": null,
+      "result": {"summary": "The team met to plan the next app release, Maya will finish the camera interface by Thursday, and Leo will investigate a startup crash. Testing starts Friday, and the new settings screen will be delayed until the next release.", "done": true},
+      "stream": [{"chunk": "The", "done": false}, {"chunk": " team", "done": false}, {"chunk": " met", "done": false}, {"chunk": " to", "done": false}, {"chunk": " plan", "done": false}, {"chunk": " the", "done": false}, {"chunk": " next", "done": false}, {"chunk": " app", "done": false}, {"chunk": " release", "done": false}, {"chunk": ",", "done": false}, {"chunk": " May", "done": false}, {"chunk": "a", "done": false}, {"chunk": " will", "done": false}, {"chunk": " finish", "done": false}, {"chunk": " the", "done": false}, {"chunk": " camera", "done": false}, {"chunk": " interface", "done": false}, {"chunk": " by", "done": false}, {"chunk": " Thursday", "done": false}, {"chunk": ",", "done": false}, {"chunk": " Leo", "done": false}, {"chunk": " will", "done": false}, {"chunk": " investigate", "done": false}, {"chunk": " the", "done": false}, {"chunk": " startup", "done": false}, {"chunk": " crash", "done": false}, {"chunk": ",", "done": false}, {"chunk": " and", "done": false}, {"chunk": " testing", "done": false}, {"chunk": " starts", "done": false}, {"chunk": " Friday", "done": false}, {"chunk": ".", "done": false}, {"chunk": " The", "done": false}, {"chunk": " new", "done": false}, {"chunk": " settings", "done": false}, {"chunk": " screen", "done": false}, {"chunk": " will", "done": false}, {"chunk": " be", "done": false}, {"chunk": " delayed", "done": false}, {"chunk": " until", "done": false}, {"chunk": " the", "done": false}, {"chunk": " next", "done": false}, {"chunk": " release", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": false,
+      "sync_ms": 156.3159580109641,
+      "stream_ms": 148.49233301356435
+    },
+    {
+      "name": "tldr-garden",
+      "input": "A community garden opened beside the town library in April. Volunteers built twelve raised beds and planted tomatoes, carrots, and herbs. Rainwater collected from the library roof supplies most of the irrigation. Residents can join a Saturday workshop to learn composting and share tools. Half of the vegetables harvested this summer will be donated to the local food bank.",
+      "mode": "TLDR",
+      "max_num_tokens": null,
+      "result": {"summary": "A community garden opened next to the town library, and volunteers built raised beds and planted vegetables. Residents can learn composting and share tools, and half of the harvested vegetables will be donated to the local food bank.", "done": true},
+      "stream": [{"chunk": "A", "done": false}, {"chunk": " community", "done": false}, {"chunk": " garden", "done": false}, {"chunk": " opened", "done": false}, {"chunk": " next", "done": false}, {"chunk": " to", "done": false}, {"chunk": " the", "done": false}, {"chunk": " town", "done": false}, {"chunk": " library", "done": false}, {"chunk": ",", "done": false}, {"chunk": " and", "done": false}, {"chunk": " volunteer", "done": false}, {"chunk": "s", "done": false}, {"chunk": " built", "done": false}, {"chunk": " raised", "done": false}, {"chunk": " beds", "done": false}, {"chunk": " and", "done": false}, {"chunk": " planted", "done": false}, {"chunk": " vegetables", "done": false}, {"chunk": ".", "done": false}, {"chunk": " Resident", "done": false}, {"chunk": "s", "done": false}, {"chunk": " can", "done": false}, {"chunk": " learn", "done": false}, {"chunk": " com", "done": false}, {"chunk": "post", "done": false}, {"chunk": "ing", "done": false}, {"chunk": " and", "done": false}, {"chunk": " share", "done": false}, {"chunk": " tools", "done": false}, {"chunk": ",", "done": false}, {"chunk": " and", "done": false}, {"chunk": " half", "done": false}, {"chunk": " of", "done": false}, {"chunk": " the", "done": false}, {"chunk": " harvest", "done": false}, {"chunk": "ed", "done": false}, {"chunk": " vegetables", "done": false}, {"chunk": " will", "done": false}, {"chunk": " be", "done": false}, {"chunk": " don", "done": false}, {"chunk": "ated", "done": false}, {"chunk": " to", "done": false}, {"chunk": " the", "done": false}, {"chunk": " local", "done": false}, {"chunk": " food", "done": false}, {"chunk": " bank", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 157.96470799250528,
+      "stream_ms": 160.0882500060834
+    },
+    {
+      "name": "tldr-unicode",
+      "input": "Mar\u00eda and Andr\u00e9 opened a caf\u00e9 in Montr\u00e9al last spring. They serve coffee and fresh pastries every morning. After customers requested more options, they added vegan sandwiches and extended their opening hours on weekends. They plan to hire two employees before the winter season.",
+      "mode": "TLDR",
+      "max_num_tokens": null,
+      "result": {"summary": "Mar\u00eda and Andr\u00e9 opened a cafe in Montr\u00e9al in spring, serving coffee and pastries. They plan to hire two employees before the winter season.", "done": true},
+      "stream": [{"chunk": "Mar", "done": false}, {"chunk": "\u00ed", "done": false}, {"chunk": "a", "done": false}, {"chunk": " and", "done": false}, {"chunk": " And", "done": false}, {"chunk": "r", "done": false}, {"chunk": "\u00e9", "done": false}, {"chunk": " opened", "done": false}, {"chunk": " a", "done": false}, {"chunk": " cafe", "done": false}, {"chunk": " in", "done": false}, {"chunk": " Mont", "done": false}, {"chunk": "r", "done": false}, {"chunk": "\u00e9", "done": false}, {"chunk": "al", "done": false}, {"chunk": " in", "done": false}, {"chunk": " spring", "done": false}, {"chunk": ",", "done": false}, {"chunk": " serving", "done": false}, {"chunk": " coffee", "done": false}, {"chunk": " and", "done": false}, {"chunk": " pastries", "done": false}, {"chunk": ".", "done": false}, {"chunk": " They", "done": false}, {"chunk": " plan", "done": false}, {"chunk": " to", "done": false}, {"chunk": " hire", "done": false}, {"chunk": " two", "done": false}, {"chunk": " employees", "done": false}, {"chunk": " before", "done": false}, {"chunk": " the", "done": false}, {"chunk": " winter", "done": false}, {"chunk": " season", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 127.01712496345863,
+      "stream_ms": 125.21495798137039
+    },
+    {
+      "name": "tldr-short",
+      "input": "The library will close at six today for maintenance and reopen tomorrow morning.",
+      "mode": "TLDR",
+      "max_num_tokens": null,
+      "result": {"summary": "The library will close for maintenance and reopen tomorrow morning.", "done": true},
+      "stream": [{"chunk": "The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " close", "done": false}, {"chunk": " for", "done": false}, {"chunk": " maintenance", "done": false}, {"chunk": " and", "done": false}, {"chunk": " reopen", "done": false}, {"chunk": " tomorrow", "done": false}, {"chunk": " morning", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 44.38666603527963,
+      "stream_ms": 43.059582996647805
+    },
+    {
+      "name": "tldr-short-limit-64",
+      "input": "The library will close at six today for maintenance and reopen tomorrow morning.",
+      "mode": "TLDR",
+      "max_num_tokens": 64,
+      "result": {"summary": "The library will close for maintenance and reopen tomorrow morning.", "done": true},
+      "stream": [{"chunk": "The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " close", "done": false}, {"chunk": " for", "done": false}, {"chunk": " maintenance", "done": false}, {"chunk": " and", "done": false}, {"chunk": " reopen", "done": false}, {"chunk": " tomorrow", "done": false}, {"chunk": " morning", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 43.3100420050323,
+      "stream_ms": 41.069041995797306
+    },
+    {
+      "name": "keypoints-meeting",
+      "input": "The team met on Monday to plan the next app release. Maya will finish the camera interface by Thursday. Leo will investigate the startup crash and send a fix for review on Wednesday. Testing begins on Friday, and the release is scheduled for the following Tuesday if no critical bugs remain. The team decided to postpone the new settings screen until the next release.",
+      "mode": "KEYPOINTS",
+      "max_num_tokens": null,
+      "result": {"summary": "* The team met on Monday to plan the next app release.\n* Maya will finish the camera interface by Thursday.\n* Leo will investigate the startup crash and send a fix for review on Wednesday.\n* Testing will begin on Friday and the release is scheduled for Tuesday if no critical bugs remain.\n* The team decided to postpone the new settings screen until the next release.", "done": true},
+      "stream": [{"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " team", "done": false}, {"chunk": " met", "done": false}, {"chunk": " on", "done": false}, {"chunk": " Monday", "done": false}, {"chunk": " to", "done": false}, {"chunk": " plan", "done": false}, {"chunk": " the", "done": false}, {"chunk": " next", "done": false}, {"chunk": " app", "done": false}, {"chunk": " release", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " May", "done": false}, {"chunk": "a", "done": false}, {"chunk": " will", "done": false}, {"chunk": " finish", "done": false}, {"chunk": " the", "done": false}, {"chunk": " camera", "done": false}, {"chunk": " interface", "done": false}, {"chunk": " by", "done": false}, {"chunk": " Thursday", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Leo", "done": false}, {"chunk": " will", "done": false}, {"chunk": " investigate", "done": false}, {"chunk": " the", "done": false}, {"chunk": " startup", "done": false}, {"chunk": " crash", "done": false}, {"chunk": " and", "done": false}, {"chunk": " send", "done": false}, {"chunk": " a", "done": false}, {"chunk": " fix", "done": false}, {"chunk": " for", "done": false}, {"chunk": " review", "done": false}, {"chunk": " on", "done": false}, {"chunk": " Wednesday", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Test", "done": false}, {"chunk": "ing", "done": false}, {"chunk": " will", "done": false}, {"chunk": " begin", "done": false}, {"chunk": " on", "done": false}, {"chunk": " Friday", "done": false}, {"chunk": " and", "done": false}, {"chunk": " the", "done": false}, {"chunk": " release", "done": false}, {"chunk": " is", "done": false}, {"chunk": " scheduled", "done": false}, {"chunk": " for", "done": false}, {"chunk": " Tuesday", "done": false}, {"chunk": " if", "done": false}, {"chunk": " no", "done": false}, {"chunk": " critical", "done": false}, {"chunk": " bugs", "done": false}, {"chunk": " remain", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " team", "done": false}, {"chunk": " decided", "done": false}, {"chunk": " to", "done": false}, {"chunk": " post", "done": false}, {"chunk": "p", "done": false}, {"chunk": "one", "done": false}, {"chunk": " the", "done": false}, {"chunk": " new", "done": false}, {"chunk": " settings", "done": false}, {"chunk": " screen", "done": false}, {"chunk": " until", "done": false}, {"chunk": " the", "done": false}, {"chunk": " next", "done": false}, {"chunk": " release", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 252.37112498143688,
+      "stream_ms": 246.70783296460286
+    },
+    {
+      "name": "keypoints-garden",
+      "input": "A community garden opened beside the town library in April. Volunteers built twelve raised beds and planted tomatoes, carrots, and herbs. Rainwater collected from the library roof supplies most of the irrigation. Residents can join a Saturday workshop to learn composting and share tools. Half of the vegetables harvested this summer will be donated to the local food bank.",
+      "mode": "KEYPOINTS",
+      "max_num_tokens": null,
+      "result": {"summary": "* A community garden opened in April near the town library.\n* Volunteers built twelve raised beds and planted tomatoes, carrots, and herbs.\n* Rainwater from the library roof supplied most of the irrigation.\n* Residents can join a Saturday workshop to learn composting and share tools.\n* Half of the vegetables harvested this summer will be donated to the local food bank.", "done": true},
+      "stream": [{"chunk": "*", "done": false}, {"chunk": " A", "done": false}, {"chunk": " community", "done": false}, {"chunk": " garden", "done": false}, {"chunk": " opened", "done": false}, {"chunk": " in", "done": false}, {"chunk": " April", "done": false}, {"chunk": " near", "done": false}, {"chunk": " the", "done": false}, {"chunk": " town", "done": false}, {"chunk": " library", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Vol", "done": false}, {"chunk": "un", "done": false}, {"chunk": "te", "done": false}, {"chunk": "ers", "done": false}, {"chunk": " built", "done": false}, {"chunk": " twelve", "done": false}, {"chunk": " raised", "done": false}, {"chunk": " beds", "done": false}, {"chunk": " and", "done": false}, {"chunk": " planted", "done": false}, {"chunk": " tomatoes", "done": false}, {"chunk": ",", "done": false}, {"chunk": " carrot", "done": false}, {"chunk": "s", "done": false}, {"chunk": ",", "done": false}, {"chunk": " and", "done": false}, {"chunk": " herbs", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Rain", "done": false}, {"chunk": "water", "done": false}, {"chunk": " from", "done": false}, {"chunk": " the", "done": false}, {"chunk": " library", "done": false}, {"chunk": " roof", "done": false}, {"chunk": " supplied", "done": false}, {"chunk": " most", "done": false}, {"chunk": " of", "done": false}, {"chunk": " the", "done": false}, {"chunk": " ir", "done": false}, {"chunk": "rig", "done": false}, {"chunk": "ation", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Resident", "done": false}, {"chunk": "s", "done": false}, {"chunk": " can", "done": false}, {"chunk": " join", "done": false}, {"chunk": " a", "done": false}, {"chunk": " Saturday", "done": false}, {"chunk": " workshop", "done": false}, {"chunk": " to", "done": false}, {"chunk": " learn", "done": false}, {"chunk": " com", "done": false}, {"chunk": "post", "done": false}, {"chunk": "ing", "done": false}, {"chunk": " and", "done": false}, {"chunk": " share", "done": false}, {"chunk": " tools", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " Half", "done": false}, {"chunk": " of", "done": false}, {"chunk": " the", "done": false}, {"chunk": " vegetables", "done": false}, {"chunk": " harvest", "done": false}, {"chunk": "ed", "done": false}, {"chunk": " this", "done": false}, {"chunk": " summer", "done": false}, {"chunk": " will", "done": false}, {"chunk": " be", "done": false}, {"chunk": " don", "done": false}, {"chunk": "ated", "done": false}, {"chunk": " to", "done": false}, {"chunk": " the", "done": false}, {"chunk": " local", "done": false}, {"chunk": " food", "done": false}, {"chunk": " bank", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 258.4694999968633,
+      "stream_ms": 260.9273749985732
+    },
+    {
+      "name": "keypoints-unicode",
+      "input": "Mar\u00eda and Andr\u00e9 opened a caf\u00e9 in Montr\u00e9al last spring. They serve coffee and fresh pastries every morning. After customers requested more options, they added vegan sandwiches and extended their opening hours on weekends. They plan to hire two employees before the winter season.",
+      "mode": "KEYPOINTS",
+      "max_num_tokens": null,
+      "result": {"summary": "* Mar\u00eda and Andr\u00e9 opened a caf\u00e9 in Montr\u00e9al last spring.\n* They serve coffee and fresh pastries daily.\n* They have expanded their hours on weekends.\n* They plan to hire two employees before the winter season.", "done": true},
+      "stream": [{"chunk": "*", "done": false}, {"chunk": " Mar", "done": false}, {"chunk": "\u00ed", "done": false}, {"chunk": "a", "done": false}, {"chunk": " and", "done": false}, {"chunk": " And", "done": false}, {"chunk": "r", "done": false}, {"chunk": "\u00e9", "done": false}, {"chunk": " opened", "done": false}, {"chunk": " a", "done": false}, {"chunk": " ca", "done": false}, {"chunk": "f", "done": false}, {"chunk": "\u00e9", "done": false}, {"chunk": " in", "done": false}, {"chunk": " Mont", "done": false}, {"chunk": "r", "done": false}, {"chunk": "\u00e9", "done": false}, {"chunk": "al", "done": false}, {"chunk": " last", "done": false}, {"chunk": " spring", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " They", "done": false}, {"chunk": " serve", "done": false}, {"chunk": " coffee", "done": false}, {"chunk": " and", "done": false}, {"chunk": " fresh", "done": false}, {"chunk": " pastries", "done": false}, {"chunk": " daily", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " They", "done": false}, {"chunk": " have", "done": false}, {"chunk": " expanded", "done": false}, {"chunk": " their", "done": false}, {"chunk": " hours", "done": false}, {"chunk": " on", "done": false}, {"chunk": " weekends", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " They", "done": false}, {"chunk": " plan", "done": false}, {"chunk": " to", "done": false}, {"chunk": " hire", "done": false}, {"chunk": " two", "done": false}, {"chunk": " employees", "done": false}, {"chunk": " before", "done": false}, {"chunk": " the", "done": false}, {"chunk": " winter", "done": false}, {"chunk": " season", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 181.57408299157396,
+      "stream_ms": 184.43962500896305
+    },
+    {
+      "name": "keypoints-short",
+      "input": "The library will close at six today for maintenance and reopen tomorrow morning.",
+      "mode": "KEYPOINTS",
+      "max_num_tokens": null,
+      "result": {"summary": "* The library will close at six today for maintenance.\n* The library will reopen tomorrow morning.", "done": true},
+      "stream": [{"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " close", "done": false}, {"chunk": " at", "done": false}, {"chunk": " six", "done": false}, {"chunk": " today", "done": false}, {"chunk": " for", "done": false}, {"chunk": " maintenance", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " reopen", "done": false}, {"chunk": " tomorrow", "done": false}, {"chunk": " morning", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 68.78412503283471,
+      "stream_ms": 69.48858295800164
+    },
+    {
+      "name": "keypoints-short-limit-64",
+      "input": "The library will close at six today for maintenance and reopen tomorrow morning.",
+      "mode": "KEYPOINTS",
+      "max_num_tokens": 64,
+      "result": {"summary": "* The library will close at six today for maintenance.\n* The library will reopen tomorrow morning.", "done": true},
+      "stream": [{"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " close", "done": false}, {"chunk": " at", "done": false}, {"chunk": " six", "done": false}, {"chunk": " today", "done": false}, {"chunk": " for", "done": false}, {"chunk": " maintenance", "done": false}, {"chunk": ".", "done": false}, {"chunk": "\n", "done": false}, {"chunk": "*", "done": false}, {"chunk": " The", "done": false}, {"chunk": " library", "done": false}, {"chunk": " will", "done": false}, {"chunk": " reopen", "done": false}, {"chunk": " tomorrow", "done": false}, {"chunk": " morning", "done": false}, {"chunk": ".", "done": false}, {"chunk": null, "done": true}],
+      "stream_matches_result": true,
+      "sync_ms": 65.26258401572704,
+      "stream_ms": 64.37008403008804
+    }
+  ],
+  "errors": [
+    {"input": "", "mode": "TLDR", "message": "Input text is empty. Please provide a non-empty text.", "stream_message": "Input text is empty. Please provide a non-empty text."},
+    {"input": "", "mode": "KEYPOINTS", "message": "Input text is empty. Please provide a non-empty text.", "stream_message": "Input text is empty. Please provide a non-empty text."}
+  ],
+  "abi": {
+    "MpBaseOptionsC": {
+      "size": 72,
+      "alignment": 8,
+      "offsets": {"model_asset_buffer": 0, "model_asset_buffer_count": 8, "model_asset_path": 16, "file_descriptor": 24, "delegate": 28, "host_environment": 32, "host_system": 36, "host_version": 40, "ca_bundle_path": 48, "app_id": 56, "app_version": 64}
+    },
+    "_MpTextSummarizerOptionsC": {
+      "size": 96,
+      "alignment": 8,
+      "offsets": {"base_options": 0, "mode": 72, "max_num_tokens": 76, "cache_dir": 80, "min_log_severity": 88}
+    },
+    "_MpTextSummarizerResultC": {
+      "size": 8,
+      "alignment": 8,
+      "offsets": {"summary": 0}
+    },
+    "_MpTextSummarizerStreamResultC": {
+      "size": 16,
+      "alignment": 8,
+      "offsets": {"chunk": 0, "done": 8}
+    }
+  }
+}

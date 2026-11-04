@@ -1,0 +1,23 @@
+{
+  "package": "@mediapipe/tasks-audio",
+  "version": "1.2.0-rc.20261018",
+  "integrity": "cPrBCDIeeqFE9TvBOCLEe0o9sfnTcC9CQYo4lqPdtNOnQDRulSR3UZjIV4H24M/DOnGfa5qJENnPrTuqZAdInA==",
+  "files": [
+    "audio_bundle.mjs",
+    "wasm/audio_wasm_internal.js",
+    "wasm/audio_wasm_internal.wasm",
+    "wasm/audio_wasm_nosimd_internal.js",
+    "wasm/audio_wasm_nosimd_internal.wasm",
+    "wasm/audio_wasm_module_internal.js",
+    "wasm/audio_wasm_module_internal.wasm"
+  ],
+  "sha384": {
+    "audio_bundle.mjs": "3aojcj/qb2mIWyAJxhk8l0w2U4Fm5OOI5NH1pi8TcYkrY102Y391kvZG0xqNNLQ6",
+    "wasm/audio_wasm_internal.js": "uJNIXcxjc6A2j3yxJi3PhfIcs4NkGMw23ilwlR0+mmerQJ8P+iybQvu+cRfN8H67",
+    "wasm/audio_wasm_internal.wasm": "ELvZaMwbipY+6ThEMbjNJYeVpFyPjW4ME/CU2MfseFrKMgqUdQ2LEkJukrnaHtzo",
+    "wasm/audio_wasm_nosimd_internal.js": "eRvrFGPbCdcQlfwV9rTyhr95NTPcrjyTGTVC7oia6gPVQ2Gk687esJ3VFOhq/nQR",
+    "wasm/audio_wasm_nosimd_internal.wasm": "d6iG5EeIzUlvRa7IEvrKmOLmmCkoaM41e5XjfEsSU+F+A0VJVWZIhdc40vXiHjKJ",
+    "wasm/audio_wasm_module_internal.js": "1XQdOJmEHdPS31RpHPfV5mYtP+b/y37KjdIXC1sJ7doKq5Fns7qgdj21qKIQyHla",
+    "wasm/audio_wasm_module_internal.wasm": "828DzngWZ0EAwFLAajBwR8tYBCRK0bUWDFHNBxaub5+6+yMGnjeYPlSN83HwARzr"
+  }
+}

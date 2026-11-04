@@ -1,0 +1,26 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "source": "official Python AudioClassifier, macOS arm64 wheel, max_results 3",
+  "model": "yamnet.tflite",
+  "model_sha256": "4d8b4a53282dc83ef04e3e7dbc4fbc98082e34e44ed798e16c3a0cdd4c584faf",
+  "decode": "16-bit PCM WAV, samples / 32768",
+  "clips": {
+    "speech_16000_hz_mono.wav": [
+      {"timestamp_ms": 0, "top": [["Speech", 0.917969], ["Inside, small room", 0.058594], ["Silence", 0.015625]]},
+      {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]]},
+      {"timestamp_ms": 1950, "top": [["Speech", 0.984375], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]]},
+      {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]]},
+      {"timestamp_ms": 3900, "top": [["Tick", 0.261719], ["Silence", 0.199219], ["Bouncing", 0.199219]]}
+    ],
+    "speech_48000_hz_mono.wav": [
+      {"timestamp_ms": 0, "top": [["Speech", 0.941406], ["Inside, small room", 0.058594], ["Silence", 0.015625]]},
+      {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]]},
+      {"timestamp_ms": 1950, "top": [["Speech", 0.988281], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]]},
+      {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]]},
+      {"timestamp_ms": 3900, "top": [["Bouncing", 0.332031], ["Tick", 0.199219], ["Silence", 0.148438]]}
+    ],
+    "two_heads_16000_hz_mono.wav": [
+      {"timestamp_ms": 0, "top": [["Animal", 0.5], ["Environmental noise", 0.5], ["Bird", 0.414062]]}
+    ]
+  }
+}

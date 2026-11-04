@@ -1,0 +1,330 @@
+name: Nightly comparison
+
+# Runs the suites twice in one run, on the pinned build (baseline) and on a
+# newer Google nightly (nightly), and compares the two: each suite's pass or
+# fail, the measurement records they print against the tolerances the tests
+# use, and Google's C headers. A C API change, a suite that fails on the
+# nightly only, or a value the nightly moves beyond its tolerance is reported
+# in the run's summary and its nightly-compare artifact, and opens no issue;
+# a daily run that finds a regression or drift then runs the full matrix.
+# Nothing here pushes, releases or uses a secret besides GITHUB_TOKEN.
+on:
+  schedule:
+    # Google's C nightlies land about 12:10 to 12:20 UTC, its npm prereleases
+    # about 13:20 to 14:30; a nightly npm does not have yet runs native only,
+    # and the summary says so. Monday to Saturday run the daily set, Sunday
+    # the full matrix (tool/ci/nightly_pin.py FULL_SCHEDULE).
+    - cron: '0 14 * * 1-6'
+    - cron: '0 14 * * 0'
+  workflow_dispatch:
+    inputs:
+      nightly:
+        description: The nightly to compare, YYYYMMDD or newest.
+        type: string
+        default: newest
+      full:
+        description: Run the full matrix, not the daily set.
+        type: boolean
+        default: false
+  # A change to the comparison runs it on its own pull request.
+  pull_request:
+    paths:
+      - .github/workflows/nightly-compare.yaml
+      - .github/actions/nightly-pin/**
+      - packages/mediapipe-core/tool/pin_nightly.py
+      - tool/ci/nightly_compare.py
+      - tool/ci/nightly_pin.py
+      - tool/ci/test_nightly_compare.py
+
+permissions: {}
+
+concurrency:
+  group: nightly-compare-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # What a pull request run compares: a nightly (YYYYMMDD or newest), and the
+  # full matrix or the daily set.
+  PULL_REQUEST_NIGHTLY: newest
+  PULL_REQUEST_FULL: 'false'
+  NIGHTLY_COMPARE_ISSUE_PREFIX: ''
+  # Multiplies every tolerance; a negative scale makes every value drift,
+  # which tests the report.
+  NIGHTLY_COMPARE_TOLERANCE_SCALE: '1'
+
+jobs:
+  # Hashes Google's archive once, for every job: the nightly's pins as files
+  # the nightly side copies over its checkout (.github/actions/nightly-pin).
+  pin:
+    name: Pin the nightly
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      report: ${{ steps.decide.outputs.report }}
+      compare: ${{ steps.decide.outputs.compare }}
+      nightly: ${{ steps.pin.outputs.nightly }}
+      generation: ${{ steps.pin.outputs.generation }}
+      scope: ${{ steps.pin.outputs.scope }}
+      web: ${{ steps.pin.outputs.web }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Test the pin and comparison tools
+        run: |
+          python3 -B -m unittest packages/mediapipe-core/tool/test_pin_nightly.py
+          python3 -B -m unittest tool/ci/test_nightly_compare.py
+      - name: Pin Google's nightly
+        id: pin
+        env:
+          NIGHTLY: ${{ github.event_name == 'pull_request' && env.PULL_REQUEST_NIGHTLY || inputs.nightly || 'newest' }}
+          FULL: ${{ github.event_name == 'pull_request' && env.PULL_REQUEST_FULL || inputs.full }}
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: >-
+          python3 -B tool/ci/nightly_pin.py --nightly "$NIGHTLY" --event "$EVENT"
+          --schedule "$SCHEDULE" --full "$FULL" --out build/nightly-pin
+      # A scheduled run compares each build once: the cache key names the
+      # nightly, its archive generation (a re-upload is a new build) and the
+      # set, and a full comparison covers the daily set. The compare job saves
+      # it. A cache needs no write permission and keeps no state in the
+      # repository; one evicted after 7 days unused only means a nightly that
+      # old is compared again. Dispatches and pull requests always run.
+      - name: Look for an earlier comparison of this build
+        id: compared
+        if: ${{ github.event_name == 'schedule' }}
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: build/nightly-compared
+          key: nightly-compared-v1-${{ steps.pin.outputs.nightly }}-${{ steps.pin.outputs.generation }}-${{ steps.pin.outputs.scope }}
+          restore-keys: ${{ steps.pin.outputs.scope == 'daily' && format('nightly-compared-v1-{0}-{1}-', steps.pin.outputs.nightly, steps.pin.outputs.generation) || '' }}
+          lookup-only: true
+      - name: Decide what to run
+        id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          COMPARED: ${{ steps.compared.outputs.cache-matched-key }}
+          NIGHTLY: ${{ steps.pin.outputs.nightly }}
+          PREVIOUS: ${{ steps.pin.outputs.previous }}
+          GENERATION: ${{ steps.pin.outputs.generation }}
+          SCOPE: ${{ steps.pin.outputs.scope }}
+          PATCHED: ${{ steps.pin.outputs.patched }}
+          API_CHANGED: ${{ steps.pin.outputs.api_changed }}
+          WEB_NOTE: ${{ steps.pin.outputs.web_note }}
+        run: |
+          if [ -n "$COMPARED" ]; then
+            echo "Nightly $NIGHTLY (generation $GENERATION) was compared already ($COMPARED); nothing to run." >> "$GITHUB_STEP_SUMMARY"
+            echo 'report=false' >> "$GITHUB_OUTPUT"
+          elif [ "$NIGHTLY" = "$PREVIOUS" ] && [ "$EVENT" = schedule ]; then
+            echo "The newest nightly, $NIGHTLY, is the pinned build; nothing to compare." >> "$GITHUB_STEP_SUMMARY"
+            echo 'report=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'report=true' >> "$GITHUB_OUTPUT"
+            echo "compare=$PATCHED" >> "$GITHUB_OUTPUT"
+            if [ "$API_CHANGED" = true ]; then
+              echo "Nightly $NIGHTLY changes the C API: no suites run; the compare job reports it." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Nightly $NIGHTLY against the pinned $PREVIOUS, $SCOPE set. Browser: $WEB_NOTE." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ steps.decide.outputs.report == 'true' }}
+        with:
+          name: nightly-pin
+          path: build/nightly-pin/
+          if-no-files-found: error
+
+  # The existing workflows, called once per side. Daily: Linux CPU and Mesa
+  # GPU (desktop.yaml), the Android 15 emulator (android.yaml). Full: every
+  # desktop and Android job, iOS (ios.yaml) and macOS (main.yaml).
+  desktop:
+    name: Desktop (${{ matrix.side }})
+    needs: pin
+    if: ${{ needs.pin.outputs.compare == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [baseline, nightly]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/desktop.yaml
+    with:
+      side: ${{ matrix.side }}
+      scope: ${{ needs.pin.outputs.scope }}
+
+  android:
+    name: Android (${{ matrix.side }})
+    needs: pin
+    if: ${{ needs.pin.outputs.compare == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [baseline, nightly]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/android.yaml
+    with:
+      side: ${{ matrix.side }}
+      scope: ${{ needs.pin.outputs.scope }}
+
+  ios:
+    name: iOS (${{ matrix.side }})
+    needs: pin
+    if: ${{ needs.pin.outputs.compare == 'true' && needs.pin.outputs.scope == 'full' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [baseline, nightly]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ios.yaml
+    with:
+      side: ${{ matrix.side }}
+
+  macos:
+    name: macOS (${{ matrix.side }})
+    needs: pin
+    if: ${{ needs.pin.outputs.compare == 'true' && needs.pin.outputs.scope == 'full' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [baseline, nightly]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/main.yaml
+    with:
+      side: ${{ matrix.side }}
+
+  # web.yaml cannot be called here: its Pages deploy job needs pages and
+  # id-token write, which a caller must grant. This runs its browser steps for
+  # Google's runtime: the WebGL API suite in Chromium and text and audio in
+  # WebKit, each against Google's own JavaScript of the same build.
+  web:
+    name: Web (${{ matrix.side }}) / Chromium WebGL API and WebKit text and audio
+    needs: pin
+    if: ${{ needs.pin.outputs.compare == 'true' && needs.pin.outputs.web == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [baseline, nightly]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: ${{ matrix.side == 'nightly' }}
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: browser
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: gallery/tool/browser/package-lock.json
+      # web.yaml's model cache; restored only, so this workflow never writes it.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: gallery/assets/mediapipe
+          key: gallery-web-models-${{ hashFiles('packages/mediapipe-task-*/lib/models.dart') }}
+      - name: Prepare official web runtime and models
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target web
+          python3 -B gallery/tool/browser/prepare_camera.py
+      - name: Install browser test dependencies
+        working-directory: gallery/tool/browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium webkit
+      # The text and audio suite ends in the release gallery's Text Embedder.
+      - name: Build the release gallery and the API and text and audio probes
+        id: build
+        working-directory: gallery
+        run: |
+          flutter build web --release --base-href /flutter-mediapipe/ --no-web-resources-cdn
+          flutter build web --release --base-href /api-probe/ --no-web-resources-cdn --output build/web-api -t tool/web_api_probe.dart
+          flutter build web --release --base-href /text-audio-probe/ --no-web-resources-cdn --output build/web-text-audio -t tool/web_text_audio_probe.dart
+          dart run mediapipe_core:web_runtime build/web-runtime
+      - name: Start the gallery server
+        run: |
+          nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &
+          for _ in $(seq 1 60); do
+            curl -sf -o /dev/null --max-time 5 http://127.0.0.1:8866/api-probe/ && exit 0
+            sleep 2
+          done
+          cat web-server.log
+          exit 1
+      - name: Chromium WebGL API
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_browser.mjs --suite=api --delegate=gpu --official-runtime=/runtime/
+      - name: Text and audio in WebKit
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --browser=webkit --suite=text-audio --official-runtime=/runtime/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: web-evidence-${{ matrix.side }}
+          path: build/ci-tmp/web-browser-*/
+          if-no-files-found: warn
+
+  compare:
+    name: Compare the nightly with the pinned build
+    needs: [pin, desktop, android, ios, macos, web]
+    if: ${{ always() && needs.pin.outputs.report == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      escalate: ${{ steps.compare.outputs.escalate }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: nightly-pin
+          path: build/nightly-pin
+      - name: Compare the two sides
+        id: compare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCOPE: ${{ needs.pin.outputs.scope }}
+        run: python3 -B tool/ci/nightly_compare.py --pin build/nightly-pin --scope "$SCOPE" --out build/nightly-compare
+      - name: Say what a scheduled run would do next
+        if: ${{ github.event_name == 'pull_request' && steps.compare.outputs.escalate == 'true' && needs.pin.outputs.scope == 'daily' }}
+        run: echo 'A scheduled run would now dispatch the full matrix for this nightly; a pull request run does not.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: nightly-compare
+          path: build/nightly-compare/
+      # The marker the pin job looks for. A run that only met infrastructure
+      # failures leaves none, so the next schedule tries the build again.
+      - name: Mark this build compared
+        if: ${{ github.event_name != 'pull_request' && steps.compare.outputs.infra_only == 'false' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: build/nightly-compare/findings.json
+          key: nightly-compared-v1-${{ needs.pin.outputs.nightly }}-${{ needs.pin.outputs.generation }}-${{ needs.pin.outputs.scope }}
+
+  # A daily run that found a regression or drift runs the full matrix for the
+  # same nightly. GITHUB_TOKEN may start a workflow_dispatch run.
+  escalate:
+    name: Run the full matrix for this nightly
+    needs: [pin, compare]
+    if: ${{ always() && needs.compare.outputs.escalate == 'true' && needs.pin.outputs.scope == 'daily' && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NIGHTLY: ${{ needs.pin.outputs.nightly }}
+          REF: ${{ github.ref_name }}
+        run: |
+          gh workflow run nightly-compare.yaml --ref "$REF" -f nightly="$NIGHTLY" -f full=true
+          echo "Dispatched the full matrix for nightly $NIGHTLY." >> "$GITHUB_STEP_SUMMARY"

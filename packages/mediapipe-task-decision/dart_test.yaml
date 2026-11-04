@@ -1,0 +1,4 @@
+tags:
+  # Tests that load Google's library through the build hook and run the
+  # Laya model (make models_decision, or MEDIAPIPE_DECISION_MODEL).
+  native-assets:

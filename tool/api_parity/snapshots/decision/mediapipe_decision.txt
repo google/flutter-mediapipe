@@ -1,0 +1,80 @@
+include package:mediapipe_core/mediapipe_core.dart
+final class BooleanQuestion
+  Map<String, Object?> toJson()
+  String get condition
+  bool get normalizePrior
+  double get threshold
+  double? get temperature
+  new BooleanQuestion(String condition, {double threshold = 0.5, double? temperature, bool normalizePrior = false})
+final class BooleanResult
+  String toString()
+  bool get value
+  double get confidence
+  double get probabilityTrue
+  new BooleanResult({required bool value, required double probabilityTrue, required double confidence})
+final class ChoiceQuestion
+  ChoiceScoringMode get scoringMode
+  Map<String, Object?> toJson()
+  Map<String, String> get criteria
+  String? get instructions
+  bool get normalizePrior
+  double? get temperature
+  new ChoiceQuestion(Map<String, String> criteria, {String? instructions, double? temperature, ChoiceScoringMode scoringMode = ChoiceScoringMode.auto, bool normalizePrior = false})
+final class ChoiceResult
+  List<String> get predictionSet
+  Map<String, double> get probabilities
+  String get selectedKey
+  String toString()
+  double get confidence
+  new ChoiceResult({required String selectedKey, required Map<String, double> probabilities, required double confidence})
+enum ChoiceScoringMode extends Enum
+  int get index
+  new ChoiceScoringMode()
+  static ChoiceScoringMode auto
+  static ChoiceScoringMode fullOption
+  static ChoiceScoringMode singleToken
+  static List<ChoiceScoringMode> values
+  value ChoiceScoringMode.auto
+  value ChoiceScoringMode.fullOption
+  value ChoiceScoringMode.singleToken
+final class DecisionMaker
+  Delegate get delegate
+  Future<BooleanResult> evaluateBoolean(String text, BooleanQuestion question)
+  Future<ChoiceResult> evaluateChoice(String text, ChoiceQuestion question)
+  Future<List<BooleanResult>> evaluateBooleanBatch(List<String> texts, BooleanQuestion question, {String? sharedPrefix})
+  Future<List<ChoiceResult>> evaluateChoiceBatch(List<String> texts, ChoiceQuestion question, {String? sharedPrefix})
+  Future<List<ScoreResult>> evaluateScoreBatch(List<String> texts, ScoreQuestion question, {String? sharedPrefix})
+  Future<ScoreResult> evaluateScore(String text, ScoreQuestion question)
+  Future<void> dispose()
+  static Future<DecisionMaker> create(DecisionMakerOptions options)
+final class DecisionMakerOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get modelPath
+  Uint8List? get modelBytes
+  int get maxNumTokens
+  new DecisionMakerOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, int maxNumTokens = 0})
+abstract final class DecisionModels
+  new DecisionModels()
+  static DownloadAsset embeddingGemma2Text
+  static DownloadAsset embeddingGemma2TextVision
+  static DownloadAsset glinerS256
+  static DownloadAsset glinerS512
+  static DownloadAsset layaS256
+  static DownloadAsset layaS512
+  static Map<String, DownloadAsset> byName
+final class ScoreQuestion
+  List<String> get rubric
+  Map<String, Object?> toJson()
+  String? get instructions
+  double? get temperature
+  new ScoreQuestion(List<String> rubric, {String? instructions, double? temperature})
+final class ScoreResult
+  List<double> get probabilities
+  String get selectedKey
+  String toString()
+  double get confidence
+  double get expectedScore
+  new ScoreResult({required double expectedScore, required List<double> probabilities, required double confidence, required String selectedKey})
+function TaskCapabilities decisionMakerCapabilitiesForPlatform(TaskPlatform platform, {DownloadAsset? model})
+function Future<TaskCapabilities> queryDecisionMakerCapabilities([DownloadAsset? model])

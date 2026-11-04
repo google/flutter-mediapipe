@@ -1,0 +1,73 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "source": "official Python AudioClassifier in AUDIO_STREAM mode, macOS arm64 wheel, max_results 3",
+  "model": "yamnet.tflite",
+  "model_sha256": "4d8b4a53282dc83ef04e3e7dbc4fbc98082e34e44ed798e16c3a0cdd4c584faf",
+  "decode": "16-bit PCM WAV, samples / 32768, copied to every channel",
+  "timestamps": "each block at first_timestamp_ms + frames_sent * 1000 // rate",
+  "cases": {
+    "speech-100ms": {
+      "clip": "speech_16000_hz_mono.wav",
+      "frames": 68360,
+      "rate": 16000,
+      "channels": 1,
+      "block_frames": 1600,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 0, "top": [["Speech", 0.917969], ["Inside, small room", 0.058594], ["Silence", 0.015625]], "during_close": false}, {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]], "during_close": false}, {"timestamp_ms": 1950, "top": [["Speech", 0.984375], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]], "during_close": false}, {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]], "during_close": false}, {"timestamp_ms": 9223372036854775, "top": [["Tick", 0.261719], ["Silence", 0.199219], ["Bouncing", 0.199219]], "during_close": true}]
+    },
+    "speech-odd": {
+      "clip": "speech_16000_hz_mono.wav",
+      "frames": 68360,
+      "rate": 16000,
+      "channels": 1,
+      "block_frames": 777,
+      "first_timestamp_ms": 5000,
+      "results": [{"timestamp_ms": 5000, "top": [["Speech", 0.917969], ["Inside, small room", 0.058594], ["Silence", 0.015625]], "during_close": false}, {"timestamp_ms": 5975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]], "during_close": false}, {"timestamp_ms": 6950, "top": [["Speech", 0.984375], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]], "during_close": false}, {"timestamp_ms": 7925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]], "during_close": false}, {"timestamp_ms": 9223372036854775, "top": [["Tick", 0.261719], ["Silence", 0.199219], ["Bouncing", 0.199219]], "during_close": true}]
+    },
+    "speech-one-block": {
+      "clip": "speech_16000_hz_mono.wav",
+      "frames": 68360,
+      "rate": 16000,
+      "channels": 1,
+      "block_frames": 68360,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 0, "top": [["Speech", 0.917969], ["Inside, small room", 0.058594], ["Silence", 0.015625]], "during_close": false}, {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]], "during_close": false}, {"timestamp_ms": 1950, "top": [["Speech", 0.984375], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]], "during_close": false}, {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]], "during_close": false}, {"timestamp_ms": 9223372036854775, "top": [["Tick", 0.261719], ["Silence", 0.199219], ["Bouncing", 0.199219]], "during_close": true}]
+    },
+    "speech-48k": {
+      "clip": "speech_48000_hz_mono.wav",
+      "frames": 205080,
+      "rate": 48000,
+      "channels": 1,
+      "block_frames": 4801,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 0, "top": [["Speech", 0.941406], ["Inside, small room", 0.058594], ["Silence", 0.015625]], "during_close": false}, {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]], "during_close": false}, {"timestamp_ms": 1950, "top": [["Speech", 0.988281], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]], "during_close": false}, {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]], "during_close": false}, {"timestamp_ms": 9223372036854775, "top": [["Bouncing", 0.332031], ["Tick", 0.199219], ["Silence", 0.148438]], "during_close": true}]
+    },
+    "speech-stereo": {
+      "clip": "speech_16000_hz_mono.wav",
+      "frames": 68360,
+      "rate": 16000,
+      "channels": 2,
+      "block_frames": 1600,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 0, "top": [["Speech", 0.917969], ["Inside, small room", 0.058594], ["Silence", 0.015625]], "during_close": false}, {"timestamp_ms": 975, "top": [["Speech", 0.992188], ["Narration, monologue", 0.007812], ["Inside, small room", 0.003906]], "during_close": false}, {"timestamp_ms": 1950, "top": [["Speech", 0.984375], ["Speech synthesizer", 0.015625], ["Narration, monologue", 0.011719]], "during_close": false}, {"timestamp_ms": 2925, "top": [["Speech", 0.996094], ["Narration, monologue", 0.015625], ["Speech synthesizer", 0.003906]], "during_close": false}, {"timestamp_ms": 9223372036854775, "top": [["Tick", 0.261719], ["Silence", 0.199219], ["Bouncing", 0.199219]], "during_close": true}]
+    },
+    "two-heads": {
+      "clip": "two_heads_16000_hz_mono.wav",
+      "frames": 15600,
+      "rate": 16000,
+      "channels": 1,
+      "block_frames": 1600,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 0, "top": [["Animal", 0.5], ["Environmental noise", 0.5], ["Bird", 0.414062]], "during_close": false}]
+    },
+    "lone-half-second": {
+      "clip": "speech_16000_hz_mono.wav",
+      "frames": 8000,
+      "rate": 16000,
+      "channels": 1,
+      "block_frames": 8000,
+      "first_timestamp_ms": 0,
+      "results": [{"timestamp_ms": 9223372036854775, "top": [["Silence", 0.199219], ["Speech", 0.109375], ["Inside, small room", 0.042969]], "during_close": true}]
+    }
+  }
+}

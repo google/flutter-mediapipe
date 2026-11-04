@@ -1,0 +1,14 @@
+# Everything below is written by tool/gallery_builder for one build target.
+# The task list, the bundled models and the asset manifest all differ per platform,
+# so committing them would pin the repository to whichever machine ran last.
+/pubspec.yaml
+/assets/
+
+# Flutter/Dart build output.
+/build/
+/.dart_tool/
+/pubspec.lock
+*.iml
+
+# Python bytecode from the scripts in tool/.
+__pycache__/

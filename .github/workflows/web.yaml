@@ -1,0 +1,430 @@
+name: Web vision tasks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy_only:
+        description: Build and deploy Pages without browser tests
+        required: false
+        type: boolean
+        default: false
+      source_ref:
+        description: Git ref to build for a deploy-only run
+        required: false
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-face-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    if: ${{ !inputs.deploy_only }}
+    runs-on: ubuntu-24.04
+    # Setup, the API suites and both gallery tours (Chromium, then Firefox)
+    # ran past 45 minutes once retrieval and decision joined the gallery.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: browser
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: gallery/tool/browser/package-lock.json
+      # The gallery's models where bundle_models keeps them, named by their
+      # pinned SHA-256s, so a run reuses them; EmbeddingGemma alone is 184 MB.
+      # Only main saves them, as in family.yaml: a pull request reads main's copy.
+      - if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: gallery/assets/mediapipe
+          key: gallery-web-models-${{ hashFiles('packages/mediapipe-task-*/lib/models.dart') }}
+      - if: github.event_name != 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: gallery/assets/mediapipe
+          key: gallery-web-models-${{ hashFiles('packages/mediapipe-task-*/lib/models.dart') }}
+      - name: Prepare official web runtime and models
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target web
+          python3 -B gallery/tool/browser/prepare_camera.py
+      # The browsers' system packages come from the setup action's browser
+      # profile, cached and from another mirror when one is slow; the dry run
+      # fails and names them if this Playwright needs more.
+      - name: Install browser test dependencies
+        working-directory: gallery/tool/browser
+        run: |
+          npm ci
+          npx playwright install chromium firefox webkit
+          npx playwright install-deps --dry-run chromium firefox webkit
+      - name: Analyze and test vision browser code
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          flutter pub get
+          flutter analyze lib test
+          for attempt in 1 2; do
+            status=0
+            timeout 300 flutter test --platform chrome test/web || status=$?
+            if [ "$status" = 124 ] && [ "$attempt" = 1 ]; then
+              echo "flutter test --platform chrome hung; retrying"
+              continue
+            fi
+            exit "$status"
+          done
+      - name: Analyze text and audio browser code
+        run: |
+          for family in text audio; do
+            (cd packages/mediapipe-task-$family && flutter pub get && flutter analyze lib)
+          done
+      # The emulated audio stream, which is what browsers run, and the
+      # decoders, compiled to JavaScript and to WebAssembly: the stream's
+      # clock must hold with JavaScript numbers.
+      - name: Test audio browser code
+        working-directory: packages/mediapipe-task-audio
+        run: |
+          for compiler in javascript wasm; do
+            flags=""
+            if [ "$compiler" = wasm ]; then flags="--wasm"; fi
+            for attempt in 1 2; do
+              status=0
+              timeout 300 flutter test --platform chrome $flags test/web || status=$?
+              if [ "$status" = 124 ] && [ "$attempt" = 1 ]; then
+                echo "flutter test --platform chrome ($compiler) hung; retrying"
+                continue
+              fi
+              [ "$status" = 0 ] || exit "$status"
+              break
+            done
+          done
+      - name: Analyze and test gallery geometry and the video file reader
+        working-directory: gallery
+        run: |
+          flutter pub get
+          flutter analyze lib tool/web_api_probe.dart tool/web_text_audio_probe.dart
+          flutter test --platform chrome test/camera_geometry_test.dart test/camera_frame_test.dart test/camera_selection_test.dart
+          cd packages/video_frames && flutter test --reporter expanded
+      - name: Build release gallery and API probe
+        id: build
+        working-directory: gallery
+        run: |
+          flutter build web --release --base-href /flutter-mediapipe/ --no-web-resources-cdn
+          flutter build web --release --base-href /api-probe/ --no-web-resources-cdn --output build/web-api -t tool/web_api_probe.dart
+          flutter build web --release --base-href /text-audio-probe/ --no-web-resources-cdn --output build/web-text-audio -t tool/web_text_audio_probe.dart
+          # Core's self-host tool, for the self-hosted text and audio run.
+          dart run mediapipe_core:web_runtime build/web-text-audio/mediapipe
+          # Google's runtimes for the browser tests' direct comparisons with its
+          # own JavaScript, so they do not depend on the CDN (web_server.py
+          # serves them at /runtime/).
+          dart run mediapipe_core:web_runtime build/web-runtime
+          python3 -B tool/write_web_build_info.py
+      # Each browser run is its own step so the coverage rows follow its outcome.
+      - name: Start the gallery server
+        run: |
+          nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -sf -o /dev/null --max-time 5 http://127.0.0.1:8866/api-probe/ && exit 0
+            sleep 2
+          done
+          cat web-server.log
+          exit 1
+      - name: Face Landmarker still image in Chromium
+        run: node gallery/tool/browser/test_still_image.mjs
+      - name: Image Segmenter masks, legend and output types in Chromium
+        run: node gallery/tool/browser/test_segmenter_display.mjs
+      - name: Chromium CPU runtime, API and face webcam
+        id: chromium_cpu
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_browser.mjs --official-runtime=/runtime/
+      - name: Chromium CPU hand webcam
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_browser.mjs --suite=camera --task=hand --official-runtime=/runtime/
+      - name: Chromium CPU and GPU worker overlays
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_worker_overlays.mjs
+      - name: Chromium WebGL API
+        id: chromium_gpu
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_browser.mjs --suite=api --delegate=gpu --official-runtime=/runtime/
+      - name: Firefox CPU API
+        id: firefox_cpu
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: xvfb-run -a node gallery/tool/browser/test_browser.mjs --browser=firefox --suite=api --headed=true --official-runtime=/runtime/
+      - name: Text and audio in Chromium, with the fake microphone
+        id: text_audio_chromium
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --suite=text-audio --official-runtime=/runtime/
+      - name: Text and audio in Chromium, self-hosted runtimes
+        id: text_audio_self_hosted
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --suite=text-audio --runtime=mediapipe/ --official-runtime=/runtime/
+      - name: Text and audio in Firefox
+        id: text_audio_firefox
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --browser=firefox --suite=text-audio --official-runtime=/runtime/
+      - name: Text and audio in WebKit
+        id: text_audio_webkit
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --browser=webkit --suite=text-audio --official-runtime=/runtime/
+      - name: Every release gallery sidebar task in Chromium
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: node gallery/tool/browser/test_gallery_journey.mjs
+      - name: Every release gallery sidebar task in Firefox
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: xvfb-run -a node gallery/tool/browser/test_gallery_journey.mjs --browser=firefox --headed=true
+      - name: Record web CPU task coverage (web-text-audio-chromium)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-text-audio-chromium
+          platform: web
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder,embedding_gemma
+          outcome: ${{ steps.text_audio_chromium.outcome }}
+      - name: Record web CPU task coverage (web-text-audio-firefox)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-text-audio-firefox
+          platform: web
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder,embedding_gemma
+          outcome: ${{ steps.text_audio_firefox.outcome }}
+      - name: Record web CPU task coverage (web-text-audio-webkit)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-text-audio-webkit
+          platform: web
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder,embedding_gemma
+          outcome: ${{ steps.text_audio_webkit.outcome }}
+      - name: Record web CPU task coverage (web-chromium-cpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-chromium-cpu
+          platform: web
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.chromium_cpu.outcome }}
+      - name: Record web GPU task coverage (web-chromium-webgl)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-chromium-webgl
+          platform: web
+          delegate: gpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.chromium_gpu.outcome }}
+      - name: Record web CPU task coverage (web-firefox-cpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-firefox-cpu
+          platform: web
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.firefox_cpu.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: web-face-evidence
+          path: |
+            build/ci-tmp/web-browser-*/
+            build/ci-tmp/worker-overlays/
+            build/ci-tmp/gallery-journey-*/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: web-gallery-release
+          path: gallery/build/web/
+
+  # Safari's engine, on macOS. Linux WebKit builds give a worker's
+  # OffscreenCanvas no WebGL context, and Google's vision tasks need one even
+  # on CPU; its text and audio tasks run in Linux WebKit above. The gallery
+  # journey does not run here: WebKit's page process on these hosts sometimes
+  # ends mid-journey with no error, so CONTRIBUTING.md has it run by hand.
+  webkit:
+    if: ${{ !inputs.deploy_only }}
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: gallery/tool/browser/package-lock.json
+      - name: Prepare official web runtime and models
+        run: dart run tool/gallery_builder/bin/prepare_gallery.dart --target web
+      - name: Install WebKit
+        working-directory: gallery/tool/browser
+        run: |
+          npm ci
+          npx playwright install webkit
+      - name: Build release gallery and API probe
+        id: build
+        working-directory: gallery
+        run: |
+          flutter pub get
+          flutter build web --release --base-href /flutter-mediapipe/ --no-web-resources-cdn
+          flutter build web --release --base-href /api-probe/ --no-web-resources-cdn --output build/web-api -t tool/web_api_probe.dart
+          # Google's runtimes for the browser tests' direct comparisons with its
+          # own JavaScript, so they do not depend on the CDN (web_server.py
+          # serves them at /runtime/).
+          dart run mediapipe_core:web_runtime build/web-runtime
+          python3 -B tool/write_web_build_info.py
+      # The server takes about 20 s to answer its first request on these hosts.
+      - name: Start the gallery server
+        run: |
+          nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -sf -o /dev/null --max-time 5 http://127.0.0.1:8866/api-probe/ && exit 0
+            sleep 2
+          done
+          cat web-server.log
+          exit 1
+      - name: WebKit CPU API
+        id: webkit_cpu
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_browser.mjs --browser=webkit --suite=api --official-runtime=/runtime/
+      - name: Record web CPU task coverage (web-webkit-cpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-webkit-cpu
+          platform: web
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.webkit_cpu.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: web-webkit-evidence
+          path: |
+            build/ci-tmp/web-browser-*/
+            web-server.log
+
+  deploy:
+    needs: browser
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: web-gallery-release
+          path: public
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  verify-deployment:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      # ffmpeg and the browser's packages through the browser profile, cached
+      # and from another mirror when one is slow, as the browser job installs
+      # them; a bare apt-get here had neither.
+      - uses: ./.github/actions/setup
+        with:
+          flutter: 'false'
+          linux-profile: browser
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: gallery/tool/browser/package-lock.json
+      - name: Check deployed source
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: python3 -B gallery/tool/check_web_deployment.py
+      - name: Prepare release browser verification
+        run: |
+          python3 -B gallery/tool/browser/prepare_camera.py
+          cd gallery/tool/browser
+          npm ci
+          npx playwright install --no-shell chromium
+          npx playwright install-deps --dry-run chromium
+      - name: Verify public live camera gallery
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: |
+          node gallery/tool/browser/test_browser.mjs --suite=camera --base-url="$PAGE_URL"
+          node gallery/tool/browser/test_browser.mjs --suite=camera --task=hand --base-url="$PAGE_URL"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: web-pages-evidence
+          path: build/ci-tmp/web-browser-*/
+
+  deploy-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_only }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.source_ref }}
+      - uses: ./.github/actions/setup
+      - name: Build release gallery
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target web
+          cd gallery
+          flutter pub get
+          flutter build web --release --base-href /flutter-mediapipe/ --no-web-resources-cdn
+          env -u GITHUB_SHA python3 -B tool/write_web_build_info.py
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: gallery/build/web
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

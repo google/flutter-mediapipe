@@ -1,0 +1,108 @@
+include package:mediapipe_core/mediapipe_core.dart
+enum ActivationDataType extends Enum
+  int get index
+  new ActivationDataType()
+  static ActivationDataType float16
+  static ActivationDataType float32
+  static ActivationDataType int16
+  static ActivationDataType int8
+  static ActivationDataType modelDefault
+  static List<ActivationDataType> values
+  value ActivationDataType.float16
+  value ActivationDataType.float32
+  value ActivationDataType.int16
+  value ActivationDataType.int8
+  value ActivationDataType.modelDefault
+final class AudioPart extends ContentPart
+  Float32List? get audioData
+  Map<String, Object?> toJson()
+  String toString()
+  String? get audioPath
+  new AudioPart({Float32List? audioData, String? audioPath})
+enum ChunkingMode extends Enum
+  int get index
+  new ChunkingMode()
+  static ChunkingMode character
+  static ChunkingMode word
+  static List<ChunkingMode> values
+  value ChunkingMode.character
+  value ChunkingMode.word
+abstract sealed class ContentPart
+  Map<String, Object?> toJson()
+  new ContentPart()
+final class ImagePart extends ContentPart
+  Map<String, Object?> toJson()
+  String toString()
+  String? get filePath
+  Uint8List? get imageBytes
+  new ImagePart({Uint8List? imageBytes, String? filePath})
+abstract final class RetrievalModels
+  new RetrievalModels()
+  static DownloadAsset embeddingGemma2
+  static DownloadAsset embeddingGemma2TextVision
+  static Map<String, DownloadAsset> byName
+final class RetrievalRecord
+  Map<String, String> get metadata
+  String get id
+  String get text
+  String toString()
+  double get score
+  new RetrievalRecord({required String id, required String text, required double score, Map<String, String> metadata = const {}})
+final class RetrievalResult
+  List<RetrievalRecord> get records
+  String toString()
+  new RetrievalResult({required List<RetrievalRecord> records})
+final class SemanticRetriever
+  Delegate get delegate
+  Future<List<String>> getAllRecordIds()
+  Future<RetrievalResult> retrieve(String query, {int limit = 5, double minSimilarity = 0.5, Map<String, String>? metadataFilter})
+  Future<RetrievalResult> retrieveContent(List<ContentPart> query, {int limit = 5, double minSimilarity = 0.5, Map<String, String>? metadataFilter})
+  Future<void> delete(String id)
+  Future<void> deleteAll()
+  Future<void> deleteWithMetadataFilter(Map<String, String> metadataFilter)
+  Future<void> dispose()
+  Future<void> insertAudio(String id, {Float32List? audioData, String? audioPath, Map<String, String> metadata = const {}})
+  Future<void> insertContent(String id, List<ContentPart> parts, {Map<String, String> metadata = const {}})
+  Future<void> insertDocument(String id, String text, {Map<String, String> metadata = const {}})
+  Future<void> insertImage(String id, {Uint8List? imageBytes, String? filePath, Map<String, String> metadata = const {}})
+  static Future<SemanticRetriever> create(SemanticRetrieverOptions options)
+final class SemanticRetrieverOptions
+  ChunkingMode get chunkingMode
+  String? get databasePath
+  UniversalEmbedder get embedder
+  int get chunkOverlap
+  int get chunkSize
+  int get embeddingDimension
+  new SemanticRetrieverOptions({required UniversalEmbedder embedder, String? databasePath, int embeddingDimension = 768, int chunkSize = 512, int chunkOverlap = 100, ChunkingMode chunkingMode = ChunkingMode.character})
+final class TextPart extends ContentPart
+  Map<String, Object?> toJson()
+  String get text
+  String toString()
+  new TextPart(String text)
+final class UniversalEmbedder
+  Delegate get delegate
+  Future<UniversalEmbedderResult> embedAudio(Float32List audioData)
+  Future<UniversalEmbedderResult> embedImage(Uint8List imageBytes)
+  Future<UniversalEmbedderResult> embedText(String text)
+  Future<void> dispose()
+  static Future<UniversalEmbedder> create(UniversalEmbedderOptions options)
+  static double cosineSimilarity(Embedding first, Embedding second)
+final class UniversalEmbedderOptions extends TaskOptions
+  ActivationDataType get activationDataType
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get cacheDir
+  String? get modelPath
+  Uint8List? get modelBytes
+  bool get l2Normalize
+  int get maxInputLength
+  int get visionTokensPerImage
+  new UniversalEmbedderOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, bool l2Normalize = true, int maxInputLength = 0, int visionTokensPerImage = 0, ActivationDataType activationDataType = ActivationDataType.modelDefault, String? cacheDir})
+final class UniversalEmbedderResult
+  List<Embedding> get embeddings
+  String toString()
+  new UniversalEmbedderResult({required List<Embedding> embeddings})
+function Future<TaskCapabilities> querySemanticRetrieverCapabilities()
+function Future<TaskCapabilities> queryUniversalEmbedderCapabilities()
+function TaskCapabilities semanticRetrieverCapabilitiesForPlatform(TaskPlatform platform)
+function TaskCapabilities universalEmbedderCapabilitiesForPlatform(TaskPlatform platform)

@@ -1,0 +1,535 @@
+{
+ "mediapipe": "1.1.0",
+ "platform": "darwin/arm64",
+ "library": "libmediapipe.dylib",
+ "librarySha256": "8445f23f797b1103527b24d4ec71e898c49a792f3d5f936c3ba06c5dba252002",
+ "model": "embeddinggemma-2-text-vision-440m.litertlm",
+ "modelSha256": "92dcbea108899e5d6e30d919b0744f90d9967e80c67a4ab5503ac16d54f62eb0",
+ "cases": [
+  {
+   "name": "refund",
+   "kind": "boolean",
+   "question": {
+    "condition": "The customer wants a refund.",
+    "threshold": 0.5,
+    "normalizePrior": false
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "value": false,
+     "probabilityTrue": 0.45160728693008423,
+     "confidence": 0.09678542613983154
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.7287903428077698,
+     "confidence": 0.45758068561553955
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.7560138702392578,
+     "confidence": 0.5120277404785156
+    }
+   ],
+   "batch": [
+    {
+     "value": false,
+     "probabilityTrue": 0.45160728693008423,
+     "confidence": 0.09678542613983154
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.7287903428077698,
+     "confidence": 0.45758068561553955
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.7560138702392578,
+     "confidence": 0.5120277404785156
+    }
+   ]
+  },
+  {
+   "name": "refund_strict",
+   "kind": "boolean",
+   "question": {
+    "condition": "The customer wants a refund.",
+    "threshold": 0.9,
+    "normalizePrior": false
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "value": false,
+     "probabilityTrue": 0.45160728693008423,
+     "confidence": 0.49821412563323975
+    },
+    {
+     "value": false,
+     "probabilityTrue": 0.7287903428077698,
+     "confidence": 0.19023293256759644
+    },
+    {
+     "value": false,
+     "probabilityTrue": 0.7560138702392578,
+     "confidence": 0.15998457372188568
+    }
+   ],
+   "batch": [
+    {
+     "value": false,
+     "probabilityTrue": 0.45160728693008423,
+     "confidence": 0.49821412563323975
+    },
+    {
+     "value": false,
+     "probabilityTrue": 0.7287903428077698,
+     "confidence": 0.19023293256759644
+    },
+    {
+     "value": false,
+     "probabilityTrue": 0.7560138702392578,
+     "confidence": 0.15998457372188568
+    }
+   ]
+  },
+  {
+   "name": "question_normalized",
+   "kind": "boolean",
+   "question": {
+    "condition": "The text asks a question.",
+    "threshold": 0.5,
+    "normalizePrior": true
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "value": false,
+     "probabilityTrue": 0.10143933445215225,
+     "confidence": 0.7971213459968567
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.6206521391868591,
+     "confidence": 0.24130427837371826
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.549288272857666,
+     "confidence": 0.09857654571533203
+    }
+   ],
+   "batch": [
+    {
+     "value": false,
+     "probabilityTrue": 0.10143933445215225,
+     "confidence": 0.7971213459968567
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.6206521391868591,
+     "confidence": 0.24130427837371826
+    },
+    {
+     "value": true,
+     "probabilityTrue": 0.549288272857666,
+     "confidence": 0.09857654571533203
+    }
+   ]
+  },
+  {
+   "name": "topic",
+   "kind": "choice",
+   "question": {
+    "criteria": {
+     "shipping": "A problem with delivery or a damaged package",
+     "billing": "A question about a charge or a refund",
+     "account": "A question about the account or its settings",
+     "other": "Anything else"
+    },
+    "instructions": null
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "selectedKey": "shipping",
+     "probabilities": {
+      "other": 0.0082760751247406,
+      "billing": 0.257577121257782,
+      "account": 0.043358396738767624,
+      "shipping": 0.6907883882522583
+     },
+     "confidence": 0.4368634819984436,
+     "predictionSet": [
+      "shipping",
+      "billing"
+     ]
+    },
+    {
+     "selectedKey": "shipping",
+     "probabilities": {
+      "other": 0.3130199909210205,
+      "billing": 0.042998865246772766,
+      "account": 0.06152987852692604,
+      "shipping": 0.5824512839317322
+     },
+     "confidence": 0.2892933487892151,
+     "predictionSet": [
+      "shipping",
+      "other",
+      "account"
+     ]
+    },
+    {
+     "selectedKey": "account",
+     "probabilities": {
+      "other": 0.016903312876820564,
+      "billing": 0.00453403452411294,
+      "account": 0.9783204793930054,
+      "shipping": 0.00024215695157181472
+     },
+     "confidence": 0.9156781435012817,
+     "predictionSet": [
+      "account"
+     ]
+    }
+   ],
+   "batch": [
+    {
+     "selectedKey": "shipping",
+     "probabilities": {
+      "other": 0.0082760751247406,
+      "billing": 0.257577121257782,
+      "account": 0.043358396738767624,
+      "shipping": 0.6907883882522583
+     },
+     "confidence": 0.4368634819984436,
+     "predictionSet": [
+      "shipping",
+      "billing"
+     ]
+    },
+    {
+     "selectedKey": "shipping",
+     "probabilities": {
+      "other": 0.3130199909210205,
+      "billing": 0.042998865246772766,
+      "shipping": 0.5824512839317322,
+      "account": 0.06152987852692604
+     },
+     "confidence": 0.2892933487892151,
+     "predictionSet": [
+      "shipping",
+      "other",
+      "account"
+     ]
+    },
+    {
+     "selectedKey": "account",
+     "probabilities": {
+      "billing": 0.00453403452411294,
+      "other": 0.016903312876820564,
+      "account": 0.9783204793930054,
+      "shipping": 0.00024215695157181472
+     },
+     "confidence": 0.9156781435012817,
+     "predictionSet": [
+      "account"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "topic_instructed",
+   "kind": "choice",
+   "question": {
+    "criteria": {
+     "complaint": "The customer is unhappy",
+     "praise": "The customer is happy",
+     "question": "The customer asks for help"
+    },
+    "instructions": "Classify the customer message."
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "selectedKey": "question",
+     "probabilities": {
+      "complaint": 0.4581025242805481,
+      "praise": 0.0034611260052770376,
+      "question": 0.5384363532066345
+     },
+     "confidence": 0.3532085716724396,
+     "predictionSet": [
+      "question",
+      "complaint"
+     ]
+    },
+    {
+     "selectedKey": "praise",
+     "probabilities": {
+      "complaint": 0.005004760809242725,
+      "praise": 0.9593276977539062,
+      "question": 0.03566755726933479
+     },
+     "confidence": 0.8313835859298706,
+     "predictionSet": [
+      "praise"
+     ]
+    },
+    {
+     "selectedKey": "question",
+     "probabilities": {
+      "complaint": 0.20014505088329315,
+      "praise": 0.1427835375070572,
+      "question": 0.6570714116096497
+     },
+     "confidence": 0.20277713239192963,
+     "predictionSet": [
+      "question",
+      "complaint",
+      "praise"
+     ]
+    }
+   ],
+   "batch": [
+    {
+     "selectedKey": "question",
+     "probabilities": {
+      "complaint": 0.4581025242805481,
+      "praise": 0.0034611260052770376,
+      "question": 0.5384363532066345
+     },
+     "confidence": 0.3532085716724396,
+     "predictionSet": [
+      "question",
+      "complaint"
+     ]
+    },
+    {
+     "selectedKey": "praise",
+     "probabilities": {
+      "complaint": 0.005004760809242725,
+      "praise": 0.9593276977539062,
+      "question": 0.03566755726933479
+     },
+     "confidence": 0.8313835859298706,
+     "predictionSet": [
+      "praise"
+     ]
+    },
+    {
+     "selectedKey": "question",
+     "probabilities": {
+      "complaint": 0.20014505088329315,
+      "question": 0.6570714116096497,
+      "praise": 0.1427835375070572
+     },
+     "confidence": 0.20277713239192963,
+     "predictionSet": [
+      "question",
+      "complaint",
+      "praise"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "sentiment",
+   "kind": "score",
+   "question": {
+    "rubric": [
+     "very unhappy",
+     "unhappy",
+     "neutral",
+     "happy",
+     "very happy"
+    ],
+    "instructions": null
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "expectedScore": 0.8518764972686768,
+     "probabilities": [
+      0.18589510023593903,
+      0.795743465423584,
+      0.004636743105947971,
+      0.008039368316531181,
+      0.005685354117304087
+     ],
+     "confidence": 0.634854793548584,
+     "selectedKey": "2"
+    },
+    {
+     "expectedScore": 3.4912571907043457,
+     "probabilities": [
+      0.001287724357098341,
+      0.0031981689389795065,
+      0.006850721314549446,
+      0.4802957773208618,
+      0.5083675980567932
+     ],
+     "confidence": 0.529496431350708,
+     "selectedKey": "5"
+    },
+    {
+     "expectedScore": 1.8833309412002563,
+     "probabilities": [
+      0.07895788550376892,
+      0.36132752895355225,
+      0.25913774967193604,
+      0.19857938587665558,
+      0.10199744254350662
+     ],
+     "confidence": 0.08534654229879379,
+     "selectedKey": "2"
+    }
+   ],
+   "batch": [
+    {
+     "expectedScore": 0.8518764972686768,
+     "probabilities": [
+      0.18589510023593903,
+      0.795743465423584,
+      0.004636743105947971,
+      0.008039368316531181,
+      0.005685354117304087
+     ],
+     "confidence": 0.634854793548584,
+     "selectedKey": "2"
+    },
+    {
+     "expectedScore": 3.4912571907043457,
+     "probabilities": [
+      0.001287724357098341,
+      0.0031981689389795065,
+      0.006850721314549446,
+      0.4802957773208618,
+      0.5083675980567932
+     ],
+     "confidence": 0.529496431350708,
+     "selectedKey": "5"
+    },
+    {
+     "expectedScore": 1.8833309412002563,
+     "probabilities": [
+      0.07895788550376892,
+      0.36132752895355225,
+      0.25913774967193604,
+      0.19857938587665558,
+      0.10199744254350662
+     ],
+     "confidence": 0.08534654229879379,
+     "selectedKey": "2"
+    }
+   ]
+  },
+  {
+   "name": "urgency",
+   "kind": "score",
+   "question": {
+    "rubric": [
+     "not urgent",
+     "somewhat urgent",
+     "very urgent"
+    ],
+    "instructions": "How urgently does this need a reply?"
+   },
+   "texts": [
+    "My order arrived broken and I want my money back.",
+    "Thanks, everything was perfect and it arrived early.",
+    "How do I change the email address on my account?"
+   ],
+   "results": [
+    {
+     "expectedScore": 0.8300362825393677,
+     "probabilities": [
+      0.21683543920516968,
+      0.7362927794456482,
+      0.04687175527215004
+     ],
+     "confidence": 0.36255839467048645,
+     "selectedKey": "2"
+    },
+    {
+     "expectedScore": 0.33097708225250244,
+     "probabilities": [
+      0.7358768582344055,
+      0.1972692310810089,
+      0.06685393303632736
+     ],
+     "confidence": 0.3384847342967987,
+     "selectedKey": "1"
+    },
+    {
+     "expectedScore": 0.5225682854652405,
+     "probabilities": [
+      0.5677698254585266,
+      0.3418920934200287,
+      0.0903380960226059
+     ],
+     "confidence": 0.17576964199543,
+     "selectedKey": "1"
+    }
+   ],
+   "batch": [
+    {
+     "expectedScore": 0.8300362825393677,
+     "probabilities": [
+      0.21683543920516968,
+      0.7362927794456482,
+      0.04687175527215004
+     ],
+     "confidence": 0.36255839467048645,
+     "selectedKey": "2"
+    },
+    {
+     "expectedScore": 0.33097708225250244,
+     "probabilities": [
+      0.7358768582344055,
+      0.1972692310810089,
+      0.06685393303632736
+     ],
+     "confidence": 0.3384847342967987,
+     "selectedKey": "1"
+    },
+    {
+     "expectedScore": 0.5225682854652405,
+     "probabilities": [
+      0.5677698254585266,
+      0.3418920934200287,
+      0.0903380960226059
+     ],
+     "confidence": 0.17576964199543,
+     "selectedKey": "1"
+    }
+   ]
+  }
+ ]
+}

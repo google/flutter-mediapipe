@@ -1,51 +1,53 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:ffi';
+
 import 'package:ffi/ffi.dart';
-import 'package:mediapipe_core/src/io/test_utils.dart';
-import 'package:mediapipe_text/io.dart';
-import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
-    as core_bindings;
-import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
-    as bindings;
+import 'package:mediapipe_text/src/io/native_text_embedder.dart';
+import 'package:mediapipe_text/src/io/third_party/mediapipe/embedding_gemma_bindings.dart'
+    as mp;
 import 'package:test/test.dart';
 
 void main() {
-  group('TextEmbedderResult.native should', () {
-    test('load an empty object', () {
-      final Pointer<bindings.TextEmbedderResult> ptr =
-          calloc<bindings.TextEmbedderResult>();
-      // These fields are provided by the real MediaPipe implementation, but
-      // Dart ignores them because they are meaningless in context of text tasks
-      ptr.ref.embeddings_count = 0;
-      ptr.ref.has_timestamp_ms = false;
-
-      final result = TextEmbedderResult.native(ptr);
-      expect(result.embeddings, isEmpty);
+  test('copies an empty 1.0.1 embedding result', () {
+    final result = using(
+      (arena) => textEmbedderResultFromNative(arena<mp.MpEmbeddingResult>()),
+    );
+    expect(result.embeddings, isEmpty);
+    expect(result.timestampMilliseconds, isNull);
+  });
+  test('owns immutable float and signed-byte storage after native free', () {
+    final result = using((arena) {
+      final output = arena<mp.MpEmbeddingResult>();
+      final heads = arena<mp.MpEmbedding>(2);
+      final floats = arena<Float>(2)..asTypedList(2).setAll(0, [.25, -.5]);
+      final bytes = arena<Uint8>(2)..asTypedList(2).setAll(0, [127, 128]);
+      heads[0]
+        ..floatEmbedding = floats
+        ..valuesCount = 2
+        ..headIndex = 0;
+      heads[1]
+        ..quantizedEmbedding = bytes
+        ..valuesCount = 2
+        ..headIndex = 1;
+      output.ref
+        ..embeddings = heads
+        ..embeddingsCount = 2;
+      final result = textEmbedderResultFromNative(output);
+      floats.asTypedList(2).fillRange(0, 2, 99);
+      bytes.asTypedList(2).fillRange(0, 2, 0);
+      return result;
     });
-
-    test('load a hydrated object', () {
-      final Pointer<bindings.TextEmbedderResult> resultPtr =
-          calloc<bindings.TextEmbedderResult>();
-
-      final embeddingsPtr = calloc<core_bindings.Embedding>(2);
-      populateEmbedding(embeddingsPtr[0], length: 50);
-      populateEmbedding(embeddingsPtr[1], length: 25);
-
-      resultPtr.ref.embeddings_count = 2;
-      resultPtr.ref.embeddings = embeddingsPtr;
-      resultPtr.ref.has_timestamp_ms = false;
-
-      final result = TextEmbedderResult.native(resultPtr);
-      expect(result.embeddings, hasLength(2));
-      final embedding = result.embeddings.take(1).toList().first;
-      expect(embedding.type, EmbeddingType.float);
-      expect(embedding.length, 50);
-      final embedding2 = result.embeddings.skip(1).take(1).toList().last;
-      expect(embedding2.type, EmbeddingType.float);
-      expect(embedding2.length, 25);
-    }, timeout: const Timeout(Duration(milliseconds: 10)));
+    expect(result.embeddings[0].floatEmbedding, [.25, -.5]);
+    expect(result.embeddings[1].quantizedEmbedding, [127, 128]);
+    expect(result.embeddings[0].headName, isNull);
+    expect(result.embeddings[1].headIndex, 1);
+    expect(() => result.embeddings.clear(), throwsUnsupportedError);
+    expect(
+      () => result.embeddings[0].floatEmbedding![0] = 0,
+      throwsUnsupportedError,
+    );
+    expect(
+      () => result.embeddings[1].quantizedEmbedding![0] = 0,
+      throwsUnsupportedError,
+    );
   });
 }

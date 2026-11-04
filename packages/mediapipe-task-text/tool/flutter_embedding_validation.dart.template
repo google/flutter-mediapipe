@@ -1,0 +1,259 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/services.dart';
+import 'package:mediapipe_text/mediapipe_text.dart';
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+import 'summarizer_validation.dart';
+import 'classic_text_validation.dart';
+
+Future<Uint8List> _asset(String name) async {
+  final data = await rootBundle.load('assets/$name');
+  return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+}
+
+String _file(String name) {
+  final path = File.fromUri(File(Platform.resolvedExecutable).parent.parent.uri.resolve(
+    'Frameworks/App.framework/Resources/flutter_assets/assets/$name'));
+  if (!path.existsSync()) throw StateError('Missing bundled asset $name');
+  return path.path;
+}
+
+TextFormatContext? _context(Map<String, dynamic> entry) {
+  final context = entry['context'] as Map<String, dynamic>?;
+  if (context == null) return null;
+  const names = ['RETRIEVAL_QUERY', 'RETRIEVAL_DOCUMENT', 'SEMANTIC_SIMILARITY',
+    'CLASSIFICATION', 'CLUSTERING', 'QUESTION_ANSWERING', 'FACT_CHECKING', 'CODE_RETRIEVAL'];
+  return TextFormatContext(
+    taskType: EmbeddingType.values[names.indexOf(context['task_type'])],
+    title: context['title'],
+    role: context['role'] == 'DOCUMENT' ? TextRole.document : TextRole.query);
+}
+
+void _check(bool condition, String message) {
+  if (!condition) throw StateError(message);
+}
+
+Future<Map<String, Object>> validateEmbedding() async {
+  final classic = await validateClassicText({
+    'classifier': _file('bert_classifier.tflite'),
+    'embedder': _file('universal_sentence_encoder.tflite'),
+    'language': _file('language_detector.tflite'),
+  }, jsonDecode(utf8.decode(await _asset('classic_text_reference.json'))) as Map<String, dynamic>);
+  final summarization = await validateSummarizer(_file('summarization_quant_200m_2modes.litertlm'),
+    jsonDecode(utf8.decode(await _asset('summarizer_reference.json'))) as Map<String, dynamic>);
+  final proofreading = await _validateProofreader();
+  final reference = jsonDecode(utf8.decode(await _asset('embedding_reference.json'))) as Map<String, dynamic>;
+  var maximumError = 0.0;
+  var count = 0;
+  var uiTicks = 0;
+  final timings = <double>[];
+  final timer = Timer.periodic(const Duration(milliseconds: 10), (_) { uiTicks++; });
+  final model = _file('embedding_gemma.task');
+  try {
+    for (final quantize in [false, true]) {
+      final task = await TextEmbedder.create(TextEmbedderOptions(
+        modelPath: model, quantize: quantize, l2Normalize: quantize));
+      try {
+        // The library stamps each request on a task, as for the classic
+        // embedder (0, 1000, 2000, ...). Google's Python ctypes misread it as
+        // absent; see the text package's classic_text_abi_test.dart.
+        var lastTimestamp = -1;
+        for (final dynamic raw in reference['cases'] as List) {
+          final entry = raw as Map<String, dynamic>;
+          if (entry['quantize'] != quantize) continue;
+          final watch = Stopwatch()..start();
+          final result = await task.embed(entry['text'], formatContext: _context(entry));
+          timings.add(watch.elapsedMicroseconds / 1000);
+          final embedding = result.embeddings.single;
+          final expected = entry['embeddings'][0] as Map<String, dynamic>;
+          final timestamp = result.timestampMilliseconds;
+          _check(embedding.length == 768 && timestamp != null && timestamp > lastTimestamp, 'Wrong output dimensions/timestamp: $timestamp');
+          lastTimestamp = timestamp!;
+          _check(embedding.headIndex == expected['head_index'] && embedding.headName == expected['head_name'], 'Wrong head metadata');
+          final values = expected['values'] as List;
+          for (var i = 0; i < values.length; i++) {
+            final actual = quantize ? embedding.quantizedEmbedding![i] : embedding.floatEmbedding![i];
+            final error = (actual - (values[i] as num)).abs().toDouble();
+            _check(error.isFinite && error <= (quantize ? 0 : 1e-6), '${entry['name']} mismatch at $i: $error');
+            if (error > maximumError) maximumError = error;
+          }
+          count++;
+        }
+      } finally { await task.dispose(); }
+    }
+  } finally { timer.cancel(); }
+  _check(count == 17, 'Missing official reference cases.');
+  _check(uiTicks > 10, 'Inference blocked the calling isolate.');
+
+  // Keep all tasks alive together; text and MagicTouch must resolve to one dylib.
+  final embedding = await TextEmbedder.create(TextEmbedderOptions(modelPath: model));
+  final segmenter = await InteractiveSegmenter.create(InteractiveSegmenterOptions(modelPath: _file('interactive_segmentation.task')));
+  final detector = await FaceDetector.create(FaceDetectorOptions(modelPath: _file('blaze_face_short_range.tflite')));
+  final landmarker = await FaceLandmarker.create(FaceLandmarkerOptions(modelPath: _file('face_landmarker.task')));
+  final proofreader = await TextProofreader.create(TextProofreaderOptions(modelPath: _file('proofread_quant_200m.litertlm')));
+  final summarizer = await TextSummarizer.create(TextSummarizerOptions(modelPath: _file('summarization_quant_200m_2modes.litertlm')));
+  final classifier = await TextClassifier.create(TextClassifierOptions(modelPath: _file('bert_classifier.tflite')));
+  final use = await TextEmbedder.create(TextEmbedderOptions(modelPath: _file('universal_sentence_encoder.tflite')));
+  final language = await LanguageDetector.create(LanguageDetectorOptions(modelPath: _file('language_detector.tflite')));
+  var maskError = 0.0;
+  var detections = 0;
+  var landmarks = 0;
+  try {
+    await segmenter.setImage(VisionImage.fromPixels(pixels: await _asset('animals-299x150.rgb'), width: 299, height: 150, format: VisionPixelFormat.rgb));
+    final maskPending = segmenter.segment([Stroke(
+      brushMode: BrushMode.positive, points: [NormalizedKeypoint(x: .66, y: .55)])]);
+    final textPending = embedding.embed('A cat is sleeping on the sofa.');
+    final proofreadingPending = proofreader.proofreadStream('She go to the store yesterday and buyed some apples.').toList();
+    final summaryPending = summarizer.summarizeStream('The library will close at six today for maintenance and reopen tomorrow morning.').toList();
+    final classificationPending = classifier.classify('Hello, world!');
+    final usePending = use.embed('Hello, world!');
+    final languagePending = language.detect('Quiero agua, por favor.');
+    final portrait = VisionImage.fromFile(_file('landmark-ex1.jpg'));
+    detections = (await detector.detect(portrait)).detections.length;
+    landmarks = (await landmarker.detect(portrait)).faceLandmarks.single.length;
+    _check(detections == 1 && landmarks == 478, 'Face tasks failed during coexistence.');
+    _check((await textPending).embeddings.single.length == 768, 'Text failed during coexistence.');
+    _check((await classificationPending).classifications.single.categories.first.categoryName == 'positive', 'Classifier failed during coexistence.');
+    _check((await usePending).embeddings.first.length == 100, 'USE failed during coexistence.');
+    _check((await languagePending).predictions.first.languageCode == 'es', 'Language detector failed during coexistence.');
+    _check((await proofreadingPending).map((e) => e.chunk ?? '').join() == 'She went to the store yesterday and bought some apples.', 'Proofreader failed during coexistence.');
+    _check((await summaryPending).map((e) => e.chunk ?? '').join() == '* The library will close at six today for maintenance.\n* The library will reopen tomorrow morning.', 'Summarizer failed during coexistence.');
+    final mask = await maskPending;
+    final expected = Uint8List.fromList(gzip.decode(await _asset('raw-dog.f32.gz'))).buffer.asFloat32List();
+    _check(mask.confidence.length == expected.length, 'Wrong mask dimensions.');
+    for (var i = 0; i < expected.length; i++) {
+      final error = (mask.confidence[i] - expected[i]).abs();
+      _check(error.isFinite && error <= 1e-6, 'MagicTouch reference mismatch at $i');
+      if (error > maskError) maskError = error;
+    }
+    // Submit concurrent requests then close; copied results remain valid.
+    final pending = [for (var i = 0; i < 3; i++) embedding.embed('A cat is sleeping on the sofa.')];
+    final closing = embedding.dispose();
+    final results = await Future.wait(pending);
+    await closing;
+    _check(TextEmbedder.cosineSimilarity(results.first.embeddings.single, results.last.embeddings.single) > .999999, 'Queue/result ownership failed.');
+  } finally {
+    await embedding.dispose();
+    await segmenter.dispose();
+    await detector.dispose();
+    await landmarker.dispose();
+    await proofreader.dispose();
+    await summarizer.dispose();
+    await classifier.dispose();
+    await use.dispose();
+    await language.dispose();
+  }
+  timings.sort();
+  return {
+    'runtime': 'mediapipe==1.0.0', 'delegate': 'cpu',
+    'proofreader': proofreading,
+    'summarizer': summarization,
+    'classic_text': classic, 'coexisting_tasks': 9,
+    'reference_cases': count, 'dimensions': 768,
+    'maximum_embedding_error': maximumError,
+    'maximum_segmentation_error': maskError,
+    'coexisting_face_detections': detections, 'coexisting_face_landmarks': landmarks,
+    'ui_timer_ticks': uiTicks,
+    'model_sha256': reference['model_sha256'] as String,
+    'samples_ms': timings, 'p50_ms': timings[timings.length ~/ 2],
+    'p95_ms': timings[(timings.length * .95).ceil() - 1],
+    'timing_scope': 'Public async embed, including native formatting/tokenization/inference and owned output copy',
+    'os': Platform.operatingSystemVersion, 'dart': Platform.version,
+  };
+}
+
+List<Map<String, String>> _edits(List<ProofreadingCorrection> corrections) => [
+  for (final edit in corrections) {'type': edit.type.name, 'text': edit.text},
+];
+
+/// Google's streamed text can differ from its completed text for the same
+/// input (upstream-issues.md UP-036), so a stream is compared with the
+/// reference's own streamed events: their text joined, and the corrections of
+/// the last one.
+List<Map<String, dynamic>> _events(Map<String, dynamic> entry) =>
+    (entry['stream'] as List).cast<Map<String, dynamic>>();
+String _streamedText(Map<String, dynamic> entry) =>
+    _events(entry).map((e) => e['text'] as String? ?? '').join();
+
+/// Google's text can depend on the requests before it on the same task
+/// (upstream-issues.md UP-036), so a request run out of the reference's order
+/// must follow Google's text for 80 characters, or in full when it is shorter.
+bool _follows(String? actual, String? expected) {
+  final a = expected ?? '';
+  final b = actual ?? '';
+  var prefix = 0;
+  while (prefix < a.length && prefix < b.length && a[prefix] == b[prefix]) {
+    prefix++;
+  }
+  return prefix >= (a.length < 80 ? a.length : 80);
+}
+
+Future<Map<String, Object>> _validateProofreader() async {
+  final reference = jsonDecode(utf8.decode(await _asset('proofreader_reference.json'))) as Map<String, dynamic>;
+  final cases = (reference['cases'] as List).cast<Map<String, dynamic>>();
+  final syncTimes = <double>[];
+  final streamTimes = <double>[];
+  final firstChunkTimes = <double>[];
+  var count = 0;
+  var ticks = 0;
+  final timer = Timer.periodic(const Duration(milliseconds: 10), (_) { ticks++; });
+  try {
+    for (final budget in [null, 64]) {
+      final task = await TextProofreader.create(TextProofreaderOptions(
+        modelPath: _file('proofread_quant_200m.litertlm'), maxNumTokens: budget));
+      try {
+        for (final entry in cases.where((e) => e['max_num_tokens'] == budget)) {
+          final watch = Stopwatch()..start();
+          final result = await task.proofread(entry['input']);
+          syncTimes.add(watch.elapsedMicroseconds / 1000);
+          _check(result.proofreadText == entry['result']['text'], '${entry['name']}: completed text mismatch');
+          _check(jsonEncode(_edits(result.corrections)) == jsonEncode(entry['result']['corrections']), '${entry['name']}: completed edits mismatch');
+          watch.reset();
+          final updates = <TextProofreaderUpdate>[];
+          await for (final update in task.proofreadStream(entry['input'])) {
+            if (updates.isEmpty) firstChunkTimes.add(watch.elapsedMicroseconds / 1000);
+            updates.add(update);
+          }
+          streamTimes.add(watch.elapsedMicroseconds / 1000);
+          _check(updates.where((e) => e.done).length == 1 && updates.last.done, 'Missing/duplicate terminal update');
+          _check(updates.map((e) => e.chunk ?? '').join() == _streamedText(entry), '${entry['name']}: stream text mismatch');
+          _check(jsonEncode(_edits(updates.last.corrections)) == jsonEncode(_events(entry).last['corrections']), '${entry['name']}: stream edits mismatch');
+          count++;
+        }
+        if (budget == null) {
+          // Cancellation waits for native completion, then the same task works.
+          final first = Completer<void>();
+          final subscription = task.proofreadStream(cases[6]['input']).listen((_) {
+            if (!first.isCompleted) first.complete();
+          });
+          await first.future;
+          final cancelling = subscription.cancel();
+          final result = task.proofread(cases[0]['input']);
+          final stream = task.proofreadStream(cases[1]['input']).toList();
+          final closing = task.dispose();
+          await cancelling;
+          final owned = await result;
+          final ownedStream = await stream;
+          await closing;
+          _check(_follows(owned.proofreadText, cases[0]['result']['text']), 'Queued result lost during disposal');
+          _check(_follows(ownedStream.map((e) => e.chunk ?? '').join(), _streamedText(cases[1])), 'Queued stream lost during disposal');
+          if (owned.proofreadText == cases[0]['result']['text']) {
+            _check(jsonEncode(_edits(owned.corrections)) == jsonEncode(cases[0]['result']['corrections']), 'Result not owned after disposal');
+          }
+        }
+      } finally { await task.dispose(); }
+    }
+  } finally { timer.cancel(); }
+  _check(count == 9 && ticks > 10, 'Missing cases or caller isolate blocked');
+  return {
+    'reference_cases': count, 'completed_text_and_edits': 'exact match',
+    'streamed_text_and_final_edits': 'exact match',
+    'cancel_queue_dispose': 'passed', 'ui_timer_ticks': ticks,
+    'model_sha256': reference['model_sha256'] as String,
+    'sync_ms': syncTimes, 'stream_ms': streamTimes, 'first_update_ms': firstChunkTimes,
+    'timing_scope': 'Public async API including native inference and owned copies; nine functional reference cases, not a benchmark',
+  };
+}

@@ -1,0 +1,102 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "source_revision": null,
+  "library_sha256": "a9d0e783f1aef73aae4a0e2df46154ced7d3dcb9ccd36989c092592921afcad6",
+  "model_sha256": "b4578f35940bf5a1a655214a1cce5cab13eba73c1297cd78e1a04c2380b0152f",
+  "platform": "Darwin arm64",
+  "delegate": "CPU",
+  "running_mode": "IMAGE",
+  "min_detection_confidence": 0.5,
+  "min_suppression_threshold": 0.3,
+  "raw_derivation": "face-landmarks-ex1.jpeg official RGB decoder, [::20, ::20, :3]",
+  "cases": [
+    {
+      "name": "landmark-ex1.jpg",
+      "width": 1280,
+      "height": 853,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 401, "origin_y": 212, "width": 461, "height": 461}, "categories": [{"index": 0, "score": 0.7983753681182861, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.398253470659256, "y": 0.43126529455184937, "label": null, "score": 0.0}, {"x": 0.5460397005081177, "y": 0.39594048261642456, "label": null, "score": 0.0}, {"x": 0.4736906886100769, "y": 0.5591029524803162, "label": null, "score": 0.0}, {"x": 0.4901997447013855, "y": 0.6572102308273315, "label": null, "score": 0.0}, {"x": 0.3424203395843506, "y": 0.47767066955566406, "label": null, "score": 0.0}, {"x": 0.6490330100059509, "y": 0.4052637815475464, "label": null, "score": 0.0}]}],
+      "file": "landmark-ex1.jpg",
+      "sha256": "17a32597df503211ed126797bf8f5281f6e122545be925cfd3bf65658dc5f0ec"
+    },
+    {
+      "name": "face-landmarks-ex1.jpeg",
+      "width": 6010,
+      "height": 4180,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 2205, "origin_y": 1075, "width": 1658, "height": 1658}, "categories": [{"index": 0, "score": 0.9670019149780273, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.45176854729652405, "y": 0.36959055066108704, "label": null, "score": 0.0}, {"x": 0.5636747479438782, "y": 0.370041161775589, "label": null, "score": 0.0}, {"x": 0.5085383653640747, "y": 0.4688583314418793, "label": null, "score": 0.0}, {"x": 0.5066781044006348, "y": 0.5432016849517822, "label": null, "score": 0.0}, {"x": 0.38656869530677795, "y": 0.3995231091976166, "label": null, "score": 0.0}, {"x": 0.623420774936676, "y": 0.4051143229007721, "label": null, "score": 0.0}]}],
+      "file": "face-landmarks-ex1.jpeg",
+      "sha256": "c2ba880b592ddc41c57d9534c989be5db274e5c150c0c16d4a2b62cddcca6048"
+    },
+    {
+      "name": "iris-detection-ex1.jpg",
+      "width": 761,
+      "height": 764,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 254, "origin_y": 269, "width": 257, "height": 257}, "categories": [{"index": 0, "score": 0.9383193850517273, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.4448278546333313, "y": 0.4405249357223511, "label": null, "score": 0.0}, {"x": 0.5914474129676819, "y": 0.4281054139137268, "label": null, "score": 0.0}, {"x": 0.5406385660171509, "y": 0.5045691728591919, "label": null, "score": 0.0}, {"x": 0.540338397026062, "y": 0.5811580419540405, "label": null, "score": 0.0}, {"x": 0.3420456349849701, "y": 0.4952261447906494, "label": null, "score": 0.0}, {"x": 0.6509507894515991, "y": 0.4678117036819458, "label": null, "score": 0.0}]}],
+      "file": "iris-detection-ex1.jpg",
+      "sha256": "91a31661e74701c2e5df36f123564cbf757a7c206978982160af46a69fc8c215"
+    },
+    {
+      "name": "iris-detection-ex2.jpg",
+      "width": 853,
+      "height": 928,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 196, "origin_y": 343, "width": 413, "height": 413}, "categories": [{"index": 0, "score": 0.9196192622184753, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.40035539865493774, "y": 0.48917356133461, "label": null, "score": 0.0}, {"x": 0.5964006185531616, "y": 0.5005512833595276, "label": null, "score": 0.0}, {"x": 0.5086814761161804, "y": 0.6066853404045105, "label": null, "score": 0.0}, {"x": 0.4937722682952881, "y": 0.6946219205856323, "label": null, "score": 0.0}, {"x": 0.26322585344314575, "y": 0.5197768807411194, "label": null, "score": 0.0}, {"x": 0.6707929372787476, "y": 0.5429329872131348, "label": null, "score": 0.0}]}],
+      "file": "iris-detection-ex2.jpg",
+      "sha256": "bd105c9a11822ef4a6d96ef6dce6e56b1fc314aaad4d413fc997dd135cc35c72"
+    },
+    {
+      "name": "group-shot-bounding-box-ex1.jpeg",
+      "width": 3840,
+      "height": 2160,
+      "rotation_degrees": 0,
+      "detections": [],
+      "file": "group-shot-bounding-box-ex1.jpeg",
+      "sha256": "71793e5a129e35541f937904039b722981b9ba40db09bbe24419dc0e0fc086f1"
+    },
+    {
+      "name": "rgb",
+      "width": 301,
+      "height": 209,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 111, "origin_y": 54, "width": 82, "height": 82}, "categories": [{"index": 0, "score": 0.9663498997688293, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.4531995356082916, "y": 0.3705691695213318, "label": null, "score": 0.0}, {"x": 0.564267098903656, "y": 0.36773282289505005, "label": null, "score": 0.0}, {"x": 0.5099766254425049, "y": 0.4658888578414917, "label": null, "score": 0.0}, {"x": 0.5091457962989807, "y": 0.5415833592414856, "label": null, "score": 0.0}, {"x": 0.38916704058647156, "y": 0.4040936231613159, "label": null, "score": 0.0}, {"x": 0.6250680088996887, "y": 0.4034765958786011, "label": null, "score": 0.0}]}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgba",
+      "width": 301,
+      "height": 209,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 111, "origin_y": 54, "width": 82, "height": 82}, "categories": [{"index": 0, "score": 0.9663498997688293, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.4531995356082916, "y": 0.3705691695213318, "label": null, "score": 0.0}, {"x": 0.564267098903656, "y": 0.36773282289505005, "label": null, "score": 0.0}, {"x": 0.5099766254425049, "y": 0.4658888578414917, "label": null, "score": 0.0}, {"x": 0.5091457962989807, "y": 0.5415833592414856, "label": null, "score": 0.0}, {"x": 0.38916704058647156, "y": 0.4040936231613159, "label": null, "score": 0.0}, {"x": 0.6250680088996887, "y": 0.4034765958786011, "label": null, "score": 0.0}]}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgb-pair",
+      "width": 360,
+      "height": 209,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 232, "origin_y": 54, "width": 79, "height": 79}, "categories": [{"index": 0, "score": 0.9445754289627075, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.7086089253425598, "y": 0.3749806582927704, "label": null, "score": 0.0}, {"x": 0.8009393215179443, "y": 0.3687717020511627, "label": null, "score": 0.0}, {"x": 0.7550222873687744, "y": 0.4658338725566864, "label": null, "score": 0.0}, {"x": 0.757867693901062, "y": 0.5364938974380493, "label": null, "score": 0.0}, {"x": 0.6598786115646362, "y": 0.40171483159065247, "label": null, "score": 0.0}, {"x": 0.8569745421409607, "y": 0.387424498796463, "label": null, "score": 0.0}]}, {"bounding_box": {"origin_x": 52, "origin_y": 54, "width": 79, "height": 79}, "categories": [{"index": 0, "score": 0.9385786056518555, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.20879557728767395, "y": 0.3746504485607147, "label": null, "score": 0.0}, {"x": 0.3007446825504303, "y": 0.36695006489753723, "label": null, "score": 0.0}, {"x": 0.254489928483963, "y": 0.4641423523426056, "label": null, "score": 0.0}, {"x": 0.25774961709976196, "y": 0.5356738567352295, "label": null, "score": 0.0}, {"x": 0.16128161549568176, "y": 0.4033034145832062, "label": null, "score": 0.0}, {"x": 0.35771751403808594, "y": 0.38678255677223206, "label": null, "score": 0.0}]}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgb-rotated",
+      "width": 209,
+      "height": 301,
+      "rotation_degrees": 90,
+      "detections": [{"bounding_box": {"origin_x": 53, "origin_y": 106, "width": 84, "height": 84}, "categories": [{"index": 0, "score": 0.9611864686012268, "display_name": null, "category_name": null}], "keypoints": [{"x": 0.3705615997314453, "y": 0.547035276889801, "label": null, "score": 0.0}, {"x": 0.3675847053527832, "y": 0.43416082859039307, "label": null, "score": 0.0}, {"x": 0.470733642578125, "y": 0.488818883895874, "label": null, "score": 0.0}, {"x": 0.5451279878616333, "y": 0.48911595344543457, "label": null, "score": 0.0}, {"x": 0.4009631872177124, "y": 0.6105439066886902, "label": null, "score": 0.0}, {"x": 0.39867061376571655, "y": 0.3720250129699707, "label": null, "score": 0.0}]}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "blank",
+      "width": 640,
+      "height": 480,
+      "rotation_degrees": 0,
+      "detections": []
+    }
+  ]
+}

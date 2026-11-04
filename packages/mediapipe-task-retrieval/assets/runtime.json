@@ -1,0 +1,23 @@
+{
+  "package": "@mediapipe/tasks-retrieval",
+  "version": "1.2.0-rc.20261018",
+  "integrity": "NWFzkM91J7I0a6ym3hk/MiPDN7dGJTlLjnJ+eG7BTR+rxs9E+QUzdonFxuISDjMum0uErjTMrH4YSzCtJ3Z+sQ==",
+  "files": [
+    "retrieval_bundle.mjs",
+    "wasm/retrieval_wasm_internal.js",
+    "wasm/retrieval_wasm_internal.wasm",
+    "wasm/retrieval_wasm_nosimd_internal.js",
+    "wasm/retrieval_wasm_nosimd_internal.wasm",
+    "wasm/retrieval_wasm_module_internal.js",
+    "wasm/retrieval_wasm_module_internal.wasm"
+  ],
+  "sha384": {
+    "retrieval_bundle.mjs": "tOPnqtdlUx9fZPtxG01L1s172jDSlD3eE53zA9lGLpNG0XXfnMc+QemEsMlu9dxS",
+    "wasm/retrieval_wasm_internal.js": "nMzdtg17AjcS68fSDCKXD96uQBRHtneuT9SPhWQMvPMXkWFVLx/hnrRdnYm9TcgK",
+    "wasm/retrieval_wasm_internal.wasm": "nAcczNj1AnbLIj6Vmdea/K5cmXc+Ok7Jz+zXzeCTozZLSEwti570unY3Ugxt/AY5",
+    "wasm/retrieval_wasm_nosimd_internal.js": "C5x0exW1SQWVxbcGXhjMmRktHSWRNCOZezbgJnpwgcQhuBbJP99Uu9RVgdo/wivd",
+    "wasm/retrieval_wasm_nosimd_internal.wasm": "w8WUiNqyavsSLJR/MM3PzomOMrPnFDuMBts7N+1eTvd5tj/jb2yiuJLt6LibQMKZ",
+    "wasm/retrieval_wasm_module_internal.js": "ui/VmsON5JX8EnjpcFvuwR2FhZ7HZGCV6x9j6RFj5sqAwiahQEfhIQEEeB5jQvU+",
+    "wasm/retrieval_wasm_module_internal.wasm": "mtnX+wsm20jrkXOeeso1SSF+NiK+OkSmD0S9jKHjVfbP0orMVAfpEUJGbEM83b05"
+  }
+}

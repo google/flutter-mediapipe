@@ -1,0 +1,5 @@
+# The family packages depend on mediapipe_core from pub.dev; this points
+# them at the checkout's copy.
+dependency_overrides:
+  mediapipe_core:
+    path: ../../packages/mediapipe-core

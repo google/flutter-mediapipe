@@ -1,0 +1,3 @@
+# The audio stream's native slots are shared by the whole test process, so
+# suites run one at a time: the 64-stream test must see every slot free.
+concurrency: 1

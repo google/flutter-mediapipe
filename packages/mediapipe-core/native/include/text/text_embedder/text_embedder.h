@@ -1,0 +1,151 @@
+/* Copyright 2023 The MediaPipe Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
+
+#ifndef MEDIAPIPE_TASKS_C_TEXT_TEXT_EMBEDDER_TEXT_EMBEDDER_H_
+#define MEDIAPIPE_TASKS_C_TEXT_TEXT_EMBEDDER_TEXT_EMBEDDER_H_
+
+#include "components/containers/embedding_result.h"
+#include "components/processors/embedder_options.h"
+#include "core/base_options.h"
+#include "core/mp_status.h"
+
+#ifndef MP_EXPORT
+#if defined(_MSC_VER)
+#define MP_EXPORT __declspec(dllexport)
+#else
+#define MP_EXPORT __attribute__((visibility("default")))
+#endif  // _MSC_VER
+#endif  // MP_EXPORT
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct MpTextEmbedderInternal* MpTextEmbedderPtr;
+typedef struct MpEmbeddingResult MpTextEmbedderResult;
+
+// The embedding type, used to format input text.
+enum MpTextEmbedderEmbeddingType {
+  // Embed text for retrieval query.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_RETRIEVAL_QUERY = 1,
+  // Embed text for retrieval document.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_RETRIEVAL_DOCUMENT = 2,
+  // Embed text for semantic similarity.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_SEMANTIC_SIMILARITY = 3,
+  // Embed text for classification.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_CLASSIFICATION = 4,
+  // Embed text for clustering.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_CLUSTERING = 5,
+  // Embed text for question answering.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_QUESTION_ANSWERING = 6,
+  // Embed text for fact verification.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_FACT_CHECKING = 7,
+  // Embed text for code retrieval.
+  MP_TEXT_EMBEDDER_EMBEDDING_TYPE_CODE_RETRIEVAL = 8,
+};
+
+// The role of the text in the context of the embedding task.
+enum MpTextEmbedderRole {
+  // The embedding is extracted to perform a query.
+  MP_TEXT_EMBEDDER_ROLE_QUERY = 1,
+  // The embedding is extracted to store a document.
+  MP_TEXT_EMBEDDER_ROLE_DOCUMENT = 2
+};
+
+// Encapsulates formatting instructions for models that require it (like Gecko).
+struct MpTextEmbedderFormatContext {
+  // The embedding type, used to format input text.
+  enum MpTextEmbedderEmbeddingType task_type;
+  // The title of the text, used to format the input text.
+  const char* title;
+  // The role of the text in the context of the embedding task.
+  enum MpTextEmbedderRole role;
+};
+
+// The options for configuring a MediaPipe text embedder task.
+struct MpTextEmbedderOptions {
+  // Base options for configuring MediaPipe Tasks, such as specifying the model
+  // file with metadata, accelerator options, op resolver, etc.
+  struct MpBaseOptions base_options;
+
+  // Options for configuring the embedder behavior, such as l2_normalize
+  // and quantize.
+  struct MpEmbedderOptions embedder_options;
+};
+
+// Creates a TextEmbedder from the provided `options`.
+// If successful, returns `kMpOk` and sets `*embedder` to the new
+// `MpTextEmbedderPtr`.
+//
+// To obtain a detailed error, `error_msg` must be non-null pointer to a
+// `char*`, which will be populated with a newly-allocated error message upon
+// failure. It's the caller responsibility to free the error message with
+// `MpErrorFree()`.
+MP_EXPORT MpStatus MpTextEmbedderCreate(struct MpTextEmbedderOptions* options,
+                                        MpTextEmbedderPtr* embedder,
+                                        char** error_msg);
+
+// Performs embedding extraction on the input `utf8_str`.
+// If successful, returns `kMpOk` and sets `*result` to the new
+// `MpTextEmbedderResult`.
+//
+// The optional `format_context` can be used to specify formatting options for
+// models that require them, such as the Gecko family of models. If
+// `format_context` is `nullptr` the input text is passed to the model without
+// modifications.
+//
+// To obtain a detailed error, `error_msg` must be non-null pointer to a
+// `char*`, which will be populated with a newly-allocated error message upon
+// failure. It's the caller responsibility to free the error message with
+// `MpErrorFree()`.
+MP_EXPORT MpStatus
+MpTextEmbedderEmbed(MpTextEmbedderPtr embedder, const char* utf8_str,
+                    const struct MpTextEmbedderFormatContext* format_context,
+                    MpTextEmbedderResult* result, char** error_msg);
+
+// Frees the memory allocated inside a MpTextEmbedderResult result. Does not
+// free the result pointer itself.
+MP_EXPORT void MpTextEmbedderCloseResult(MpTextEmbedderResult* result);
+
+// Shuts down the TextEmbedder when all the work is done. Frees all memory.
+//
+// To obtain a detailed error, `error_msg` must be non-null pointer to a
+// `char*`, which will be populated with a newly-allocated error message upon
+// failure. It's the caller responsibility to free the error message with
+// `MpErrorFree()`.
+MP_EXPORT MpStatus MpTextEmbedderClose(MpTextEmbedderPtr embedder,
+                                       char** error_msg);
+
+// Utility function to compute cosine similarity [1] between two embeddings.
+// Returns `kMpOk` on success, or an error status if e.g. the embeddings are
+// of different types (quantized vs. float), have different sizes, or have a
+// an L2-norm of 0.
+//
+// To obtain a detailed error, `error_msg` must be non-null pointer to a
+// `char*`, which will be populated with a newly-allocated error message upon
+// failure. It's the caller responsibility to free the error message with
+// `MpErrorFree()`.
+//
+// [1]: https://en.wikipedia.org/wiki/Cosine_similarity
+MP_EXPORT MpStatus MpTextEmbedderCosSimilarity(const struct MpEmbedding* u,
+                                               const struct MpEmbedding* v,
+                                               double* similarity,
+                                               char** error_msg);
+
+#ifdef __cplusplus
+}  // extern C
+#endif
+
+#endif  // MEDIAPIPE_TASKS_C_TEXT_TEXT_EMBEDDER_TEXT_EMBEDDER_H_

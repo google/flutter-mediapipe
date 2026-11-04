@@ -1,0 +1,190 @@
+name: Windows real camera
+
+# The desktop workflow injects frames through the camera platform interface.
+# This one opens a genuine Media Foundation capture device: a virtual camera
+# (gallery/tool/windows/vcam), registered with the Frame Server, shows the
+# licensed portrait fixture, so camera_desktop's capture engine, the gallery's
+# live controller, Google's CPU task and the preview all run as shipped. The
+# overlay-alignment oracle then compares what the overlay draws with the face
+# visible on the desktop.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: windows-camera-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-camera:
+    name: Face Landmarker / Windows x64 Media Foundation virtual camera
+    runs-on: windows-2025
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      EVIDENCE: ${{ github.workspace }}\build\ci-tmp\gallery-real-camera-windows
+      MEDIAPIPE_CAMERA_REPORT: ${{ github.workspace }}\build\ci-tmp\gallery-real-camera-windows\report.json
+      VCAM: C:\mediapipe-vcam
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Media Foundation, Frame Server, camera consent and display
+        run: |
+          New-Item -ItemType Directory -Force $env:EVIDENCE | Out-Null
+          $feature = Install-WindowsFeature Server-Media-Foundation
+          "Server-Media-Foundation: success=$($feature.Success) restart=$($feature.RestartNeeded) exit=$($feature.ExitCode)"
+          # Camera privacy, policy and Media Foundation state as the image has it.
+          $store = 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam'
+          foreach ($key in "HKLM\$store", "HKCU\$store", 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy',
+                           'HKLM\SOFTWARE\Microsoft\Windows Media Foundation\Platform', 'HKLM\SOFTWARE\Microsoft\Windows Media Foundation\FrameServer') {
+            "--- $key"
+            reg query $key /s 2>&1 | Out-String
+          }
+          # MFCreateVirtualCamera is subject to the webcam privacy control:
+          # allow the device, this user and desktop apps, as Settings would.
+          foreach ($key in "HKLM:\$store", "HKCU:\$store", "HKCU:\$store\NonPackaged") {
+            if (-not (Test-Path $key)) { New-Item $key -Force | Out-Null }
+            Set-ItemProperty $key -Name Value -Value Allow
+          }
+          $policy = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy'
+          if ((Get-ItemProperty $policy -ErrorAction SilentlyContinue).LetAppsAccessCamera -eq 2) {
+            Set-ItemProperty $policy -Name LetAppsAccessCamera -Value 1
+            'AppPrivacy LetAppsAccessCamera was force-deny; set to force-allow'
+          }
+          foreach ($service in 'camsvc', 'FrameServer', 'FrameServerMonitor') {
+            try { Restart-Service $service -Force -ErrorAction Stop } catch { "$service start: $($_.Exception.Message)" }
+          }
+          Get-Service camsvc, FrameServer, FrameServerMonitor | Format-Table Name, Status, StartType -AutoSize | Out-String
+          # Turn on the camera-related event channels so a failure leaves a trace.
+          Get-WinEvent -ListLog * -ErrorAction SilentlyContinue |
+            Where-Object { $_.LogName -match 'MediaFoundation|FrameServer|Camera|Capture|CapabilityAccess|Kernel-PnP' } |
+            ForEach-Object {
+              if (-not $_.IsEnabled -and $_.LogType -in 'Operational', 'Administrative') {
+                try { $_.IsEnabled = $true; $_.SaveChanges() } catch {}
+              }
+              "$($_.LogName): $($_.LogType), enabled=$($_.IsEnabled), records=$($_.RecordCount)"
+            }
+          # The gallery window is 1280x720 at (10, 10); the screenshot oracle
+          # needs all of it on screen.
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          "Screen before: $([System.Windows.Forms.Screen]::PrimaryScreen.Bounds)"
+          Get-CimInstance Win32_VideoController | Format-List Name, CurrentHorizontalResolution, CurrentVerticalResolution | Out-String
+          Add-Type -TypeDefinition @'
+          using System; using System.Runtime.InteropServices;
+          public static class Display {
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            public struct DEVMODE {
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmDeviceName;
+              public short dmSpecVersion, dmDriverVersion, dmSize, dmDriverExtra;
+              public int dmFields, dmPositionX, dmPositionY, dmDisplayOrientation, dmDisplayFixedOutput;
+              public short dmColor, dmDuplex, dmYResolution, dmTTOption, dmCollate;
+              [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string dmFormName;
+              public short dmLogPixels;
+              public int dmBitsPerPel, dmPelsWidth, dmPelsHeight, dmDisplayFlags, dmDisplayFrequency;
+              public int dmICMMethod, dmICMIntent, dmMediaType, dmDitherType, dmReserved1, dmReserved2, dmPanningWidth, dmPanningHeight;
+            }
+            [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern bool EnumDisplaySettings(string device, int mode, ref DEVMODE devMode);
+            [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int ChangeDisplaySettings(ref DEVMODE devMode, int flags);
+            [DllImport("user32.dll")] public static extern int GetSystemMetrics(int index);
+            public static int Resize(int width, int height) {
+              var mode = new DEVMODE();
+              mode.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
+              if (!EnumDisplaySettings(null, -1, ref mode)) return -100;
+              mode.dmPelsWidth = width; mode.dmPelsHeight = height; mode.dmFields = 0x80000 | 0x100000;
+              return ChangeDisplaySettings(ref mode, 0);
+            }
+          }
+          '@
+          "ChangeDisplaySettings 1920x1080: $([Display]::Resize(1920, 1080))"
+          # Forms caches the screen list; ask Win32 and WMI afresh.
+          "Screen after: $([Display]::GetSystemMetrics(0))x$([Display]::GetSystemMetrics(1))"
+          Get-CimInstance Win32_VideoController | Format-List Name, CurrentHorizontalResolution, CurrentVerticalResolution | Out-String
+          "DPI: $([System.Drawing.Graphics]::FromHwnd([IntPtr]::Zero).DpiX)"
+      - name: Build the fixture camera
+        run: gallery/tool/windows/vcam/build.ps1 -Out $env:VCAM
+      - name: Register the media source
+        run: |
+          # The Frame Server services (Local Service and Local System) load the
+          # DLL, so they must be able to read it.
+          icacls $env:VCAM /grant '*S-1-1-0:(OI)(CI)RX'
+          icacls "$env:VCAM\mediapipe_vcam.dll"
+          $register = Start-Process regsvr32.exe -ArgumentList '/s', "$env:VCAM\mediapipe_vcam.dll" -Wait -PassThru
+          "regsvr32: $($register.ExitCode)"
+          reg query 'HKLM\SOFTWARE\Classes\CLSID\{40A27443-E72D-4A75-9ED4-0FCEFDA4D712}' /s
+          if ($register.ExitCode) { exit 1 }
+      - uses: ./.github/actions/setup
+      - name: Download the official Face Landmarker model
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart face_landmarker
+      - name: Prepare the Windows gallery with the face task only
+        run: dart run tool/gallery_builder/bin/prepare_gallery.dart --target windows/x64 --tasks face_landmarker
+      - name: Analyze the camera test and oracle
+        working-directory: gallery
+        run: |
+          flutter pub get
+          flutter analyze integration_test/real_camera_test.dart integration_test/support
+      - name: Start the fixture camera and run the gallery against it
+        working-directory: gallery
+        env:
+          # camera_desktop's own trace of engine events and media types.
+          CAMERA_DESKTOP_LOG: '1'
+        run: |
+          # The camera has session lifetime: it exists while vcam_host runs,
+          # and the host did not outlive the step that started it, so the
+          # host, the frame check and the test share this step.
+          $log = "$env:EVIDENCE\vcam-host.log"
+          $vcamHost = Start-Process "$env:VCAM\vcam_host.exe" -ArgumentList 'start' -PassThru -WindowStyle Hidden `
+            -RedirectStandardOutput $log -RedirectStandardError "$env:EVIDENCE\vcam-host.err"
+          $deadline = (Get-Date).AddSeconds(60)
+          while ((Get-Date) -lt $deadline -and -not $vcamHost.HasExited) {
+            if ((Test-Path $log) -and (Select-String -Quiet -Path $log -Pattern 'VCAM_READY')) { break }
+            Start-Sleep -Milliseconds 500
+          }
+          Get-Content $log -ErrorAction SilentlyContinue
+          if ($vcamHost.HasExited) { "vcam_host exited with $($vcamHost.ExitCode)"; Get-Content "$env:EVIDENCE\vcam-host.err" -ErrorAction SilentlyContinue; exit 1 }
+          Get-PnpDevice -Class Camera -ErrorAction SilentlyContinue | Format-Table Status, Class, FriendlyName, InstanceId -AutoSize | Out-String -Width 220
+          & "$env:VCAM\vcam_host.exe" list
+          if ($LASTEXITCODE) { exit 1 }
+          & "$env:VCAM\vcam_host.exe" smoke 60 "$env:EVIDENCE\vcam-frame.bmp"
+          if ($LASTEXITCODE) { exit 1 }
+          flutter test -d windows integration_test/real_camera_test.dart --reporter expanded
+          $status = $LASTEXITCODE
+          "vcam_host still running after the test: $(-not $vcamHost.HasExited)"
+          exit $status
+      - name: Check the record names the fixture camera
+        run: |
+          $report = Get-Content $env:MEDIAPIPE_CAMERA_REPORT -Raw | ConvertFrom-Json
+          "first session camera: $($report.first_session.camera)"
+          if ($report.first_session.camera -notlike 'MediaPipe Fixture (Windows Virtual Camera) (*') { exit 1 }
+      - name: Diagnostics
+        if: always()
+        run: |
+          Get-Content "$env:EVIDENCE\vcam-host.log" -ErrorAction SilentlyContinue
+          Get-Process vcam_host -ErrorAction SilentlyContinue | Format-Table Id, StartTime -AutoSize | Out-String
+          Get-Content $env:MEDIAPIPE_CAMERA_REPORT -ErrorAction SilentlyContinue
+          Get-PnpDevice -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName -match 'MediaPipe|Virtual Camera' } |
+            Format-Table Status, Class, FriendlyName, InstanceId -AutoSize | Out-String -Width 220
+          Get-Service camsvc, FrameServer, FrameServerMonitor | Format-Table Name, Status -AutoSize | Out-String
+          $logs = Get-WinEvent -ListLog * -ErrorAction SilentlyContinue |
+            Where-Object { $_.LogName -match 'MediaFoundation|FrameServer|Camera|Capture|CapabilityAccess|Kernel-PnP' -and $_.RecordCount }
+          foreach ($log in $logs) {
+            "=== $($log.LogName) ($($log.RecordCount))"
+            Get-WinEvent -LogName $log.LogName -MaxEvents 40 -ErrorAction SilentlyContinue | Format-List TimeCreated, Id, LevelDisplayName, Message | Out-String -Width 220
+          }
+          "=== Application errors"
+          Get-WinEvent -FilterHashtable @{LogName = 'Application'; Level = 1, 2} -MaxEvents 30 -ErrorAction SilentlyContinue | Format-List TimeCreated, ProviderName, Id, Message | Out-String -Width 220
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: windows-real-camera-evidence
+          path: build/ci-tmp/gallery-real-camera-windows/
+          if-no-files-found: warn

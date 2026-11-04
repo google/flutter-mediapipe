@@ -1,0 +1,137 @@
+name: Usage-log capture
+
+# Records what Google's libraries upload to its usage log when the packages
+# run a task. Windows: read from Windows' own WinINet capture trace; nothing
+# is intercepted or rerouted. Linux: the runner trusts a temporary recorder
+# (tool/ci/telemetry_capture.py) that saves each upload and forwards it to
+# Google unchanged. Each job runs the text, audio, retrieval and Decision
+# packages. Run it by hand, or push the branch ci/telemetry-capture.
+
+on:
+  push:
+    branches: [ci/telemetry-capture]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    name: capture / windows-2025
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+      - name: Language Detector models
+        working-directory: packages/mediapipe-task-text
+        shell: bash
+        run: |
+          flutter pub get
+          dart tool/download_models.dart
+      - name: Start Windows' WinINet capture trace
+        shell: pwsh
+        run: netsh trace start capture=no provider=Microsoft-Windows-WinINet-Capture tracefile="$env:RUNNER_TEMP\wininet.etl" maxsize=200 overwrite=yes report=disabled
+      - name: Close a task, then stay alive 90 s for late uploads
+        working-directory: packages/mediapipe-task-text
+        shell: bash
+        env:
+          MEDIAPIPE_UPLOAD_WAIT: '1'
+        run: dart test test/upload_wait_test.dart --reporter expanded
+      - name: Audio, Retrieval and Decision through their packages
+        shell: bash
+        run: |
+          run() {
+            (cd "packages/mediapipe-task-$1" && flutter pub get > /dev/null &&
+              dart tool/download_models.dart $2 &&
+              dart test "test/$3" --timeout 300s --reporter expanded) || echo "::warning::$1 failed"
+          }
+          run audio yamnet audio_classifier_test.dart
+          run retrieval embedding_gemma_2_text_vision native_reference_test.dart
+          run decision laya_s256 native_reference_test.dart
+      - name: Stop the trace and export its payloads
+        if: always()
+        shell: pwsh
+        run: |
+          netsh trace stop
+          $events = Get-WinEvent -Path "$env:RUNNER_TEMP\wininet.etl" -Oldest -ErrorAction SilentlyContinue
+          Write-Output "events: $($events.Count)"
+          $rows = foreach ($e in $events) {
+            $props = foreach ($p in $e.Properties) {
+              if ($p.Value -is [byte[]]) { 'hex:' + [System.BitConverter]::ToString($p.Value).Replace('-', '') } else { [string]$p.Value }
+            }
+            [pscustomobject]@{ id = $e.Id; time = $e.TimeCreated.ToString('o'); props = @($props) }
+          }
+          $rows | ConvertTo-Json -Depth 4 -Compress | Set-Content "$env:RUNNER_TEMP\wininet.json"
+      - name: What the uploads carried
+        if: always()
+        shell: bash
+        run: python -B tool/ci/wininet_report.py "$RUNNER_TEMP/wininet.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: wininet-capture
+          path: |
+            ${{ runner.temp }}/wininet.json
+            ${{ runner.temp }}/wininet.etl
+
+  capture-linux:
+    name: capture / ubuntu-24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: ffi
+      - name: Recorder certificate
+        shell: bash
+        run: |
+          python -m pip install --quiet cryptography
+          python -B tool/ci/telemetry_capture.py certs "$RUNNER_TEMP/capture"
+      - name: Route play.googleapis.com through the recorder
+        shell: bash
+        run: |
+          dir="$RUNNER_TEMP/capture"
+          openssl x509 -inform der -in "$dir/ca.cer" -out "$dir/ca.crt"
+          sudo cp "$dir/ca.crt" /usr/local/share/ca-certificates/recorder.crt
+          sudo update-ca-certificates > /dev/null
+          ip=$(getent ahostsv4 play.googleapis.com | awk 'NR==1{print $1}')
+          echo "Google's address: $ip"
+          printf '127.0.0.1 play.googleapis.com\n::1 play.googleapis.com\n' | sudo tee -a /etc/hosts > /dev/null
+          # Port 443 needs root; the log goes to the runner's own folder.
+          # shellcheck disable=SC2024
+          sudo nohup python3 -B tool/ci/telemetry_capture.py serve "$dir" "$ip" > "$dir/serve.out" 2>&1 &
+          for _ in $(seq 1 30); do
+            [ "$(curl -sS https://play.googleapis.com/__recorder_ping 2>/dev/null)" = recorder ] && { echo 'Recorder answers through the system trust store'; exit 0; }
+            sleep 1
+          done
+          cat "$dir/serve.out"
+          exit 1
+      - name: Language Detector through the text package
+        working-directory: packages/mediapipe-task-text
+        shell: bash
+        run: |
+          flutter pub get
+          dart tool/download_models.dart
+          dart test test/classic_text_lifecycle_test.dart --plain-name 'language preserves concurrent response order' --timeout 180s --reporter expanded
+      - name: Audio, Retrieval and Decision through their packages
+        shell: bash
+        run: |
+          run() {
+            (cd "packages/mediapipe-task-$1" && flutter pub get > /dev/null &&
+              dart tool/download_models.dart $2 &&
+              dart test "test/$3" --timeout 300s --reporter expanded) || echo "::warning::$1 failed"
+          }
+          run audio yamnet audio_classifier_test.dart
+          run retrieval embedding_gemma_2_text_vision native_reference_test.dart
+          run decision laya_s256 native_reference_test.dart
+      - name: What the uploads carried
+        if: always()
+        shell: bash
+        run: python -B tool/ci/telemetry_capture.py report "$RUNNER_TEMP/capture"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: usage-log-capture-linux
+          path: ${{ runner.temp }}/capture/

@@ -1,23 +1,67 @@
-name: "MediaPipeVisionBindings"
-description: "Bindings for MediaPipe structs for vision-related tasks"
-output:
-  bindings: "lib/third_party/mediapipe/mediapipe_vision_bindings.dart"
+name: MediaPipeVisionBindings
+description: MediaPipe 1.2.0 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
+silence-enum-warning: true # sizeof(enum)==4 is checked by tool/abi_check.cc.
+# Every vision task binds Google's one vision library.
+output: lib/src/third_party/mediapipe/vision_bindings.dart
 headers:
   entry-points:
-    - "third_party/mediapipe/tasks/c/**"
-import:
-  symbol-files:
-    - "package:mediapipe_core/generated/core_symbols.yaml"
+    - build/ffigen/vision/face_detector/face_detector.h
+    - build/ffigen/vision/face_landmarker/face_landmarker.h
+    - build/ffigen/vision/gesture_recognizer/gesture_recognizer.h
+    - build/ffigen/vision/hand_landmarker/hand_landmarker.h
+    - build/ffigen/vision/holistic_landmarker/holistic_landmarker.h
+    - build/ffigen/vision/image_classifier/image_classifier.h
+    - build/ffigen/vision/image_embedder/image_embedder.h
+    - build/ffigen/vision/image_segmenter/image_segmenter.h
+    - build/ffigen/vision/interactive_segmenter/interactive_segmenter.h
+    - build/ffigen/vision/object_detector/object_detector.h
+    - build/ffigen/vision/pose_landmarker/pose_landmarker.h
+    - build/ffigen/vision/core/image_processing_options.h
+    - build/ffigen/components/containers/category.h
+    - build/ffigen/components/containers/keypoint.h
+    - build/ffigen/components/containers/landmark.h
+  include-directives:
+    - '**ffigen/**.h'
+compiler-opts:
+  - '-xc++'
+  - '-Ibuild/ffigen'
+  - '-std=c++17'
+functions:
+  include:
+    - 'MpFaceDetector.*'
+    - 'MpFaceLandmarker.*'
+    - 'MpGestureRecognizer.*'
+    - 'MpHandLandmarker.*'
+    - 'MpHolisticLandmarker.*'
+    - 'MpImageClassifier.*'
+    - 'MpImageEmbedder.*'
+    - 'MpImageSegmenter.*'
+    - 'MpInteractiveSegmenter.*'
+    - 'MpObjectDetector.*'
+    - 'MpPoseLandmarker.*'
+    - 'MpImage(CreateFromFile|CreateFromUint8Data|Free|GetWidthStep|GetWidth|GetHeight|GetChannels|GetByteDepth|DataFloat32|DataUint8)'
+    - MpStringListFree
+    - MpErrorFree
+  # The package runs live streams through VIDEO calls, never the C API's
+  # LIVE_STREAM entry points.
+  exclude:
+    - '.*Async'
+structs:
+  include:
+    - 'Mp.*'
+enums:
+  include:
+    - 'Mp.*'
+typedefs:
+  include:
+    - 'Mp.*'
+macros:
+  exclude:
+    - '.*'
 preamble: |
-  /* Copyright 2023 The MediaPipe Authors.
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-      http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  ==============================================================================*/
+  // Copyright 2026 The MediaPipe Authors.
+  // Licensed under the Apache License, Version 2.0.
+  // Generated from Google's unmodified MediaPipe 1.2.0 headers; see
+  // packages/mediapipe-core/native/README.md.
 ffi-native:
+  asset-id: package:mediapipe_vision/mediapipe.dylib

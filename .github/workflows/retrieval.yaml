@@ -1,0 +1,38 @@
+name: Retrieval
+
+permissions:
+  contents: read
+
+# The retrieval checks, as family.yaml runs them: the package against Google's
+# Python answers on each desktop, the gallery's test and journey on the
+# desktops, and the browser journey. The phones run the test and the journey
+# in android.yaml and ios.yaml. Dispatch by hand to run a subset of the jobs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      jobs:
+        description: Jobs to run (package, gallery, web), comma-separated, or all
+        required: false
+        default: all
+
+concurrency:
+  group: retrieval-${{ github.ref }}-${{ inputs.jobs || 'all' }}
+  cancel-in-progress: true
+
+jobs:
+  retrieval:
+    name: Retrieval
+    uses: ./.github/workflows/family.yaml
+    with:
+      family: retrieval
+      tasks: universal_embedder,semantic_retriever
+      integration-test: retrieval_test
+      # Both EmbeddingGemma 2 models the native tests run: text and vision,
+      # and the full one, the only one that embeds audio.
+      model-path: |
+        packages/mediapipe-task-retrieval/models/embeddinggemma-2-text-vision-440m.litertlm
+        packages/mediapipe-task-retrieval/models/embeddinggemma-2-740m.litertlm
+      jobs: ${{ inputs.jobs || 'all' }}

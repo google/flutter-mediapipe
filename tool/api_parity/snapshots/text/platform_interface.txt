@@ -1,0 +1,6 @@
+abstract interface class TextTaskBackend
+  Future<Map<String, dynamic>> run(String text, [Map<String, Object?> arguments = const {}])
+  Future<void> dispose()
+  new TextTaskBackend()
+getter Future<TextTaskBackend> Function(String, Map<String, Object?>)? get textTaskBackendFactory
+setter set textTaskBackendFactory(Future<TextTaskBackend> Function(String, Map<String, Object?>)? value)

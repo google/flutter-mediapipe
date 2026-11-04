@@ -1,0 +1,128 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "delegate": "CPU",
+  "library_sha256": "a9d0e783f1aef73aae4a0e2df46154ced7d3dcb9ccd36989c092592921afcad6",
+  "model_sha256": "2caa317d5a6f951af6e437edce3bb3a9fdedc85a7a8c2a8fcaec96318d7708cc",
+  "model_url": "https://storage.googleapis.com/mediapipe-models/text_proofreader/200m/1/proofread_quant_200m.litertlm",
+  "os": "macOS-27.0-arm64-arm-64bit",
+  "machine": "arm64",
+  "cases": [
+    {
+      "name": "grammar",
+      "input": "She go to the store yesterday and buyed some apples.",
+      "max_num_tokens": null,
+      "result": {"text": "She went to the store yesterday and bought some apples.", "done": true, "corrections": [{"type": "same", "text": "She "}, {"type": "insertion", "text": "went"}, {"type": "deletion", "text": "go"}, {"type": "same", "text": " to the store yesterday and b"}, {"type": "insertion", "text": "o"}, {"type": "same", "text": "u"}, {"type": "deletion", "text": "yed"}, {"type": "insertion", "text": "ght"}, {"type": "same", "text": " some apples."}]},
+      "stream": [{"text": "She", "done": false, "corrections": []}, {"text": " went", "done": false, "corrections": []}, {"text": " to", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " store", "done": false, "corrections": []}, {"text": " yesterday", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " bought", "done": false, "corrections": []}, {"text": " some", "done": false, "corrections": []}, {"text": " apple", "done": false, "corrections": []}, {"text": "s", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "She "}, {"type": "insertion", "text": "went"}, {"type": "deletion", "text": "go"}, {"type": "same", "text": " to the store yesterday and b"}, {"type": "insertion", "text": "o"}, {"type": "same", "text": "u"}, {"type": "deletion", "text": "yed"}, {"type": "insertion", "text": "ght"}, {"type": "same", "text": " some apples."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 40.35000002477318,
+      "stream_ms": 39.39325001556426
+    },
+    {
+      "name": "spelling",
+      "input": "I recieved your mesage and will reply tomorow.",
+      "max_num_tokens": null,
+      "result": {"text": "I received your message and will reply tomorrow.", "done": true, "corrections": [{"type": "same", "text": "I rec"}, {"type": "deletion", "text": "i"}, {"type": "same", "text": "e"}, {"type": "insertion", "text": "i"}, {"type": "same", "text": "ved your mes"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": "age and will reply tomo"}, {"type": "insertion", "text": "r"}, {"type": "same", "text": "row."}]},
+      "stream": [{"text": "I", "done": false, "corrections": []}, {"text": " received", "done": false, "corrections": []}, {"text": " your", "done": false, "corrections": []}, {"text": " message", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " will", "done": false, "corrections": []}, {"text": " reply", "done": false, "corrections": []}, {"text": " tomorrow", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "I rec"}, {"type": "deletion", "text": "i"}, {"type": "same", "text": "e"}, {"type": "insertion", "text": "i"}, {"type": "same", "text": "ved your mes"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": "age and will reply tomo"}, {"type": "insertion", "text": "r"}, {"type": "same", "text": "row."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 34.08520802622661,
+      "stream_ms": 32.65991702210158
+    },
+    {
+      "name": "unchanged",
+      "input": "The cat is sleeping on the sofa.",
+      "max_num_tokens": null,
+      "result": {"text": "The cat is sleeping on the sofa.", "done": true, "corrections": [{"type": "same", "text": "The cat is sleeping on the sofa."}]},
+      "stream": [{"text": "The", "done": false, "corrections": []}, {"text": " cat", "done": false, "corrections": []}, {"text": " is", "done": false, "corrections": []}, {"text": " sleeping", "done": false, "corrections": []}, {"text": " on", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " so", "done": false, "corrections": []}, {"text": "fa", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "The cat is sleeping on the sofa."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 30.006334010977298,
+      "stream_ms": 30.033415998332202
+    },
+    {
+      "name": "punctuation",
+      "input": "hello my name is sam i live in canada",
+      "max_num_tokens": null,
+      "result": {"text": "Hello, my name is Sam. I live in Canada.", "done": true, "corrections": [{"type": "deletion", "text": "h"}, {"type": "insertion", "text": "H"}, {"type": "same", "text": "ello"}, {"type": "insertion", "text": ","}, {"type": "same", "text": " my name is "}, {"type": "deletion", "text": "s"}, {"type": "insertion", "text": "S"}, {"type": "same", "text": "am"}, {"type": "insertion", "text": "."}, {"type": "same", "text": " "}, {"type": "deletion", "text": "i"}, {"type": "insertion", "text": "I"}, {"type": "same", "text": " live in "}, {"type": "insertion", "text": "C"}, {"type": "deletion", "text": "c"}, {"type": "same", "text": "anada"}, {"type": "insertion", "text": "."}]},
+      "stream": [{"text": "Hello", "done": false, "corrections": []}, {"text": ",", "done": false, "corrections": []}, {"text": " my", "done": false, "corrections": []}, {"text": " name", "done": false, "corrections": []}, {"text": " is", "done": false, "corrections": []}, {"text": " Sam", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": " I", "done": false, "corrections": []}, {"text": " live", "done": false, "corrections": []}, {"text": " in", "done": false, "corrections": []}, {"text": " Canada", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "deletion", "text": "h"}, {"type": "insertion", "text": "H"}, {"type": "same", "text": "ello"}, {"type": "insertion", "text": ","}, {"type": "same", "text": " my name is "}, {"type": "deletion", "text": "s"}, {"type": "insertion", "text": "S"}, {"type": "same", "text": "am"}, {"type": "insertion", "text": "."}, {"type": "same", "text": " "}, {"type": "deletion", "text": "i"}, {"type": "insertion", "text": "I"}, {"type": "same", "text": " live in "}, {"type": "insertion", "text": "C"}, {"type": "deletion", "text": "c"}, {"type": "same", "text": "anada"}, {"type": "insertion", "text": "."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 38.481916999444366,
+      "stream_ms": 37.68291603773832
+    },
+    {
+      "name": "unicode",
+      "input": "The caf\u00e9 serve delicious croissants, and Mar\u00eda enjoy them.",
+      "max_num_tokens": null,
+      "result": {"text": "The caf\u00e9 serves delicious croissants, and Mar\u00eda enjoys them.", "done": true, "corrections": [{"type": "same", "text": "The caf\u00e9 serve"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " delicious croissants, and Mar\u00eda enjoy"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " them."}]},
+      "stream": [{"text": "The", "done": false, "corrections": []}, {"text": " ca", "done": false, "corrections": []}, {"text": "f", "done": false, "corrections": []}, {"text": "\u00e9", "done": false, "corrections": []}, {"text": " serves", "done": false, "corrections": []}, {"text": " delicious", "done": false, "corrections": []}, {"text": " croissant", "done": false, "corrections": []}, {"text": "s", "done": false, "corrections": []}, {"text": ",", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " Mar", "done": false, "corrections": []}, {"text": "\u00ed", "done": false, "corrections": []}, {"text": "a", "done": false, "corrections": []}, {"text": " enjoy", "done": false, "corrections": []}, {"text": "s", "done": false, "corrections": []}, {"text": " them", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "The caf\u00e9 serve"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " delicious croissants, and Mar\u00eda enjoy"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " them."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 59.54854196170345,
+      "stream_ms": 60.37254200782627
+    },
+    {
+      "name": "empty",
+      "input": "",
+      "max_num_tokens": null,
+      "result": {"text": "", "done": true, "corrections": []},
+      "stream": [{"text": null, "done": true, "corrections": []}],
+      "stream_matches_result": true,
+      "sync_ms": 0.0636660261079669,
+      "stream_ms": 0.01916696783155203
+    },
+    {
+      "name": "paragraph",
+      "input": "Our team have finished the first version of the app. We was testing it yesterday when we notice a small problem. The report explain how to reproduce the issue, and include a screenshot. Please let me knows if you needs any more details.",
+      "max_num_tokens": null,
+      "result": {"text": "Our team finished the first version of the app. We were testing it yesterday when we noticed a small problem. The report explains how to reproduce the issue, and includes a screenshot. Please let me know if you need any more details.", "done": true, "corrections": [{"type": "same", "text": "Our team "}, {"type": "deletion", "text": "have "}, {"type": "same", "text": "finished the first version of the app. We w"}, {"type": "insertion", "text": "ere"}, {"type": "deletion", "text": "as"}, {"type": "same", "text": " testing it yesterday when we notice"}, {"type": "insertion", "text": "d"}, {"type": "same", "text": " a small problem. The report explain"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " how to reproduce the issue, and include"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " a screenshot. Please let me know"}, {"type": "deletion", "text": "s"}, {"type": "same", "text": " if you need"}, {"type": "deletion", "text": "s"}, {"type": "same", "text": " any more details."}]},
+      "stream": [{"text": "Our", "done": false, "corrections": []}, {"text": " team", "done": false, "corrections": []}, {"text": " finished", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " first", "done": false, "corrections": []}, {"text": " version", "done": false, "corrections": []}, {"text": " of", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " app", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": " We", "done": false, "corrections": []}, {"text": " were", "done": false, "corrections": []}, {"text": " testing", "done": false, "corrections": []}, {"text": " it", "done": false, "corrections": []}, {"text": " yesterday", "done": false, "corrections": []}, {"text": " when", "done": false, "corrections": []}, {"text": " we", "done": false, "corrections": []}, {"text": " noticed", "done": false, "corrections": []}, {"text": " a", "done": false, "corrections": []}, {"text": " small", "done": false, "corrections": []}, {"text": " problem", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": " The", "done": false, "corrections": []}, {"text": " report", "done": false, "corrections": []}, {"text": " explains", "done": false, "corrections": []}, {"text": " how", "done": false, "corrections": []}, {"text": " to", "done": false, "corrections": []}, {"text": " reproduce", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " issue", "done": false, "corrections": []}, {"text": ",", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " includes", "done": false, "corrections": []}, {"text": " a", "done": false, "corrections": []}, {"text": " screenshot", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": " Please", "done": false, "corrections": []}, {"text": " let", "done": false, "corrections": []}, {"text": " me", "done": false, "corrections": []}, {"text": " know", "done": false, "corrections": []}, {"text": " if", "done": false, "corrections": []}, {"text": " you", "done": false, "corrections": []}, {"text": " need", "done": false, "corrections": []}, {"text": " any", "done": false, "corrections": []}, {"text": " more", "done": false, "corrections": []}, {"text": " details", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "Our team "}, {"type": "deletion", "text": "have "}, {"type": "same", "text": "finished the first version of the app. We w"}, {"type": "insertion", "text": "ere"}, {"type": "deletion", "text": "as"}, {"type": "same", "text": " testing it yesterday when we notice"}, {"type": "insertion", "text": "d"}, {"type": "same", "text": " a small problem. The report explain"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " how to reproduce the issue, and include"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": " a screenshot. Please let me know"}, {"type": "deletion", "text": "s"}, {"type": "same", "text": " if you need"}, {"type": "deletion", "text": "s"}, {"type": "same", "text": " any more details."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 137.63625000137836,
+      "stream_ms": 137.53412500955164
+    },
+    {
+      "name": "grammar-limit-64",
+      "input": "She go to the store yesterday and buyed some apples.",
+      "max_num_tokens": 64,
+      "result": {"text": "She went to the store yesterday and bought some apples.", "done": true, "corrections": [{"type": "same", "text": "She "}, {"type": "insertion", "text": "went"}, {"type": "deletion", "text": "go"}, {"type": "same", "text": " to the store yesterday and b"}, {"type": "insertion", "text": "o"}, {"type": "same", "text": "u"}, {"type": "deletion", "text": "yed"}, {"type": "insertion", "text": "ght"}, {"type": "same", "text": " some apples."}]},
+      "stream": [{"text": "She", "done": false, "corrections": []}, {"text": " went", "done": false, "corrections": []}, {"text": " to", "done": false, "corrections": []}, {"text": " the", "done": false, "corrections": []}, {"text": " store", "done": false, "corrections": []}, {"text": " yesterday", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " bought", "done": false, "corrections": []}, {"text": " some", "done": false, "corrections": []}, {"text": " apple", "done": false, "corrections": []}, {"text": "s", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "She "}, {"type": "insertion", "text": "went"}, {"type": "deletion", "text": "go"}, {"type": "same", "text": " to the store yesterday and b"}, {"type": "insertion", "text": "o"}, {"type": "same", "text": "u"}, {"type": "deletion", "text": "yed"}, {"type": "insertion", "text": "ght"}, {"type": "same", "text": " some apples."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 38.869749987497926,
+      "stream_ms": 38.34241698496044
+    },
+    {
+      "name": "spelling-limit-64",
+      "input": "I recieved your mesage and will reply tomorow.",
+      "max_num_tokens": 64,
+      "result": {"text": "I received your message and will reply tomorrow.", "done": true, "corrections": [{"type": "same", "text": "I rec"}, {"type": "deletion", "text": "i"}, {"type": "same", "text": "e"}, {"type": "insertion", "text": "i"}, {"type": "same", "text": "ved your mes"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": "age and will reply tomo"}, {"type": "insertion", "text": "r"}, {"type": "same", "text": "row."}]},
+      "stream": [{"text": "I", "done": false, "corrections": []}, {"text": " received", "done": false, "corrections": []}, {"text": " your", "done": false, "corrections": []}, {"text": " message", "done": false, "corrections": []}, {"text": " and", "done": false, "corrections": []}, {"text": " will", "done": false, "corrections": []}, {"text": " reply", "done": false, "corrections": []}, {"text": " tomorrow", "done": false, "corrections": []}, {"text": ".", "done": false, "corrections": []}, {"text": null, "done": true, "corrections": [{"type": "same", "text": "I rec"}, {"type": "deletion", "text": "i"}, {"type": "same", "text": "e"}, {"type": "insertion", "text": "i"}, {"type": "same", "text": "ved your mes"}, {"type": "insertion", "text": "s"}, {"type": "same", "text": "age and will reply tomo"}, {"type": "insertion", "text": "r"}, {"type": "same", "text": "row."}]}],
+      "stream_matches_result": true,
+      "sync_ms": 33.99024996906519,
+      "stream_ms": 33.616375003475696
+    }
+  ],
+  "abi": {
+    "MpBaseOptionsC": {
+      "size": 72,
+      "alignment": 8,
+      "offsets": {"model_asset_buffer": 0, "model_asset_buffer_count": 8, "model_asset_path": 16, "file_descriptor": 24, "delegate": 28, "host_environment": 32, "host_system": 36, "host_version": 40, "ca_bundle_path": 48, "app_id": 56, "app_version": 64}
+    },
+    "_MpTextProofreaderOptionsC": {
+      "size": 96,
+      "alignment": 8,
+      "offsets": {"base_options": 0, "max_num_tokens": 72, "cache_dir": 80, "min_log_severity": 88}
+    },
+    "_MpCorrectionC": {
+      "size": 16,
+      "alignment": 8,
+      "offsets": {"type": 0, "text": 8}
+    },
+    "_MpTextProofreaderResultC": {
+      "size": 24,
+      "alignment": 8,
+      "offsets": {"proofread_text": 0, "corrections_count": 8, "corrections": 16}
+    },
+    "_MpTextProofreaderStreamResultC": {
+      "size": 32,
+      "alignment": 8,
+      "offsets": {"chunk": 0, "corrections_count": 8, "corrections": 16, "done": 24}
+    }
+  }
+}

@@ -1,0 +1,17 @@
+# Everything .gitignore excludes (pub reads this file instead of it).
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# Avoid committing pubspec.lock for library packages; see
+# https://dart.dev/guides/libraries/private-files#pubspeclock.
+pubspec.lock
+
+# Maintainer-only: tests and their fixtures, reference generators,
+# validation evidence and benchmarks live in the repository, not the package.
+/tool/
+/test/
+# The C API headers the vision package's bindings are generated from.
+/native/
+# It includes the repository's shared options, which are not published.
+/analysis_options.yaml

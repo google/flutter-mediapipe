@@ -1,0 +1,6 @@
+final class WebTaskWorker
+  Future<String> run(JSObject input)
+  Future<void> close()
+  static Future<WebTaskWorker> create(String family, Map<String, Object?> options)
+function Future<void> loadPackageScript(String package, String asset)
+function Future<String?> readWebGpuAdapter()

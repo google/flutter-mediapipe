@@ -1,0 +1,48 @@
+name: Install the Android NDK and CMake
+description: >-
+  The NDK and CMake the build asks for, installed with retries before the
+  build. The NDK version is Flutter's own default (flutter.ndkVersion, which
+  both Android apps in this repository use), read from the pinned Flutter SDK
+  so it cannot drift. Gradle downloads a missing NDK or CMake itself and gives
+  up on the first corrupt archive.
+runs:
+  using: composite
+  steps:
+    - name: Install the NDK Flutter builds with
+      shell: bash
+      run: |
+        # Fail loudly if an app stops taking Flutter's default, since the
+        # version below would then not be the one Gradle installs.
+        for app in gallery/android/app/build.gradle.kts samples/object_detection/android/app/build.gradle.kts; do
+          grep -q 'ndkVersion = flutter.ndkVersion' "$GITHUB_WORKSPACE/$app" ||
+            { echo "$app does not use flutter.ndkVersion." >&2; exit 1; }
+        done
+        source="$FLUTTER_ROOT/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt"
+        version=$(sed -n 's/.*val ndkVersion: String = "\([^"]*\)".*/\1/p' "$source")
+        [ -n "$version" ] || { echo "No ndkVersion in $source." >&2; exit 1; }
+        sdkmanager=$(command -v sdkmanager || echo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager")
+        echo "NDKs on the image: $(ls "$ANDROID_HOME/ndk" 2>/dev/null | tr '\n' ' ')"
+        echo "Flutter builds with NDK $version."
+        yes | "$sdkmanager" --licenses > /dev/null || true
+        for attempt in 1 2 3 4; do
+          "$sdkmanager" --install "ndk;$version" && exit 0
+          echo "Attempt $attempt of installing ndk;$version failed." >&2
+          sleep 20
+        done
+        exit 1
+    # Plugins with native code that name no CMake version (jni, which
+    # path_provider_android uses, among them) get the Android Gradle Plugin's
+    # default, 3.22.1, and Gradle downloaded it on demand during the gallery's
+    # debug and release builds with no retry (2026-10-22).
+    - name: Install the CMake the Android Gradle Plugin defaults to
+      shell: bash
+      run: |
+        sdkmanager=$(command -v sdkmanager || echo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager")
+        echo "CMakes on the image: $(ls "$ANDROID_HOME/cmake" 2>/dev/null | tr '\n' ' ')"
+        package='cmake;3.22.1'
+        for attempt in 1 2 3 4; do
+          "$sdkmanager" --install "$package" && exit 0
+          echo "Attempt $attempt of installing $package failed." >&2
+          sleep 20
+        done
+        exit 1

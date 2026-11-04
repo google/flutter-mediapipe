@@ -1,0 +1,51 @@
+{
+  "source_repository": "https://github.com/hugocornellier/face_detection_tflite",
+  "source_revision": "50c784adaa9f40c722affb1d4412674f25e1fe0c",
+  "files": [
+    {
+      "file": "landmark-ex1.jpg",
+      "source_path": "assets/samples/landmark-ex1.jpg",
+      "sha256": "17a32597df503211ed126797bf8f5281f6e122545be925cfd3bf65658dc5f0ec",
+      "width": 1280,
+      "height": 853,
+      "bytes": 290724,
+      "scenario": "close-up portrait"
+    },
+    {
+      "file": "face-landmarks-ex1.jpeg",
+      "source_path": "assets/samples/face-landmarks-ex1.jpeg",
+      "sha256": "c2ba880b592ddc41c57d9534c989be5db274e5c150c0c16d4a2b62cddcca6048",
+      "width": 6010,
+      "height": 4180,
+      "bytes": 950280,
+      "scenario": "high-resolution portrait with non-square input"
+    },
+    {
+      "file": "iris-detection-ex1.jpg",
+      "source_path": "assets/samples/iris-detection-ex1.jpg",
+      "sha256": "91a31661e74701c2e5df36f123564cbf757a7c206978982160af46a69fc8c215",
+      "width": 761,
+      "height": 764,
+      "bytes": 225974,
+      "scenario": "portrait with turned head"
+    },
+    {
+      "file": "iris-detection-ex2.jpg",
+      "source_path": "assets/samples/iris-detection-ex2.jpg",
+      "sha256": "bd105c9a11822ef4a6d96ef6dce6e56b1fc314aaad4d413fc997dd135cc35c72",
+      "width": 853,
+      "height": 928,
+      "bytes": 256191,
+      "scenario": "portrait with directional lighting and head covering"
+    },
+    {
+      "file": "group-shot-bounding-box-ex1.jpeg",
+      "source_path": "assets/samples/group-shot-bounding-box-ex1.jpeg",
+      "sha256": "71793e5a129e35541f937904039b722981b9ba40db09bbe24419dc0e0fc086f1",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 573826,
+      "scenario": "four-person group with smaller faces and glasses"
+    }
+  ]
+}

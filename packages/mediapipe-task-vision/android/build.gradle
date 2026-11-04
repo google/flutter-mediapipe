@@ -1,0 +1,23 @@
+group = 'dev.mediapipe.flutter.vision'
+version = '1.0'
+
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:8.11.1' }
+}
+apply plugin: 'com.android.library'
+
+android {
+    namespace = 'dev.mediapipe.flutter.vision'
+    compileSdk = 36
+    defaultConfig {
+        // Google's MediaPipe Android libraries, which the hook bundles, need
+        // Android 9.
+        minSdk = 28
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+repositories { google(); mavenCentral() }

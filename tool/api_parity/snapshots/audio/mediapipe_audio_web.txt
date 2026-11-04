@@ -1,0 +1,3 @@
+abstract final class MediaPipeAudioWeb
+  new MediaPipeAudioWeb()
+  static void registerWith(Registrar registrar)

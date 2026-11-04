@@ -1,0 +1,9 @@
+abstract final class DecisionModels
+  new DecisionModels()
+  static DownloadAsset embeddingGemma2Text
+  static DownloadAsset embeddingGemma2TextVision
+  static DownloadAsset glinerS256
+  static DownloadAsset glinerS512
+  static DownloadAsset layaS256
+  static DownloadAsset layaS512
+  static Map<String, DownloadAsset> byName

@@ -1,0 +1,198 @@
+include package:mediapipe_core/mediapipe_core.dart
+enum EmbeddingType extends Enum
+  int get index
+  int get nativeValue
+  new EmbeddingType(int nativeValue)
+  static EmbeddingType classification
+  static EmbeddingType clustering
+  static EmbeddingType codeRetrieval
+  static EmbeddingType factChecking
+  static EmbeddingType questionAnswering
+  static EmbeddingType retrievalDocument
+  static EmbeddingType retrievalQuery
+  static EmbeddingType semanticSimilarity
+  static List<EmbeddingType> values
+  value EmbeddingType.classification
+  value EmbeddingType.clustering
+  value EmbeddingType.codeRetrieval
+  value EmbeddingType.factChecking
+  value EmbeddingType.questionAnswering
+  value EmbeddingType.retrievalDocument
+  value EmbeddingType.retrievalQuery
+  value EmbeddingType.semanticSimilarity
+final class LanguageDetector
+  Delegate get delegate
+  Future<LanguageDetectorResult> detect(String text)
+  Future<void> dispose()
+  static Future<LanguageDetector> create(LanguageDetectorOptions options)
+final class LanguageDetectorOptions extends TaskOptions implements ClassifierSettings
+  Delegate get delegate
+  DownloadAsset? get model
+  List<String> get categoryAllowlist
+  List<String> get categoryDenylist
+  String? get displayNamesLocale
+  String? get modelPath
+  Uint8List? get modelBytes
+  double get scoreThreshold
+  int get maxResults
+  new LanguageDetectorOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, String? displayNamesLocale, int maxResults = -1, double scoreThreshold = 0, List<String>? categoryAllowlist, List<String>? categoryDenylist})
+final class LanguageDetectorResult
+  List<LanguagePrediction> get predictions
+  String toString()
+  new LanguageDetectorResult({required List<LanguagePrediction> predictions})
+final class LanguagePrediction
+  String get languageCode
+  String toString()
+  bool ==(Object other)
+  double get probability
+  int get hashCode
+  new LanguagePrediction({required String languageCode, required double probability})
+final class ProofreadingCorrection
+  ProofreadingCorrectionType get type
+  String get text
+  String toString()
+  bool ==(Object other)
+  int get hashCode
+  new ProofreadingCorrection({required ProofreadingCorrectionType type, required String text})
+enum ProofreadingCorrectionType extends Enum
+  int get index
+  new ProofreadingCorrectionType()
+  static List<ProofreadingCorrectionType> values
+  static ProofreadingCorrectionType deletion
+  static ProofreadingCorrectionType insertion
+  static ProofreadingCorrectionType same
+  value ProofreadingCorrectionType.deletion
+  value ProofreadingCorrectionType.insertion
+  value ProofreadingCorrectionType.same
+final class TextClassifier
+  Delegate get delegate
+  Future<TextClassifierResult> classify(String text)
+  Future<void> dispose()
+  static Future<TextClassifier> create(TextClassifierOptions options)
+final class TextClassifierOptions extends TaskOptions implements ClassifierSettings
+  Delegate get delegate
+  DownloadAsset? get model
+  List<String> get categoryAllowlist
+  List<String> get categoryDenylist
+  String? get displayNamesLocale
+  String? get modelPath
+  Uint8List? get modelBytes
+  double get scoreThreshold
+  int get maxResults
+  new TextClassifierOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, String? displayNamesLocale, int maxResults = -1, double scoreThreshold = 0, List<String>? categoryAllowlist, List<String>? categoryDenylist})
+final class TextClassifierResult
+  List<Classifications> get classifications
+  String toString()
+  int? get timestampMilliseconds
+  new TextClassifierResult({required List<Classifications> classifications, int? timestampMilliseconds})
+final class TextEmbedder
+  Delegate get delegate
+  Future<TextEmbedderResult> embed(String text, {TextFormatContext? formatContext})
+  Future<void> dispose()
+  static Future<TextEmbedder> create(TextEmbedderOptions options)
+  static double cosineSimilarity(Embedding a, Embedding b)
+final class TextEmbedderOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get modelPath
+  Uint8List? get modelBytes
+  bool get l2Normalize
+  bool get quantize
+  new TextEmbedderOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, bool l2Normalize = false, bool quantize = false})
+final class TextEmbedderResult
+  List<Embedding> get embeddings
+  String toString()
+  int? get timestampMilliseconds
+  new TextEmbedderResult({required List<Embedding> embeddings, int? timestampMilliseconds})
+final class TextFormatContext
+  EmbeddingType get taskType
+  String toString()
+  String? get title
+  TextRole get role
+  new TextFormatContext({required EmbeddingType taskType, String? title, TextRole role = TextRole.query})
+abstract final class TextModels
+  new TextModels()
+  static DownloadAsset bertClassifier
+  static DownloadAsset embeddingGemma
+  static DownloadAsset languageDetector
+  static DownloadAsset proofreader
+  static DownloadAsset summarizer
+  static DownloadAsset universalSentenceEncoder
+  static Map<String, DownloadAsset> byName
+final class TextProofreader
+  Delegate get delegate
+  Future<TextProofreaderResult> proofread(String text)
+  Future<void> dispose()
+  Stream<TextProofreaderUpdate> proofreadStream(String text)
+  static Future<TextProofreader> create(TextProofreaderOptions options)
+final class TextProofreaderOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get cacheDirectory
+  String? get modelPath
+  Uint8List? get modelBytes
+  int? get maxNumTokens
+  new TextProofreaderOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, int? maxNumTokens, String? cacheDirectory})
+final class TextProofreaderResult
+  List<ProofreadingCorrection> get corrections
+  String toString()
+  String? get proofreadText
+  new TextProofreaderResult({required String? proofreadText, required List<ProofreadingCorrection> corrections})
+final class TextProofreaderUpdate
+  List<ProofreadingCorrection> get corrections
+  String toString()
+  String? get chunk
+  bool get done
+  new TextProofreaderUpdate({required String? chunk, required bool done, required List<ProofreadingCorrection> corrections})
+enum TextRole extends Enum
+  int get index
+  int get nativeValue
+  new TextRole(int nativeValue)
+  static List<TextRole> values
+  static TextRole document
+  static TextRole query
+  value TextRole.document
+  value TextRole.query
+final class TextSummarizer
+  Delegate get delegate
+  Future<TextSummarizerResult> summarize(String text)
+  Future<void> dispose()
+  Stream<TextSummarizerUpdate> summarizeStream(String text)
+  TextSummarizerMode get mode
+  static Future<TextSummarizer> create(TextSummarizerOptions options)
+enum TextSummarizerMode extends Enum
+  int get index
+  new TextSummarizerMode()
+  static List<TextSummarizerMode> values
+  static TextSummarizerMode keypoints
+  static TextSummarizerMode tldr
+  value TextSummarizerMode.keypoints
+  value TextSummarizerMode.tldr
+final class TextSummarizerOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get cacheDirectory
+  String? get modelPath
+  TextSummarizerMode get mode
+  Uint8List? get modelBytes
+  int? get maxNumTokens
+  new TextSummarizerOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, TextSummarizerMode mode = TextSummarizerMode.keypoints, int? maxNumTokens, String? cacheDirectory})
+final class TextSummarizerResult
+  String toString()
+  String? get summary
+  new TextSummarizerResult({required String? summary})
+final class TextSummarizerUpdate
+  String toString()
+  String? get chunk
+  bool get done
+  new TextSummarizerUpdate({required String? chunk, required bool done})
+function TaskCapabilities languageDetectorCapabilitiesForPlatform(TaskPlatform platform)
+function Future<TaskCapabilities> queryLanguageDetectorCapabilities()
+function Future<TaskCapabilities> queryTextClassifierCapabilities()
+function Future<TaskCapabilities> queryTextEmbedderCapabilities([DownloadAsset? model])
+function Future<TaskCapabilities> queryTextProofreaderCapabilities()
+function Future<TaskCapabilities> queryTextSummarizerCapabilities()
+function TaskCapabilities textClassifierCapabilitiesForPlatform(TaskPlatform platform)
+function TaskCapabilities textEmbedderCapabilitiesForPlatform(TaskPlatform platform, {DownloadAsset? model})
+function TaskCapabilities textProofreaderCapabilitiesForPlatform(TaskPlatform platform)
+function TaskCapabilities textSummarizerCapabilitiesForPlatform(TaskPlatform platform)

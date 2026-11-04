@@ -1,0 +1,56 @@
+name: Download Ubuntu packages, switching mirrors
+description: >-
+  Updates apt and downloads the packages under time limits, moving to another
+  Ubuntu mirror when one fails or is too slow, then installs them unless the
+  caller wants the files first. The runner's own mirror held jobs for 25 to 60
+  minutes on 2026-10-22.
+inputs:
+  packages:
+    description: The packages, separated by spaces.
+    required: true
+  install:
+    description: Install the packages once they are downloaded.
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    # The runner's own mirror (azure.archive.ubuntu.com, then archive.ubuntu.com)
+    # served 70 KB/s to two jobs and held both to their limits (2026-10-22), and
+    # archive.ubuntu.com delivered no 15 MB index in 40 s to three runners that
+    # day. The others are mirrors of other operators that answered at 8 to 45
+    # MB/s, and carry the security suite too.
+    - name: Download the packages from the first mirror that delivers
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+        INSTALL: ${{ inputs.install }}
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        sources=/etc/apt/sources.list.d/ubuntu.sources
+        # The files a mirror delivered stay in /var/cache/apt/archives, so the
+        # next mirror only fetches what is missing.
+        sudo apt-get clean
+        downloaded=false
+        for mirror in default http://us.archive.ubuntu.com/ubuntu http://mirrors.edge.kernel.org/ubuntu; do
+          if [ "$mirror" != default ]; then
+            if [ ! -f "$sources" ]; then
+              echo "No $sources to point at $mirror." >&2
+              break
+            fi
+            echo "Switching apt to $mirror."
+            # Both stanzas, the security suite too: these mirrors carry it.
+            sudo sed -i -E "s#^URIs: .*#URIs: $mirror#" "$sources"
+          fi
+          start=$SECONDS
+          if sudo timeout --kill-after=10 90 apt-get update &&
+            sudo timeout --kill-after=10 240 apt-get install -y --download-only $PACKAGES; then
+            echo "Mirror $mirror delivered the packages in $((SECONDS - start)) s."
+            downloaded=true
+            break
+          fi
+          echo "Mirror $mirror failed after $((SECONDS - start)) s." >&2
+        done
+        $downloaded || { echo 'No mirror delivered the packages.' >&2; exit 1; }
+        if [ "$INSTALL" = true ]; then
+          sudo -E apt-get install -y --no-download $PACKAGES
+        fi

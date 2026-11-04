@@ -1,0 +1,35 @@
+name: video_frames
+description: "Decodes a video file frame by frame with each platform's own decoder, for the gallery's video file mode."
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.47.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.mediapipe.gallery.videoframes
+        pluginClass: VideoFramesPlugin
+      ios:
+        pluginClass: VideoFramesPlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: VideoFramesPlugin
+        sharedDarwinSource: true
+      linux:
+        pluginClass: VideoFramesPlugin
+      windows:
+        pluginClass: VideoFramesPluginCApi

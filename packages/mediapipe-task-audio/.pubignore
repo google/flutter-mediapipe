@@ -1,0 +1,14 @@
+# Everything .gitignore excludes (pub reads this file instead of it).
+models/
+.dart_tool/
+build/
+
+# Maintainer-only: tests and their fixtures, reference generators,
+# validation evidence and benchmarks live in the repository, not the package.
+/tool/
+/test/
+# The bridge's AddressSanitizer test; the build hook compiles only the bridge.
+/native/audio_stream_bridge_test.c
+/dart_test.yaml
+# It includes the repository's shared options, which are not published.
+/analysis_options.yaml

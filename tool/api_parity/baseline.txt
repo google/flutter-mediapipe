@@ -1,0 +1,4 @@
+# Findings the public API still has: differences between the native and web
+# APIs, platform types in signatures, convention gaps and name collisions.
+# `dart run tool/api_parity/bin/api_parity.dart --update` rewrites it; it may only shrink.
+[retrieval] convention: SemanticRetrieverOptions does not extend TaskOptions

@@ -1,46 +1,52 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:ffi';
+
 import 'package:ffi/ffi.dart';
-import 'package:mediapipe_core/src/io/test_utils.dart';
-import 'package:mediapipe_text/io.dart';
-import 'package:mediapipe_core/src/io/third_party/mediapipe/generated/mediapipe_common_bindings.dart'
-    as core_bindings;
-import 'package:mediapipe_text/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart'
-    as bindings;
+import 'package:mediapipe_text/src/io/native_text_classifier.dart';
+import 'package:mediapipe_text/src/io/third_party/mediapipe/classic_text_bindings.dart'
+    as mp;
 import 'package:test/test.dart';
 
 void main() {
-  group('TextClassifierResult.native should', () {
-    test('load an empty object', () {
-      final Pointer<bindings.TextClassifierResult> ptr =
-          calloc<bindings.TextClassifierResult>();
-      // These fields are provided by the real MediaPipe implementation, but
-      // Dart ignores them because they are meaningless in context of text tasks
-      ptr.ref.classifications_count = 0;
-      ptr.ref.has_timestamp_ms = true;
-
-      final result = TextClassifierResult.native(ptr);
-      expect(result.classifications, isEmpty);
+  test('copies an empty 1.0.1 classification result', () {
+    final result = using(
+      (arena) =>
+          textClassifierResultFromNative(arena<mp.MpClassificationResult>()),
+    );
+    expect(result.classifications, isEmpty);
+    expect(result.timestampMilliseconds, isNull);
+  });
+  test('copies nested categories before caller frees native memory', () {
+    final result = using((arena) {
+      final output = arena<mp.MpClassificationResult>();
+      final heads = arena<mp.MpClassifications>();
+      final categories = arena<mp.MpCategory>();
+      final name = 'positive'.toNativeUtf8(allocator: arena);
+      categories.ref
+        ..index = 1
+        ..score = .75
+        ..categoryName = name.cast();
+      heads.ref
+        ..categories = categories
+        ..categoriesCount = 1
+        ..headIndex = 2;
+      output.ref
+        ..classifications = heads
+        ..classificationsCount = 1;
+      final result = textClassifierResultFromNative(output);
+      categories.ref
+        ..index = 99
+        ..score = 0;
+      name.cast<Uint8>().value = 0;
+      return result;
     });
-
-    test('load a hydrated object', () {
-      final Pointer<bindings.TextClassifierResult> resultPtr =
-          calloc<bindings.TextClassifierResult>();
-
-      final classificationsPtr = calloc<core_bindings.Classifications>(2);
-      populateClassifications(classificationsPtr[0]);
-      populateClassifications(classificationsPtr[1]);
-
-      resultPtr.ref.classifications_count = 2;
-      resultPtr.ref.classifications = classificationsPtr;
-      resultPtr.ref.has_timestamp_ms = true;
-      resultPtr.ref.timestamp_ms = 0;
-
-      final result = TextClassifierResult.native(resultPtr);
-      expect(result.classifications, hasLength(2));
-    }, timeout: const Timeout(Duration(milliseconds: 10)));
+    final head = result.classifications.single;
+    expect(head.headName, isNull);
+    expect(head.headIndex, 2);
+    expect(head.categories.single.index, 1);
+    expect(head.categories.single.score, .75);
+    expect(head.categories.single.categoryName, 'positive');
+    expect(head.categories.single.displayName, isNull);
+    expect(() => result.classifications.clear(), throwsUnsupportedError);
+    expect(() => (head.categories as List).clear(), throwsUnsupportedError);
   });
 }

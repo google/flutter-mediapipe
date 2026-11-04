@@ -1,0 +1,14 @@
+abstract final class VisionModels
+  new VisionModels()
+  static DownloadAsset faceDetector
+  static DownloadAsset faceLandmarker
+  static DownloadAsset gestureRecognizer
+  static DownloadAsset handLandmarker
+  static DownloadAsset holisticLandmarker
+  static DownloadAsset imageClassifier
+  static DownloadAsset imageEmbedder
+  static DownloadAsset imageSegmenter
+  static DownloadAsset interactiveSegmenter
+  static DownloadAsset objectDetector
+  static DownloadAsset poseLandmarker
+  static Map<String, DownloadAsset> byName

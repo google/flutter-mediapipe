@@ -1,0 +1,194 @@
+final class BoundingBox
+  String toString()
+  bool ==(Object other)
+  int get bottom
+  int get hashCode
+  int get height
+  int get left
+  int get right
+  int get top
+  int get width
+  new BoundingBox({required int left, required int top, required int right, required int bottom})
+enum BrowserEngine extends Enum
+  int get index
+  new BrowserEngine()
+  static BrowserEngine blink
+  static BrowserEngine gecko
+  static BrowserEngine webkit
+  static BrowserEngine? fromUserAgent(String userAgent)
+  static List<BrowserEngine> values
+  value BrowserEngine.blink
+  value BrowserEngine.gecko
+  value BrowserEngine.webkit
+final class CategoryMask
+  String toString()
+  Uint8List get categories
+  int get height
+  int get width
+  new CategoryMask({required int width, required int height, required Uint8List categories})
+final class Classifications
+  List<MediaPipeCategory> get categories
+  String toString()
+  String? get headName
+  int get headIndex
+  new Classifications({required List<MediaPipeCategory> categories, required int headIndex, String? headName})
+final class ConfidenceMask
+  Float32List get confidence
+  String toString()
+  int get height
+  int get width
+  new ConfidenceMask({required int width, required int height, required Float32List confidence})
+enum Delegate extends Enum
+  int get index
+  new Delegate()
+  static Delegate cpu
+  static Delegate gpu
+  static List<Delegate> values
+  value Delegate.cpu
+  value Delegate.gpu
+final class Detection
+  BoundingBox get boundingBox
+  List<MediaPipeCategory> get categories
+  List<NormalizedKeypoint> get keypoints
+  String toString()
+  new Detection({required BoundingBox boundingBox, required List<MediaPipeCategory> categories, List<NormalizedKeypoint> keypoints = const []})
+final class DownloadAsset
+  Iterable<String> get urls
+  List<String> get mirrors
+  String get sha256
+  String get url
+  new DownloadAsset({required String url, required String sha256, List<String> mirrors = const []})
+final class DownloadFailure
+  String get reason
+  String get url
+  new DownloadFailure(String url, String reason)
+final class Embedding
+  Float32List? get floatEmbedding
+  String toString()
+  String? get headName
+  Uint8List? get quantizedEmbedding
+  int get headIndex
+  int get length
+  new Embedding({Float32List? floatEmbedding, Uint8List? quantizedEmbedding, required int headIndex, String? headName})
+final class Landmark
+  String toString()
+  String? get name
+  bool ==(Object other)
+  double get x
+  double get y
+  double get z
+  double? get presence
+  double? get visibility
+  int get hashCode
+  new Landmark({required double x, required double y, required double z, double? visibility, double? presence, String? name})
+final class Matrix
+  List<double> get data
+  String toString()
+  double at(int row, int column)
+  int get columns
+  int get rows
+  new Matrix({required int rows, required int columns, required List<double> data})
+final class MediaPipeCategory
+  String toString()
+  String? get categoryName
+  String? get displayName
+  bool ==(Object other)
+  double get score
+  int get hashCode
+  int get index
+  new MediaPipeCategory({required int index, required double score, String? categoryName, String? displayName})
+class MediaPipeException implements Exception
+  Object? get cause
+  String get message
+  String toString()
+  new MediaPipeException(String message, {Object? cause})
+abstract final class MediaPipeWebRuntime
+  new MediaPipeWebRuntime()
+  static String baseUrl
+  static String defaultBaseUrl
+  static String resolve(Uri page)
+final class ModelDownloadException extends MediaPipeException
+  List<DownloadFailure> get failures
+  Object? get cause
+  String get message
+  String toString()
+  String? get hint
+  new ModelDownloadException(List<DownloadFailure> failures, String? hint)
+final class ModelSource
+  String toString()
+  String? get path
+  Uint8List? get bytes
+  new ModelSource({String? path, Uint8List? bytes})
+final class ModelStore
+  Client? get client
+  Future<ModelSource> get(DownloadAsset model)
+  Future<ModelSource?> find(DownloadAsset model)
+  Future<void> clear()
+  Future<void> prefetch(DownloadAsset model)
+  String? get cacheDirectory
+  String? get source
+  new ModelStore({String? cacheDirectory, String? source, Client? client})
+  static Future<Uint8List?> Function(String)? debugBundledModels
+  static String? debugCacheDirectory
+  static bool allowDownloads
+final class NormalizedKeypoint
+  String toString()
+  String? get label
+  bool ==(Object other)
+  double get x
+  double get y
+  double? get score
+  int get hashCode
+  new NormalizedKeypoint({required double x, required double y, String? label, double? score})
+final class NormalizedLandmark
+  String toString()
+  String? get name
+  bool ==(Object other)
+  double get x
+  double get y
+  double get z
+  double? get presence
+  double? get visibility
+  int get hashCode
+  new NormalizedLandmark({required double x, required double y, required double z, double? visibility, double? presence, String? name})
+typedef RuntimeTargets = Map<String, String?>
+final class RuntimeUnavailableException extends MediaPipeException
+  Object? get cause
+  String get fix
+  String get message
+  String toString()
+  new RuntimeUnavailableException(String message, {required String fix, Object? cause})
+final class TaskCapabilities
+  Map<Delegate, String> get unavailableReasons
+  Map<String, String?> get supportedTargets
+  Set<Delegate> get supportedDelegates
+  String get runtimeVersion
+  String toString()
+  String? get minimumOperatingSystemVersion
+  TaskPlatform get platform
+  bool get isSupported
+  factory TaskCapabilities.cpuOnTargets({required TaskPlatform platform, required String gpuUnavailableReason, required String runtimeVersion, Map<String, String?> targets = tasksRuntimeTargets})
+  factory TaskCapabilities.onTargets({required TaskPlatform platform, required Map<Delegate, Map<String, String?>> delegates, required Map<Delegate, String> unavailableReasons, required String runtimeVersion})
+final class TaskException extends MediaPipeException
+  Object? get cause
+  String get message
+  String toString()
+  bool get gpuUnavailable
+  int? get statusCode
+  new TaskException(String message, {int? statusCode, bool gpuUnavailable = false, Object? cause})
+abstract base class TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get modelPath
+  Uint8List? get modelBytes
+  new TaskOptions({DownloadAsset? model, String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu, required String family, required Map<String, DownloadAsset> registry})
+final class TaskPlatform
+  BrowserEngine? get browserEngine
+  String get architecture
+  String get operatingSystem
+  String get target
+  String toString()
+  String? get gpu
+  String? get version
+  bool get simulator
+  new TaskPlatform({required String operatingSystem, required String architecture, String? version, String? gpu, bool simulator = false, BrowserEngine? browserEngine})

@@ -1,0 +1,7 @@
+MediaPipe Tasks C API nightly prebuilts
+build_date=20261018
+mediapipe_version=1.2.0
+piper_changelist=1001798245
+kokoro_job=mediapipe/gcp_ubuntu_c_api/nightly
+kokoro_build_number=8
+domains=audio decision retrieval text vision

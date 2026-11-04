@@ -1,0 +1,6 @@
+abstract interface class RetrievalBackend
+  Future<Object?> run(Map<String, Object?> request)
+  Future<void> dispose()
+  new RetrievalBackend()
+getter Future<RetrievalBackend> Function(Map<String, Object?>)? get retrievalBackendFactory
+setter set retrievalBackendFactory(Future<RetrievalBackend> Function(Map<String, Object?>)? value)

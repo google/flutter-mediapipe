@@ -1,3 +1,9 @@
 tags:
   # Integration tests that talk to C code bundled via the native-assets feature
   native-assets:
+  # EmbeddingGemma, Proofreader and Summarizer: they need the generative
+  # models (make models_embedding models_proofreader models_summarizer) and,
+  # off macOS arm64, same-host references in MEDIAPIPE_MODERN_TEXT_REFERENCE_DIR
+  # (tool/prepare_modern_text_reference.py). The Linux and Windows harnesses
+  # run them apart from the classic tasks: tool/test_modern_text.py.
+  modern-text:

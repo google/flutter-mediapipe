@@ -1,0 +1,211 @@
+// Written into a fresh app by tool/test_bundled_models.py. Its integration
+// test and its release build both run these checks.
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
+import 'package:mediapipe_audio/mediapipe_audio.dart';
+import 'package:mediapipe_core/mediapipe_core.dart';
+import 'package:mediapipe_decision/mediapipe_decision.dart';
+import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';
+import 'package:mediapipe_text/mediapipe_text.dart';
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+/// Fails any HTTP client this isolate creates, the isolate where tasks
+/// resolve their models, so a check that downloads cannot pass.
+final class NoNetwork extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) =>
+      throw StateError('This check must not download anything.');
+}
+
+/// Empties the model cache, so a model can only come from the app's bundle
+/// or a download.
+Future<void> clearModelCache() => ModelStore().clear();
+
+/// Face Detector from its bundled model finds the portrait's face.
+Future<void> checkVision() async {
+  final detector = await FaceDetector.create(
+    FaceDetectorOptions(model: VisionModels.faceDetector),
+  );
+  try {
+    final result = await detector.detect(await _portrait());
+    _expect(
+      result.detections.length == 1,
+      'one face in the portrait, found ${result.detections.length}',
+    );
+  } finally {
+    await detector.dispose();
+  }
+  await _stored(VisionModels.faceDetector);
+}
+
+/// Language Detector from its bundled model recognizes French.
+Future<void> checkText() async {
+  final detector = await LanguageDetector.create(
+    LanguageDetectorOptions(model: TextModels.languageDetector),
+  );
+  try {
+    final result = await detector.detect(
+      "Bonjour tout le monde, je suis très content de vous voir aujourd'hui.",
+    );
+    final top = result.predictions.first.languageCode;
+    _expect(top == 'fr', 'French, detected $top');
+  } finally {
+    await detector.dispose();
+  }
+  await _stored(TextModels.languageDetector);
+}
+
+/// Audio Classifier from its bundled model hears a 440 Hz tone.
+Future<void> checkAudio() async {
+  final classifier = await AudioClassifier.create(
+    AudioClassifierOptions(model: AudioModels.yamnet, maxResults: 3),
+  );
+  try {
+    const rate = 16000.0;
+    final samples = Float32List.fromList([
+      for (var i = 0; i < rate; i++)
+        0.5 * math.sin(2 * math.pi * 440 * i / rate),
+    ]);
+    final results = await classifier.classify(
+      AudioData(samples: samples, sampleRate: rate),
+    );
+    final names = [
+      for (final c in results.first.classifications.first.categories)
+        c.categoryName,
+    ];
+    _expect(names.contains('Sine wave'), 'a sine wave, heard $names');
+  } finally {
+    await classifier.dispose();
+  }
+  await _stored(AudioModels.yamnet);
+}
+
+/// Decision Maker from its bundled EmbeddingGemma 2 routes an account
+/// question, as Google's Python API does with the same model.
+Future<void> checkDecision() async {
+  final decider = await DecisionMaker.create(
+    DecisionMakerOptions(model: DecisionModels.embeddingGemma2TextVision),
+  );
+  try {
+    final result = await decider.evaluateChoice(
+      'How do I change the email address on my account?',
+      ChoiceQuestion({
+        'shipping': 'A problem with delivery or a damaged package',
+        'billing': 'A question about a charge or a refund',
+        'account': 'A question about the account or its settings',
+        'other': 'Anything else',
+      }),
+    );
+    _expect(
+      result.selectedKey == 'account',
+      'account, chose ${result.selectedKey}',
+    );
+  } finally {
+    await decider.dispose();
+  }
+  await _stored(DecisionModels.embeddingGemma2TextVision);
+}
+
+/// Universal Embedder from the same bundled model, which Retrieval pins as
+/// Decision does, puts a puppy nearer a dog than a cake.
+Future<void> checkRetrieval() async {
+  final embedder = await UniversalEmbedder.create(
+    UniversalEmbedderOptions(model: RetrievalModels.embeddingGemma2TextVision),
+  );
+  try {
+    final [puppy, dog, cake] = [
+      for (final text in [
+        'A puppy playing fetch outside.',
+        'A dog chases a ball across the park on a sunny afternoon.',
+        'Whisk the eggs with sugar, then fold in the flour to make the cake '
+            'batter.',
+      ])
+        (await embedder.embedText(text)).embeddings.single,
+    ];
+    final near = UniversalEmbedder.cosineSimilarity(puppy, dog);
+    final far = UniversalEmbedder.cosineSimilarity(puppy, cake);
+    _expect(near > far + 0.1, 'the dog nearer than the cake: $near, $far');
+  } finally {
+    await embedder.dispose();
+  }
+  await _stored(RetrievalModels.embeddingGemma2TextVision);
+}
+
+/// Face Landmarker's model is not bundled: creating it must fail with the
+/// fix that names the pubspec entry, instead of downloading it.
+Future<void> checkRefused() async {
+  try {
+    final landmarker = await FaceLandmarker.create(
+      FaceLandmarkerOptions(model: VisionModels.faceLandmarker),
+    );
+    await landmarker.dispose();
+  } on RuntimeUnavailableException catch (error) {
+    const entry =
+        'Add face_landmarker to hooks.user_defines.mediapipe_vision.models';
+    _expect(error.fix.contains(entry), 'the fix to name the entry: $error');
+    return;
+  }
+  throw StateError('Face Landmarker was created without a bundled model.');
+}
+
+/// With downloads turned on, the unbundled Face Landmarker model downloads
+/// at run time, and no claim or partial file is left beside the models.
+Future<void> checkDownload() async {
+  ModelStore.allowDownloads = true;
+  try {
+    final landmarker = await FaceLandmarker.create(
+      FaceLandmarkerOptions(model: VisionModels.faceLandmarker),
+    );
+    try {
+      final result = await landmarker.detect(await _portrait());
+      _expect(
+        result.faceLandmarks.length == 1,
+        'one face in the portrait, found ${result.faceLandmarks.length}',
+      );
+    } finally {
+      await landmarker.dispose();
+    }
+  } finally {
+    ModelStore.allowDownloads = false;
+  }
+  final file = await _stored(VisionModels.faceLandmarker);
+  final leftovers = [
+    for (final entry in file.parent.parent.listSync(recursive: true))
+      if (entry.path.endsWith('.lock') ||
+          entry.path.contains('.download-') ||
+          entry.path.contains('.bundled-'))
+        entry.path,
+  ];
+  _expect(leftovers.isEmpty, 'nothing left behind, found $leftovers');
+}
+
+/// The store's copy of [model] must match its pin.
+Future<File> _stored(DownloadAsset model) async {
+  final path = (await ModelStore().find(model))?.path;
+  if (path == null) throw StateError('No stored copy of ${model.url}.');
+  final file = File(path);
+  final digest = sha256.convert(await file.readAsBytes()).toString();
+  _expect(digest == model.sha256, '${file.path} to match its pin');
+  return file;
+}
+
+Future<VisionImage> _portrait() async {
+  final pixels = await rootBundle.load('assets/test/portrait.rgb');
+  return VisionImage.fromPixels(
+    pixels: pixels.buffer.asUint8List(
+      pixels.offsetInBytes,
+      pixels.lengthInBytes,
+    ),
+    width: 301,
+    height: 209,
+    format: VisionPixelFormat.rgb,
+  );
+}
+
+void _expect(bool condition, String expected) {
+  if (!condition) throw StateError('Expected $expected.');
+}

@@ -1,0 +1,15 @@
+name: api_parity
+description: Checks that each MediaPipe family's public API is identical on native and web, follows the shared conventions, and matches its reviewed snapshot.
+
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  analyzer: ^13.3.0
+  args: ^2.4.2
+  path: ^1.9.1
+
+dev_dependencies:
+  lints: ^6.1.0

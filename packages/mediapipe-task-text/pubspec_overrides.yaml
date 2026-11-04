@@ -1,0 +1,7 @@
+# The pubspec depends on mediapipe_core from pub.dev, as the published
+# package must. This file points a checkout at the sibling package
+# instead, so the repository builds against itself; pub leaves it out
+# of the published archive.
+dependency_overrides:
+  mediapipe_core:
+    path: ../mediapipe-core

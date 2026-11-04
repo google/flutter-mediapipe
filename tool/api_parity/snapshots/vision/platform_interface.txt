@@ -1,0 +1,66 @@
+abstract interface class InteractiveSegmenterBackend
+  Future<ConfidenceMask> segment(List<Stroke> strokes)
+  Future<void> dispose()
+  Future<void> setImage(VisionImage image)
+  new InteractiveSegmenterBackend()
+typedef LandmarkBuilder = T Function({String? name, double? presence, double? visibility, required double x, required double y, required double z})
+typedef VisionBackendFactory = Future<VisionTaskBackend<R>> Function(O)
+final class VisionResultData
+  Float64List? get landmarks
+  List<(String, List<int>)>? get parts
+  List<int>? get counts
+  Map<String, dynamic> get result
+  factory VisionResultData.fromBrowser(Map<String, dynamic> json, {Float64List? landmarks})
+  int get height
+  int get width
+  int? get timestamp
+  new VisionResultData({required Map<String, dynamic> result, required int width, required int height, int? timestamp, Float64List? landmarks, List<int>? counts, List<(String, List<int>)>? parts})
+abstract interface class VisionTaskBackend<R>
+  Future<R> detect(VisionImage image, int rotationDegrees, int? timestampMilliseconds, {VisionRegionOfInterest? regionOfInterest})
+  Future<void> dispose()
+  new VisionTaskBackend<R>()
+abstract interface class VisionTaskOverlayBackend
+  Future<void> attachOverlay(Object canvas)
+  Future<void> detachOverlay()
+  bool get overlayActive
+  new VisionTaskOverlayBackend()
+  void setOverlayOptions({required bool connections, required bool points, required bool mirrored, required double scale})
+function void attachMaskBuffers(Map<String, dynamic> result, List<ByteBuffer> buffers)
+function ConfidenceMask confidenceMaskFromList(List<dynamic> mask)
+function FaceDetectorResult decodeFaceDetectorResult(VisionResultData data)
+function FaceLandmarkerResult decodeFaceLandmarkerResult(VisionResultData data)
+function GestureRecognizerResult decodeGestureRecognizerResult(VisionResultData data)
+function HandLandmarkerResult decodeHandLandmarkerResult(VisionResultData data)
+function HolisticLandmarkerResult decodeHolisticLandmarkerResult(VisionResultData data)
+function ImageClassifierResult decodeImageClassifierResult(VisionResultData data)
+function ImageEmbedderResult decodeImageEmbedderResult(VisionResultData data)
+function ImageSegmenterResult decodeImageSegmenterResult(VisionResultData data)
+function ObjectDetectorResult decodeObjectDetectorResult(VisionResultData data)
+function PoseLandmarkerResult decodePoseLandmarkerResult(VisionResultData data)
+getter Future<VisionTaskBackend<FaceDetectorResult>> Function(FaceDetectorOptions)? get faceDetectorBackendFactory
+setter set faceDetectorBackendFactory(Future<VisionTaskBackend<FaceDetectorResult>> Function(FaceDetectorOptions)? value)
+getter Future<VisionTaskBackend<FaceLandmarkerResult>> Function(FaceLandmarkerOptions)? get faceLandmarkerBackendFactory
+setter set faceLandmarkerBackendFactory(Future<VisionTaskBackend<FaceLandmarkerResult>> Function(FaceLandmarkerOptions)? value)
+getter Future<VisionTaskBackend<GestureRecognizerResult>> Function(GestureRecognizerOptions)? get gestureRecognizerBackendFactory
+setter set gestureRecognizerBackendFactory(Future<VisionTaskBackend<GestureRecognizerResult>> Function(GestureRecognizerOptions)? value)
+getter Future<VisionTaskBackend<HandLandmarkerResult>> Function(HandLandmarkerOptions)? get handLandmarkerBackendFactory
+setter set handLandmarkerBackendFactory(Future<VisionTaskBackend<HandLandmarkerResult>> Function(HandLandmarkerOptions)? value)
+getter Future<VisionTaskBackend<HolisticLandmarkerResult>> Function(HolisticLandmarkerOptions)? get holisticLandmarkerBackendFactory
+setter set holisticLandmarkerBackendFactory(Future<VisionTaskBackend<HolisticLandmarkerResult>> Function(HolisticLandmarkerOptions)? value)
+getter Future<VisionTaskBackend<ImageClassifierResult>> Function(ImageClassifierOptions)? get imageClassifierBackendFactory
+setter set imageClassifierBackendFactory(Future<VisionTaskBackend<ImageClassifierResult>> Function(ImageClassifierOptions)? value)
+getter Future<VisionTaskBackend<ImageEmbedderResult>> Function(ImageEmbedderOptions)? get imageEmbedderBackendFactory
+setter set imageEmbedderBackendFactory(Future<VisionTaskBackend<ImageEmbedderResult>> Function(ImageEmbedderOptions)? value)
+getter Future<VisionTaskBackend<ImageSegmenterResult>> Function(ImageSegmenterOptions)? get imageSegmenterBackendFactory
+setter set imageSegmenterBackendFactory(Future<VisionTaskBackend<ImageSegmenterResult>> Function(ImageSegmenterOptions)? value)
+getter Future<InteractiveSegmenterBackend> Function(InteractiveSegmenterOptions)? get interactiveSegmenterBackendFactory
+setter set interactiveSegmenterBackendFactory(Future<InteractiveSegmenterBackend> Function(InteractiveSegmenterOptions)? value)
+getter Future<VisionTaskBackend<ObjectDetectorResult>> Function(ObjectDetectorOptions)? get objectDetectorBackendFactory
+setter set objectDetectorBackendFactory(Future<VisionTaskBackend<ObjectDetectorResult>> Function(ObjectDetectorOptions)? value)
+getter Expando<VisionTaskOverlayBackend> get overlayBackends
+getter int get packedLandmarkStride
+getter Future<VisionTaskBackend<PoseLandmarkerResult>> Function(PoseLandmarkerOptions)? get poseLandmarkerBackendFactory
+setter set poseLandmarkerBackendFactory(Future<VisionTaskBackend<PoseLandmarkerResult>> Function(PoseLandmarkerOptions)? value)
+getter Future<String?> Function()? get taskPlatformGpuReader
+setter set taskPlatformGpuReader(Future<String?> Function()? value)
+function List<List<T>> unpackLandmarks<T>(List<double> packed, List<int> counts, T Function({String? name, double? presence, double? visibility, required double x, required double y, required double z}) point)

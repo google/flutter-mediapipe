@@ -1,0 +1,4 @@
+abstract final class AudioModels
+  new AudioModels()
+  static DownloadAsset yamnet
+  static Map<String, DownloadAsset> byName

@@ -1,0 +1,103 @@
+import 'dart:async';
+import 'package:mediapipe_text/mediapipe_text.dart';
+
+void _check(bool condition, String message) {
+  if (!condition) throw StateError(message);
+}
+
+/// Google's streamed text can differ from its completed text for the same
+/// input (upstream-issues.md UP-036), so a stream is compared with the
+/// reference's own streamed chunks, joined.
+String _streamed(Map<String, dynamic> entry) =>
+    (entry['stream'] as List).map((e) => (e as Map)['chunk'] as String? ?? '').join();
+
+/// Google's text differs between builds and machines late in long summaries,
+/// and can depend on the requests before it on the same task
+/// (upstream-issues.md UP-036), so every summary must follow Google's text for
+/// 80 characters, or in full when it is shorter. Exact matches are counted.
+bool _follows(String? actual, String? expected) {
+  final a = expected ?? '';
+  final b = actual ?? '';
+  var prefix = 0;
+  while (prefix < a.length && prefix < b.length && a[prefix] == b[prefix]) {
+    prefix++;
+  }
+  return prefix >= (a.length < 80 ? a.length : 80);
+}
+
+Future<Map<String, Object>> validateSummarizer(String model, Map<String, dynamic> reference) async {
+  final cases = (reference['cases'] as List).cast<Map<String, dynamic>>();
+  final samples = <Map<String, Object>>[];
+  var ticks = 0;
+  var errorCases = 0;
+  var exact = 0;
+  final timer = Timer.periodic(const Duration(milliseconds: 10), (_) { ticks++; });
+  try {
+    for (final mode in TextSummarizerMode.values) {
+      for (final budget in [null, 64]) {
+        final task = await TextSummarizer.create(TextSummarizerOptions(
+          modelPath: model, mode: mode, maxNumTokens: budget));
+        final selected = cases.where((e) => e['mode'] == mode.name.toUpperCase() && e['max_num_tokens'] == budget).toList();
+        try {
+          for (final entry in selected) {
+            final watch = Stopwatch()..start();
+            final result = await task.summarize(entry['input']);
+            final syncMs = watch.elapsedMicroseconds / 1000;
+            _check(_follows(result.summary, entry['result']['summary']), '${entry['name']}: completed summary mismatch');
+            if (result.summary == entry['result']['summary']) exact++;
+            watch.reset();
+            double? firstUpdate;
+            final updates = <TextSummarizerUpdate>[];
+            await for (final update in task.summarizeStream(entry['input'])) {
+              firstUpdate ??= watch.elapsedMicroseconds / 1000;
+              updates.add(update);
+            }
+            _check(updates.where((e) => e.done).length == 1 && updates.last.done, 'Missing/duplicate terminal update');
+            final streamed = updates.map((e) => e.chunk ?? '').join();
+            _check(_follows(streamed, _streamed(entry)), '${entry['name']}: stream summary mismatch');
+            if (streamed == _streamed(entry)) exact++;
+            samples.add({'case': entry['name'] as String, 'sync_ms': syncMs,
+              'stream_ms': watch.elapsedMicroseconds / 1000, 'first_update_ms': firstUpdate!});
+          }
+          if (budget == null) {
+            final expected = (reference['errors'] as List).singleWhere((e) => e['mode'] == mode.name.toUpperCase());
+            for (final call in [() async { await task.summarize(''); }, () async { await task.summarizeStream('').toList(); }]) {
+              var rejected = false;
+              try { await call(); } on TaskException catch (error) {
+                rejected = error.message == expected['message'];
+              }
+              _check(rejected, 'Official empty-input error not preserved');
+              errorCases++;
+            }
+            // Cancellation drains the engine; later requests remain usable.
+            final first = Completer<void>();
+            final subscription = task.summarizeStream(selected.first['input']).listen((_) {
+              if (!first.isCompleted) first.complete();
+            });
+            await first.future;
+            final cancelling = subscription.cancel();
+            final pending = task.summarize(selected.first['input']);
+            final stream = task.summarizeStream(selected[1]['input']).toList();
+            final closing = task.dispose();
+            await cancelling;
+            final result = await pending;
+            final updates = await stream;
+            await closing;
+            _check(_follows(result.summary, selected.first['result']['summary']), 'Queued result lost during disposal');
+            _check(_follows(updates.map((e) => e.chunk ?? '').join(), _streamed(selected[1])), 'Queued stream lost during disposal');
+          }
+        } finally { await task.dispose(); }
+      }
+    }
+  } finally { timer.cancel(); }
+  _check(samples.length == 10 && errorCases == 4, 'Missing Summarizer reference cases');
+  _check(ticks > 10, 'Summarizer blocked the calling isolate');
+  return {
+    'reference_cases': samples.length, 'modes': ['tldr', 'keypoints'],
+    'completed_and_streamed_text': 'follows Google\'s for 80 characters',
+    'exact_text_matches': '$exact of ${samples.length * 2}', 'native_empty_input_errors': errorCases,
+    'cancel_queue_dispose': 'passed', 'ui_timer_ticks': ticks,
+    'model_sha256': reference['model_sha256'] as String, 'samples': samples,
+    'timing_scope': 'Public async API including inference and owned copies; functional references, not a benchmark',
+  };
+}

@@ -1,0 +1,269 @@
+name: Android devices (Firebase Test Lab)
+
+# Every phone suite (gallery/integration_test/sdk_all_test.dart): the
+# vision tasks on CPU and GPU, Face Landmarker's camera checks, the text and
+# audio tasks, EmbeddingGemma, Proofreader and Summarizer against the
+# checked-in references from Google's macOS arm64 wheel of the same release
+# (the phones are arm64, like that Mac), on physical phones covering the three
+# Android GPU families: Mali (Pixel 8a), Adreno (Galaxy S24) and PowerVR
+# (Galaxy A12). The Pixel 8a and Galaxy S24 also run Decision Maker, Universal
+# Embedder and Semantic Retriever, downloading their models (Laya 678 MB,
+# EmbeddingGemma 2 388 MB) on first use; the Galaxy A12 (4 GB) took 29 of its
+# 30 minutes for the other tasks, so they would take it past Test Lab's 45.
+# The oldest Android the packages support (Pixel 3, API 28) and a 32-bit
+# phone (Galaxy A10) run too; `all` runs all five, about 95 minutes for the
+# Pixel 3, and a dispatch may name fewer. Manual only:
+# each run bills physical devices, so it is dispatched for a branch, whose own
+# copy of this file then runs. It signs in with the FIREBASE_TEST_LAB_CREDENTIALS
+# repository secret. Its coverage rows are the device tier that
+# tool/coverage/gate.py accepts for GPU cells. Keeps this file name: GitHub lists
+# a dispatchable workflow only when the default branch holds a file of that name.
+on:
+  workflow_dispatch:
+    inputs:
+      devices:
+        description: Comma-separated Test Lab model IDs to run (akita, e1q, a12, blueline, a10), or all
+        required: false
+        default: all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-devices-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # The phones covering Mali, Adreno and PowerVR, the oldest Android and a
+  # 32-bit phone; a dispatch may pick some.
+  devices:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+    steps:
+      - id: pick
+        env:
+          WANTED: ${{ inputs.devices || 'all' }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          devices = [
+              # extra_tasks: Decision Maker and the retrieval tasks, on the phones
+              # with the memory and the time for them (see the top of this file).
+              {'model': 'akita', 'version': '35', 'name': 'Pixel 8a Mali', 'gpu_skip': '',
+               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker'},
+              {'model': 'e1q', 'version': '34', 'name': 'Galaxy S24 Adreno', 'gpu_skip': '',
+               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker'},
+              {'model': 'a12', 'version': '31', 'name': 'Galaxy A12 PowerVR',
+               'gpu_skip': '', 'extra_tasks': ''},
+          ]
+          # The oldest Android the packages support (minSdk 28, which Google's
+          # libraries target too), and a 32-bit-only phone for the armeabi-v7a
+          # libraries every family ships; both in 'all', and slower. abi is the
+          # APK's one ABI; tasks replaces the phone suites' list, for a phone
+          # without the memory for every task; gpu is SDK_GPU (default required),
+          # skip for a phone the packages offer no GPU on.
+          named = [
+              # Decision Maker passed on the Pixel 3 (run 38553588539), but its
+              # 678 MB download took 42 of Test Lab's 45 minutes there (6 on the
+              # Pixel 8a), so the phone runs the retrieval tasks without it.
+              {'model': 'blueline', 'version': '28', 'name': 'Pixel 3 Adreno API 28',
+               'gpu_skip': '',
+               'extra_tasks': 'universal_embedder,semantic_retriever'},
+              # 32-bit Android offers no vision GPU yet.
+              {'model': 'a10', 'version': '29', 'name': 'Galaxy A10 32-bit', 'gpu_skip': '',
+               'extra_tasks': '', 'abi': 'armeabi-v7a', 'gpu': 'skip',
+               'tasks': 'audio_classifier,face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,language_detector,object_detector,pose_landmarker,text_classifier,text_embedder'},
+          ]
+          wanted = os.environ['WANTED'].replace(' ', '').split(',')
+          chosen = [d for d in devices + named if 'all' in wanted or d['model'] in wanted]
+          for device in chosen:
+              device.setdefault('abi', 'arm64-v8a')
+              device.setdefault('tasks', '')
+              device.setdefault('gpu', 'required')
+          assert chosen, f'No known device in {wanted}'
+          print('matrix=' + json.dumps({'include': chosen}))
+          PY
+
+  sdk-tasks:
+    name: Official SDK tasks / ${{ matrix.name }} (${{ matrix.model }} API ${{ matrix.version }})
+    needs: devices
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.devices.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    # The build, the upload, Test Lab's queue and its 45 minutes on the phone.
+    # A phone Test Lab has few of can wait long before it starts: the Pixel 3
+    # waited 36 minutes on October 14, and a 75-minute limit cancelled the job
+    # while Test Lab kept running it.
+    timeout-minutes: 150
+    env:
+      FIREBASE_PROJECT_ID: flutter-litert
+      RESULTS_BUCKET: test-lab-7yqvc8ruj90y2-k9u7wfunxj2sa
+      RESULTS_DIR: mediapipe-sdk-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.model }}
+      DEVICE: ${{ matrix.model }}-${{ matrix.version }}-en-portrait
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: ./.github/actions/setup
+      # Gradle's own NDK and CMake downloads give up on one corrupt archive.
+      - uses: ./.github/actions/android-ndk
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          credentials_json: ${{ secrets.FIREBASE_TEST_LAB_CREDENTIALS }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+        with:
+          project_id: ${{ env.FIREBASE_PROJECT_ID }}
+      # Checked before building, so a typo costs minutes rather than a run.
+      - name: Verify physical device
+        env:
+          MODEL: ${{ matrix.model }}
+          VERSION: ${{ matrix.version }}
+          ABI: ${{ matrix.abi }}
+        run: |
+          gcloud firebase test android models describe "$MODEL" --project "$FIREBASE_PROJECT_ID" --format=json > device.json
+          python3 -c 'import json, os; d = json.load(open("device.json")); assert d["form"] == "PHYSICAL", d["form"]; assert os.environ["VERSION"] in d["supportedVersionIds"], d["supportedVersionIds"]; assert os.environ["ABI"] in d["supportedAbis"], d["supportedAbis"]'
+      # The phone suites' tasks, plus the device's extra_tasks, or its own
+      # tasks; and the Flutter platform for its ABI.
+      - name: The tasks this device runs
+        id: tasks
+        env:
+          EXTRA: ${{ matrix.extra_tasks }}
+          OWN: ${{ matrix.tasks }}
+          ABI: ${{ matrix.abi }}
+        run: |
+          base=audio_classifier,face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,language_detector,object_detector,pose_landmarker,text_classifier,text_embedder,embedding_gemma,text_proofreader,text_summarizer
+          echo "all=${OWN:-$base${EXTRA:+,$EXTRA}}" >> "$GITHUB_OUTPUT"
+          if [ "$ABI" = armeabi-v7a ]; then platform=android-arm; else platform=android-arm64; fi
+          echo "platform=$platform" >> "$GITHUB_OUTPUT"
+      # The same two commands a clean checkout runs, so CI builds what a
+      # contributor with only Dart, Flutter and the Android SDK builds.
+      - name: Prepare the gallery with the phone suites' tasks
+        env:
+          TASKS: ${{ steps.tasks.outputs.all }}
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target android/arm64 --tasks "$TASKS"
+          cd gallery && flutter pub get
+      - name: Build the app and instrumentation APKs
+        working-directory: gallery
+        env:
+          GPU_SKIP: ${{ matrix.gpu_skip }}
+          GPU: ${{ matrix.gpu }}
+          ABI: ${{ matrix.abi }}
+          PLATFORM: ${{ steps.tasks.outputs.platform }}
+        run: |
+          target="$PWD/integration_test/sdk_all_test.dart"
+          # A physical GPU must work: a refusal fails its test.
+          defines="$(printf 'SDK_GPU=%s' "$GPU" | base64),$(printf 'SDK_GPU_SKIP_TASKS=%s' "$GPU_SKIP" | base64),$(printf 'SDK_MODERN_TEXT=true' | base64),$(printf 'TELEMETRY_PROBE=true' | base64)"
+          flutter build apk --config-only --debug --target "$target" --target-platform "$PLATFORM"
+          cd android
+          ./gradlew app:assembleAndroidTest -Pmediapipe.testLabAbi="$ABI"
+          ./gradlew app:assembleDebug -Ptarget="$target" -Ptarget-platform="$PLATFORM" \
+            -Pdart-defines="$defines" -Pmediapipe.testLabAbi="$ABI"
+      - name: Verify packaged runtime and models
+        env:
+          TASKS: ${{ steps.tasks.outputs.all }}
+          ABI: ${{ matrix.abi }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import zipfile
+          with zipfile.ZipFile('gallery/build/app/outputs/apk/debug/app-debug.apk') as apk:
+              names = set(apk.namelist())
+              # Every task this device runs: a suite skips a task its build does not list.
+              tasks = json.loads(apk.read('assets/flutter_assets/assets/manifest.json'))['tasks']
+          expected = os.environ['TASKS'].split(',')
+          assert len(tasks) == len(expected), (tasks, expected)
+          # bundle_models names each model by its SHA-256; every model the
+          # manifest lists. Decision Maker's and the retrieval tasks' are too
+          # large to bundle: the phone downloads them on first use.
+          with open('gallery/assets/mediapipe/manifest.json') as manifest:
+              models = [entry['file'] for entry in json.load(manifest)['models']]
+          assert models, 'no bundled models'
+          references = (['embedding_gemma.json', 'proofreader.json', 'summarizer.json']
+                        if 'text_summarizer' in expected else [])
+          # One library per family, with the text and audio stream adapters.
+          libraries = ['libflutter.so', 'libmediapipe_tasks_vision.so', 'libmediapipe_tasks_text.so',
+                       'libmediapipe_tasks_audio.so', 'libmediapipe_text_stream.so',
+                       'libmediapipe_audio_stream.so']
+          if 'decision_maker' in expected:
+              libraries.append('libmediapipe_tasks_decision.so')
+          if 'universal_embedder' in expected:
+              libraries.append('libmediapipe_tasks_retrieval.so')
+          required = {*[f"lib/{os.environ['ABI']}/{library}" for library in libraries],
+                      *[f'assets/flutter_assets/assets/mediapipe/{m}' for m in models],
+                      *[f'assets/flutter_assets/assets/references/modern_text/{r}' for r in references]}
+          assert required <= names, sorted(required - names)
+          # Neither the combined library nor Google's retired Java SDK.
+          stale = [name for name in names if name.endswith(('/libmediapipe.so', '_jni.so'))
+                   and 'mediapipe' in name]
+          assert not stale, stale
+          PY
+      # One device, no shards or flaky retries: one execution from the daily budget.
+      # 45m is the most Test Lab gives a physical device: the Galaxy A12 took 29
+      # minutes for its 18 tasks, and the phones that also run Decision Maker
+      # and the retrieval tasks download 1.07 GB of models.
+      - name: Run every SDK suite on CPU and GPU
+        id: testlab
+        env:
+          MODEL: ${{ matrix.model }}
+          VERSION: ${{ matrix.version }}
+        run: >-
+          gcloud firebase test android run
+          --project "$FIREBASE_PROJECT_ID" --type instrumentation
+          --app gallery/build/app/outputs/apk/debug/app-debug.apk
+          --test gallery/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          --device "model=$MODEL,version=$VERSION,locale=en,orientation=portrait"
+          --timeout 45m --results-history-name mediapipe-vision-sdk-android
+          --results-bucket "$RESULTS_BUCKET" --results-dir "$RESULTS_DIR"
+      - name: Download test artifacts
+        if: always()
+        run: |
+          mkdir -p testlab-results
+          for name in logcat instrumentation.results test_result_1.xml; do
+            gcloud storage cp "gs://$RESULTS_BUCKET/$RESULTS_DIR/$DEVICE/$name" testlab-results/ || true
+          done
+          # Each suite reports its measurements as one tagged JSON line.
+          grep -hE 'SDK_[A-Z_]+ \{' testlab-results/logcat > testlab-results/measurements.log || true
+          # Not declared on Android, so their suites check the refusal or only
+          # record the GPU: Interactive Segmenter's (browsers only), Face
+          # Detector's (no LiteRT GPU plugin, UP-046), Holistic's (UP-026) and
+          # Image Segmenter's (UP-061, UP-023).
+      - name: The GPU tasks this device ran
+        if: always()
+        id: gpu
+        env:
+          GPU_SKIP: ${{ matrix.gpu_skip }}
+        run: echo "tasks=$(python3 -c "import os; skip = set(os.environ['GPU_SKIP'].split(',')); print(','.join(t for t in 'face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker'.split(',') if t not in skip | {'interactive_segmenter', 'face_detector', 'holistic_landmarker', 'image_segmenter'}))")" >> "$GITHUB_OUTPUT"
+      - name: Record device CPU task coverage
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-${{ matrix.model }}-cpu
+          platform: android
+          delegate: cpu
+          tasks: ${{ steps.tasks.outputs.all }}
+          outcome: ${{ steps.testlab.outcome }}
+          tier: device
+      # Vision tasks only: the text, audio, Decision Maker and retrieval tasks
+      # run on the CPU alone on Android, and matrix.json marks their GPU unsupported.
+      - name: Record device GPU task coverage
+        if: always() && matrix.gpu != 'skip'
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: android-${{ matrix.model }}-gpu
+          platform: android
+          delegate: gpu
+          tasks: ${{ steps.gpu.outputs.tasks }}
+          outcome: ${{ steps.testlab.outcome }}
+          tier: device
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: android-sdk-testlab-${{ matrix.model }}-${{ matrix.version }}
+          path: testlab-results/
+          if-no-files-found: ignore

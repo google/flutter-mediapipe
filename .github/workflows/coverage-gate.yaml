@@ -1,0 +1,50 @@
+name: Task coverage gate
+
+# Waits for this commit's Android, iOS, web, desktop and macOS runs, collects
+# the `coverage-*` rows their jobs record (tool/coverage/record.py), and fails
+# unless every cell tool/coverage/matrix.json marks required has a passing row.
+# Device cells take rows from the manually dispatched physical-device workflow
+# (this commit's run, else a run on main within 48 h) and are only reported
+# while none has run.
+# The job summary shows the task x platform table.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: coverage-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  gate:
+    name: Every required task, platform and delegate passed
+    runs-on: ubuntu-24.04
+    # The longest recording workflow (iOS) can queue for a hosted macOS
+    # runner before its hour of tests.
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Gate tests
+        run: python3 -B -m unittest tool/coverage/test_gate.py
+      # Device runs are manual, so a device cell without one is reported as
+      # awaiting rather than failed; a device run that failed still fails.
+      - name: Collect rows and check the matrix
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -B tool/coverage/gate.py --collect
+          --sha ${{ github.event.pull_request.head.sha || github.sha }}
+          --rows build/coverage-rows --timeout-minutes 190
+          --lenient-devices
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: task-coverage-rows
+          path: build/coverage-rows/
+          if-no-files-found: warn

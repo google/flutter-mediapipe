@@ -5,100 +5,93 @@
 // `native-assets` tag allows test runs to opt in or out of running integration
 // tests via `flutter test -x native-assets` or `flutter test -t native-assets`
 @Tags(['native-assets'])
+library;
 
 import 'dart:io' as io;
+
 import 'package:path/path.dart' as path;
-import 'package:mediapipe_core/io.dart';
-import 'package:mediapipe_text/io.dart';
+import 'package:mediapipe_text/mediapipe_text.dart';
+import 'package:mediapipe_text/src/io/native_language_detector.dart';
 import 'package:test/test.dart';
 
 void main() {
   final pathToModel = path.joinAll([
     io.Directory.current.absolute.path,
-    'example/assets/language_detector.tflite',
+    'models/language_detector.tflite',
   ]);
   final modelBytes = io.File(pathToModel).readAsBytesSync();
 
-  group('LanguageDetectorExecutor should', () {
+  group('NativeLanguageDetector should', () {
     test('run a task', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(modelBytes),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(modelBytes: modelBytes),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
       expect(result.predictions, isNotEmpty);
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
 
     test('run multiple tasks', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(modelBytes),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(modelBytes: modelBytes),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
       expect(result.predictions, isNotEmpty);
-      final LanguageDetectorResult result2 =
-          executor.detect('Hello, world, again!');
+      final LanguageDetectorResult result2 = executor.detect(
+        'Hello, world, again!',
+      );
       expect(result2.predictions, isNotEmpty);
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
 
     test('unpack a result', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(modelBytes),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(modelBytes: modelBytes),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
       final prediction = result.predictions.first;
       expect(prediction.languageCode, equals('en'));
       expect(prediction.probability, greaterThan(0.99));
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
 
     test('unpack a Spanish result', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(modelBytes),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(modelBytes: modelBytes),
       );
       final LanguageDetectorResult result = executor.detect('¡Hola, mundo!');
       final prediction = result.predictions.first;
       expect(prediction.languageCode, equals('es'));
       expect(prediction.probability, greaterThan(0.99));
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
 
     test('use the denylist', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(
-          modelBytes,
-          classifierOptions: ClassifierOptions(
-            categoryDenylist: ['en'],
-          ),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(
+          modelBytes: modelBytes,
+          categoryDenylist: ['en'],
         ),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
       final prediction = result.predictions.first;
       expect(prediction.languageCode, 'de');
       expect(prediction.probability, closeTo(0.0011, 0.0001));
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
 
     test('use the allowlist', () {
-      final executor = LanguageDetectorExecutor(
-        LanguageDetectorOptions.fromAssetBuffer(
-          modelBytes,
-          classifierOptions: ClassifierOptions(
-            categoryAllowlist: ['en'],
-          ),
+      final executor = NativeLanguageDetector(
+        LanguageDetectorOptions(
+          modelBytes: modelBytes,
+          categoryAllowlist: ['en'],
         ),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
       expect(result.predictions, hasLength(1));
       final prediction = result.predictions.first;
       expect(prediction.languageCode, equals('en'));
-      result.dispose();
-      executor.dispose();
+      executor.close();
     });
   });
 }

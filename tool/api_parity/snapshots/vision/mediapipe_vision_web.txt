@@ -1,0 +1,11 @@
+abstract final class MediaPipeVisionWeb
+  new MediaPipeVisionWeb()
+  static void registerWith(Registrar registrar)
+final class WebVisionTask<R> implements VisionTaskBackend<R>, VisionTaskOverlayBackend
+  Future<R> detect(VisionImage image, int rotationDegrees, int? timestampMilliseconds, {VisionRegionOfInterest? regionOfInterest})
+  Future<void> attachOverlay(Object canvas)
+  Future<void> detachOverlay()
+  Future<void> dispose()
+  bool get overlayActive
+  static Future<WebVisionTask<R>> create<R>(String task, TaskOptions options, RunningMode runningMode, Map<String, Object?> settings, R Function(Map<String, dynamic>, Float64List?) decode)
+  void setOverlayOptions({required bool connections, required bool points, required bool mirrored, required double scale})

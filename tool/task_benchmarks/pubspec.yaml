@@ -1,0 +1,19 @@
+name: mediapipe_task_benchmarks
+description: Repeatable validation and CPU measurements of the four modern tasks.
+publish_to: none
+environment:
+  sdk: ^3.12.0
+dependencies:
+  crypto: ^3.0.6
+  mediapipe_core:
+    path: ../../packages/mediapipe-core
+  mediapipe_text:
+    path: ../../packages/mediapipe-task-text
+  mediapipe_vision:
+    path: ../../packages/mediapipe-task-vision
+dev_dependencies:
+  lints: ^6.1.0
+hooks:
+  user_defines:
+    mediapipe_vision:
+      tasks: [interactive_segmenter]

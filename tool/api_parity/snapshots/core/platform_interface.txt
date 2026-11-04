@@ -1,0 +1,45 @@
+abstract interface class ClassifierSettings
+  List<String> get categoryAllowlist
+  List<String> get categoryDenylist
+  String? get displayNamesLocale
+  double get scoreThreshold
+  int get maxResults
+  new ClassifierSettings()
+final class ModelSource
+  String toString()
+  String? get path
+  Uint8List? get bytes
+  new ModelSource({String? path, Uint8List? bytes})
+final class SerialTaskQueue
+  Future<T> add<T>(FutureOr<T> Function() request)
+  Future<void> close(FutureOr<void> Function() release)
+  new SerialTaskQueue(String _name)
+function void checkClassifierSettings(ClassifierSettings settings)
+function void checkLabel(String value, String name)
+function void checkStreamTimestamp(int timestampMilliseconds, int? previous)
+function Map<String, Object?> classifierSettingsJson(ClassifierSettings settings)
+function double cosineSimilarity(Embedding first, Embedding second)
+function Future<TaskPlatform> currentTaskPlatform()
+function MediaPipeCategory decodeCategory(Map<Object?, Object?> json)
+function Classifications decodeClassifications(Map<Object?, Object?> json)
+function Embedding decodeEmbedding(Map<Object?, Object?> json)
+function String? decodeLabel(Object? value)
+function bool hasHardwareWebGpu(TaskPlatform platform)
+function void holdModelBytes(TaskOptions options, Uint8List bytes)
+getter String get largeModelNeeds64Bit
+getter Map<String, String?> get largeModelRuntimeTargets
+getter int get maxStreamTimestampMilliseconds
+function StateError? missingLinuxGraphicsLibraries(String loaderError)
+getter int get mpHostSystem
+getter String get mpHostVersion
+function String nativeModelPath(String path)
+function RuntimeUnavailableException pluginNotRegistered(String package)
+function void requireDelegate(TaskCapabilities capabilities, Delegate delegate)
+function Future<ModelSource> resolvePinnedModel(DownloadAsset model, {String? family, Map<String, DownloadAsset> registry = const {}})
+function Future<void> resolveTaskModel(TaskOptions options)
+function MediaPipeException taskException(Object error)
+getter Future<String?> Function()? get taskPlatformGpuReader
+setter set taskPlatformGpuReader(Future<String?> Function()? value)
+getter Map<String, String?> get tasksRuntimeTargets
+function String tasksRuntimeUnavailable(String task, String operatingSystem)
+function String tasksRuntimeVersionOn(TaskPlatform platform)

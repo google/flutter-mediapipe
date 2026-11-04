@@ -1,0 +1,43 @@
+name: object_detection
+description: "MediaPipe Object Detector sample for Flutter: live camera, images and video files on Android, iOS, macOS, Linux, Windows and the web."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.47.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The sample uses the package from this repository, not pub.dev.
+  mediapipe_vision:
+    path: ../../packages/mediapipe-task-vision
+  # The vision package decodes no video; the gallery's plugin decodes files
+  # frame by frame with each platform's own decoder.
+  video_frames:
+    path: ../../gallery/packages/video_frames
+  # camera covers Android, iOS and browsers; camera_desktop adds macOS, Linux
+  # and Windows with raw frame streaming.
+  camera: ^0.12.1
+  camera_desktop: ^1.2.2
+  image_picker: ^1.2.2
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+hooks:
+  user_defines:
+    mediapipe_vision:
+      tasks: [object_detector]
+      # `dart run mediapipe_core:bundle_models` bundles these into
+      # assets/mediapipe/, so nothing is downloaded at run time.
+      models: [object_detector]
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/mediapipe/

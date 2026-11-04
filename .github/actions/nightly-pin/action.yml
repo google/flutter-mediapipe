@@ -1,0 +1,25 @@
+name: Use the nightly being compared
+description: >-
+  For the nightly side of nightly-compare.yaml: copies the files the run's pin
+  job changed (tool/ci/nightly_pin.py, the nightly-pin artifact) over the
+  checkout, so the job builds and tests Google's nightly in place of the
+  pinned build. Copying, not `git apply`, since Windows checks out CRLF files.
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+      with:
+        name: nightly-pin
+        path: ${{ runner.temp }}/nightly-pin
+    - name: Copy the nightly's pins over the checkout
+      shell: bash
+      env:
+        PIN: ${{ runner.temp }}/nightly-pin
+      run: |
+        if [ ! -d "$PIN/files" ]; then
+          echo 'The nightly-pin artifact has no files: nothing to compare.' >&2
+          exit 1
+        fi
+        cp -R "$PIN/files/." .
+        git status --short
+        grep -h 'const familyRuntimeVersion' packages/mediapipe-core/lib/src/native_assets/family_runtimes.dart

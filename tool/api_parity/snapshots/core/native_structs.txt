@@ -1,0 +1,98 @@
+final class MpBaseOptions extends Struct
+  Pointer<Char> get appId
+  Pointer<Char> get appVersion
+  Pointer<Char> get caBundlePath
+  Pointer<Char> get hostVersion
+  Pointer<Char> get modelAssetBuffer
+  Pointer<Char> get modelAssetPath
+  int get delegate
+  int get fileDescriptor
+  int get hostEnvironment
+  int get hostSystem
+  int get modelAssetBufferCount
+  new MpBaseOptions()
+  set appId(Pointer<Char> value)
+  set appVersion(Pointer<Char> value)
+  set caBundlePath(Pointer<Char> value)
+  set delegate(int value)
+  set fileDescriptor(int value)
+  set hostEnvironment(int value)
+  set hostSystem(int value)
+  set hostVersion(Pointer<Char> value)
+  set modelAssetBuffer(Pointer<Char> value)
+  set modelAssetBufferCount(int value)
+  set modelAssetPath(Pointer<Char> value)
+final class MpCategory extends Struct
+  Pointer<Char> get categoryName
+  Pointer<Char> get displayName
+  double get score
+  int get index
+  new MpCategory()
+  set categoryName(Pointer<Char> value)
+  set displayName(Pointer<Char> value)
+  set index(int value)
+  set score(double value)
+final class MpClassificationResult extends Struct
+  Pointer<MpClassifications> get classifications
+  bool get hasTimestampMs
+  int get classificationsCount
+  int get timestampMs
+  new MpClassificationResult()
+  set classifications(Pointer<MpClassifications> value)
+  set classificationsCount(int value)
+  set hasTimestampMs(bool value)
+  set timestampMs(int value)
+final class MpClassifications extends Struct
+  Pointer<Char> get headName
+  Pointer<MpCategory> get categories
+  int get categoriesCount
+  int get headIndex
+  new MpClassifications()
+  set categories(Pointer<MpCategory> value)
+  set categoriesCount(int value)
+  set headIndex(int value)
+  set headName(Pointer<Char> value)
+final class MpClassifierOptions extends Struct
+  Pointer<Char> get displayNamesLocale
+  Pointer<Pointer<Char>> get categoryAllowlist
+  Pointer<Pointer<Char>> get categoryDenylist
+  double get scoreThreshold
+  int get categoryAllowlistCount
+  int get categoryDenylistCount
+  int get maxResults
+  new MpClassifierOptions()
+  set categoryAllowlist(Pointer<Pointer<Char>> value)
+  set categoryAllowlistCount(int value)
+  set categoryDenylist(Pointer<Pointer<Char>> value)
+  set categoryDenylistCount(int value)
+  set displayNamesLocale(Pointer<Char> value)
+  set maxResults(int value)
+  set scoreThreshold(double value)
+final class MpEmbedding extends Struct
+  Pointer<Char> get headName
+  Pointer<Float> get floatEmbedding
+  Pointer<Uint8> get quantizedEmbedding
+  int get headIndex
+  int get valuesCount
+  new MpEmbedding()
+  set floatEmbedding(Pointer<Float> value)
+  set headIndex(int value)
+  set headName(Pointer<Char> value)
+  set quantizedEmbedding(Pointer<Uint8> value)
+  set valuesCount(int value)
+final class MpEmbeddingResult extends Struct
+  Pointer<MpEmbedding> get embeddings
+  bool get hasTimestampMs
+  int get embeddingsCount
+  int get timestampMs
+  new MpEmbeddingResult()
+  set embeddings(Pointer<MpEmbedding> value)
+  set embeddingsCount(int value)
+  set hasTimestampMs(bool value)
+  set timestampMs(int value)
+function void checkNativeStatus(int Function(Pointer<Pointer<Char>>) call, void Function(Pointer<Char>) errorFree, {Object Function(String, int)? failure})
+function List<Classifications> copyClassifications(MpClassificationResult result)
+function void fillBaseOptions(MpBaseOptions target, Arena arena, {String? modelPath, Uint8List? modelBytes})
+function void fillClassifierOptions(MpClassifierOptions target, Arena arena, ClassifierSettings settings)
+function String? nativeString(Pointer<Char> value, {bool emptyIsNull = false})
+function Pointer<Pointer<Char>> nativeStrings(Arena arena, List<String> values)

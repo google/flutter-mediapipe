@@ -1,0 +1,2 @@
+# Preserve the upstream notice verbatim, including its whitespace.
+third_party/NOTICE -text -whitespace

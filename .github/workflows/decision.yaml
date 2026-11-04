@@ -1,0 +1,39 @@
+name: Decision Maker
+
+permissions:
+  contents: read
+
+# The Decision Maker checks, as family.yaml runs them: the package against
+# Google's Python answers on each desktop, the gallery's test and journey on
+# the desktops, and the browser journey. The phones run the test and the
+# journey in android.yaml and ios.yaml. Dispatch by hand to run a subset of
+# the jobs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      jobs:
+        description: Jobs to run (package, gallery, web), comma-separated, or all
+        required: false
+        default: all
+
+concurrency:
+  group: decision-${{ github.ref }}-${{ inputs.jobs || 'all' }}
+  cancel-in-progress: true
+
+jobs:
+  decision:
+    name: Decision
+    uses: ./.github/workflows/family.yaml
+    with:
+      family: decision
+      tasks: decision_maker
+      integration-test: decision_maker_test
+      # EmbeddingGemma 2 for memory_budget_test.dart's macOS check (UP-060).
+      model-path: |
+        packages/mediapipe-task-decision/models/laya_s256.task
+        packages/mediapipe-task-decision/models/embeddinggemma-2-text-vision-440m.litertlm
+      download-models: laya_s256 embedding_gemma_2_text_vision
+      jobs: ${{ inputs.jobs || 'all' }}

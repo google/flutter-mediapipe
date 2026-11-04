@@ -1,0 +1,3 @@
+# Swift Package Manager output when Xcode or SourceKit opens the package.
+.build/
+.swiftpm/

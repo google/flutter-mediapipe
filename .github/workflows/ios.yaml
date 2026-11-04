@@ -1,0 +1,222 @@
+name: iOS simulator CPU tasks
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # nightly-compare.yaml: once on the pinned build, once on a nightly.
+  workflow_call:
+    inputs:
+      side:
+        description: baseline (the pins on this ref) or nightly (the run's nightly-pin artifact).
+        type: string
+        required: true
+
+# A newer push on the same branch supersedes the queued matrix; the hosted
+# macOS pool is small enough that stale runs otherwise starve the latest one.
+concurrency:
+  group: ios-simulator-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  cancel-in-progress: true
+
+# nightly-compare.yaml calls this workflow twice in one run, on the pinned
+# build and on Google's nightly; the suffix keeps the two calls' artifacts
+# apart. It is empty in every other run.
+env:
+  ARTIFACT_SUFFIX: ${{ inputs.side && format('-{0}', inputs.side) || '' }}
+
+jobs:
+  # Every family through Google's iOS libraries in one app: the vision tasks,
+  # text and audio, EmbeddingGemma, Proofreader and Summarizer, Decision Maker
+  # and the retrieval tasks, so this job needs no source build. The simulator
+  # runs them on the CPU only: Google's MediaPipe aborts in its Metal
+  # preprocessing there. Metal is a phone check.
+  sdk-tasks:
+    name: Every phone suite / official iOS SDK on an arm64 simulator
+    runs-on: macos-15
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          modern-model-cache: 'true'
+      - name: Make flutter test wait for the simulator log reader
+        run: python3 -B tool/ci/patch_flutter_simulator_launch.py
+      - name: Download the vision task models
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart
+      # Google's answers for its iOS libraries: its macOS arm64 wheel of the
+      # same release on this arm64 runner.
+      - name: Google's references for EmbeddingGemma, Proofreader and Summarizer
+        run: |
+          cd packages/mediapipe-task-text
+          dart pub get
+          dart tool/download_models.dart embedding_gemma proofreader summarizer
+          cd ../..
+          python3 -B packages/mediapipe-task-text/tool/prepare_modern_text_reference.py \
+            --venv build/ci-tmp/official-python \
+            --output-dir build/modern-text-reference
+      - name: Prepare the gallery with the phone suites' tasks
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target ios-simulator/arm64 \
+            --tasks face_landmarker,hand_landmarker,pose_landmarker,gesture_recognizer,holistic_landmarker,face_detector,object_detector,image_classifier,image_embedder,image_segmenter,interactive_segmenter,audio_classifier,language_detector,text_classifier,text_embedder,embedding_gemma,text_proofreader,text_summarizer,universal_embedder,semantic_retriever,decision_maker \
+            --modern-text-reference build/modern-text-reference
+          cd gallery && flutter pub get
+      - name: Boot an installed iPhone simulator
+        id: simulator
+        run: |
+          device=$(python3 - <<'PY'
+          import json, subprocess
+          devices = json.loads(subprocess.check_output(
+              ['xcrun', 'simctl', 'list', 'devices', 'available', '--json'], text=True))['devices']
+          candidates = [d for runtime, entries in devices.items() if '.iOS-' in runtime
+                        for d in entries if d['name'].startswith('iPhone')]
+          if not candidates:
+              raise SystemExit('No installed iPhone simulator runtime')
+          print(candidates[0]['udid'])
+          PY
+          )
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device" -b
+          echo "device=$device" >> "$GITHUB_OUTPUT"
+      - name: Official references, pixel formats, rotation, VIDEO and every live tile
+        id: sdk
+        working-directory: gallery
+        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
+        shell: bash
+        env:
+          DEVICE: ${{ steps.simulator.outputs.device }}
+        run: |
+          device="$DEVICE"
+          for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test runtime_test face_landmarker_still_image_test gallery_journey_test; do
+            for attempt in 1 2; do
+              status=0
+              # A hosted simulator sometimes stalls while loading the app and
+              # never starts the tests. Each file finishes in minutes, so a
+              # file that takes 15 runs once more on a rebooted simulator.
+              perl -e 'alarm shift; exec @ARGV' 900 flutter test -d "$device" \
+                integration_test/$test.dart \
+                --dart-define=SDK_GPU=skip --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
+              [ "$status" = 0 ] && break
+              if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
+                echo "$test stalled; rebooting the simulator and retrying"
+                xcrun simctl shutdown "$device" || true
+                xcrun simctl boot "$device"
+                xcrun simctl bootstatus "$device" -b
+                continue
+              fi
+              exit "$status"
+            done
+          done
+      - name: Record ios CPU task coverage (ios-sdk-simulator)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: ios-sdk-simulator
+          platform: ios
+          delegate: cpu
+          tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.sdk.outcome }}
+      # Text and audio run in the same SDK adapter, which core's runtime
+      # resolves to on iOS.
+      - name: Text and audio through Google's iOS SDK
+        id: text_audio
+        if: ${{ !cancelled() && steps.simulator.outcome == 'success' }}
+        working-directory: gallery
+        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
+        shell: bash
+        env:
+          DEVICE: ${{ steps.simulator.outputs.device }}
+        run: |
+          device="$DEVICE"
+          for attempt in 1 2; do
+            status=0
+            perl -e 'alarm shift; exec @ARGV' 900 flutter test -d "$device" \
+              integration_test/sdk_text_audio_test.dart \
+              --dart-define=SDK_GPU=skip --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
+            [ "$status" = 0 ] && exit 0
+            if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
+              echo "sdk_text_audio_test stalled; rebooting the simulator and retrying"
+              xcrun simctl shutdown "$device" || true
+              xcrun simctl boot "$device"
+              xcrun simctl bootstatus "$device" -b
+              continue
+            fi
+            exit "$status"
+          done
+      - name: Record ios CPU retrieval coverage (ios-sdk-simulator-retrieval)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: ios-sdk-simulator-retrieval
+          platform: ios
+          delegate: cpu
+          tasks: universal_embedder,semantic_retriever
+          outcome: ${{ steps.sdk.outcome }}
+      - name: Record ios CPU Decision Maker coverage (ios-sdk-simulator-decision)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: ios-sdk-simulator-decision
+          platform: ios
+          delegate: cpu
+          tasks: decision_maker
+          outcome: ${{ steps.sdk.outcome }}
+      - name: Record ios CPU text and audio coverage (ios-sdk-simulator-text-audio)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: ios-sdk-simulator-text-audio
+          platform: ios
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder
+          outcome: ${{ steps.text_audio.outcome }}
+      # The generative text tasks and EmbeddingGemma through the same adapter,
+      # against Google's wheel's answers generated above.
+      - name: EmbeddingGemma, Proofreader and Summarizer through Google's iOS SDK
+        id: modern_text
+        if: ${{ !cancelled() && steps.simulator.outcome == 'success' }}
+        working-directory: gallery
+        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
+        shell: bash
+        env:
+          DEVICE: ${{ steps.simulator.outputs.device }}
+        run: |
+          device="$DEVICE"
+          for attempt in 1 2; do
+            status=0
+            perl -e 'alarm shift; exec @ARGV' 1800 flutter test -d "$device" \
+              integration_test/sdk_modern_text_test.dart \
+              --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
+            [ "$status" = 0 ] && exit 0
+            if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
+              echo "sdk_modern_text_test stalled; rebooting the simulator and retrying"
+              xcrun simctl shutdown "$device" || true
+              xcrun simctl boot "$device"
+              xcrun simctl bootstatus "$device" -b
+              continue
+            fi
+            exit "$status"
+          done
+      - name: Record ios CPU modern text coverage (ios-sdk-simulator-modern-text)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: ios-sdk-simulator-modern-text
+          platform: ios
+          delegate: cpu
+          tasks: embedding_gemma,text_proofreader,text_summarizer
+          outcome: ${{ steps.modern_text.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: ios-simulator-sdk-tasks${{ env.ARTIFACT_SUFFIX }}
+          path: gallery/sdk-ios-simulator.log
+          if-no-files-found: warn

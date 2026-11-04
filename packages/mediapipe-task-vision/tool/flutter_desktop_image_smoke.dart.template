@@ -1,0 +1,63 @@
+
+Future<void> runImageTasksSmoke() async {
+  final pixels = await rootBundle.load('assets/portrait.rgb');
+  final image = VisionImage.fromPixels(
+    pixels: pixels.buffer.asUint8List(pixels.offsetInBytes, pixels.lengthInBytes),
+    width: 301, height: 209, format: VisionPixelFormat.rgb,
+  );
+  final classifierModel = await rootBundle.load('assets/image_classifier.tflite');
+  final classifier = await ImageClassifier.create(ImageClassifierOptions(
+    modelBytes: classifierModel.buffer.asUint8List(classifierModel.offsetInBytes,
+      classifierModel.lengthInBytes),
+    maxResults: 3,
+    runningMode: RunningMode.video,
+  ));
+  try {
+    final requests = [for (var i = 0; i < 3; i++)
+      classifier.classifyForVideo(image, timestampMilliseconds: i * 33)];
+    final closing = classifier.dispose();
+    final results = await Future.wait(requests);
+    await closing;
+    for (var i = 0; i < results.length; i++) {
+      final result = results[i];
+      if (result.imageWidth != 301 || result.imageHeight != 209 ||
+          result.timestampMilliseconds != i * 33 ||
+          result.classifications.single.categories.length != 3 ||
+          result.classifications.single.categories.first.categoryName != 'cloak' ||
+          (result.classifications.single.categories.first.score - 0.13042697).abs() > 0.0001) {
+        throw StateError('Bundled Image Classifier inference failed.');
+      }
+    }
+  } finally {
+    await classifier.dispose();
+  }
+  final embedderModel = await rootBundle.load('assets/image_embedder.tflite');
+  final embedder = await ImageEmbedder.create(ImageEmbedderOptions(
+    modelBytes: embedderModel.buffer.asUint8List(embedderModel.offsetInBytes,
+      embedderModel.lengthInBytes),
+    l2Normalize: true,
+    quantize: true,
+    runningMode: RunningMode.video,
+  ));
+  try {
+    final requests = [for (var i = 0; i < 3; i++)
+      embedder.embedForVideo(image, timestampMilliseconds: i * 33)];
+    final closing = embedder.dispose();
+    final results = await Future.wait(requests);
+    await closing;
+    for (var i = 0; i < results.length; i++) {
+      final result = results[i];
+      final vector = result.embeddings.single.quantizedEmbedding;
+      if (result.imageWidth != 301 || result.imageHeight != 209 ||
+          result.timestampMilliseconds != i * 33 || vector == null ||
+          vector.length != 1024 || vector[0] != 253 || vector[1] != 255 ||
+          (ImageEmbedder.cosineSimilarity(result.embeddings.single,
+            results.first.embeddings.single) - 1).abs() > 0.000001) {
+        throw StateError('Bundled Image Embedder inference failed.');
+      }
+    }
+  } finally {
+    await embedder.dispose();
+  }
+  stdout.writeln('Image Classifier and Image Embedder CPU inference passed.');
+}

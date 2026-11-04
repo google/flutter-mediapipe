@@ -1,0 +1,8 @@
+abstract interface class AudioTaskBackend
+  Future<List<Object?>> classify(Float32List samples, double sampleRate)
+  Future<void> dispose()
+  new AudioTaskBackend()
+getter Future<AudioTaskBackend> Function(Map<String, Object?>)? get audioTaskBackendFactory
+setter set audioTaskBackendFactory(Future<AudioTaskBackend> Function(Map<String, Object?>)? value)
+getter void Function(int)? get debugGoogleStreamTimestamp
+setter set debugGoogleStreamTimestamp(void Function(int)? value)

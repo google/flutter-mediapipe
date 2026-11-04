@@ -1,35 +1,268 @@
-name: Main Branch CI
+name: macOS tasks
 
-# Declare default permissions as read only.
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   pull_request:
-    branches: []
   push:
-    branches: [main, ffi-wrapper, ffi-wrapper-text-pkg]
+    branches: [main]
+  workflow_dispatch:
+  # nightly-compare.yaml: once on the pinned build, once on a nightly.
+  workflow_call:
+    inputs:
+      side:
+        description: baseline (the pins on this ref) or nightly (the run's nightly-pin artifact).
+        type: string
+        required: true
 
-defaults:
-  run:
-    shell: bash
+# A newer push on the same branch supersedes the queued matrix; the hosted
+# macOS pool is small enough that stale runs otherwise starve the latest one.
+concurrency:
+  group: macos-tasks-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  cancel-in-progress: true
+
+# nightly-compare.yaml calls this workflow twice in one run, on the pinned
+# build and on Google's nightly; the suffix keeps the two calls' artifacts
+# apart. It is empty in every other run.
+env:
+  ARTIFACT_SUFFIX: ${{ inputs.side && format('-{0}', inputs.side) || '' }}
 
 jobs:
-  flutter-tests:
-    name: Test mediapipe_core against ${{ matrix.flutter_version }}
-    runs-on: ${{ matrix.os }}
-    # Skip running job on forks
-    if: github.repository == 'google/flutter-mediapipe'
-    strategy:
-      fail-fast: false
-      matrix:
-        flutter_version: [master]
-        # TODO(craiglabenz): reverse once CI works
-        # flutter_version: [stable, beta, master]
-        # TODO(craiglabenz): Add `ubuntu-latest` and `windows-latest` when those artifacts exist
-        os: [macos-latest]
+  gallery-vision-still-images:
+    name: Vision still images / macOS arm64
+    runs-on: macos-15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
         with:
-          channel: ${{ matrix.flutter_version }}
-      - run: ./tool/mediapipe_ci_script_${{ matrix.flutter_version }}.sh
+          python: 'false'
+      # The one Dart command a fresh checkout runs: it downloads and verifies
+      # the models itself, with no Python.
+      - name: Prepare the vision gallery
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target macos/arm64 --tasks face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
+          cd gallery && flutter pub get
+      - name: Test Face Landmarker still image inference and overlay
+        working-directory: gallery
+        run: flutter test -d macos integration_test/face_landmarker_still_image_test.dart --reporter expanded
+      - name: Test still image inference for every camera vision task
+        working-directory: gallery
+        run: flutter test -d macos integration_test/vision_still_image_modes_test.dart --reporter expanded
+      # Includes the MagicTouch editor: strokes, undo and clear.
+      - name: Exercise every prepared gallery page through its sidebar
+        working-directory: gallery
+        run: flutter test -d macos integration_test/gallery_journey_test.dart --reporter expanded
+      # The same journey in a release build: AOT and kReleaseMode can fail
+      # what debug passes (tool/ci/run_release_suite.py).
+      - name: Exercise every prepared gallery page in a release build
+        run: python3 -B tool/ci/run_release_suite.py --target macos --suite integration_test/gallery_journey_test.dart --timeout 900
+
+  modern-task-matrix:
+    name: Modern tasks / options and sustained CPU inference
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+      - name: Prepare the official models
+        run: |
+          cd tool/task_benchmarks
+          dart pub get
+          dart analyze --fatal-infos
+          dart format --output=none --set-exit-if-changed .
+          cd ../../packages/mediapipe-task-text
+          dart pub get
+          dart tool/download_models.dart embedding_gemma proofreader summarizer
+          cd ../mediapipe-task-vision
+          dart pub get
+          dart tool/download_models.dart interactive_segmenter
+      - name: Validate option combinations, caches, lifecycle and sustained use
+        run: python3 -B tool/task_benchmarks/run_macos.py --output build/task-benchmarks/ci --iterations 25 --reloads 3
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: modern-task-matrix${{ env.ARTIFACT_SUFFIX }}
+          path: build/task-benchmarks/ci/
+          if-no-files-found: error
+
+  embedding-consumer:
+    name: Modern text tasks / fresh macOS consumer
+    runs-on: macos-15
+    timeout-minutes: 25
+    env:
+      MEDIAPIPE_CLASSIC_TEXT_REFERENCE_DIR: ${{ github.workspace }}/build/classic-text-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+      - name: Generate official CPU text references on this runner
+        run: |
+          cd packages/mediapipe-task-text
+          dart pub get
+          cd ../..
+          make models_text
+          python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
+      # Google's references for all six text tasks, with face tasks and
+      # MagicTouch in the same app, in a debug and a release build. The text
+      # package's own suite runs in native-tasks (`make test_only`).
+      - name: Verify public downloads and debug/release task coexistence
+        id: modern_text
+        run: python3 -B packages/mediapipe-task-text/tool/test_embedding_macos.py
+      - name: Check callback ownership in the text stream bridge
+        run: make test_text_stream_bridge
+      - name: Record macos CPU modern text coverage (macos-modern-text)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-modern-text
+          platform: macos
+          delegate: cpu
+          tasks: embedding_gemma,text_proofreader,text_summarizer
+          outcome: ${{ steps.modern_text.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: embedding-gemma-validation${{ env.ARTIFACT_SUFFIX }}
+          path: |
+            build/ci-tmp/embedding-consumer-*/report.json
+            build/ci-tmp/embedding-consumer-*/*.log
+            build/classic-text-reference/*.json
+            build/classic-text-reference/*.log
+          if-no-files-found: error
+
+  native-tasks:
+    name: Stable Flutter / macOS arm64
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      MEDIAPIPE_CLASSIC_TEXT_REFERENCE_DIR: ${{ github.workspace }}/build/classic-text-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+      - run: flutter --version
+      - run: make get models
+      - name: Generate official CPU text references on this runner
+        run: python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
+      # No Metal references: the vision package withdraws the macOS GPU while
+      # Google's library since 1.1.1 differs there from its 1.1.0 wheel
+      # (upstream-issues.md UP-057).
+      # make get/models already ran above for the independent references.
+      # Keep the remaining make ci checks, with visible stage boundaries.
+      - name: Analyze, format-check and test all packages
+        id: packages
+        run: |
+          make analyze
+          make check_format
+          make test_only
+      - name: Record macos CPU task coverage (macos-packages)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-packages
+          platform: macos
+          delegate: cpu
+          tasks: audio_classifier,language_detector,text_classifier,text_embedder
+          outcome: ${{ steps.packages.outcome }}
+      # The face suites ran above against Google's wheel on this runner, on
+      # the CPU.
+      - name: Record macos CPU task coverage (macos-face-cpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-face-cpu
+          platform: macos
+          delegate: cpu
+          tasks: face_detector,face_landmarker
+          outcome: ${{ steps.packages.outcome }}
+      # MagicTouch against Google's references, on the CPU.
+      - name: Record macos CPU task coverage (macos-interactive-segmenter)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-interactive-segmenter
+          platform: macos
+          delegate: cpu
+          tasks: interactive_segmenter
+          outcome: ${{ steps.packages.outcome }}
+      - name: Test face tasks in a fresh Flutter app
+        run: make test_vision_flutter
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: official-classic-text-reference${{ env.ARTIFACT_SUFFIX }}
+          path: |
+            build/classic-text-reference/*.json
+            build/classic-text-reference/*.log
+          if-no-files-found: error
+
+  # The same package suites and fresh app on macOS 14, the oldest macOS the
+  # packages and Google's libraries support (MACOSX_DEPLOYMENT_TARGET 14.0);
+  # every other macOS job runs 15 or 26. decision.yaml and retrieval.yaml run
+  # their packages there too. No coverage rows: the job above records macOS.
+  macos-14:
+    name: Every package / macOS 14 arm64
+    runs-on: macos-14
+    timeout-minutes: 90
+    env:
+      MEDIAPIPE_CLASSIC_TEXT_REFERENCE_DIR: ${{ github.workspace }}/build/classic-text-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+      - run: make get models
+      - name: Generate official CPU text references on this runner
+        run: python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
+      - name: Test all packages
+        run: make test_only
+      - name: Test face tasks in a fresh Flutter app
+        run: make test_vision_flutter
+
+  official-runtime-validation:
+    # Every vision task on Google's vision library, against Google's
+    # reference wheel on this runner: CPU references generated here. Metal is
+    # withdrawn for now (upstream-issues.md UP-057).
+    name: Official macOS runtime / every served task against Google's wheel
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: inputs.side == 'nightly'
+        uses: ./.github/actions/nightly-pin
+      - uses: ./.github/actions/setup
+      - name: Download the pinned models
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart face_detector face_landmarker hand_landmarker gesture_recognizer pose_landmarker holistic_landmarker image_classifier image_embedder object_detector image_segmenter
+      # Core's hook fetches Google's vision library by its pinned SHA-256.
+      - name: Compare every served task with Google's wheel
+        id: official
+        run: python3 -B packages/mediapipe-task-vision/tool/test_macos_references.py
+      - name: Record macos CPU task coverage (macos-official-cpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-official-cpu
+          platform: macos
+          delegate: cpu
+          tasks: face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,object_detector,pose_landmarker
+          outcome: ${{ steps.official.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: official-macos-runtime-validation${{ env.ARTIFACT_SUFFIX }}
+          path: |
+            packages/mediapipe-task-vision/build/macos-reference-validation/*.log
+          if-no-files-found: warn

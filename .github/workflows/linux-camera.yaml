@@ -1,0 +1,125 @@
+name: Linux real camera
+
+# The desktop workflow injects frames through the camera platform interface.
+# This one opens a genuine V4L2 device: v4l2loopback exposes /dev/video10 and
+# ffmpeg streams the licensed portrait fixture into it, so camera_desktop's
+# GStreamer capture, the gallery's live controller, Google's CPU task and the
+# preview all run as shipped, with a face in view. The overlay-alignment oracle
+# then compares what the overlay draws with the face visible on the X screen.
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: linux-camera-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-camera:
+    name: Face Landmarker / Linux x64 real V4L2 camera
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      MEDIAPIPE_CAMERA_REPORT: ${{ github.workspace }}/build/ci-tmp/gallery-real-camera-linux/report.json
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: gallery
+      # The setup action's cache hit runs no apt-get update, so these install
+      # through apt-install, which updates apt and switches mirrors when one
+      # is slow. The kernel headers must match the running kernel, and so must
+      # linux-modules-extra, where the hosted Azure kernel ships videodev, which
+      # v4l2loopback needs. That one installed with `|| true` before, and its
+      # 51 MB took 5 minutes from the runner's mirror (2026-10-22). Image
+      # ubuntu24/20261025 boots 7.0.0-1017-azure from Ubuntu 26.04, which has no
+      # linux-modules-extra package and ships videodev in linux-modules instead,
+      # so the extra package is only asked for when videodev is missing.
+      - name: Name the kernel packages
+        id: kernel
+        run: |
+          echo "headers=linux-headers-$(uname -r)" >> "$GITHUB_OUTPUT"
+          if modinfo videodev > /dev/null 2>&1; then
+            echo "videodev is already installed for $(uname -r)"
+            echo "modules=" >> "$GITHUB_OUTPUT"
+          else
+            echo "modules=linux-modules-extra-$(uname -r)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install the camera, virtual device and screenshot dependencies
+        uses: ./.github/actions/apt-install
+        with:
+          packages: ffmpeg imagemagick v4l-utils ${{ steps.kernel.outputs.headers }} ${{ steps.kernel.outputs.modules }} v4l2loopback-dkms
+      - name: Create the loopback camera and stream the portrait into it
+        run: |
+          # Ubuntu's packaged v4l2loopback trails 6.x kernels, so build the
+          # maintained upstream module against the running kernel. Without
+          # videodev there is no V4L2 device and the test has no camera.
+          sudo modprobe videodev ||
+            { echo "::error::videodev did not load for kernel $(uname -r); the real camera test needs it for v4l2loopback."; exit 1; }
+          git clone --quiet --depth 1 https://github.com/umlaeute/v4l2loopback.git /tmp/v4l2loopback
+          make -C /tmp/v4l2loopback > /tmp/v4l2loopback-build.log 2>&1 || { cat /tmp/v4l2loopback-build.log; exit 1; }
+          sudo insmod /tmp/v4l2loopback/v4l2loopback.ko devices=1 video_nr=10 card_label=MediaPipe_Fixture exclusive_caps=1 ||
+            { echo '::error::v4l2loopback did not load, so there is no /dev/video10 for the real camera test.'; sudo dmesg | tail -15; exit 1; }
+          modinfo /tmp/v4l2loopback/v4l2loopback.ko | grep -E '^(version|vermagic)' || true
+          # The node is created root-only; the producer and the app run as runner.
+          sudo chmod 666 /dev/video10
+          ls -l /dev/video10
+          id
+          portrait=packages/mediapipe-task-vision/test/fixtures/face_detection/landmark-ex1.jpg
+          produce() {
+            "$@" ffmpeg -hide_banner -loglevel error -re -loop 1 -framerate 15 -i "$portrait" \
+              -vf "scale=640:480:force_original_aspect_ratio=decrease,pad=640:480:(ow-iw)/2:(oh-ih)/2,format=yuv420p" \
+              -f v4l2 /dev/video10 > build-ffmpeg.log 2>&1 &
+            echo $! > build-ffmpeg.pid
+            sleep 4
+            kill -0 "$(cat build-ffmpeg.pid)" 2>/dev/null
+          }
+          if produce; then
+            echo 'producer running as runner'
+          else
+            echo 'producer failed as runner:'; cat build-ffmpeg.log; sudo dmesg | tail -15 || true
+            if produce sudo; then echo 'producer running as root'; else echo 'producer failed as root:'; cat build-ffmpeg.log; exit 1; fi
+          fi
+          v4l2-ctl --list-devices || true
+          v4l2-ctl -d /dev/video10 --all | head -30 || true
+      - name: Download the official Face Landmarker model
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart face_landmarker
+      - name: Prepare the Linux gallery with the face task only
+        run: dart run tool/gallery_builder/bin/prepare_gallery.dart --target linux/x64 --tasks face_landmarker
+      - name: Analyze the camera test and oracle
+        working-directory: gallery
+        run: |
+          flutter pub get
+          flutter analyze integration_test/real_camera_test.dart integration_test/support
+      - name: Run the gallery against the real camera under Xvfb
+        working-directory: gallery
+        # The hosted runner lets only root open the V4L2 node whatever its mode
+        # bits (the producer above also needed root), so the app runs as root.
+        # CI=true keeps the Flutter tool's root warning quiet; HOME and PATH
+        # carry the SDK and pub cache across.
+        run: |
+          sudo -E env "PATH=$PATH" HOME="$HOME" CI=true \
+            xvfb-run -a -s "-screen 0 1600x1000x24" \
+            flutter test -d linux integration_test/real_camera_test.dart --reporter expanded
+      - name: Show the record
+        if: always()
+        run: |
+          cat "$MEDIAPIPE_CAMERA_REPORT" || true
+          tail -20 build-ffmpeg.log || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: linux-real-camera-evidence
+          path: |
+            build/ci-tmp/gallery-real-camera-linux/
+            build-ffmpeg.log
+          if-no-files-found: warn

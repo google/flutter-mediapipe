@@ -1,0 +1,104 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+// Desktop and iOS runners read the launched process's own standard streams.
+// An Android app's file descriptors reach neither, and `adb` exposes only
+// logcat, so every result is reported through the platform log as well.
+void report(String message) {
+  stdout.writeln(message);
+  print(message);
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    final model = await rootBundle.load('assets/model.tflite');
+    final pixels = await rootBundle.load('assets/portrait.rgb');
+    for (final delegate in Delegate.values) {
+      final detector = await FaceDetector.create(
+        FaceDetectorOptions(
+          delegate: delegate,
+          modelBytes: model.buffer.asUint8List(
+            model.offsetInBytes,
+            model.lengthInBytes,
+          ),
+        ),
+      );
+      try {
+        final result = await detector.detect(
+          VisionImage.fromPixels(
+            pixels: pixels.buffer.asUint8List(
+              pixels.offsetInBytes,
+              pixels.lengthInBytes,
+            ),
+            width: 301,
+            height: 209,
+            format: VisionPixelFormat.rgb,
+          ),
+        );
+        // Explicit checks remain enabled in release mode.
+        if (result.imageWidth != 301 ||
+            result.imageHeight != 209 ||
+            result.detections.length != 1 ||
+            result.detections.single.keypoints.length != 6 ||
+            result.detections.single.categories.single.score <= 0.9) {
+          throw StateError(
+            'Release inference did not match the portrait fixture.',
+          );
+        }
+        final bundle = await rootBundle.load('assets/face_landmarker.task');
+        final landmarker = await FaceLandmarker.create(
+          FaceLandmarkerOptions(
+            delegate: delegate,
+            modelBytes: bundle.buffer.asUint8List(
+              bundle.offsetInBytes,
+              bundle.lengthInBytes,
+            ),
+            runningMode: RunningMode.video,
+            outputFaceBlendshapes: true,
+            outputFacialTransformationMatrixes: true,
+          ),
+        );
+        try {
+          for (var timestamp = 0; timestamp < 100; timestamp += 33) {
+            final landmarks = await landmarker.detectForVideo(
+              VisionImage.fromPixels(
+                pixels: pixels.buffer.asUint8List(
+                  pixels.offsetInBytes,
+                  pixels.lengthInBytes,
+                ),
+                width: 301,
+                height: 209,
+                format: VisionPixelFormat.rgb,
+              ),
+              timestampMilliseconds: timestamp,
+            );
+            if (landmarks.faceLandmarks.length != 1 ||
+                landmarks.faceLandmarks.single.length != 478 ||
+                landmarks.faceBlendshapes.single.length != 52 ||
+                landmarks.facialTransformationMatrixes.single.data.length !=
+                    16 ||
+                landmarks.timestampMilliseconds != timestamp) {
+              throw StateError('Release Face Landmarker inference failed.');
+            }
+          }
+        } finally {
+          await landmarker.dispose();
+        }
+      } finally {
+        await detector.dispose();
+      }
+      report(
+        'Flutter release: bundled ${delegate.name} Face Detector and Face Landmarker inference passed.',
+      );
+    }
+    exit(0);
+  } catch (error, stack) {
+    stderr.writeln('$error\n$stack');
+    report('Flutter smoke failure: $error\n$stack');
+    exit(1);
+  }
+}

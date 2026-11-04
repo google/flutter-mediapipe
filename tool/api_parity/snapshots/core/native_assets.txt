@@ -1,0 +1,33 @@
+final class DownloadAsset
+  Iterable<String> get urls
+  List<String> get mirrors
+  String get sha256
+  String get url
+  new DownloadAsset({required String url, required String sha256, List<String> mirrors = const []})
+final class DownloadException implements Exception
+  List<DownloadFailure> get failures
+  String toString()
+  new DownloadException(List<DownloadFailure> failures)
+final class DownloadFailure
+  String get reason
+  String get url
+  new DownloadFailure(String url, String reason)
+final class FamilyRuntime
+  DownloadAsset get asset
+  String get fileName
+  String get path
+  String get sha256
+  int get bytes
+  new FamilyRuntime(String path, String sha256, int bytes)
+function String buildTarget(CodeConfig code)
+function Future<void> bundleFamilyRuntime(BuildInput input, BuildOutputBuilder output, {required String family})
+function Future<File> downloadVerified(DownloadAsset asset, File destination, {Client? client, String? source})
+getter String get familyRuntimeArchiveUrl
+getter String get familyRuntimeAssetName
+getter String get familyRuntimeBaseUrl
+getter int get familyRuntimeMinimumAndroidApi
+getter String get familyRuntimeVersion
+getter Map<String, Map<String, FamilyRuntime>> get familyRuntimes
+function String? hookAssetSource(BuildInput input)
+function void requireDynamicLinking(CodeConfig code)
+function FamilyRuntime requireFamilyRuntime(String family, String target)

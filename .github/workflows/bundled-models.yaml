@@ -1,0 +1,52 @@
+name: Bundled models
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: bundled-models-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # A fresh app lists one model per family in its pubspec, bundles them with
+  # `dart run mediapipe_core:bundle_models`, which downloads them from Google
+  # on this host, and runs them with networking blocked, in debug and release
+  # (packages/mediapipe-core/tool/test_bundled_models.py).
+  desktop:
+    name: Bundled models / ${{ matrix.os }} x64
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: gallery
+      # The store's lock, downloads and file replacement on this host's file
+      # system. The rest of core's suite runs on macOS in main.yaml.
+      - name: Model store and bundling unit tests
+        working-directory: packages/mediapipe-core
+        run: flutter pub get && dart test test/model_store_test.dart test/model_bundling_test.dart --reporter expanded
+      - name: Bundle a fresh app's models and run them offline (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python3 -B packages/mediapipe-core/tool/test_bundled_models.py
+      - name: Bundle a fresh app's models and run them offline (Windows)
+        if: runner.os == 'Windows'
+        run: python -B packages/mediapipe-core/tool/test_bundled_models.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: bundled-models-${{ matrix.os }}
+          path: |
+            build/ci-tmp/bundled-*/*.log
+            build/ci-tmp/bundled-*/report.json
+          if-no-files-found: error

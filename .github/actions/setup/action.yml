@@ -1,0 +1,153 @@
+name: Set up the toolchain
+description: >-
+  What every job installs after its checkout: the pinned Flutter and Python,
+  the Linux packages its profile needs, and the cache of the generative text
+  models. The versions are pinned here only; tool/check_repository.py reads
+  them.
+inputs:
+  flutter:
+    description: Install the pinned Flutter.
+    default: 'true'
+  python:
+    description: Install the pinned Python.
+    default: 'true'
+  linux-profile:
+    description: >-
+      The packages a Linux runner needs: none, ffi (EGL and OpenGL ES for the
+      FFI hosts), gallery (the Flutter desktop host and GStreamer) or browser
+      (ffmpeg, Xvfb, Mesa and the system packages of the Playwright browsers).
+    default: none
+  modern-model-cache:
+    description: Cache the three generative text models, 419 MB in all, by their pinned SHA-256.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - if: ${{ inputs.flutter == 'true' }}
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+      with:
+        flutter-version: '3.47.5'
+        channel: stable
+        cache: true
+    - if: ${{ inputs.python == 'true' }}
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      with:
+        python-version: '3.12'
+    # An apt mirror that serves 3 to 5 minutes a package, or hangs after the
+    # InRelease files, held two jobs until their limits (2026-10-22). Every apt
+    # call after this step, here and in the workflows, retries and gives up on
+    # a silent connection.
+    - name: Make apt retry and give up on a silent connection
+      if: ${{ runner.os == 'Linux' && inputs.linux-profile != 'none' }}
+      shell: bash
+      run: |
+        printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' |
+          sudo tee /etc/apt/apt.conf.d/99ci-fail-fast
+    # The key names the runner image, whose installed packages decide which
+    # .deb files a profile needs, and the package list.
+    - name: Choose the Linux packages
+      id: apt
+      if: ${{ runner.os == 'Linux' && inputs.linux-profile != 'none' }}
+      shell: bash
+      env:
+        PROFILE: ${{ inputs.linux-profile }}
+      run: |
+        # gstreamer1.0-libav decodes the gallery's H.264 sample clip, which the
+        # journey test plays in video file mode; GStreamer itself ships no
+        # H.264 decoder.
+        # The browser profile carries what `playwright install --with-deps`
+        # would install for Chromium, Firefox and WebKit on Ubuntu 24.04: its
+        # own apt-get has no time limit and no other mirror (2026-10-22). The
+        # list is Playwright 1.63.0's (tools, chromium, firefox and webkit for
+        # ubuntu24.04-x64 in playwright-core's nativeDeps), and the workflows
+        # run `playwright install-deps --dry-run` after it, which names any
+        # package a newer Playwright adds.
+        case "$PROFILE" in
+          ffi) packages='libegl1 libgles2' ;;
+          gallery) packages='clang cmake ninja-build pkg-config libgtk-3-dev xvfb libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-libav libegl1 libgles2' ;;
+          browser)
+            packages='ffmpeg xvfb libgl1-mesa-dri'
+            packages="$packages fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 xfonts-cyrillic xfonts-scalable fonts-liberation fonts-ipafont-gothic fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf"
+            packages="$packages libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2"
+            packages="$packages libavcodec60 libcairo-gobject2 libgdk-pixbuf-2.0-0 libgtk-3-0t64 libpangocairo-1.0-0 libx11-xcb1 libxcb-shm0 libxcursor1 libxi6 libxrender1"
+            packages="$packages gstreamer1.0-libav gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good libicu74 libatomic1 libenchant-2-2 libepoxy0 libevent-2.1-7t64 libflite1 libgles2 libgstreamer-gl1.0-0 libgstreamer-plugins-bad1.0-0 libgstreamer-plugins-base1.0-0 libgstreamer1.0-0 libgtk-4-1 libharfbuzz-icu0 libharfbuzz0b libhyphen0 libjpeg-turbo8 liblcms2-2 libmanette-0.2-0 libopus0 libpng16-16t64 libsecret-1-0 libvpx9 libwayland-client0 libwayland-egl1 libwayland-server0 libwebp7 libwebpdemux2 libwoff1 libxml2 libxslt1.1 libx264-164 libavif16"
+            ;;
+          *) echo "Unknown linux-profile: $PROFILE" >&2; exit 1 ;;
+        esac
+        hash=$(echo "$packages" | sha256sum | cut -c1-16)
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+        echo "key=apt-v1-${ImageOS:-linux}-${ImageVersion:-unknown}-$PROFILE-$hash" >> "$GITHUB_OUTPUT"
+    # The .deb files of the profile and everything it pulls in, so a hit
+    # installs without a download or an apt-get update. Only main saves them,
+    # as with the models: two pull requests each saved a 95 MB copy of the key
+    # main saves, with the repository's caches past their 10 GB (2026-10-22).
+    - name: Restore the Linux packages
+      id: apt-cache-pr
+      if: ${{ steps.apt.outcome == 'success' && github.event_name == 'pull_request' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.cache/apt-debs
+        key: ${{ steps.apt.outputs.key }}
+    - name: Restore the Linux packages
+      id: apt-cache
+      if: ${{ steps.apt.outcome == 'success' && github.event_name != 'pull_request' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.cache/apt-debs
+        key: ${{ steps.apt.outputs.key }}
+    # A hit installs the files with dpkg. It runs no apt-get update, so a later
+    # step of a workflow that installs more packages uses apt-install.
+    - name: Install the cached Linux packages
+      id: cached
+      if: ${{ steps.apt-cache.outputs.cache-hit == 'true' || steps.apt-cache-pr.outputs.cache-hit == 'true' }}
+      shell: bash
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        debs="$HOME/.cache/apt-debs"
+        if ! compgen -G "$debs/*.deb" > /dev/null; then
+          echo 'Every package of this profile is already on the image.'
+          echo installed=true >> "$GITHUB_OUTPUT"
+        elif sudo -E dpkg -i "$debs"/*.deb; then
+          echo installed=true >> "$GITHUB_OUTPUT"
+        else
+          echo 'The cached packages did not install; downloading them.' >&2
+        fi
+    # A miss, or a hit that could not install, downloads the files under time
+    # limits, from another mirror when one fails.
+    - name: Download the Linux packages
+      if: ${{ steps.apt.outcome == 'success' && steps.cached.outputs.installed != 'true' }}
+      uses: ./.github/actions/apt-install
+      with:
+        packages: ${{ steps.apt.outputs.packages }}
+        install: 'false'
+    # Installs from the downloaded files and leaves them for the cache.
+    - name: Install the downloaded Linux packages
+      if: ${{ steps.apt.outcome == 'success' && steps.cached.outputs.installed != 'true' }}
+      shell: bash
+      env:
+        PACKAGES: ${{ steps.apt.outputs.packages }}
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        debs="$HOME/.cache/apt-debs"
+        rm -rf "$debs" && mkdir -p "$debs"
+        echo "$PACKAGES" > "$debs/packages.txt"
+        find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp {} "$debs" \;
+        sudo -E apt-get install -y --no-download $PACKAGES
+    # Only main saves the models, as in family.yaml: a pull request reads
+    # main's copy.
+    - if: ${{ inputs.modern-model-cache == 'true' && github.event_name == 'pull_request' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: |
+          packages/mediapipe-task-text/models/embedding_gemma.task
+          packages/mediapipe-task-text/models/proofread_quant_200m.litertlm
+          packages/mediapipe-task-text/models/summarization_quant_200m_2modes.litertlm
+        key: modern-text-models-${{ hashFiles('packages/mediapipe-task-text/lib/models.dart') }}
+    - if: ${{ inputs.modern-model-cache == 'true' && github.event_name != 'pull_request' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: |
+          packages/mediapipe-task-text/models/embedding_gemma.task
+          packages/mediapipe-task-text/models/proofread_quant_200m.litertlm
+          packages/mediapipe-task-text/models/summarization_quant_200m_2modes.litertlm
+        key: modern-text-models-${{ hashFiles('packages/mediapipe-task-text/lib/models.dart') }}

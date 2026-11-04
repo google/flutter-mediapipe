@@ -1,0 +1,34 @@
+
+Future<void> runObjectDetectorSmoke() async {
+  final model = await rootBundle.load('assets/object_detector.tflite');
+  final pixels = await rootBundle.load('assets/portrait.rgb');
+  final task = await ObjectDetector.create(ObjectDetectorOptions(
+    modelBytes: model.buffer.asUint8List(model.offsetInBytes, model.lengthInBytes),
+    scoreThreshold: 0.3,
+    maxResults: 5,
+    runningMode: RunningMode.video,
+  ));
+  try {
+    final image = VisionImage.fromPixels(
+      pixels: pixels.buffer.asUint8List(pixels.offsetInBytes, pixels.lengthInBytes),
+      width: 301, height: 209, format: VisionPixelFormat.rgb,
+    );
+    final requests = [for (var i = 0; i < 4; i++)
+      task.detectForVideo(image, timestampMilliseconds: i * 33)];
+    final closing = task.dispose();
+    final results = await Future.wait(requests);
+    await closing;
+    for (var i = 0; i < results.length; i++) {
+      final result = results[i];
+      if (result.imageWidth != 301 || result.imageHeight != 209 ||
+          result.timestampMilliseconds != i * 33 ||
+          !result.detections.any((d) => d.categories.any((c) =>
+            c.categoryName == 'person' && c.score >= 0.3))) {
+        throw StateError('Bundled Object Detector video inference failed.');
+      }
+    }
+  } finally {
+    await task.dispose();
+  }
+  stdout.writeln('Object Detector CPU inference passed.');
+}

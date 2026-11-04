@@ -1,23 +1,58 @@
-name: "MediaPipeTextBindings"
-description: "Bindings for MediaPipe structs for text-related tasks"
-output:
-  bindings: "lib/src/io/third_party/mediapipe/generated/mediapipe_text_bindings.dart"
+name: MediaPipeGenerativeTextBindings
+description: MediaPipe 1.2.0 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
+silence-enum-warning: true # sizeof(enum)==4 is checked by tool/abi_check.cc.
+# The Proofreader and the Summarizer bind Google's text library. The classic
+# text tasks keep the bindings adapted from Google's wheel.
+output: lib/src/io/third_party/mediapipe/generative_text_bindings.dart
 headers:
   entry-points:
-    - "third_party/mediapipe/tasks/c/**.h"
-import:
-  symbol-files:
-    - "package:mediapipe_core/generated/core_symbols.yaml"
+    - build/ffigen/text/text_proofreader/text_proofreader.h
+    - build/ffigen/text/text_summarizer/text_summarizer.h
+    - build/ffigen/core/common.h
+  include-directives:
+    - '**ffigen/text/text_proofreader/*.h'
+    - '**ffigen/text/text_summarizer/*.h'
+    - '**ffigen/core/common.h'
+    - '**ffigen/core/mp_status.h'
+compiler-opts:
+  - '-xc++'
+  - '-Ibuild/ffigen'
+  - '-std=c++17'
+functions:
+  include:
+    - 'MpTextProofreader.*'
+    - 'MpTextSummarizer.*'
+    - MpErrorFree
+structs:
+  include:
+    - 'MpTextProofreader.*'
+    - 'MpTextSummarizer.*'
+    - MpCorrection
+enums:
+  include:
+    - MpStatus
+    - MpCorrectionType
+    - MpTextSummarizerMode
+typedefs:
+  include:
+    - 'MpTextProofreader.*'
+    - 'MpTextSummarizer.*'
+macros:
+  exclude:
+    - '.*'
+# Core fills the base options for every family.
+library-imports:
+  core: 'package:mediapipe_core/native_structs.dart'
+type-map:
+  structs:
+    MpBaseOptions:
+      lib: core
+      c-type: MpBaseOptions
+      dart-type: MpBaseOptions
 preamble: |
-  /* Copyright 2023 The MediaPipe Authors.
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-      http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-  ==============================================================================*/
+  // Copyright 2026 The MediaPipe Authors.
+  // Licensed under the Apache License, Version 2.0.
+  // Generated from Google's unmodified MediaPipe 1.2.0 headers; see
+  // packages/mediapipe-core/native/README.md.
 ffi-native:
+  asset-id: package:mediapipe_text/mediapipe.dylib

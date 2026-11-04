@@ -1,0 +1,46 @@
+name: Record task coverage
+description: >-
+  Records which task cells a test step covered, with that step's outcome
+  (tool/coverage/record.py), and uploads the rows as the coverage-<suite>
+  artifact that coverage-gate.yaml collects. Call it with `if: always()` so a
+  failed suite records its failure.
+inputs:
+  suite:
+    description: A name unique to this step across the workflows.
+    required: true
+  platform:
+    description: The platform column of tool/coverage/matrix.json.
+    required: true
+  delegate:
+    description: cpu or gpu.
+    required: true
+  tasks:
+    description: Comma-separated task names.
+    required: true
+  outcome:
+    description: The test step's outcome, success, failure, cancelled or skipped.
+    required: true
+  tier:
+    description: pr, or device for the physical-device workflows.
+    default: pr
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        SUITE: ${{ inputs.suite }}
+        PLATFORM: ${{ inputs.platform }}
+        DELEGATE: ${{ inputs.delegate }}
+        TASKS: ${{ inputs.tasks }}
+        OUTCOME: ${{ inputs.outcome }}
+        TIER: ${{ inputs.tier }}
+      run: |
+        python=python3
+        if [ "$RUNNER_OS" = Windows ]; then python=python; fi
+        "$python" -B tool/coverage/record.py --tier "$TIER" --suite "$SUITE" --platform "$PLATFORM" \
+          --delegate "$DELEGATE" --tasks "$TASKS" --outcome "$OUTCOME"
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: coverage-${{ inputs.suite }}${{ env.ARTIFACT_SUFFIX }}
+        path: build/coverage/${{ inputs.suite }}.json
+        if-no-files-found: error

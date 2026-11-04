@@ -1,0 +1,94 @@
+{
+  "runtime": "mediapipe==1.1.0rc20260925",
+  "source_revision": null,
+  "library_sha256": "a9d0e783f1aef73aae4a0e2df46154ced7d3dcb9ccd36989c092592921afcad6",
+  "model_sha256": "40338edf5ec70d43e318b0a716a84d4564cd1802759a7a07170c7e43796dbf58",
+  "platform": "Darwin arm64",
+  "delegate": "GPU",
+  "running_mode": "IMAGE",
+  "score_threshold": 0.3,
+  "max_results": 5,
+  "raw_derivation": "face-landmarks-ex1.jpeg official RGB decoder, [::20, ::20, :3]",
+  "input_conversion": "RGB to RGBA with opaque alpha for Metal",
+  "cases": [
+    {
+      "name": "landmark-ex1.jpg",
+      "width": 1280,
+      "height": 853,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 13, "origin_y": 0, "width": 1264, "height": 849}, "categories": [{"index": null, "score": 0.96337890625, "display_name": null, "category_name": "person"}], "keypoints": null}, {"bounding_box": {"origin_x": 469, "origin_y": 675, "width": 408, "height": 173}, "categories": [{"index": null, "score": 0.321533203125, "display_name": null, "category_name": "tie"}], "keypoints": null}],
+      "file": "landmark-ex1.jpg",
+      "sha256": "17a32597df503211ed126797bf8f5281f6e122545be925cfd3bf65658dc5f0ec"
+    },
+    {
+      "name": "face-landmarks-ex1.jpeg",
+      "width": 6010,
+      "height": 4180,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 691, "origin_y": 167, "width": 4155, "height": 3997}, "categories": [{"index": null, "score": 0.8798828125, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "file": "face-landmarks-ex1.jpeg",
+      "sha256": "c2ba880b592ddc41c57d9534c989be5db274e5c150c0c16d4a2b62cddcca6048"
+    },
+    {
+      "name": "iris-detection-ex1.jpg",
+      "width": 761,
+      "height": 764,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 7, "origin_y": 143, "width": 743, "height": 618}, "categories": [{"index": null, "score": 0.94384765625, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "file": "iris-detection-ex1.jpg",
+      "sha256": "91a31661e74701c2e5df36f123564cbf757a7c206978982160af46a69fc8c215"
+    },
+    {
+      "name": "iris-detection-ex2.jpg",
+      "width": 853,
+      "height": 928,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 6, "origin_y": 84, "width": 844, "height": 844}, "categories": [{"index": null, "score": 0.94189453125, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "file": "iris-detection-ex2.jpg",
+      "sha256": "bd105c9a11822ef4a6d96ef6dce6e56b1fc314aaad4d413fc997dd135cc35c72"
+    },
+    {
+      "name": "group-shot-bounding-box-ex1.jpeg",
+      "width": 3840,
+      "height": 2160,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 1579, "origin_y": 1024, "width": 1013, "height": 1104}, "categories": [{"index": null, "score": 0.7890625, "display_name": null, "category_name": "person"}], "keypoints": null}, {"bounding_box": {"origin_x": 1216, "origin_y": 394, "width": 1009, "height": 957}, "categories": [{"index": null, "score": 0.6611328125, "display_name": null, "category_name": "person"}], "keypoints": null}, {"bounding_box": {"origin_x": 745, "origin_y": 943, "width": 1016, "height": 1161}, "categories": [{"index": null, "score": 0.625, "display_name": null, "category_name": "person"}], "keypoints": null}, {"bounding_box": {"origin_x": 1995, "origin_y": 249, "width": 291, "height": 271}, "categories": [{"index": null, "score": 0.56689453125, "display_name": null, "category_name": "clock"}], "keypoints": null}, {"bounding_box": {"origin_x": 2128, "origin_y": 459, "width": 866, "height": 1670}, "categories": [{"index": null, "score": 0.5419921875, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "file": "group-shot-bounding-box-ex1.jpeg",
+      "sha256": "71793e5a129e35541f937904039b722981b9ba40db09bbe24419dc0e0fc086f1"
+    },
+    {
+      "name": "rgb",
+      "width": 301,
+      "height": 209,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 36, "origin_y": 9, "width": 208, "height": 199}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgba",
+      "width": 301,
+      "height": 209,
+      "rotation_degrees": 0,
+      "detections": [{"bounding_box": {"origin_x": 36, "origin_y": 9, "width": 208, "height": 199}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "rgb-rotated",
+      "width": 209,
+      "height": 301,
+      "rotation_degrees": 90,
+      "detections": [{"bounding_box": {"origin_x": 9, "origin_y": 56, "width": 199, "height": 208}, "categories": [{"index": null, "score": 0.88427734375, "display_name": null, "category_name": "person"}], "keypoints": null}],
+      "raw": "portrait-301x209.rgb",
+      "sha256": "242611c8ea93118b4196bf24ed2b4dfe81dda22f57c91104b8ad233c9e921c77"
+    },
+    {
+      "name": "blank",
+      "width": 640,
+      "height": 480,
+      "rotation_degrees": 0,
+      "detections": []
+    }
+  ]
+}
