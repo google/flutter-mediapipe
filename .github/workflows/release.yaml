@@ -1,0 +1,117 @@
+name: Release to pub.dev
+
+permissions:
+  contents: read
+
+# Publishes `mediapipe_core` and the five task family packages (`mediapipe_audio`,
+# `mediapipe_decision`, `mediapipe_retrieval`, `mediapipe_text`, `mediapipe_vision`)
+# to pub.dev using GitHub Actions OIDC automated publishing (`id-token: write`).
+#
+# Triggered by pushing a version tag `v<version>` (matching pub.dev's `v{{version}}`
+# tag pattern) or by manual dispatch (`dry_run: true` validates without uploading).
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate everything and run pub publish --dry-run without uploading to pub.dev
+        type: boolean
+        default: false
+      packages:
+        description: Packages to publish (folder or pubspec names, comma- or space-separated, or all)
+        type: string
+        default: all
+
+jobs:
+  validate:
+    name: Validate packages, docs and dry-run
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+      - name: Publisher unit tests
+        run: python3 -B -m unittest tool/ci/test_publish_packages.py
+      - name: Check family lists and shared pins
+        run: python3 -B tool/check_repository.py
+      - name: Check the docs' samples, links and model names
+        run: python3 -B tool/check_docs.py
+      - name: Analyze and format-check all packages
+        run: |
+          make get
+          make analyze
+          make check_format
+      - name: Check API parity, conventions and snapshots
+        run: |
+          cd tool/api_parity
+          dart pub get
+          dart analyze --fatal-infos
+          dart format --output=none --set-exit-if-changed .
+          dart run bin/api_parity.dart
+      - name: Verify version, tag and pub dry-run
+        env:
+          PACKAGES: ${{ inputs.packages || 'all' }}
+        run: python3 -B tool/ci/publish_packages.py --dry-run
+
+  archives:
+    name: Archives build / ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: linux, os: ubuntu-24.04}
+          - {target: web, os: ubuntu-24.04}
+          - {target: android, os: ubuntu-24.04}
+          - {target: macos, os: macos-15}
+          - {target: ios, os: macos-15}
+          - {target: windows, os: windows-2025}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - if: matrix.target == 'android'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+          linux-profile: ${{ matrix.target == 'linux' && 'gallery' || 'none' }}
+      - if: matrix.target == 'android'
+        uses: ./.github/actions/android-ndk
+      - name: Build a fresh app from the archives
+        env:
+          TARGET: ${{ matrix.target }}
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} -B tool/check_archives.py "$TARGET" --scratch build/archives
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: release-archives-${{ matrix.target }}
+          path: build/archives/*.log
+          if-no-files-found: ignore
+
+  publish:
+    name: Publish to pub.dev
+    needs: [validate, archives]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: release-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+      - name: Publish packages to pub.dev
+        env:
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          PACKAGES: ${{ inputs.packages || 'all' }}
+        run: python3 -B tool/ci/publish_packages.py
