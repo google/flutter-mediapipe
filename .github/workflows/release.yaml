@@ -7,15 +7,17 @@ permissions:
 # `mediapipe_decision`, `mediapipe_retrieval`, `mediapipe_text`, `mediapipe_vision`)
 # to pub.dev using GitHub Actions OIDC automated publishing (`id-token: write`).
 #
-# Triggered when a GitHub Release is published (`release: types: [published]`)
-# or manually via `workflow_dispatch` (never automatically on commits or PRs).
-# When the release tag or `version` input names a new version (e.g. `v0.2.0`),
+# Triggered when a `v<version>` tag is pushed (including when creating a new
+# tag from the GitHub Release UI, matching pub.dev's `v{{version}}` tag-push
+# requirement) or manually via `workflow_dispatch` (never on branch commits or
+# PRs). When the tag or `version` input names a new version (e.g. `v0.2.0`),
 # `tool/ci/publish_packages.py` updates all package `pubspec.yaml`,
 # `CHANGELOG.md` and `README.md` files, commits and tags `v<version>`, and
 # publishes `mediapipe_core` followed by the five family packages.
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]*'
   workflow_dispatch:
     inputs:
       version:
