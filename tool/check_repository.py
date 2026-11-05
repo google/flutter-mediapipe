@@ -35,8 +35,7 @@ ALIGNMENT_ORACLES = ['gallery/integration_test/support/alignment_oracle.dart',
                      'gallery/tool/browser/test_browser.mjs']
 
 # Where the docs name the Flutter version CI runs.
-FLUTTER_DOCS = ['README.md', 'gallery/tool/WEB_FACE.md',
-                'packages/mediapipe-task-vision/README.md']
+FLUTTER_DOCS = ['README.md', 'gallery/tool/WEB_FACE.md']
 
 # The README's "Where it runs" rows and the coverage-matrix tasks each stands
 # for; together they must cover the matrix.

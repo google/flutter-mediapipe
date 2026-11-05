@@ -132,6 +132,151 @@ void main() {
       expect(requests, 2);
     });
 
+    group('an outage', () {
+      const lookup = SocketException(
+        "Failed host lookup: 'huggingface.co' (OS Error: nodename nor servname "
+        'provided, or not known, errno = 8)',
+      );
+      Duration waited() => waits.fold(Duration.zero, (sum, wait) => sum + wait);
+
+      test('passes when the network returns within the limit', () async {
+        var requests = 0;
+        final client = MockClient.streaming((request, _) async {
+          if (++requests <= 6) throw lookup;
+          return _serve(request, bytes);
+        });
+        expect(await (await download(client)).readAsBytes(), bytes);
+        expect(requests, 7);
+        expect(waits, hasLength(6));
+      });
+
+      for (final (name, error) in <(String, Object)>[
+        ('a failed lookup', lookup),
+        ('a wrapped failed lookup', http.ClientException(lookup.message)),
+        ('a refused connection', const SocketException('Connection refused')),
+      ]) {
+        test('fails after 75 s of $name', () async {
+          var requests = 0;
+          final client = MockClient.streaming((_, _) async {
+            requests++;
+            throw error;
+          });
+          await expectLater(
+            download(client),
+            failsWith([
+              predicate<String>(
+                (reason) => reason.endsWith('after $requests attempts'),
+              ),
+            ]),
+          );
+          expect(requests, greaterThan(3));
+          // Time spent in the attempts counts too, here a few microseconds.
+          expect(waited(), greaterThan(const Duration(seconds: 74)));
+          expect(waited(), lessThanOrEqualTo(const Duration(seconds: 75)));
+          expect(await directory.list().isEmpty, isTrue);
+        });
+      }
+
+      test('waits at the mirror, not before reaching it', () async {
+        final hosts = <String>[];
+        final client = MockClient.streaming((request, _) async {
+          hosts.add(request.url.host);
+          if (request.url.host == 'primary.invalid' || hosts.length < 8) {
+            throw lookup;
+          }
+          return _serve(request, bytes);
+        });
+        await download(client, mirrors: [_mirror]);
+        expect(hosts.take(4), [
+          ...List.filled(3, 'primary.invalid'),
+          'mirror.invalid',
+        ]);
+        expect(hosts.last, 'mirror.invalid');
+      });
+
+      test('ends at about 81 s when the mirror is down too', () async {
+        final client = MockClient.streaming((_, _) async => throw lookup);
+        await expectLater(
+          download(client, mirrors: [_mirror]),
+          failsWith([contains('after 3 attempts'), contains('attempts')]),
+        );
+        expect(waited(), greaterThan(const Duration(seconds: 74)));
+        expect(waited(), lessThanOrEqualTo(const Duration(seconds: 81)));
+      });
+
+      test('resumes a dropped download when the network returns', () async {
+        final ranges = <String?>[];
+        final client = MockClient.streaming((request, _) async {
+          ranges.add(request.headers['range']);
+          return switch (ranges.length) {
+            1 => _serve(request, bytes, stream: (b) => _dropAfter(b, 50000)),
+            <= 6 => throw lookup,
+            _ => _serve(request, bytes),
+          };
+        });
+        expect(await (await download(client)).readAsBytes(), bytes);
+        expect(ranges.last, 'bytes=50000-');
+      });
+
+      for (final (name, error) in <(String, Object)>[
+        ('a timeout', TimeoutException('60 s')),
+        ('a bad certificate', const HandshakeException('CERTIFICATE_VERIFY')),
+        ('a redirect loop', http.ClientException('Redirect loop detected')),
+      ]) {
+        test('is not $name, which keeps its three attempts', () async {
+          var requests = 0;
+          final client = MockClient.streaming((_, _) async {
+            requests++;
+            throw error;
+          });
+          await expectLater(
+            download(client),
+            failsWith([contains('after 3 attempts')]),
+          );
+          expect(requests, 3);
+        });
+      }
+
+      test(
+        'is not a transient status, which keeps its three attempts',
+        () async {
+          var requests = 0;
+          final client = MockClient((_) async {
+            requests++;
+            return http.Response('', 503);
+          });
+          await expectLater(
+            download(client),
+            failsWith([contains('after 3 attempts')]),
+          );
+          expect(requests, 3);
+        },
+      );
+
+      test('then a missing file stops at once', () async {
+        var requests = 0;
+        final client = MockClient.streaming((_, _) async {
+          if (++requests <= 4) throw lookup;
+          return http.StreamedResponse(const Stream.empty(), 404);
+        });
+        await expectLater(download(client), failsWith([contains('HTTP 404')]));
+        expect(requests, 5);
+      });
+
+      test('then a digest mismatch stops at once', () async {
+        var requests = 0;
+        final client = MockClient.streaming((request, _) async {
+          if (++requests <= 4) throw lookup;
+          return _serve(request, [1, 2, 3]);
+        });
+        await expectLater(
+          download(client),
+          failsWith([contains('SHA-256 mismatch')]),
+        );
+        expect(requests, 5);
+      });
+    });
+
     test('three times, then moves to the mirror', () async {
       final hosts = <String>[];
       final client = MockClient.streaming((request, _) async {

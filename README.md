@@ -16,46 +16,33 @@ runtime for its platform, with Google's pinned models bundled at build time.
 
 ## Which package do I need?
 
-| Package | Use it for | Guide |
-| --- | --- | --- |
-| `mediapipe_vision` | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | [Vision](packages/mediapipe-task-vision/README.md) |
-| `mediapipe_text` | Text classification, embeddings (EmbeddingGemma included) and language detection; proofreading and summarization everywhere but browsers | [Text](packages/mediapipe-task-text/README.md) |
-| `mediapipe_audio` | Audio classification | [Audio](packages/mediapipe-task-audio/README.md) |
-| `mediapipe_decision` | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | [Decision](packages/mediapipe-task-decision/README.md) |
-| `mediapipe_retrieval` | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | [Retrieval](packages/mediapipe-task-retrieval/README.md) |
+| Package | Use it for | Install | Guide |
+| --- | --- | --- | --- |
+| [`mediapipe_vision`](https://pub.dev/packages/mediapipe_vision) | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | `flutter pub add mediapipe_vision` | [Vision](packages/mediapipe-task-vision/README.md) |
+| [`mediapipe_text`](https://pub.dev/packages/mediapipe_text) | Text classification, embeddings (EmbeddingGemma included) and language detection; proofreading and summarization everywhere but browsers | `flutter pub add mediapipe_text` | [Text](packages/mediapipe-task-text/README.md) |
+| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification | `flutter pub add mediapipe_audio` | [Audio](packages/mediapipe-task-audio/README.md) |
+| [`mediapipe_decision`](https://pub.dev/packages/mediapipe_decision) | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | `flutter pub add mediapipe_decision` | [Decision](packages/mediapipe-task-decision/README.md) |
+| [`mediapipe_retrieval`](https://pub.dev/packages/mediapipe_retrieval) | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | `flutter pub add mediapipe_retrieval` | [Retrieval](packages/mediapipe-task-retrieval/README.md) |
 
 Add only the families you use: each one bundles only Google's MediaPipe
-library for that family. They all depend on `mediapipe_core`, which holds the
+library for that family. Every family brings `mediapipe_core`, which holds the
 shared download code, model store and browser runtime settings
-([core guide](packages/mediapipe-core/README.md)).
+([core guide](packages/mediapipe-core/README.md)), and exports its types, so
+you do not add or import core yourself unless your own code imports
+`package:mediapipe_core/...`.
 
 ## Quick start
 
-Use Flutter 3.47.5 stable, the version CI tests (Dart 3.12 or newer). Add a
-family to your app:
+The packages need Flutter 3.47 or newer; the latest stable release is
+recommended. Add a family from pub.dev, from your app's root:
 
-```yaml
-# Your app's pubspec.yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  mediapipe_vision: ^0.1.2
+```sh
+flutter pub add mediapipe_vision
 ```
 
-To use the repository's current code instead, clone it beside your app and
-depend on the family by path, with `mediapipe_core` pointed at the clone too:
-
-```yaml
-dependencies:
-  mediapipe_vision:
-    path: ../flutter-mediapipe/packages/mediapipe-task-vision
-dependency_overrides:
-  mediapipe_core:
-    path: ../flutter-mediapipe/packages/mediapipe-core
-```
-
-List the models your app uses in the same pubspec, and declare the folder
-they are bundled in:
+This adds `mediapipe_vision: ^0.1.2` to your app's `pubspec.yaml`. List the
+models your app uses in the same pubspec, and declare the folder they are
+bundled in:
 
 ```yaml
 flutter:
@@ -110,10 +97,9 @@ Future<int> countFaces(Uint8List rgba, int width, int height) async {
 
 A model that is not bundled makes `create` throw a
 `RuntimeUnavailableException` whose `fix` names the pubspec entry to add. To
-download models at run time instead, add `mediapipe_core` to your
-dependencies and set `ModelStore.allowDownloads = true` before creating
-tasks; Android then needs the `INTERNET` permission, and a sandboxed macOS
-app the network client entitlement.
+download models at run time instead, set `ModelStore.allowDownloads = true`
+before creating tasks; Android then needs the `INTERNET` permission, and a
+sandboxed macOS app the network client entitlement.
 
 On macOS, build the app for Apple Silicon only (two lines in its
 `AppInfo.xcconfig`; without them, release builds fail). See

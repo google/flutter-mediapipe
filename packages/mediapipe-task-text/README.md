@@ -31,9 +31,19 @@ No platform needs a setting. See
 for permissions, Linux graphics libraries and self-hosting the browser
 runtime.
 
-## Quick start
+## Installation
 
-Add `mediapipe_text: ^0.1.2` to your app's dependencies, then:
+Add the package from pub.dev, from your app's root:
+
+```sh
+flutter pub add mediapipe_text
+```
+
+This adds `mediapipe_text: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+comes with it, and `mediapipe_text.dart` exports its types, so you do not add or
+import core yourself.
+
+## Quick start
 
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
@@ -72,8 +82,8 @@ hooks:
 
 `TextModels.byName` lists the accepted names. A model that is not bundled
 makes `create` throw a `RuntimeUnavailableException` naming the entry to add;
-setting `ModelStore.allowDownloads = true` from `mediapipe_core` downloads it
-at run time instead. The text generation models are 118 to 184 MB, so weigh
+setting `ModelStore.allowDownloads = true` downloads it at run time instead.
+The text generation models are 118 to 184 MB, so weigh
 that against your app's size. To use your own
 model, pass `modelPath` (a file on native platforms, a URL in browsers) or
 `modelBytes` (for example from `rootBundle`); the Proofreader and Summarizer

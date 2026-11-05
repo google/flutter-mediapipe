@@ -67,8 +67,10 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
   or `Retry-After`'s seconds capped at 30 s; a dropped download resumes with
   `Range` and `If-Range` (a strong `ETag`, else `Last-Modified`), appending
   on a 206 that starts where it stopped; 60 s for the response and for each
-  gap in the stream; then the next location. `DownloadException` lists every
-  location's failure. Tests:
+  gap in the stream; at the last location, a failed lookup or a lost
+  connection keeps being retried for 75 s from the first failure, counting
+  attempts as well as waits; then the next location. `DownloadException` lists
+  every location's failure. Tests:
   `packages/mediapipe-core/test/native_assets/verified_download_test.dart`,
   through the `retryWait` hook so they never sleep.
 - **Generation pins for comparison runs** (#100).
