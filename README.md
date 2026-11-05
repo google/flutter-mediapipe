@@ -1,7 +1,7 @@
 # MediaPipe Tasks for Flutter
 
 <p align="center">
-  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.47.5-02569B?logo=flutter" alt="Tested with Flutter 3.47.5"></a>
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.47.9-02569B?logo=flutter" alt="Tested with Flutter 3.47.9"></a>
   <a href="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml"><img src="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml/badge.svg" alt="Web CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0 license"></a>
 </p>

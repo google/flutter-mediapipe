@@ -358,7 +358,9 @@ jobs:
   verify-deployment:
     needs: deploy
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Passing runs take 4 to 9 minutes, and each check can spend 4 more on its
+    # two first loads.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       # ffmpeg and the browser's packages through the browser profile, cached
@@ -384,12 +386,15 @@ jobs:
           npm ci
           npx playwright install --no-shell chromium
           npx playwright install-deps --dry-run chromium
+      # A longer first load, then one retry on a fresh browser, with a warning in
+      # the log and report.json. Only here: the page has only just been deployed.
+      # A failed check is never retried, and a deploy that never loads still fails.
       - name: Verify public live camera gallery
         env:
           PAGE_URL: ${{ needs.deploy.outputs.page_url }}
         run: |
-          node gallery/tool/browser/test_browser.mjs --suite=camera --base-url="$PAGE_URL"
-          node gallery/tool/browser/test_browser.mjs --suite=camera --task=hand --base-url="$PAGE_URL"
+          node gallery/tool/browser/test_browser.mjs --suite=camera --first-load-timeout=120000 --base-url="$PAGE_URL"
+          node gallery/tool/browser/test_browser.mjs --suite=camera --task=hand --first-load-timeout=120000 --base-url="$PAGE_URL"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

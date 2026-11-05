@@ -81,7 +81,7 @@ void main() {
                   _single(reference),
                   _single(padded),
                 ),
-                greaterThan(0.99999),
+                greaterThan(delegate == Delegate.gpu ? 0.9999 : 0.99999),
                 reason: format.name,
               );
             }

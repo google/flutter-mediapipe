@@ -218,8 +218,8 @@ the history (`git show 4b4ab7a:debloat-plan.md`). Still open:
   release suite among them. The phone suite jobs in `android.yaml` and
   `ios.yaml` are now "Every phone suite / official Android SDK on an x64
   emulator" and "... official iOS SDK on an arm64 simulator", and the rule
-  requires them by those names. The macOS 14 and Android 9 jobs can join it
-  once they have passed on `main`.
+  requires them by those names. The Android 9 job can join it once it has
+  passed on `main`.
 - **Publish.** 0.1.0 of the six packages, as `CONTRIBUTING.md` ("Versions
   and the first release") describes. The pubspecs are publishable as checked
   in (no `publish_to: none`, families on `mediapipe_core: ^0.1.0` with a

@@ -26,7 +26,8 @@ def main():
     parser.add_argument('--delegate', required=True, choices=['cpu', 'gpu'])
     parser.add_argument('--tasks', required=True, help='comma-separated task names')
     parser.add_argument('--outcome', required=True,
-                        help="the step's outcome: success, failure, cancelled or skipped")
+                        help="the step's outcome: success, failure, cancelled or skipped, "
+                             "or why no test ran; only success passes")
     parser.add_argument('--tier', default='pr', choices=['pr', 'device'])
     parser.add_argument('--output-dir', type=Path, default=REPO / 'build/coverage')
     args = parser.parse_args()

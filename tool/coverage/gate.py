@@ -17,6 +17,8 @@ import calendar
 import json
 import os
 from pathlib import Path
+import re
+import shutil
 import subprocess
 import sys
 import time
@@ -34,6 +36,12 @@ RECORDING_WORKFLOWS = ['.github/workflows/android.yaml', '.github/workflows/ios.
 DEVICE_WORKFLOWS = ['.github/workflows/android-face-testlab.yml']
 # How old a run on main may be when this commit has no device run.
 DEVICE_WINDOW_HOURS = 48
+NO_ROW = 'no row recorded'
+# gh failures a later attempt can survive: GitHub's 5xx and rate limits, the
+# network, and an artifact cut off in transit.
+TRANSIENT_GH = re.compile(r'HTTP (429|5\d\d)|rate limit|connect|timeout|timed out|deadline exceeded'
+                          r'|\blookup\b|\bEOF\b|stream error|not a valid zip', re.IGNORECASE)
+GH_RETRY_SECONDS = (15, 30, 60)
 
 
 def load_matrix():
@@ -57,7 +65,10 @@ def evaluate(matrix, rows, strict_devices=True):
     passed = {(r['task'], r['platform'], r['delegate']) for r in rows if r['passed']}
     on_device = {(r['task'], r['platform'], r['delegate']) for r in rows
                  if r['passed'] and r.get('tier') == 'device'}
-    failed = {(r['task'], r['platform'], r['delegate']): r['suite'] for r in rows if not r['passed']}
+    # A step that never reached a verdict says so rather than "failed".
+    failed = {(r['task'], r['platform'], r['delegate']):
+              f"{'failed' if r.get('outcome', 'failure') == 'failure' else r['outcome']} in {r['suite']}"
+              for r in rows if not r['passed']}
     states, failures, ahead, awaiting = {}, [], [], []
     for task, platforms in matrix.items():
         for platform, delegates in platforms.items():
@@ -68,17 +79,15 @@ def evaluate(matrix, rows, strict_devices=True):
                         states[key] = 'pass'
                     else:
                         states[key] = 'fail'
-                        reason = (f'failed in {failed[key]}' if key in failed
-                                  else 'no row recorded')
+                        reason = failed.get(key, NO_ROW)
                         failures.append(f'{task} / {platform} / {delegate}: {reason}')
                 elif status == 'device':
                     if key in on_device:
                         states[key] = 'pass'
                     elif key in failed or strict_devices:
                         states[key] = 'fail'
-                        reason = (f'failed in {failed[key]}' if key in failed
-                                  else f'no device run for this commit or on main within '
-                                       f'{DEVICE_WINDOW_HOURS} h')
+                        reason = failed.get(key, f'no device run for this commit or on main '
+                                                 f'within {DEVICE_WINDOW_HOURS} h')
                         failures.append(f'{task} / {platform} / {delegate}: {reason}')
                     else:
                         states[key] = 'awaiting'
@@ -113,12 +122,28 @@ def table(matrix, states):
     return '\n'.join(lines)
 
 
-def gh(*args):
-    return subprocess.run(['gh', *args], check=True, capture_output=True, text=True).stdout
+def gh(*args, scratch=None):
+    """Runs gh and prints its stderr when it fails. Only a failure TRANSIENT_GH
+    names is tried again, with a warning; [scratch] is cleared first, since gh run
+    download refuses to overwrite what an earlier attempt left there."""
+    for delay in (*GH_RETRY_SECONDS, None):
+        result = subprocess.run(['gh', *args], capture_output=True, text=True)
+        if result.returncode == 0:
+            return result.stdout
+        print(f'gh {" ".join(args)}: {result.stderr.strip()}', file=sys.stderr, flush=True)
+        if delay is None or not TRANSIENT_GH.search(result.stderr):
+            raise subprocess.CalledProcessError(result.returncode, ['gh', *args],
+                                                result.stdout, result.stderr)
+        print(f'::warning::gh {args[0]} {args[1]} failed, retrying in {delay} s: '
+              f'{result.stderr.strip().splitlines()[-1]}', flush=True)
+        if scratch:
+            shutil.rmtree(scratch, ignore_errors=True)
+        time.sleep(delay)
 
 
 def collect(sha, output, timeout_minutes, poll_seconds=60):
-    """Waits for this commit's recording workflow runs, then downloads their rows."""
+    """Waits for this commit's recording workflow runs, downloads their rows, and
+    returns the runs it read, by workflow path."""
     repository = os.environ['GITHUB_REPOSITORY']
     deadline = time.time() + timeout_minutes * 60
     while True:
@@ -143,7 +168,9 @@ def collect(sha, output, timeout_minutes, poll_seconds=60):
         artifacts = json.loads(gh('api', f'repos/{repository}/actions/runs/{run["id"]}/artifacts?per_page=100'))
         if any(a['name'].startswith('coverage-') for a in artifacts['artifacts']):
             gh('run', 'download', str(run['id']), '--repo', repository,
-               '--pattern', 'coverage-*', '--dir', str(output / str(run['id'])))
+               '--pattern', 'coverage-*', '--dir', str(output / str(run['id'])),
+               scratch=output / str(run['id']))
+    return latest
 
 
 def device_runs(repository, commit_runs):
@@ -176,6 +203,46 @@ def device_runs(repository, commit_runs):
     return found
 
 
+def stop_reason(repository, job):
+    """GitHub's own words: a job without steps looks the same whether no runner
+    took it, its image is gone or someone cancelled the run."""
+    try:
+        annotations = json.loads(gh('api', f'repos/{repository}/check-runs/{job["id"]}/annotations'))
+    except subprocess.CalledProcessError:
+        annotations = []
+    messages = [a['message'] for a in annotations if a['annotation_level'] == 'failure']
+    return messages[0] if messages else 'GitHub gave no reason'
+
+
+def stopped_jobs(repository, runs):
+    """The cancelled or timed-out jobs of [runs], as report lines."""
+    lines = []
+    for path, run in sorted(runs.items()):
+        jobs = json.loads(gh('api', f'repos/{repository}/actions/runs/{run["id"]}/jobs'
+                             '?filter=latest&per_page=100'))['jobs']
+        for job in jobs:
+            if job['conclusion'] in ('cancelled', 'timed_out'):
+                steps = '' if job['steps'] else ' with no step run'
+                lines.append(f'- {Path(path).name} / {job["name"]}: {job["conclusion"]}{steps}: '
+                             f'{stop_reason(repository, job)} ({job["html_url"]})')
+    return lines
+
+
+def missing_rows_report(runs, failures):
+    """Says why cells have no row: a job that stops early records nothing. Only
+    explains, and its own failure is reported rather than raised: the gate's
+    verdict is already decided by [failures]."""
+    if not runs or not any(f.endswith(NO_ROW) for f in failures):
+        return []
+    try:
+        jobs = stopped_jobs(os.environ['GITHUB_REPOSITORY'], runs)
+    except subprocess.CalledProcessError as error:
+        jobs = [f'- Could not list the jobs: {error.stderr.strip()}']
+    return (['### Jobs that may explain the cells with no row', ''] +
+            (jobs or ['No job on the runs read was cancelled or timed out, so a job failed '
+                      'before its record step or no suite records those cells.']) + [''])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -186,14 +253,14 @@ def main():
     parser.add_argument('--lenient-devices', action='store_true',
                         help='report device cells without device evidence instead of failing')
     args = parser.parse_args()
-    if args.collect:
-        collect(args.sha, args.rows, args.timeout_minutes)
+    runs = collect(args.sha, args.rows, args.timeout_minutes) if args.collect else {}
     matrix = load_matrix()
     states, failures, ahead, awaiting = evaluate(matrix, load_rows(args.rows),
                                                  strict_devices=not args.lenient_devices)
     report = ['## Task coverage', '', table(matrix, states), '']
     if failures:
         report += ['### Required cells without a passing row', ''] + [f'- {f}' for f in failures] + ['']
+        report += missing_rows_report(runs, failures)
     if awaiting:
         report += ['### Awaiting a physical-device run', '',
                    'Dispatch the device workflow (Android devices, Firebase Test Lab) for '

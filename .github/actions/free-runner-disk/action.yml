@@ -1,0 +1,16 @@
+name: Free disk on a hosted runner
+description: >-
+  Removes toolchains no job here uses before the emulator needs its space: the
+  emulator refused to start for lack of disk on 2026-11-01, and the job then
+  waited out the boot and reported only a refused adb connection. Flutter,
+  Python, Java and the Android SDK stay.
+runs:
+  using: composite
+  steps:
+    - name: Remove unused toolchains
+      shell: bash
+      run: |
+        df -h /
+        sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/share/swift \
+          /usr/local/share/boost /usr/local/share/powershell /opt/hostedtoolcache/CodeQL
+        df -h /

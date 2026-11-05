@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium, firefox, webkit} from 'playwright';
+import {isLostPage, saveSystemLog} from './lost_page.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const args = Object.fromEntries(process.argv.slice(2).map(arg => arg.replace(/^--/, '').split('=')));
@@ -52,7 +54,10 @@ const cases = {
 const matrix = JSON.parse(fs.readFileSync(path.join(repo, 'tool/coverage/matrix.json'), 'utf8')).cells;
 const delegatesFor = id => ['cpu', 'gpu'].filter(delegate => matrix[id]?.web?.[delegate] === 'required');
 
-const report = {browser: browserName, checks: [], tasks: [], errors: [], steps: [], events: []};
+const report = {browser: browserName, checks: [], tasks: [], errors: [], steps: [], events: [], retries: []};
+// The report of an attempt that lost its page, kept beside the retry's and in it.
+const lostPageReport = path.join(evidence, 'report-lost-page.json');
+if (args['lost-page-retry']) report.retries.push(JSON.parse(fs.readFileSync(lostPageReport, 'utf8')));
 // Each step and browser event carries the wall clock, to line up with the
 // browser's own logs.
 let step = 'launch';
@@ -95,6 +100,7 @@ const browser = await ({chromium, firefox, webkit}[browserName]).launch({
 browser.on('disconnected', () => lifecycle('browser disconnected'));
 let page;
 let hardwareWebGpu = false;
+let retry = false;
 try {
   const context = await browser.newContext({viewport: {width: 1280, height: 900}});
   context.on('close', () => lifecycle('context closed'));
@@ -465,8 +471,23 @@ try {
   process.exitCode = 1;
   // Only a page that is still open can show where the step stopped.
   await page?.screenshot({path: path.join(evidence, 'failure.png'), timeout: 10000}).catch(() => {});
+  // Errors the page has already shown would go with the attempt, so they fail it.
+  retry = isLostPage(error) && report.errors.length === 0 && !args['lost-page-retry'];
 } finally {
   fs.writeFileSync(path.join(evidence, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   closing = true;
   await browser.close();
+}
+
+// A journey that loses its page, as test_browser.mjs's suites may, runs once more
+// in a new process with a fresh browser. This can hide a real memory bug, so the
+// warning, the attempt's report and on macOS the system's log all say it happened.
+if (retry) {
+  console.log(`::warning title=${browserName} lost the page::Gallery journey at ${step}: ` +
+    `${report.error.split('\n')[0]}. Running it once more on a fresh browser.`);
+  saveSystemLog(evidence, 'gallery-journey');
+  fs.renameSync(path.join(evidence, 'report.json'), lostPageReport);
+  const {status} = spawnSync(process.execPath,
+    [fileURLToPath(import.meta.url), ...process.argv.slice(2), '--lost-page-retry=true'], {stdio: 'inherit'});
+  process.exitCode = status ?? 1;
 }
