@@ -117,8 +117,10 @@ sample, the benchmarks and every generated consumer app) points
 `mediapipe_core` at the sibling package instead, so a checkout builds against
 itself; pub leaves that file out of the published archive. Before publishing, run `publish_check.py`, `check_archives.py` and the
 bundled-model check above, then publish `mediapipe_core` first and the five
-families after it (`.github/workflows/release.yaml` runs those checks and
-`tool/ci/publish_packages.py` when dispatched on tag `v<version>`).
+families after it (`.github/workflows/release.yaml` updates the package
+versions, tags `v<version>`, runs those checks and publishes through
+`tool/ci/publish_packages.py` when a GitHub Release is published or the
+workflow is dispatched).
 
 ## How to add a task
 
