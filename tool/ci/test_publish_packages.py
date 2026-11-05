@@ -102,26 +102,28 @@ class PublishPackagesTest(unittest.TestCase):
                 repo_root=root, packages_dir=packages, folders=folders))
 
     def test_verify_versions_and_tag_accepts_matching_tag(self):
+        _, current = publish_packages.read_pubspec_versions()
         version = publish_packages.verify_versions_and_tag(
-            'refs/tags/v0.1.1', dry_run=False)
-        self.assertEqual(version, '0.1.1')
+            f'refs/tags/v{current}', dry_run=False)
+        self.assertEqual(version, current)
 
     def test_verify_versions_and_tag_rejects_mismatched_tag_even_in_dry_run(self):
         with self.assertRaises(SystemExit):
             publish_packages.verify_versions_and_tag(
-                'refs/tags/v0.2.0', dry_run=True)
+                'refs/tags/v99.99.99', dry_run=True)
 
     def test_verify_versions_and_tag_rejects_branch_ref_without_explicit_version(self):
+        _, current = publish_packages.read_pubspec_versions()
         with self.assertRaises(SystemExit):
             publish_packages.verify_versions_and_tag(
                 'refs/heads/main', dry_run=False)
         self.assertEqual(
             publish_packages.verify_versions_and_tag(
-                'refs/heads/main', dry_run=False, explicit_version='0.1.1'),
-            '0.1.1')
+                'refs/heads/main', dry_run=False, explicit_version=current),
+            current)
         self.assertEqual(
             publish_packages.verify_versions_and_tag('refs/heads/main', dry_run=True),
-            '0.1.1')
+            current)
 
     def test_commit_and_tag_release_commits_and_pushes_tag(self):
         calls = []
@@ -202,6 +204,7 @@ class PublishPackagesTest(unittest.TestCase):
         def fake_publish(root, folder, token):
             events.append(('publish', folder))
 
+        _, current = publish_packages.read_pubspec_versions()
         selected = ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']
         with mock.patch.object(publish_packages, 'prepare', side_effect=fake_prepare), \
                 mock.patch.object(publish_packages, 'validate_staged', side_effect=fake_validate), \
@@ -210,11 +213,11 @@ class PublishPackagesTest(unittest.TestCase):
                 mock.patch.object(publish_packages, 'fetch_oidc_token', return_value='jwt'), \
                 mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run), \
                 mock.patch.object(publish_packages, 'publish_package', side_effect=fake_publish):
-            publish_packages.run_publish(selected, 'refs/tags/v0.1.1', dry_run=False)
+            publish_packages.run_publish(selected, f'refs/tags/v{current}', dry_run=False)
 
         self.assertEqual(events, [
             ('validate', ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']),
-            ('commit_and_tag', '0.1.1', 'main'),
+            ('commit_and_tag', current, 'main'),
             ('token_add', 'PUB_TOKEN'),
             ('publish', 'mediapipe-core'),
             ('publish', 'mediapipe-task-vision'),
@@ -225,10 +228,9 @@ class PublishPackagesTest(unittest.TestCase):
         self.assertIn('id-token: write', text)
         self.assertIn('contents: write', text)
         self.assertIn('needs: [validate, archives]', text)
-        self.assertIn('release:', text)
-        self.assertIn('types: [published]', text)
+        self.assertIn('tags:', text)
         self.assertIn('workflow_dispatch:', text)
-        self.assertNotRegex(text, r'(?m)^\s*push:')
+        self.assertNotRegex(text, r'(?m)^\s*branches:')
         self.assertNotRegex(text, r'(?m)^\s*pull_request:')
         for ref in re.findall(r'uses:\s*(\S+)', text):
             if not ref.startswith('./'):
