@@ -55,14 +55,17 @@ enum GalleryDemo {
 /// The home page's sections, in MediaPipe Studio's order, then the families
 /// Google added in MediaPipe 1.1.0.
 enum GalleryCategory {
-  vision('Vision'),
-  audio('Audio'),
-  text('Text'),
-  decision('Decision'),
-  retrieval('Retrieval');
+  vision('Vision', 'mediapipe_vision'),
+  audio('Audio', 'mediapipe_audio'),
+  text('Text', 'mediapipe_text'),
+  decision('Decision', 'mediapipe_decision'),
+  retrieval('Retrieval', 'mediapipe_retrieval');
 
-  const GalleryCategory(this.title);
+  const GalleryCategory(this.title, this.package);
   final String title;
+
+  /// The published package whose tasks the section's pages run.
+  final String package;
 }
 
 /// A MediaPipe task the home page lists in its section on every platform
