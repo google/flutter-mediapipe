@@ -1,6 +1,6 @@
 name: mediapipe_audio
 description: "Google's MediaPipe Audio Classifier for Flutter on Android, iOS, macOS, Linux, Windows and the web, with Google's pinned YAMNet model."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-audio
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:
@@ -29,7 +29,7 @@ dependencies:
   code_assets: ^2.1.0
   ffi: ^2.1.4
   hooks: ^2.2.0
-  mediapipe_core: ^0.1.0
+  mediapipe_core: ^0.1.1
   meta: ^1.18.0
   # Compiles the audio stream bridge (native/audio_stream_bridge.c), as the
   # text package compiles its own.

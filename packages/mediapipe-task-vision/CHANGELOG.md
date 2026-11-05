@@ -1,3 +1,7 @@
+## 0.1.1
+
+Adds Google's `NOTICE` at the package root.
+
 ## 0.1.0
 
 The first release.

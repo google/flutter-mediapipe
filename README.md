@@ -39,7 +39,7 @@ family to your app:
 dependencies:
   flutter:
     sdk: flutter
-  mediapipe_vision: ^0.1.0
+  mediapipe_vision: ^0.1.1
 ```
 
 To use the repository's current code instead, clone it beside your app and

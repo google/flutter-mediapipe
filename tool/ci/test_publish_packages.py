@@ -103,8 +103,8 @@ class PublishPackagesTest(unittest.TestCase):
 
     def test_verify_versions_and_tag_accepts_matching_tag(self):
         version = publish_packages.verify_versions_and_tag(
-            'refs/tags/v0.1.0', dry_run=False)
-        self.assertEqual(version, '0.1.0')
+            'refs/tags/v0.1.1', dry_run=False)
+        self.assertEqual(version, '0.1.1')
 
     def test_verify_versions_and_tag_rejects_mismatched_tag_even_in_dry_run(self):
         with self.assertRaises(SystemExit):
@@ -117,11 +117,11 @@ class PublishPackagesTest(unittest.TestCase):
                 'refs/heads/main', dry_run=False)
         self.assertEqual(
             publish_packages.verify_versions_and_tag(
-                'refs/heads/main', dry_run=False, explicit_version='0.1.0'),
-            '0.1.0')
+                'refs/heads/main', dry_run=False, explicit_version='0.1.1'),
+            '0.1.1')
         self.assertEqual(
             publish_packages.verify_versions_and_tag('refs/heads/main', dry_run=True),
-            '0.1.0')
+            '0.1.1')
 
     def test_commit_and_tag_release_commits_and_pushes_tag(self):
         calls = []
@@ -210,11 +210,11 @@ class PublishPackagesTest(unittest.TestCase):
                 mock.patch.object(publish_packages, 'fetch_oidc_token', return_value='jwt'), \
                 mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run), \
                 mock.patch.object(publish_packages, 'publish_package', side_effect=fake_publish):
-            publish_packages.run_publish(selected, 'refs/tags/v0.1.0', dry_run=False)
+            publish_packages.run_publish(selected, 'refs/tags/v0.1.1', dry_run=False)
 
         self.assertEqual(events, [
             ('validate', ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']),
-            ('commit_and_tag', '0.1.0', 'main'),
+            ('commit_and_tag', '0.1.1', 'main'),
             ('token_add', 'PUB_TOKEN'),
             ('publish', 'mediapipe-core'),
             ('publish', 'mediapipe-task-vision'),
