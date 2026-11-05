@@ -61,9 +61,141 @@ final class Fish {
   double vy = 0;
   double size;
 
-  /// Whether it faces left, for drawing.
-  bool get facingLeft => vx < 0;
+  /// Whether it faces left: the way it swims, unless a turn is held back.
+  bool get facingLeft => heldFacing ?? vx < 0;
+
+  /// The way it keeps facing while a turn is held back, as [FishWorld.step]
+  /// holds the player's; null otherwise.
+  bool? heldFacing;
+
+  /// The drawn body's half length and half height, and where the tail starts
+  /// and ends behind the center and its half height at the end, each as a
+  /// share of [size]. The page draws from these, and they decide collisions.
+  static const bodyHalfLength = 1.2;
+  static const bodyHalfHeight = 0.75;
+  static const tailStart = 1.0;
+  static const tailEnd = 1.9;
+  static const tailHalfHeight = 0.7;
+
+  /// The width of the outline drawn around the player's body.
+  double get outline => species == null ? 2.5 : 0;
+
+  /// The farthest any drawn part reaches from the center, past which a fish
+  /// cannot touch anything.
+  double get reach =>
+      math.max(
+        math.sqrt(tailEnd * tailEnd + tailHalfHeight * tailHalfHeight) * size,
+        bodyHalfLength * size,
+      ) +
+      outline / 2;
+
+  /// The drawn body, its outline included, as a polygon around the oval: its
+  /// sides touch the oval, so a touch is never missed, and it overshoots by
+  /// less than a fifth of a world unit on the biggest fish. An outline follows
+  /// the oval's normals, which puts it outside a bigger oval on the diagonals.
+  List<(double, double)> get bodyPoints {
+    const sides = 64;
+    final corner = 1 / math.cos(math.pi / sides);
+    final a = bodyHalfLength * size;
+    final b = bodyHalfHeight * size;
+    return [
+      for (var i = 0; i < sides; i++)
+        () {
+          final (c, s) = (
+            math.cos(2 * math.pi * i / sides),
+            math.sin(2 * math.pi * i / sides),
+          );
+          final normal = math.sqrt(b * b * c * c + a * a * s * s);
+          return (
+            x + a * corner * c + outline / 2 * b * c / normal,
+            y + b * corner * s + outline / 2 * a * s / normal,
+          );
+        }(),
+    ];
+  }
+
+  /// The drawn tail's three corners.
+  List<(double, double)> get tailPoints {
+    final direction = facingLeft ? -1.0 : 1.0;
+    return [
+      (x - direction * tailStart * size, y),
+      (x - direction * tailEnd * size, y - tailHalfHeight * size),
+      (x - direction * tailEnd * size, y + tailHalfHeight * size),
+    ];
+  }
 }
+
+/// Whether the drawn shapes of [a] and [b] touch anywhere the sea shows: body
+/// or tail. What swims past the sea's sides isn't drawn, so it can't touch.
+bool fishTouch(Fish a, Fish b) {
+  final dx = a.x - b.x;
+  final dy = a.y - b.y;
+  final reach = a.reach + b.reach;
+  if (dx * dx + dy * dy > reach * reach) return false;
+  final partsA = [_inSea(a.bodyPoints), _inSea(a.tailPoints)];
+  final partsB = [_inSea(b.bodyPoints), _inSea(b.tailPoints)];
+  return partsA.any((partA) => partsB.any((partB) => _overlap(partA, partB)));
+}
+
+/// The part of a convex polygon between the sea's sides. Nothing crosses the
+/// top or bottom: a fish stays far enough from them to fit.
+List<(double, double)> _inSea(List<(double, double)> polygon) {
+  var shown = polygon;
+  for (final (edge, side) in const [(0.0, 1.0), (FishWorld.width, -1.0)]) {
+    final kept = <(double, double)>[];
+    for (var i = 0; i < shown.length; i++) {
+      final (x1, y1) = shown[i];
+      final (x2, y2) = shown[(i + 1) % shown.length];
+      final (from, to) = ((x1 - edge) * side, (x2 - edge) * side);
+      if (from >= 0) kept.add((x1, y1));
+      if (from * to < 0) kept.add((edge, y1 + (y2 - y1) * from / (from - to)));
+    }
+    shown = kept;
+  }
+  return shown;
+}
+
+/// Whether two convex polygons overlap: they do unless the edges of one offer
+/// a line that separates them.
+bool _overlap(List<(double, double)> a, List<(double, double)> b) {
+  if (a.isEmpty || b.isEmpty) return false;
+  bool separatedBy(List<(double, double)> edges) {
+    for (var i = 0; i < edges.length; i++) {
+      final (x1, y1) = edges[i];
+      final (x2, y2) = edges[(i + 1) % edges.length];
+      final (nx, ny) = (y1 - y2, x2 - x1);
+      var (minA, maxA) = (double.infinity, double.negativeInfinity);
+      for (final (x, y) in a) {
+        final along = x * nx + y * ny;
+        minA = math.min(minA, along);
+        maxA = math.max(maxA, along);
+      }
+      var (minB, maxB) = (double.infinity, double.negativeInfinity);
+      for (final (x, y) in b) {
+        final along = x * nx + y * ny;
+        minB = math.min(minB, along);
+        maxB = math.max(maxB, along);
+      }
+      if (maxA < minB || maxB < minA) return true;
+    }
+    return false;
+  }
+
+  return !separatedBy(a) && !separatedBy(b);
+}
+
+/// A stretch of swimming the player's fish imagines: the smallest gap to any
+/// predator, the gap at its end, the closest it came to a wall, and where it
+/// ends and how fast it is going there.
+typedef _Swim = ({
+  double gap,
+  double last,
+  double clear,
+  double x,
+  double y,
+  double vx,
+  double vy,
+});
 
 /// The fish the model is asked about, and whether the player can eat it.
 typedef FishEncounter = ({Fish fish, bool prey});
@@ -104,6 +236,15 @@ final class FishWorld {
   /// The headings the player's fish weighs, in a full circle.
   static const _headings = 32;
 
+  /// The headings the player's fish weighs for its second leg while fleeing.
+  static const _turns = 6;
+
+  /// How fast the player's fish turns while it flees.
+  static const _fleeTurn = 8.0;
+
+  /// How long a step of the look-ahead is, in seconds.
+  static const _lookAheadStep = 0.15;
+
   final math.Random _random;
   late Fish player;
   final others = <Fish>[];
@@ -132,15 +273,15 @@ final class FishWorld {
     }
   }
 
-  /// Whether the player's fish is clearly bigger than [fish].
-  bool canEat(Fish fish) => player.size > fish.size * 1.1;
+  /// Whether the player's fish is bigger than [fish].
+  bool canEat(Fish fish) => player.size > fish.size;
 
   /// Whether [fish] can eat the player's fish.
-  bool dangerous(Fish fish) => fish.size > player.size * 1.1;
+  bool dangerous(Fish fish) => fish.size > player.size;
 
-  /// The fish the model is asked about: the nearest predator within three
-  /// quarters of the player's sight, since danger comes first, else the
-  /// nearest fish in sight; null when none is in sight.
+  /// The fish the model is asked about: the nearest predator in sight, since
+  /// danger comes first, else the nearest fish in sight; null when none is in
+  /// sight.
   FishEncounter? get encounter {
     Fish? nearest;
     Fish? predator;
@@ -148,15 +289,14 @@ final class FishWorld {
     var closestPredator = double.infinity;
     for (final fish in others) {
       final distance = _distance(player, fish) - fish.size;
-      if (distance < sight && distance < best) {
+      if (distance >= sight) continue;
+      if (distance < best) {
         best = distance;
         nearest = fish;
       }
-      if (dangerous(fish) && distance < sight * 0.75) {
-        if (distance < closestPredator) {
-          closestPredator = distance;
-          predator = fish;
-        }
+      if (dangerous(fish) && distance < closestPredator) {
+        closestPredator = distance;
+        predator = fish;
       }
     }
     final fish = predator ?? nearest;
@@ -166,7 +306,11 @@ final class FishWorld {
   /// Advances [dt] seconds, the player's fish doing [intent] about the fish
   /// with id [target], or exploring when that fish is gone.
   void step(double dt, FishIntent intent, int? target) {
+    // Collisions come first, on the fish as the page last drew them: a touch
+    // on screen always counts, and only a touch on screen does.
+    _collide();
     final about = others.where((fish) => fish.id == target).firstOrNull;
+    player.heldFacing = player.facingLeft;
     _steerPlayer(dt, about == null ? FishIntent.explore : intent, about);
     for (final fish in others) {
       // A bigger fish that sees the player turns toward it, a little slower
@@ -189,7 +333,7 @@ final class FishWorld {
         ..x += fish.vx * dt
         ..y = (fish.y + fish.vy * dt).clamp(fish.size, height - fish.size);
     }
-    _collide();
+    _finishTurn();
     others.removeWhere(
       (fish) => fish.x < -fish.size * 3 || fish.x > width + fish.size * 3,
     );
@@ -215,7 +359,10 @@ final class FishWorld {
       FishIntent.explore => _wander(dt),
     };
     // Fleeing turns fast; cruising turns smoothly.
-    final turn = math.min(1.0, dt * (intent == FishIntent.flee ? 8 : 4));
+    final turn = math.min(
+      1.0,
+      dt * (intent == FishIntent.flee ? _fleeTurn : 4),
+    );
     player.vx += (dx * speed - player.vx) * turn;
     player.vy += (dy * speed - player.vy) * turn;
     player
@@ -230,12 +377,13 @@ final class FishWorld {
   }
 
   /// The heading that keeps the player's fish farthest from every predator:
-  /// each of [_headings] directions is swum a little over a second ahead,
-  /// sliding along any wall it meets, while the predators swim at the fish,
-  /// and scored by the closest it lets any of them come, how much open water
-  /// it ends in, and how near it gets to the part of the sea farthest from
-  /// them all. Running into a wall or a corner stalls a path, so it scores
-  /// low, and slipping past a predator scores well when that keeps a gap.
+  /// each of [_headings] directions is swum for 0.9 seconds, then the best of
+  /// [_turns] second legs for 1.5 more, sliding along any wall it meets, while
+  /// the predators hunt the fish, and scored by the closest it lets any of them
+  /// come, how much open water it ends in, and how near it gets to the part of
+  /// the sea farthest from them all. Running into a wall or a corner stalls a
+  /// path, so it scores low, and slipping past a predator scores well when that
+  /// keeps a gap.
   (double, double) _escape(double speed, List<Fish> threats) {
     if (threats.isEmpty) {
       _route = null;
@@ -244,25 +392,15 @@ final class FishWorld {
     final (safeX, safeY) = _safe = _safestSpot(threats, _safe);
     (double, double) score(double angle) {
       final (ux, uy) = (math.cos(angle), math.sin(angle));
-      final (gap, end, x, y, clear) = _lookAhead(ux, uy, speed, threats);
+      final swim = _lookAhead(ux, uy, speed, threats);
       final toSafe = math.sqrt(
-        (x - safeX) * (x - safeX) + (y - safeY) * (y - safeY),
+        (swim.x - safeX) * (swim.x - safeX) +
+            (swim.y - safeY) * (swim.y - safeY),
       );
-      // The distance a heading wins from the predators counts most, and the
-      // closest they come on the way keeps it safe. The pull toward the open
-      // water farthest from them fades in as the fish gets clear, so up close
-      // only distance counts.
-      final room = ((end - 50) / 150).clamp(0.0, 1.0);
-      // A route the look-ahead says brings a predator within 30 units, let
-      // alone through it, never wins, however open the water it ends in.
-      return (
-        end +
-            0.5 * gap +
-            0.6 * math.min(clear, 150) -
-            0.15 * room * toSafe -
-            8 * math.max(0, 30 - gap),
-        gap,
-      );
+      // The pull toward the open water farthest from the predators fades in
+      // as the fish gets clear, so up close only distance counts.
+      final room = ((swim.last - 50) / 150).clamp(0.0, 1.0);
+      return (_worth(swim) - 0.15 * room * toSafe, swim.gap);
     }
 
     var best = 0.0;
@@ -305,7 +443,18 @@ final class FishWorld {
     for (var i = 0; i < _headings; i++) {
       final angle = i * 2 * math.pi / _headings;
       final (ux, uy) = (math.cos(angle), math.sin(angle));
-      final (gap, _, _, _, _) = _lookAhead(ux, uy, speed, threats);
+      final positions = [for (final fish in threats) (fish.x, fish.y)];
+      final velocities = [for (final fish in threats) (fish.vx, fish.vy)];
+      final gap = _swim(
+        (player.x, player.y),
+        (player.vx, player.vy),
+        (ux, uy),
+        speed,
+        threats,
+        positions,
+        velocities,
+        12,
+      ).gap;
       final toward = (ux * aimX + uy * aimY) / aim;
       final score = 100 * toward - 6 * math.max(0, 80 - gap);
       if (score > bestScore) {
@@ -334,65 +483,135 @@ final class FishWorld {
     return (dx / length, dy / length);
   }
 
-  /// Swims heading ([ux], [uy]) for 1.8 seconds in twelve steps, sliding
-  /// along walls, and returns the smallest gap to any predator on the way,
-  /// the gap at the end, and where the fish ends up. Each predator is
-  /// followed twice and the worse counts: chasing the fish head-on, and
-  /// turning as the world turns it, with its momentum, which catches a fish
-  /// that cuts across its path.
-  (double, double, double, double, double) _lookAhead(
-    double ux,
-    double uy,
+  /// What a stretch of swimming is worth. The distance it wins from the
+  /// predators counts most, and the closest they come on the way keeps it
+  /// safe. A route that brings a predator within 30 units, let alone through
+  /// it, never wins, however open the water it ends in.
+  double _worth(_Swim swim) =>
+      swim.last +
+      0.5 * swim.gap +
+      1.5 * math.min(swim.clear, 150) -
+      8 * math.max(0, 30 - swim.gap);
+
+  /// Swims heading ([ux], [uy]) for 0.9 seconds, then whichever of [_turns]
+  /// headings is worth most for 1.5 more: one straight line cannot see that a
+  /// heading ends in a trap the fish could still have turned out of.
+  _Swim _lookAhead(double ux, double uy, double speed, List<Fish> threats) {
+    final positions = [for (final fish in threats) (fish.x, fish.y)];
+    final velocities = [for (final fish in threats) (fish.vx, fish.vy)];
+    final first = _swim(
+      (player.x, player.y),
+      (player.vx, player.vy),
+      (ux, uy),
+      speed,
+      threats,
+      positions,
+      velocities,
+      6,
+    );
+    _Swim? best;
+    var bestWorth = double.negativeInfinity;
+    for (var i = 0; i < _turns; i++) {
+      final angle = i * 2 * math.pi / _turns;
+      final second = _swim(
+        (first.x, first.y),
+        (first.vx, first.vy),
+        (math.cos(angle), math.sin(angle)),
+        speed,
+        threats,
+        [...positions],
+        [...velocities],
+        10,
+      );
+      final swim = (
+        gap: math.min(first.gap, second.gap),
+        last: second.last,
+        clear: math.min(first.clear, second.clear),
+        x: second.x,
+        y: second.y,
+        vx: second.vx,
+        vy: second.vy,
+      );
+      final worth = _worth(swim);
+      if (worth > bestWorth) {
+        bestWorth = worth;
+        best = swim;
+      }
+    }
+    return best!;
+  }
+
+  /// Swims heading [heading] for [steps] steps from [start] at velocity
+  /// [velocity], turning and sliding along walls as the fish really does, while
+  /// each predator moves on from [positions] and [velocities], which this
+  /// updates, as [step] moves it.
+  _Swim _swim(
+    (double, double) start,
+    (double, double) velocity,
+    (double, double) heading,
     double speed,
     List<Fish> threats,
+    List<(double, double)> positions,
+    List<(double, double)> velocities,
+    int steps,
   ) {
-    const steps = 12;
-    const step = 1.8 / steps;
-    var x = player.x;
-    var y = player.y;
-    final chasing = [for (final fish in threats) (fish.x, fish.y)];
-    final drifting = [for (final fish in threats) (fish.x, fish.y)];
-    final velocities = [for (final fish in threats) (fish.vx, fish.vy)];
+    const dt = _lookAheadStep;
+    final keep = math.exp(-_fleeTurn * dt);
+    final (ux, uy) = heading;
+    var (x, y) = start;
+    var (vx, vy) = velocity;
     var gap = double.infinity;
     var last = double.infinity;
     var clear = double.infinity;
     for (var s = 0; s < steps; s++) {
-      x = (x + ux * speed * step).clamp(player.size, width - player.size);
-      y = (y + uy * speed * step).clamp(player.size, height - player.size);
+      vx = ux * speed + (vx - ux * speed) * keep;
+      vy = uy * speed + (vy - uy * speed) * keep;
+      x = (x + vx * dt).clamp(player.size, width - player.size);
+      y = (y + vy * dt).clamp(player.size, height - player.size);
       clear = math.min(clear, _clearance(x, y));
       last = double.infinity;
       for (var k = 0; k < threats.length; k++) {
-        var (cx, cy) = chasing[k];
-        final dx = x - cx;
-        final dy = y - cy;
-        final length = math.max(1.0, math.sqrt(dx * dx + dy * dy));
-        cx += dx / length * predatorSpeed * step;
-        cy += dy / length * predatorSpeed * step;
-        chasing[k] = (cx, cy);
-        var (mx, my) = drifting[k];
-        final (vx, vy) = _hunt(
-          mx,
-          my,
-          velocities[k].$1,
-          velocities[k].$2,
-          x,
-          y,
-          step,
-        );
-        mx += vx * step;
-        my += vy * step;
-        drifting[k] = (mx, my);
-        velocities[k] = (vx, vy);
-        final reach = threats[k].size + player.size;
-        final between = math.min(
-          math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)),
-          math.sqrt((x - mx) * (x - mx) + (y - my) * (y - my)),
-        );
-        gap = math.min(gap, between - reach);
-        last = math.min(last, between - reach);
+        final size = threats[k].size;
+        var (mx, my) = positions[k];
+        var (mvx, mvy) = velocities[k];
+        if ((x - mx) * (x - mx) + (y - my) * (y - my) < sight * sight) {
+          (mvx, mvy) = _hunt(mx, my, mvx, mvy, x, y, dt);
+        }
+        mx += mvx * dt;
+        my = (my + mvy * dt).clamp(size, height - size);
+        positions[k] = (mx, my);
+        velocities[k] = (mvx, mvy);
+        final between = _shapeGap(x, y, vx < 0, mx, my, size, mvx < 0);
+        gap = math.min(gap, between);
+        last = math.min(last, between);
       }
     }
-    return (gap, last, x, y, clear);
+    return (gap: gap, last: last, clear: clear, x: x, y: y, vx: vx, vy: vy);
+  }
+
+  /// The gap between the box around the player's drawn fish at ([x], [y]) and
+  /// the box around a predator's: tails reach far behind the center, so a
+  /// circle would miss the one thing that kills a fish slipping past. Negative
+  /// where they overlap.
+  double _shapeGap(
+    double x,
+    double y,
+    bool facingLeft,
+    double mx,
+    double my,
+    double size,
+    bool predatorFacingLeft,
+  ) {
+    final (nose, tail) = (Fish.bodyHalfLength, Fish.tailEnd);
+    final left = x - player.size * (facingLeft ? nose : tail);
+    final right = x + player.size * (facingLeft ? tail : nose);
+    final predatorLeft = mx - size * (predatorFacingLeft ? nose : tail);
+    final predatorRight = mx + size * (predatorFacingLeft ? tail : nose);
+    final across = math.max(predatorLeft - right, left - predatorRight);
+    final along = (y - my).abs() - (player.size + size) * Fish.bodyHalfHeight;
+    if (across <= 0 && along <= 0) return math.max(across, along);
+    final (ax, ay) = (math.max(across, 0.0), math.max(along, 0.0));
+    return math.sqrt(ax * ax + ay * ay);
   }
 
   /// The open water farthest from every predator: the best of a grid of
@@ -452,22 +671,42 @@ final class FishWorld {
   static double _clearance(double x, double y) =>
       math.min(math.min(x, width - x), math.min(y, height - y));
 
+  /// Whichever of two touching fish is smaller dies, however slight the
+  /// touch; two fish of the same size pass each other. A meal can't save the
+  /// player from a bigger fish it touches at the same moment.
   void _collide() {
-    for (final fish in [...others]) {
-      if (_distance(player, fish) > (player.size + fish.size) * 0.75) continue;
-      if (canEat(fish)) {
-        others.remove(fish);
-        eaten++;
-        // Area grows by a quarter of the meal's.
-        player.size = math.sqrt(
-          player.size * player.size + 0.25 * fish.size * fish.size,
-        );
-      } else if (fish.size > player.size * 1.1) {
-        lost++;
-        player = Fish(0, null, width / 2, height / 2, startSize);
-        others.removeWhere((other) => _distance(player, other) < 250);
-        return;
-      }
+    final touching = [
+      for (final fish in others)
+        if (fishTouch(player, fish)) fish,
+    ];
+    if (touching.any(dangerous)) {
+      lost++;
+      player = Fish(0, null, width / 2, height / 2, startSize);
+      others.removeWhere((other) => _distance(player, other) < 250);
+      return;
+    }
+    for (final fish in touching) {
+      if (!canEat(fish)) continue;
+      others.remove(fish);
+      eaten++;
+      // Area grows by a quarter of the meal's.
+      player.size = math.sqrt(
+        player.size * player.size + 0.25 * fish.size * fish.size,
+      );
+    }
+  }
+
+  /// Lets the player's fish finish turning around, unless that would touch a
+  /// bigger fish. A turn moves the tail to the other side at once, with no
+  /// frame in between, so it could kill without a touch ever being drawn. Until
+  /// the tail has room the fish swims tail first. A hunter needs no such hold:
+  /// it only turns to face the player, which swings its tail away from them.
+  void _finishTurn() {
+    final held = player.heldFacing;
+    player.heldFacing = null;
+    if (player.facingLeft != held &&
+        others.any((fish) => dangerous(fish) && fishTouch(player, fish))) {
+      player.heldFacing = held;
     }
   }
 
