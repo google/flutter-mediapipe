@@ -1,21 +1,29 @@
-"""Validates and publishes the repository's packages to pub.dev.
+"""Prepares, validates and publishes the repository's packages to pub.dev.
 
 Every package shares one version (`tool/check_repository.py`), and the task
-families depend on `mediapipe_core` by that version. A release therefore:
+families depend on `mediapipe_core` by that version. When a GitHub Release is
+published (or the workflow is dispatched with a target version):
 
-1. Checks that every package's `pubspec.yaml` and `CHANGELOG.md` name the same
-   version, and that a real publish runs on tag `refs/tags/v<version>` (the
-   `v{{version}}` tag pattern pub.dev's automated publishing verifies).
-2. Copies every package outside the repository as `publish_check.py` does and
+1. `prepare_release_version` reads the target version from `--version` or tag
+   `refs/tags/v<version>`. When the repository's `pubspec.yaml` files are on an
+   older version, it updates `version:` across all six `pubspec.yaml` files,
+   `mediapipe_core: ^<version>` across the five family `pubspec.yaml` files,
+   the dependency constraints in the READMEs, and ensures each package's
+   `CHANGELOG.md` has a `## <version>` section.
+2. Checks that every package's `pubspec.yaml` and `CHANGELOG.md` name the same
+   version.
+3. Copies every package outside the repository as `publish_check.py` does and
    runs `flutter pub publish --dry-run` on each selected package, refusing to
    proceed unless every package validates with zero warnings.
-3. With `--dry-run`, stops there.
-4. Otherwise registers `PUB_TOKEN` with `dart pub token add https://pub.dev
-   --env-var PUB_TOKEN`, mints a fresh GitHub Actions OIDC token for audience
-   `https://pub.dev` before each upload, publishes `mediapipe_core` first,
-   waits for pub.dev to list the new `mediapipe_core` version, and then
-   publishes the five task family packages in order. Any package whose target
-   version is already on pub.dev is skipped so a retried run finishes cleanly.
+4. With `--prepare` or `--dry-run`, stops there.
+5. Otherwise commits any version bump, pushes it to the target branch and tag
+   `refs/tags/v<version>`, registers `PUB_TOKEN` with `dart pub token add
+   https://pub.dev --env-var PUB_TOKEN`, mints a fresh GitHub Actions OIDC
+   token for audience `https://pub.dev` before each upload, publishes
+   `mediapipe_core` first, waits for pub.dev to list the new `mediapipe_core`
+   version, and then publishes the five task family packages in order. Any
+   package whose target version is already on pub.dev is skipped so a retried
+   run finishes cleanly.
 """
 import argparse
 import json
@@ -40,6 +48,11 @@ from publish_check import flutter_dry_run, prepare  # noqa: E402
 
 PUB_HOST = 'https://pub.dev'
 CLEAN_DRY_RUN = re.compile(r'Package has 0 warnings(\.| and)')
+SEMVER = re.compile(r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$')
+VERSION_DOCS = [
+    'README.md',
+    'doc/guides/vision/object_detector.md',
+]
 
 
 def executable_path(name):
@@ -82,35 +95,168 @@ def resolve_packages(raw_names):
     return [folder for folder in all_folders if folder in selected]
 
 
-def verify_versions_and_tag(ref, dry_run):
-    """Checks that every package's pubspec and CHANGELOG agree on the release
-    version, and that `ref` matches `refs/tags/v<version>` when publishing."""
+def normalize_version(raw):
+    """Strips an optional leading `v` and validates semantic version syntax."""
+    cleaned = raw.strip()
+    if cleaned.startswith('refs/tags/'):
+        cleaned = cleaned[len('refs/tags/'):]
+    if cleaned.startswith('v'):
+        cleaned = cleaned[1:]
+    if not SEMVER.match(cleaned):
+        raise SystemExit(f'Invalid semantic version: {raw!r}')
+    return cleaned
+
+
+def target_version_from(ref, explicit_version=''):
+    """Resolves the target release version from `explicit_version` or a
+    `refs/tags/v<version>` ref, or returns `None` when neither is given."""
+    if explicit_version and explicit_version.strip():
+        return normalize_version(explicit_version)
+    if ref and ref.startswith('refs/tags/'):
+        tag = ref[len('refs/tags/'):]
+        if not tag.startswith('v'):
+            raise SystemExit(f'Release tag {ref!r} must start with "v" (e.g. v0.1.0).')
+        return normalize_version(tag)
+    return None
+
+
+def read_pubspec_versions(packages_dir=PACKAGES, folders=None):
+    """Returns `{folder: version}` across all packages and verifies they agree."""
+    folders = package_folders() if folders is None else folders
     versions = {}
-    for folder in package_folders():
-        pubspec = (PACKAGES / folder / 'pubspec.yaml').read_text(encoding='utf-8')
+    for folder in folders:
+        pubspec = (packages_dir / folder / 'pubspec.yaml').read_text(encoding='utf-8')
         match = re.search(r'^version:\s*(\S+)$', pubspec, re.M)
         if not match:
             raise SystemExit(f'packages/{folder}/pubspec.yaml has no version field.')
-        version = match.group(1)
-        versions[folder] = version
-        changelog = (PACKAGES / folder / 'CHANGELOG.md').read_text(encoding='utf-8')
-        if not re.search(rf'^## {re.escape(version)}\b', changelog, re.M):
-            raise SystemExit(
-                f'packages/{folder}/CHANGELOG.md has no "## {version}" section.')
+        versions[folder] = match.group(1)
     unique = sorted(set(versions.values()))
     if len(unique) != 1:
         raise SystemExit(f'Package versions do not agree: {versions}')
-    version = unique[0]
+    return versions, unique[0]
+
+
+def prepare_release_version(target_version, release_notes='', repo_root=REPO,
+                            packages_dir=PACKAGES, folders=None):
+    """Updates every package's `pubspec.yaml`, `CHANGELOG.md`, and README
+    version constraints to `target_version` when needed. Returns True if any
+    file was modified."""
+    folders = package_folders() if folders is None else folders
+    _, current_version = read_pubspec_versions(packages_dir=packages_dir, folders=folders)
+    if not target_version:
+        return False
+    target_version = normalize_version(target_version)
+    changed = False
+
+    for folder in folders:
+        pubspec_path = packages_dir / folder / 'pubspec.yaml'
+        pubspec = pubspec_path.read_text(encoding='utf-8')
+        updated = re.sub(r'^version:\s*\S+$', f'version: {target_version}',
+                         pubspec, count=1, flags=re.M)
+        if folder != CORE:
+            updated = re.sub(r'^(\s*mediapipe_core:\s*)\^\S+$',
+                             rf'\g<1>^{target_version}',
+                             updated, count=1, flags=re.M)
+        if updated != pubspec:
+            pubspec_path.write_text(updated, encoding='utf-8')
+            changed = True
+
+        changelog_path = packages_dir / folder / 'CHANGELOG.md'
+        changelog = changelog_path.read_text(encoding='utf-8')
+        if not re.search(rf'^## {re.escape(target_version)}\b', changelog, re.M):
+            notes = (release_notes or '').strip() or f'Release {target_version}.'
+            changelog_path.write_text(
+                f'## {target_version}\n\n{notes}\n\n{changelog}',
+                encoding='utf-8')
+            changed = True
+
+    if target_version != current_version:
+        doc_paths = [
+            *(repo_root / rel for rel in VERSION_DOCS if (repo_root / rel).is_file()),
+            *(packages_dir / folder / 'README.md' for folder in folders
+              if (packages_dir / folder / 'README.md').is_file()),
+        ]
+        pattern = re.compile(
+            rf'\b(mediapipe_[a-z_]+:\s*)\^{re.escape(current_version)}\b')
+        for doc_path in doc_paths:
+            text = doc_path.read_text(encoding='utf-8')
+            updated = pattern.sub(rf'\g<1>^{target_version}', text)
+            if updated != text:
+                doc_path.write_text(updated, encoding='utf-8')
+                changed = True
+
+    if changed:
+        print(f'Updated package versions from {current_version} to {target_version}.',
+              flush=True)
+    return changed
+
+
+def verify_versions_and_tag(ref, dry_run, explicit_version='',
+                            packages_dir=PACKAGES, folders=None):
+    """Checks that every package's pubspec and CHANGELOG agree on the release
+    version, and that a real publish has a matching tag or explicit version."""
+    folders = package_folders() if folders is None else folders
+    _, version = read_pubspec_versions(packages_dir=packages_dir, folders=folders)
+    for folder in folders:
+        changelog = (packages_dir / folder / 'CHANGELOG.md').read_text(encoding='utf-8')
+        if not re.search(rf'^## {re.escape(version)}\b', changelog, re.M):
+            raise SystemExit(
+                f'packages/{folder}/CHANGELOG.md has no "## {version}" section.')
     expected_ref = f'refs/tags/v{version}'
     if ref and ref.startswith('refs/tags/') and ref != expected_ref:
         raise SystemExit(
             f'Tag ref {ref!r} does not match pubspec version {version} '
             f'(expected {expected_ref!r}).')
-    if not dry_run and ref != expected_ref:
+    target = target_version_from(ref, explicit_version)
+    if target is not None and target != version:
+        raise SystemExit(
+            f'Target version {target} does not match pubspec version {version}.')
+    if not dry_run and ref != expected_ref and not explicit_version:
         raise SystemExit(
             f'Refusing to publish version {version} from ref {ref!r}: '
-            f'publishing requires tag ref {expected_ref!r}.')
+            f'publishing requires tag ref {expected_ref!r} or --version {version}.')
     return version
+
+
+def commit_and_tag_release(version, target_branch='main', repo_root=REPO):
+    """Commits any modified version/changelog files, pushes the commit to
+    `target_branch` (best-effort if branch-protected), and pushes tag
+    `v<version>` to `origin`."""
+    status = subprocess.run(
+        ['git', 'status', '--porcelain', '--untracked-files=no'],
+        cwd=repo_root, check=True, capture_output=True, text=True).stdout.strip()
+    tag = f'v{version}'
+    if status:
+        subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'],
+                       cwd=repo_root, check=True)
+        subprocess.run(
+            ['git', 'config', 'user.email',
+             '41898282+github-actions[bot]@users.noreply.github.com'],
+            cwd=repo_root, check=True)
+        subprocess.run(['git', 'commit', '-am', f'chore(release): {tag}'],
+                       cwd=repo_root, check=True)
+        if target_branch and not target_branch.startswith('v'):
+            push_branch = subprocess.run(
+                ['git', 'push', 'origin', f'HEAD:refs/heads/{target_branch}'],
+                cwd=repo_root, capture_output=True, text=True)
+            if push_branch.returncode != 0:
+                print(f'::warning::Could not push release commit directly to '
+                      f'{target_branch}: {push_branch.stderr.strip()}', flush=True)
+        subprocess.run(['git', 'tag', '-f', tag, 'HEAD'], cwd=repo_root, check=True)
+        subprocess.run(['git', 'push', '--force', 'origin', f'refs/tags/{tag}'],
+                       cwd=repo_root, check=True)
+        print(f'Committed version {version} and updated tag {tag}.', flush=True)
+        return
+    # Even if files were already at `version`, ensure the tag exists on origin
+    # when triggered with an explicit `--version`.
+    existing = subprocess.run(
+        ['git', 'rev-parse', '-q', '--verify', f'refs/tags/{tag}'],
+        cwd=repo_root, capture_output=True, text=True)
+    if existing.returncode != 0:
+        subprocess.run(['git', 'tag', tag, 'HEAD'], cwd=repo_root, check=True)
+        subprocess.run(['git', 'push', 'origin', f'refs/tags/{tag}'],
+                       cwd=repo_root, check=True)
+        print(f'Created and pushed tag {tag}.', flush=True)
 
 
 def validate_staged(root, selected):
@@ -210,8 +356,12 @@ def publish_package(root, folder, token):
         raise SystemExit(f'{folder}: flutter pub publish failed (exit {result.returncode}).')
 
 
-def run_publish(selected, ref, dry_run, core_wait_timeout=180):
-    version = verify_versions_and_tag(ref, dry_run)
+def run_publish(selected, ref, dry_run, explicit_version='', release_notes='',
+                target_branch='main', core_wait_timeout=180):
+    target = target_version_from(ref, explicit_version)
+    if target:
+        prepare_release_version(target, release_notes=release_notes)
+    version = verify_versions_and_tag(ref, dry_run, explicit_version=explicit_version)
     print(f'Release version: {version} ({"dry-run" if dry_run else "publish"})',
           flush=True)
     with tempfile.TemporaryDirectory(prefix='mediapipe-release-') as tmp:
@@ -223,6 +373,7 @@ def run_publish(selected, ref, dry_run, core_wait_timeout=180):
             print(f'Dry run succeeded for {len(selected)} '
                   f'package{"" if len(selected) == 1 else "s"}.', flush=True)
             return
+        commit_and_tag_release(version, target_branch=target_branch)
         pending = []
         for folder in selected:
             name = package_name(folder)
@@ -258,17 +409,34 @@ def main(argv=None):
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('packages', nargs='*', default=[],
                         help='Package folders or pubspec names (default: all, core first)')
+    parser.add_argument('--prepare', action='store_true',
+                        help='Update pubspec.yaml, CHANGELOG.md and README versions in place and exit')
     parser.add_argument('--dry-run', action='store_true',
                         default=os.environ.get('DRY_RUN', '').lower() == 'true',
                         help='Validate and dry-run without uploading to pub.dev')
+    parser.add_argument('--version', default=os.environ.get('RELEASE_VERSION', ''),
+                        help='Target version (default: $RELEASE_VERSION or inferred from tag)')
+    parser.add_argument('--release-notes', default=os.environ.get('RELEASE_NOTES', ''),
+                        help='Release notes for new CHANGELOG sections (default: $RELEASE_NOTES)')
+    parser.add_argument('--target-branch', default=os.environ.get('TARGET_BRANCH', 'main'),
+                        help='Branch to push version bump commits to (default: main)')
     parser.add_argument('--ref', default=os.environ.get('GITHUB_REF', ''),
                         help='Git ref (default: $GITHUB_REF)')
     parser.add_argument('--core-wait-timeout', type=int, default=180,
                         help='Seconds to wait for mediapipe_core on pub.dev before families')
     args = parser.parse_args(argv)
+    if args.prepare:
+        target = target_version_from(args.ref, args.version)
+        if target:
+            prepare_release_version(target, release_notes=args.release_notes)
+        verify_versions_and_tag(args.ref, dry_run=True, explicit_version=args.version)
+        return
     raw_packages = args.packages or [os.environ.get('PACKAGES', 'all')]
     selected = resolve_packages(raw_packages)
     run_publish(selected, args.ref, args.dry_run,
+                explicit_version=args.version,
+                release_notes=args.release_notes,
+                target_branch=args.target_branch,
                 core_wait_timeout=args.core_wait_timeout)
 
 

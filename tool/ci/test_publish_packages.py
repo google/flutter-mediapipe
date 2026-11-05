@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 import unittest
 from unittest import mock
 import urllib.error
@@ -38,6 +39,68 @@ class PublishPackagesTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             publish_packages.resolve_packages(['mediapipe_unknown'])
 
+    def test_target_version_from_tag_and_explicit_input(self):
+        self.assertEqual(
+            publish_packages.target_version_from('refs/tags/v0.2.0'),
+            '0.2.0')
+        self.assertEqual(
+            publish_packages.target_version_from('refs/heads/main', 'v0.3.1'),
+            '0.3.1')
+        self.assertIsNone(
+            publish_packages.target_version_from('refs/heads/main', ''))
+        with self.assertRaises(SystemExit):
+            publish_packages.target_version_from('refs/tags/0.2.0')
+        with self.assertRaises(SystemExit):
+            publish_packages.target_version_from('refs/heads/main', 'not-a-semver')
+
+    def test_prepare_release_version_bumps_pubspecs_changelogs_and_readmes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packages = root / 'packages'
+            folders = ['mediapipe-core', 'mediapipe-task-vision']
+            (packages / 'mediapipe-core').mkdir(parents=True)
+            (packages / 'mediapipe-task-vision').mkdir(parents=True)
+            (packages / 'mediapipe-core/pubspec.yaml').write_text(
+                'name: mediapipe_core\nversion: 0.1.0\n', encoding='utf-8')
+            (packages / 'mediapipe-core/CHANGELOG.md').write_text(
+                '## 0.1.0\n\nInitial release.\n', encoding='utf-8')
+            (packages / 'mediapipe-task-vision/pubspec.yaml').write_text(
+                'name: mediapipe_vision\nversion: 0.1.0\ndependencies:\n'
+                '  mediapipe_core: ^0.1.0\n', encoding='utf-8')
+            (packages / 'mediapipe-task-vision/CHANGELOG.md').write_text(
+                '## 0.1.0\n\nInitial release.\n', encoding='utf-8')
+            (packages / 'mediapipe-task-vision/README.md').write_text(
+                'dependencies:\n  mediapipe_vision: ^0.1.0\n', encoding='utf-8')
+            (root / 'README.md').write_text(
+                'dependencies:\n  mediapipe_vision: ^0.1.0\n', encoding='utf-8')
+
+            changed = publish_packages.prepare_release_version(
+                '0.2.0', release_notes='- Added new feature.',
+                repo_root=root, packages_dir=packages, folders=folders)
+            self.assertTrue(changed)
+            self.assertIn(
+                'version: 0.2.0',
+                (packages / 'mediapipe-core/pubspec.yaml').read_text(encoding='utf-8'))
+            vision_pubspec = (packages / 'mediapipe-task-vision/pubspec.yaml').read_text(
+                encoding='utf-8')
+            self.assertIn('version: 0.2.0', vision_pubspec)
+            self.assertIn('mediapipe_core: ^0.2.0', vision_pubspec)
+            vision_changelog = (packages / 'mediapipe-task-vision/CHANGELOG.md').read_text(
+                encoding='utf-8')
+            self.assertTrue(vision_changelog.startswith(
+                '## 0.2.0\n\n- Added new feature.\n\n## 0.1.0'))
+            self.assertIn(
+                'mediapipe_vision: ^0.2.0',
+                (packages / 'mediapipe-task-vision/README.md').read_text(encoding='utf-8'))
+            self.assertIn(
+                'mediapipe_vision: ^0.2.0',
+                (root / 'README.md').read_text(encoding='utf-8'))
+
+            # Running a second time with the same target version is a no-op.
+            self.assertFalse(publish_packages.prepare_release_version(
+                '0.2.0', release_notes='- Added new feature.',
+                repo_root=root, packages_dir=packages, folders=folders))
+
     def test_verify_versions_and_tag_accepts_matching_tag(self):
         version = publish_packages.verify_versions_and_tag(
             'refs/tags/v0.1.0', dry_run=False)
@@ -48,14 +111,34 @@ class PublishPackagesTest(unittest.TestCase):
             publish_packages.verify_versions_and_tag(
                 'refs/tags/v0.2.0', dry_run=True)
 
-    def test_verify_versions_and_tag_rejects_branch_ref_when_publishing(self):
+    def test_verify_versions_and_tag_rejects_branch_ref_without_explicit_version(self):
         with self.assertRaises(SystemExit):
             publish_packages.verify_versions_and_tag(
                 'refs/heads/main', dry_run=False)
-        # Dry run on a branch ref is allowed.
+        self.assertEqual(
+            publish_packages.verify_versions_and_tag(
+                'refs/heads/main', dry_run=False, explicit_version='0.1.0'),
+            '0.1.0')
         self.assertEqual(
             publish_packages.verify_versions_and_tag('refs/heads/main', dry_run=True),
             '0.1.0')
+
+    def test_commit_and_tag_release_commits_and_pushes_tag(self):
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(cmd)
+            if cmd[:2] == ['git', 'status']:
+                return subprocess.CompletedProcess(cmd, 0, ' M packages/mediapipe-core/pubspec.yaml\n', '')
+            return subprocess.CompletedProcess(cmd, 0, '', '')
+
+        with mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run):
+            publish_packages.commit_and_tag_release('0.2.0', target_branch='main')
+
+        self.assertIn(['git', 'commit', '-am', 'chore(release): v0.2.0'], calls)
+        self.assertIn(['git', 'push', 'origin', 'HEAD:refs/heads/main'], calls)
+        self.assertIn(['git', 'tag', '-f', 'v0.2.0', 'HEAD'], calls)
+        self.assertIn(['git', 'push', '--force', 'origin', 'refs/tags/v0.2.0'], calls)
 
     def test_fetch_oidc_token_requests_pub_dev_audience(self):
         response_bytes = json.dumps({'value': 'oidc-jwt-token'}).encode('utf-8')
@@ -100,6 +183,9 @@ class PublishPackagesTest(unittest.TestCase):
         def fake_validate(root, selected):
             events.append(('validate', list(selected)))
 
+        def fake_commit_and_tag(version, target_branch='main'):
+            events.append(('commit_and_tag', version, target_branch))
+
         def fake_is_published(name, version, pub_host=publish_packages.PUB_HOST):
             # Simulate mediapipe_audio already published on a prior attempt,
             # and mediapipe_core becoming visible once wait_for_version polls.
@@ -119,6 +205,7 @@ class PublishPackagesTest(unittest.TestCase):
         selected = ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']
         with mock.patch.object(publish_packages, 'prepare', side_effect=fake_prepare), \
                 mock.patch.object(publish_packages, 'validate_staged', side_effect=fake_validate), \
+                mock.patch.object(publish_packages, 'commit_and_tag_release', side_effect=fake_commit_and_tag), \
                 mock.patch.object(publish_packages, 'is_version_published', side_effect=fake_is_published), \
                 mock.patch.object(publish_packages, 'fetch_oidc_token', return_value='jwt'), \
                 mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run), \
@@ -127,6 +214,7 @@ class PublishPackagesTest(unittest.TestCase):
 
         self.assertEqual(events, [
             ('validate', ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']),
+            ('commit_and_tag', '0.1.0', 'main'),
             ('token_add', 'PUB_TOKEN'),
             ('publish', 'mediapipe-core'),
             ('publish', 'mediapipe-task-vision'),
@@ -135,7 +223,10 @@ class PublishPackagesTest(unittest.TestCase):
     def test_release_workflow_pins_actions_and_gates_publish(self):
         text = WORKFLOW.read_text(encoding='utf-8')
         self.assertIn('id-token: write', text)
+        self.assertIn('contents: write', text)
         self.assertIn('needs: [validate, archives]', text)
+        self.assertIn('release:', text)
+        self.assertIn('types: [published]', text)
         self.assertIn('workflow_dispatch:', text)
         self.assertNotRegex(text, r'(?m)^\s*push:')
         self.assertNotRegex(text, r'(?m)^\s*pull_request:')

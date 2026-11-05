@@ -7,12 +7,21 @@ permissions:
 # `mediapipe_decision`, `mediapipe_retrieval`, `mediapipe_text`, `mediapipe_vision`)
 # to pub.dev using GitHub Actions OIDC automated publishing (`id-token: write`).
 #
-# Triggered manually via `workflow_dispatch` only (never automatically on
-# commits, pull requests, or tag pushes). To publish a release, create and push
-# tag `v<version>` and dispatch this workflow on that tag with `dry_run: false`.
+# Triggered when a GitHub Release is published (`release: types: [published]`)
+# or manually via `workflow_dispatch` (never automatically on commits or PRs).
+# When the release tag or `version` input names a new version (e.g. `v0.2.0`),
+# `tool/ci/publish_packages.py` updates all package `pubspec.yaml`,
+# `CHANGELOG.md` and `README.md` files, commits and tags `v<version>`, and
+# publishes `mediapipe_core` followed by the five family packages.
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
+      version:
+        description: Target version to release (e.g. 0.2.0); defaults to the release tag or current pubspec version
+        type: string
+        default: ''
       dry_run:
         description: Validate everything and run pub publish --dry-run without uploading to pub.dev
         type: boolean
@@ -32,6 +41,11 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Publisher unit tests
         run: python3 -B -m unittest tool/ci/test_publish_packages.py
+      - name: Prepare target release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version || github.event.release.tag_name || '' }}
+          RELEASE_NOTES: ${{ github.event.release.body || '' }}
+        run: python3 -B tool/ci/publish_packages.py --prepare
       - name: Check family lists and shared pins
         run: python3 -B tool/check_repository.py
       - name: Check the docs' samples, links and model names
@@ -51,6 +65,8 @@ jobs:
       - name: Verify version, tag and pub dry-run
         env:
           PACKAGES: ${{ inputs.packages || 'all' }}
+          RELEASE_VERSION: ${{ inputs.version || github.event.release.tag_name || '' }}
+          RELEASE_NOTES: ${{ github.event.release.body || '' }}
         run: python3 -B tool/ci/publish_packages.py --dry-run
 
   archives:
@@ -83,6 +99,11 @@ jobs:
           linux-profile: ${{ matrix.target == 'linux' && 'gallery' || 'none' }}
       - if: matrix.target == 'android'
         uses: ./.github/actions/android-ndk
+      - name: Prepare target release version
+        env:
+          RELEASE_VERSION: ${{ inputs.version || github.event.release.tag_name || '' }}
+          RELEASE_NOTES: ${{ github.event.release.body || '' }}
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} -B tool/ci/publish_packages.py --prepare
       - name: Build a fresh app from the archives
         env:
           TARGET: ${{ matrix.target }}
@@ -100,16 +121,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write
       id-token: write
     concurrency:
       group: release-publish
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup
-      - name: Publish packages to pub.dev
+      - name: Update versions, tag and publish packages to pub.dev
         env:
-          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
           PACKAGES: ${{ inputs.packages || 'all' }}
+          RELEASE_VERSION: ${{ inputs.version || github.event.release.tag_name || '' }}
+          RELEASE_NOTES: ${{ github.event.release.body || '' }}
+          TARGET_BRANCH: ${{ github.event.release.target_commitish || 'main' }}
         run: python3 -B tool/ci/publish_packages.py
