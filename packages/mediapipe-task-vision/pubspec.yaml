@@ -1,6 +1,6 @@
 name: mediapipe_vision
 description: "Google's MediaPipe vision tasks for Flutter: face, hand, pose and holistic landmarks, gestures, object detection, classification, embeddings and segmentation."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-vision
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:
@@ -30,7 +30,7 @@ dependencies:
   code_assets: ^2.1.0
   ffi: ^2.1.4
   hooks: ^2.2.0
-  mediapipe_core: ^0.1.0
+  mediapipe_core: ^0.1.1
   meta: ^1.18.0
   web: ^1.1.1
 

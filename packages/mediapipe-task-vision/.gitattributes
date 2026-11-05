@@ -1,2 +1,4 @@
 # Preserve raw pixel fixtures without text diffs or newline conversion.
 test/fixtures/face_detection/*.rgb binary
+# Preserve the upstream notice verbatim, including its whitespace.
+NOTICE -text -whitespace

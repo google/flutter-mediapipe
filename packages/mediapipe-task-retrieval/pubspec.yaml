@@ -1,6 +1,6 @@
 name: mediapipe_retrieval
 description: "Google's MediaPipe retrieval tasks for Flutter: Universal Embedder, one embedding space for text, images and audio, and Semantic Retriever, an on-device vector index over them."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-retrieval
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:
@@ -29,7 +29,7 @@ dependencies:
   code_assets: ^2.1.0
   ffi: ^2.1.4
   hooks: ^2.2.0
-  mediapipe_core: ^0.1.0
+  mediapipe_core: ^0.1.1
   meta: ^1.18.0
 
 dev_dependencies:

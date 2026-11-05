@@ -1,6 +1,6 @@
 name: mediapipe_text
 description: "Google's MediaPipe text tasks for Flutter: text classification and embeddings, language detection, EmbeddingGemma, proofreading and summarization."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-text
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:
@@ -31,7 +31,7 @@ dependencies:
   ffi: ^2.1.4
   hooks: ^2.2.0
   native_toolchain_c: ^0.19.3
-  mediapipe_core: ^0.1.0
+  mediapipe_core: ^0.1.1
   meta: ^1.18.0
 
 dev_dependencies:

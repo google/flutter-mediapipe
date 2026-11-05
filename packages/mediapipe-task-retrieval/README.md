@@ -34,7 +34,7 @@ the model itself, since Google's task reads a `modelAssetPath` as a file
 
 ## Quick start
 
-Add `mediapipe_retrieval: ^0.1.0` to your app's dependencies, then:
+Add `mediapipe_retrieval: ^0.1.1` to your app's dependencies, then:
 
 ```dart
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';

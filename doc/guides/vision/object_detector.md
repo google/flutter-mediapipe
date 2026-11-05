@@ -68,7 +68,7 @@ The Object Detector is in the `mediapipe_vision` package:
 dependencies:
   flutter:
     sdk: flutter
-  mediapipe_vision: ^0.1.0
+  mediapipe_vision: ^0.1.1
 ```
 
 On Android, iOS, macOS, Linux and Windows the package's build hook downloads

@@ -1,6 +1,6 @@
 name: mediapipe_core
 description: "Shared layer for the MediaPipe task packages: Google's engine on each platform, verified downloads, an on-demand model store and the browser runtime."
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-core
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:

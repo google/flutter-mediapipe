@@ -33,7 +33,7 @@ runtime.
 
 ## Quick start
 
-Add `mediapipe_text: ^0.1.0` to your app's dependencies, then:
+Add `mediapipe_text: ^0.1.1` to your app's dependencies, then:
 
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
