@@ -19,8 +19,9 @@ on:
         required: false
         default: all
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: decision-${{ github.ref }}-${{ inputs.jobs || 'all' }}
+  group: decision-${{ github.event_name == 'push' && github.sha || github.ref }}-${{ inputs.jobs || 'all' }}
   cancel-in-progress: true
 
 jobs:

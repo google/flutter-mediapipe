@@ -26,8 +26,9 @@ on:
       - .github/workflows/archives.yaml
   workflow_dispatch:
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: archives-${{ github.ref }}
+  group: archives-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -16,10 +16,12 @@ on:
         type: string
         required: true
 
-# A newer push on the same branch supersedes the queued matrix; the hosted
-# macOS pool is small enough that stale runs otherwise starve the latest one.
+# A newer push to a pull request supersedes its queued matrix; the hosted macOS
+# pool is small enough that stale runs otherwise starve the latest one. A push
+# to main is keyed by its commit and never cancelled: GitHub marks a commit
+# failed when one of its runs is cancelled.
 concurrency:
-  group: macos-tasks-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  group: macos-tasks-${{ github.event_name == 'push' && github.sha || github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
   cancel-in-progress: true
 
 # nightly-compare.yaml calls this workflow twice in one run, on the pinned

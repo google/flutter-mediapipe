@@ -26,7 +26,7 @@ runs:
         yes | "$sdkmanager" --licenses > /dev/null || true
         for attempt in 1 2 3 4; do
           "$sdkmanager" --install "ndk;$version" && exit 0
-          echo "Attempt $attempt of installing ndk;$version failed." >&2
+          echo "::warning::Installing ndk;$version failed on attempt $attempt of 4."
           sleep 20
         done
         exit 1
@@ -42,7 +42,7 @@ runs:
         package='cmake;3.22.1'
         for attempt in 1 2 3 4; do
           "$sdkmanager" --install "$package" && exit 0
-          echo "Attempt $attempt of installing $package failed." >&2
+          echo "::warning::Installing $package failed on attempt $attempt of 4."
           sleep 20
         done
         exit 1

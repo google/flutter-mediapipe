@@ -401,13 +401,14 @@ void main() {
           // The model steers the fish: Google's wording gets every sentence
           // the game writes right, so each decision matches the scene.
           await tester.tap(find.byKey(const ValueKey('fish-play')));
-          // The first game downloads Google's 165 MB EmbeddingGemma 2.
+          // The first game downloads Google's 165 MB EmbeddingGemma 2, which
+          // takes about 9 minutes at the slowest speed seen, 0.31 MB/s.
           await _until(
             tester,
             () =>
                 _fishScore(tester).$1 >= 5 ||
                 find.text('Error').evaluate().isNotEmpty,
-            attempts: 2400,
+            attempts: 3000,
           );
           expect(
             find.text('Error'),

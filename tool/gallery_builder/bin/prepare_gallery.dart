@@ -171,7 +171,10 @@ Future<void> _prepare(
       // A phone build should not fail on one dropped connection; a rerun
       // keeps the models already verified.
       if (attempt == 3) rethrow;
-      stderr.writeln('  attempt $attempt failed ($error); retrying');
+      stderr.writeln(
+        '::warning::Bundling the gallery models failed on attempt $attempt of '
+        '3 ($error); retrying',
+      );
       await Future<void>.delayed(Duration(seconds: 2 * attempt));
     }
   }
@@ -301,6 +304,7 @@ dependencies:
     path: ../packages/mediapipe-task-retrieval
   web: ^1.1.1
   crypto: ^3.0.6
+  http: ^1.6.0
   file_selector: ^1.0.3
   image_picker: ^1.2.2
   video_frames:

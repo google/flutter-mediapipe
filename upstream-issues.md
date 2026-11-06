@@ -313,6 +313,14 @@ Google's per-family macOS libraries wait the same way, and so do its October
   22 s into the wait, and the job beside it saw the same answers for the next
   twenty minutes. The Makefile's `dart test` lines now pass `--timeout 180s`
   as the family workflow does.
+- **CI, October 22 and 23:** a slow reply also fits two timeouts of the 10 s
+  that the classic text lifecycle test gave each close, on
+  [macOS](https://github.com/hugocornellier/mediapipe_flutter/actions/runs/39798055784),
+  where the library logged the same 503 16 s into the close, and on
+  [Windows](https://github.com/hugocornellier/mediapipe_flutter/actions/runs/39949215907),
+  where the VM then printed `waiting for isolate MediaPipe TextClassifier to
+  check in` until the worker exited. That limit is now 90 s, more than the
+  upload's timeout.
 
 ### UP-026: Holistic cannot open its face blendshapes model on a desktop or iPhone GPU
 

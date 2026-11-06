@@ -17,8 +17,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: windows-camera-${{ github.ref }}
+  group: windows-camera-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:

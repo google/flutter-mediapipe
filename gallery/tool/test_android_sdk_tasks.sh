@@ -56,15 +56,12 @@ for attempt in 1 2; do
   status=0
   run_suite 1800 integration_test/sdk_all_test.dart --dart-define=SDK_GPU=skip || status=$?
   [ "$status" = 0 ] && break
-  # A stall, or a Dart Development Service that never started, means no test
-  # ran to a verdict, so the suites run once more. A test that already failed
-  # is a verdict, even if the run then stalled, and an emulator that is gone
-  # cannot pass a second run; neither is retried.
-  if [ "$attempt" = 1 ] && { [ "$status" = 124 ] ||
-      grep -q "Failed to start Dart Development Service" "$log"; } &&
-      ! grep -qE ' -[0-9]+: |Some tests failed' "$log" &&
-      [ "$(adb -s "$device" get-state 2>/dev/null)" = device ]; then
-    echo "::warning::sdk_all_test reached no verdict (exit $status); retrying once"
+  # A run that started no test reached no verdict, so the suites run once more
+  # (tool/ci/retry_unstarted_suite.py). Once a test has started, a failure or a
+  # stall stays red, and an emulator that is gone cannot pass a second run.
+  if [ "$(adb -s "$device" get-state 2>/dev/null)" = device ] &&
+      python3 -B ../tool/ci/retry_unstarted_suite.py --suite sdk_all_test \
+        --attempt "$attempt" --status "$status" --log "$log"; then
     continue
   fi
   exit 1
