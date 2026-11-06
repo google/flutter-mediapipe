@@ -104,6 +104,8 @@ jobs:
       - if: inputs.side == 'nightly'
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
+        with:
+          official-wheel-cache: 'true'
       - name: Generate official CPU text references on this runner
         run: |
           cd packages/mediapipe-task-text
@@ -150,6 +152,8 @@ jobs:
       - if: inputs.side == 'nightly'
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
+        with:
+          official-wheel-cache: 'true'
       - run: flutter --version
       - run: make get models
       - name: Generate official CPU text references on this runner
@@ -206,29 +210,6 @@ jobs:
             build/classic-text-reference/*.log
           if-no-files-found: error
 
-  # The same package suites and fresh app on macOS 14, the oldest macOS the
-  # packages and Google's libraries support (MACOSX_DEPLOYMENT_TARGET 14.0);
-  # every other macOS job runs 15 or 26. decision.yaml and retrieval.yaml run
-  # their packages there too. No coverage rows: the job above records macOS.
-  macos-14:
-    name: Every package / macOS 14 arm64
-    runs-on: macos-14
-    timeout-minutes: 90
-    env:
-      MEDIAPIPE_CLASSIC_TEXT_REFERENCE_DIR: ${{ github.workspace }}/build/classic-text-reference
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - if: inputs.side == 'nightly'
-        uses: ./.github/actions/nightly-pin
-      - uses: ./.github/actions/setup
-      - run: make get models
-      - name: Generate official CPU text references on this runner
-        run: python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
-      - name: Test all packages
-        run: make test_only
-      - name: Test face tasks in a fresh Flutter app
-        run: make test_vision_flutter
-
   official-runtime-validation:
     # Every vision task on Google's vision library, against Google's
     # reference wheel on this runner: CPU references generated here. Metal is
@@ -241,6 +222,8 @@ jobs:
       - if: inputs.side == 'nightly'
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
+        with:
+          official-wheel-cache: 'true'
       - name: Download the pinned models
         working-directory: packages/mediapipe-task-vision
         run: |

@@ -62,7 +62,16 @@ jobs:
           # videodev there is no V4L2 device and the test has no camera.
           sudo modprobe videodev ||
             { echo "::error::videodev did not load for kernel $(uname -r); the real camera test needs it for v4l2loopback."; exit 1; }
-          git clone --quiet --depth 1 https://github.com/umlaeute/v4l2loopback.git /tmp/v4l2loopback
+          for attempt in 1 2 3; do
+            rm -rf /tmp/v4l2loopback
+            timeout --kill-after=10 120 git clone --quiet --depth 1 https://github.com/umlaeute/v4l2loopback.git /tmp/v4l2loopback && break
+            if [ "$attempt" = 3 ]; then
+              echo '::error::v4l2loopback did not clone in 3 attempts, so there is no module for the real camera test.'
+              exit 1
+            fi
+            echo "::warning::Cloning v4l2loopback failed on attempt $attempt of 3; trying again in 15 s."
+            sleep 15
+          done
           make -C /tmp/v4l2loopback > /tmp/v4l2loopback-build.log 2>&1 || { cat /tmp/v4l2loopback-build.log; exit 1; }
           sudo insmod /tmp/v4l2loopback/v4l2loopback.ko devices=1 video_nr=10 card_label=MediaPipe_Fixture exclusive_caps=1 ||
             { echo '::error::v4l2loopback did not load, so there is no /dev/video10 for the real camera test.'; sudo dmesg | tail -15; exit 1; }

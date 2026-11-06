@@ -26,6 +26,26 @@ cd "$(dirname "$0")/.."
 granter=$!
 trap 'kill $granter 2>/dev/null || true' EXIT
 log=$(mktemp)
+# Runs one suite under a limit in seconds. It passes only on exit 0 and
+# flutter_test's own "All tests passed!", as tool/ci/run_release_suite.py asks
+# of a release run. `timeout` exits 124 on a stall even if flutter test handles
+# the signal and exits 0, so a killed suite never passes.
+run_suite() {
+  local limit=$1 rc=0
+  shift
+  timeout --kill-after=30 "$limit" flutter test -d "$device" "$@" \
+      --reporter expanded 2>&1 | tee "$log" || rc=$?
+  # 137: it outlasted the signal, and --kill-after ended it.
+  [ "$rc" != 137 ] || rc=124
+  if [ "$rc" = 124 ]; then
+    echo "$1 stalled past $limit s; the emulator's log follows"
+    adb -s "$device" logcat -d -t 300 || true
+  elif [ "$rc" = 0 ] && ! grep -q 'All tests passed!' "$log"; then
+    echo "::error::$1 exited 0 without reporting 'All tests passed!'"
+    rc=1
+  fi
+  return "$rc"
+}
 for attempt in 1 2; do
   # The suites take about 11 minutes with the Gradle build, the gallery
   # journey's Proofreader and Summarizer pages included, and Decision Maker
@@ -34,25 +54,22 @@ for attempt in 1 2; do
   # installs the app and then hears nothing more, so a run still going at 30
   # minutes has stalled.
   status=0
-  timeout 1800 flutter test -d "$device" integration_test/sdk_all_test.dart \
-      --dart-define=SDK_GPU=skip --reporter expanded 2>&1 | tee "$log" || status=$?
+  run_suite 1800 integration_test/sdk_all_test.dart --dart-define=SDK_GPU=skip || status=$?
   [ "$status" = 0 ] && break
-  if [ "$status" = 124 ]; then
-    echo "sdk_all_test stalled; the emulator's log follows"
-    adb -s "$device" logcat -d -t 300 || true
-  fi
   # A stall, or a Dart Development Service that never started, means no test
-  # ran to a verdict, so the suites run once more.
+  # ran to a verdict, so the suites run once more. A test that already failed
+  # is a verdict, even if the run then stalled, and an emulator that is gone
+  # cannot pass a second run; neither is retried.
   if [ "$attempt" = 1 ] && { [ "$status" = 124 ] ||
-      grep -q "Failed to start Dart Development Service" "$log"; }; then
-    echo "Retrying sdk_all_test"
+      grep -q "Failed to start Dart Development Service" "$log"; } &&
+      ! grep -qE ' -[0-9]+: |Some tests failed' "$log" &&
+      [ "$(adb -s "$device" get-state 2>/dev/null)" = device ]; then
+    echo "::warning::sdk_all_test reached no verdict (exit $status); retrying once"
     continue
   fi
   exit 1
 done
-timeout 300 flutter test -d "$device" \
-  integration_test/face_landmarker_still_image_test.dart \
-  --reporter expanded
+run_suite 300 integration_test/face_landmarker_still_image_test.dart
 # EmbeddingGemma, Proofreader and Summarizer, when the build bundles them: a
 # launch of their own, since the generative models take minutes to answer on
 # an emulated CPU. The outcome lands in a file for the coverage rows, so a
@@ -60,8 +77,7 @@ timeout 300 flutter test -d "$device" \
 mkdir -p ../build/coverage-outcomes
 if python3 -c "import json, sys; sys.exit(0 if 'text_proofreader' in json.load(open('assets/manifest.json'))['tasks'] else 1)"; then
   status=0
-  timeout 1800 flutter test -d "$device" integration_test/sdk_modern_text_test.dart \
-      --reporter expanded || status=$?
+  run_suite 1800 integration_test/sdk_modern_text_test.dart || status=$?
   if [ "$status" = 0 ]; then echo success > ../build/coverage-outcomes/android-modern-text
   else echo failure > ../build/coverage-outcomes/android-modern-text; exit 1; fi
 else

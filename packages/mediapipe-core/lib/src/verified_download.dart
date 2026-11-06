@@ -24,7 +24,10 @@ Future<void> Function(Duration delay) retryWait = Future<void>.delayed;
 /// names that member of the archive, read with HTTP range requests without
 /// the rest of the archive. Each request gets up to three attempts on a
 /// connection error, a timeout or HTTP 408, 429, 500, 502, 503 or 504, and a
-/// dropped download resumes where it stopped.
+/// dropped download resumes where it stopped. At the last URL, a failed lookup
+/// or a lost connection keeps being retried for 75 seconds from the first
+/// failure, so a short network outage passes and having no network at all
+/// fails only after that long.
 Future<File> downloadVerified(
   DownloadAsset asset,
   File destination, {
@@ -56,6 +59,10 @@ Future<File> downloadVerified(
   final connection = _Connection(client ?? http.Client());
   try {
     for (final location in locations) {
+      // A location further on may answer now, so only the last one waits.
+      connection.patience = location == locations.last
+          ? _outagePatience
+          : Duration.zero;
       final temporary = await destination.parent.createTemp('.download-');
       final partial = File.fromUri(temporary.uri.resolve('asset'));
       try {
@@ -94,6 +101,7 @@ Future<File> downloadVerified(
 
 const _attempts = 3;
 const _timeout = Duration(seconds: 60);
+const _outagePatience = Duration(seconds: 75);
 const _transientStatus = {408, 429, 500, 502, 503, 504};
 
 /// A failure the same request may repeat.
@@ -104,16 +112,26 @@ final class _Retry implements Exception {
 
   /// The host's `Retry-After`, when it gave one.
   final Duration? after;
+
+  /// Whether the network itself failed, which can pass: a failed lookup or a
+  /// lost connection, not a host's answer or certificate, and not a timeout,
+  /// where each attempt has already taken a minute.
+  bool get outage => switch (error) {
+    final http.ClientException client => !client.message.startsWith('Redirect'),
+    SocketException() => true,
+    _ => false,
+  };
 }
 
 /// A request that failed on every attempt.
 final class _Exhausted implements Exception {
-  _Exhausted(this.error);
+  _Exhausted(this.error, this.attempts);
 
   final Object error;
+  final int attempts;
 
   @override
-  String toString() => '$error, after $_attempts attempts';
+  String toString() => '$error, after $attempts attempts';
 }
 
 /// The first and last byte of a 206 response, and the full size.
@@ -159,14 +177,31 @@ final class _Connection {
 
   final http.Client client;
 
-  /// Runs [attempt] until it succeeds, repeating what it marks [_Retry].
+  /// How long the current location waits out an outage.
+  Duration patience = Duration.zero;
+
+  /// Runs [attempt] until it succeeds, repeating what it marks [_Retry]: up
+  /// to [_attempts] times, and for as long as [patience] lasts in an outage.
   Future<T> _retrying<T>(Future<T> Function() attempt) async {
+    // The first attempt does not count, since a download can run for minutes
+    // before it drops. A slow failure, such as a lookup that hangs, does.
+    final retrying = Stopwatch();
+    var waited = Duration.zero;
     for (var number = 1; ; number++) {
+      if (number > 1) retrying.start();
       try {
         return await attempt();
       } on _Retry catch (retry) {
-        if (number == _attempts) throw _Exhausted(retry.error);
-        await retryWait(retry.after ?? _backoff(number));
+        retrying.stop();
+        final left = patience - retrying.elapsed - waited;
+        final attemptsLeft = number < _attempts;
+        if (!attemptsLeft && !(retry.outage && left > Duration.zero)) {
+          throw _Exhausted(retry.error, number);
+        }
+        var wait = retry.after ?? _backoff(number);
+        if (!attemptsLeft && wait > left) wait = left;
+        waited += wait;
+        await retryWait(wait);
       }
     }
   }

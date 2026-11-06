@@ -18,7 +18,7 @@ inputs:
     description: Comma-separated task names.
     required: true
   outcome:
-    description: The test step's outcome, success, failure, cancelled or skipped.
+    description: The test step's outcome, success, failure, cancelled or skipped, or why no test ran.
     required: true
   tier:
     description: pr, or device for the physical-device workflows.

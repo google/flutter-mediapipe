@@ -1,3 +1,11 @@
+## 0.1.3
+
+- The README installs the package with `flutter pub add`, drops the steps for
+  depending on a clone by path, states the Flutter 3.47 minimum and recommends
+  the latest stable release.
+- With `mediapipe_core` 0.1.3, downloads of models and native libraries wait out
+  short network failures.
+
 ## 0.1.2
 
 Release 0.1.2.

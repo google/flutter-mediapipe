@@ -1,3 +1,11 @@
+// A task's close waits for Google's usage-logging upload, which gives up after
+// 60 s (upstream-issues.md UP-025), so a slow reply holds a test past the
+// default 30 s without any real work. The slowest work here is 7 s, and
+// 3 minutes leaves room for two such waits, as CI's --timeout 180s does, while
+// a real deadlock still fails.
+@Timeout(Duration(minutes: 3))
+library;
+
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';

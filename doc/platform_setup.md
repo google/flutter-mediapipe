@@ -61,7 +61,9 @@ instead.
 
 ## macOS
 
-- macOS 14.0 or newer on Apple Silicon.
+- macOS 14.0 or newer on Apple Silicon. 14.0 is the minimum the packages are
+  built for, but CI no longer runs on it, because GitHub retired its macOS 14
+  images. The oldest macOS that CI runs on is 15.
 - Build the app for Apple Silicon only. Flutter's release and profile builds
   (`flutter build macos`, `flutter run --release`) also build an Intel
   (x86_64) slice by default, and Google's MediaPipe libraries have none, so

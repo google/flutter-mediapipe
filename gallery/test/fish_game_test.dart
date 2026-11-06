@@ -26,7 +26,7 @@ void main() {
       expect(species.name[0], isNot(isIn('aeiou'.split(''))));
     }
     final puffer = Fish(3, _species('pufferfish'), 0, 0, 15);
-    expect(world.canEat(sardine), isTrue, reason: '14 is 10% over 11');
+    expect(world.canEat(sardine), isTrue);
     expect(world.canEat(puffer), isFalse);
     world.player.size = 17;
     expect(world.canEat(puffer), isTrue);

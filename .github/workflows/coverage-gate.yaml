@@ -19,6 +19,8 @@ concurrency:
 
 permissions:
   actions: read
+  # The annotations that say why a job with no rows stopped.
+  checks: read
   contents: read
 
 jobs:

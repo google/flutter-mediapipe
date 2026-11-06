@@ -1,3 +1,11 @@
+// A task's close waits for Google's usage-logging upload, which gives up after
+// 60 s (upstream-issues.md UP-025), so a slow reply holds a test past the
+// default 30 s without any real work. The slowest work here is 58 s
+// (Image Segmenter), which alone passes the default; 58 s and two 60 s waits
+// come to just under these 3 minutes, and a real deadlock still fails.
+@Timeout(Duration(minutes: 3))
+library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
