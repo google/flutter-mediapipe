@@ -29,7 +29,8 @@ dev.mediapipe.flutter.text.MediaPipeTextPlugin:
     public static java.lang.Long timestamp(java.util.Optional)
 '''
 
-# bcd6e7d, which shipped UP-033: both Task fields holding a model buffer gone.
+# bcd6e7d, which shipped the freed model buffer: both Task fields holding a
+# model buffer gone.
 BCD6E7D = FIXED + '''\
 dev.mediapipe.flutter.audio.MediaPipeAudioPlugin$Task:
     final java.nio.ByteBuffer model

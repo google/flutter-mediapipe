@@ -28,7 +28,7 @@ void fillHolisticLandmarkerOptions(
     // Every official library, including the wheels' (Linux, Windows and
     // the official macOS runtime), reads the header's order. Google's
     // Python ctypes do not, so its references are generated with the
-    // header's order too (UP-005 in upstream-issues.md).
+    // header's order too.
     ..min_hand_landmarks_confidence = options.minHandLandmarksConfidence
     ..min_pose_detection_confidence = options.minPoseDetectionConfidence
     ..min_pose_suppression_threshold = options.minPoseSuppressionThreshold

@@ -17,8 +17,8 @@ final _audio =
 /// The most memory a Universal Embedder on a pinned model may add to this
 /// process's footprint, as `footprint` reads it: what iOS limits, about 3.4 GB
 /// for an app on an iPhone 15 Pro. Google's Decision Maker reserves memory for
-/// its whole token budget (upstream-issues.md UP-060); this guards the
-/// embedder's own budget, `maxInputLength`, the same way.
+/// its whole token budget; this guards the embedder's own budget,
+/// `maxInputLength`, the same way.
 const _budgetMegabytes = 1536;
 
 /// This process's footprint in megabytes, from macOS's `footprint` tool.

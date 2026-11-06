@@ -31,9 +31,8 @@ void compare(TextProofreaderResult result, Map<String, dynamic> entry) {
 }
 
 /// Google's streamed text can differ from its completed text for the same
-/// input (upstream-issues.md UP-036), so the stream is compared with the
-/// reference's own streamed events: the chunks joined, and the corrections
-/// of the final one.
+/// input, so the stream is compared with the reference's own streamed events:
+/// the chunks joined, and the corrections of the final one.
 void compareStream(
   List<TextProofreaderUpdate> updates,
   Map<String, dynamic> entry,

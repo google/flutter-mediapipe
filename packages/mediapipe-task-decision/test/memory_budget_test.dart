@@ -20,8 +20,7 @@ final _gemma =
 /// process's footprint, as `footprint` reads it: what iOS limits, about 3.4 GB
 /// for an app on an iPhone 15 Pro. Google's engine reserves memory for the
 /// whole token budget when the task is created, 6.7 GB with EmbeddingGemma 2
-/// at 4096 tokens (upstream-issues.md UP-060); at the model's own budget each
-/// model takes about 0.7 GB.
+/// at 4096 tokens; at the model's own budget each model takes about 0.7 GB.
 const _budgetMegabytes = 1536;
 
 /// This process's footprint in megabytes, from macOS's `footprint` tool.

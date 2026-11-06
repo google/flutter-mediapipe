@@ -3,14 +3,16 @@
 <p align="center">
   <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.47.9-02569B?logo=flutter" alt="Tested with Flutter 3.47.9"></a>
   <a href="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml"><img src="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml/badge.svg" alt="Web CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0 license"></a>
+  <a href="https://github.com/google/flutter-mediapipe/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0 license"></a>
 </p>
 
-Google's MediaPipe Tasks for Dart and Flutter on Android, iOS, macOS, Linux,
+Google's [MediaPipe] Tasks for Dart and Flutter on Android, iOS, macOS, Linux,
 Windows and the web: detect faces and objects, track face, hand and pose
 landmarks, recognize gestures, classify and embed images, text and audio,
 segment images, and more. Every task runs Google's official MediaPipe
 runtime for its platform, with Google's pinned models bundled at build time.
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 **[Try the live gallery](https://google.github.io/flutter-mediapipe/)**
 
@@ -18,16 +20,16 @@ runtime for its platform, with Google's pinned models bundled at build time.
 
 | Package | Use it for | Install | Guide |
 | --- | --- | --- | --- |
-| [`mediapipe_vision`](https://pub.dev/packages/mediapipe_vision) | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | `flutter pub add mediapipe_vision` | [Vision](packages/mediapipe-task-vision/README.md) |
-| [`mediapipe_text`](https://pub.dev/packages/mediapipe_text) | Text classification, embeddings (EmbeddingGemma included) and language detection; proofreading and summarization everywhere but browsers | `flutter pub add mediapipe_text` | [Text](packages/mediapipe-task-text/README.md) |
-| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification | `flutter pub add mediapipe_audio` | [Audio](packages/mediapipe-task-audio/README.md) |
-| [`mediapipe_decision`](https://pub.dev/packages/mediapipe_decision) | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | `flutter pub add mediapipe_decision` | [Decision](packages/mediapipe-task-decision/README.md) |
-| [`mediapipe_retrieval`](https://pub.dev/packages/mediapipe_retrieval) | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | `flutter pub add mediapipe_retrieval` | [Retrieval](packages/mediapipe-task-retrieval/README.md) |
+| [`mediapipe_vision`](https://pub.dev/packages/mediapipe_vision) | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | `flutter pub add mediapipe_vision` | [Vision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/README.md) |
+| [`mediapipe_text`](https://pub.dev/packages/mediapipe_text) | Text classification, embeddings (EmbeddingGemma included) and language detection on every platform; proofreading and summarization on every platform except the web, where they are not yet available | `flutter pub add mediapipe_text` | [Text](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-text/README.md) |
+| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification | `flutter pub add mediapipe_audio` | [Audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md) |
+| [`mediapipe_decision`](https://pub.dev/packages/mediapipe_decision) | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | `flutter pub add mediapipe_decision` | [Decision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-decision/README.md) |
+| [`mediapipe_retrieval`](https://pub.dev/packages/mediapipe_retrieval) | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | `flutter pub add mediapipe_retrieval` | [Retrieval](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-retrieval/README.md) |
 
 Add only the families you use: each one bundles only Google's MediaPipe
 library for that family. Every family brings `mediapipe_core`, which holds the
 shared download code, model store and browser runtime settings
-([core guide](packages/mediapipe-core/README.md)), and exports its types, so
+([core guide](https://github.com/google/flutter-mediapipe/blob/main/doc/mediapipe_core.md)), and exports its types, so
 you do not add or import core yourself unless your own code imports
 `package:mediapipe_core/...`.
 
@@ -103,7 +105,7 @@ sandboxed macOS app the network client entitlement.
 
 On macOS, build the app for Apple Silicon only (two lines in its
 `AppInfo.xcconfig`; without them, release builds fail). See
-[platform setup](doc/platform_setup.md#macos). Your own models work too: pass
+[platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md#macos). Your own models work too: pass
 `modelPath` or `modelBytes` instead of `model`.
 
 ## Where it runs
@@ -118,13 +120,17 @@ On macOS, build the app for Apple Silicon only (two lines in its
 | Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
+Every text task runs on every platform listed except Text Proofreader and Text
+Summarizer, which are not yet available on the web, matching the MediaPipe Tasks
+Web SDK.
+
 CPU works everywhere a family is listed, except that browsers run Decision
 and Retrieval on WebGPU alone, which needs a hardware adapter. GPU (Metal,
 OpenGL ES, WebGL or Android GPU) depends on the task; Macs run the vision
-tasks on the CPU for now, until Google confirms its Metal results since 1.1.1
-([UP-057](upstream-issues.md#up-057-the-111-macos-library-gives-different-metal-results-from-googles-110-wheel)). Every cell is tested in CI on hosted
+tasks on the CPU for now, until Google confirms its Metal results since 1.1.1.
+Every cell is tested in CI on hosted
 runners, the Android emulator, the iOS Simulator and Chromium, Firefox and
-WebKit. The [vision status table](packages/mediapipe-task-vision/tool/VISION_TASKS_STATUS.md)
+WebKit. The [vision status table](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/tool/VISION_TASKS_STATUS.md)
 lists each task, delegate, known upstream limit and physical-device result.
 Ask at run time with the `queryXxxCapabilities()` functions: they report the
 supported delegates and why any other is unavailable.
@@ -132,25 +138,25 @@ supported delegates and why any other is unavailable.
 ## More
 
 - Samples for every task:
-  [vision](packages/mediapipe-task-vision/README.md#samples-for-every-task),
-  [text](packages/mediapipe-task-text/README.md#quick-start),
-  [audio](packages/mediapipe-task-audio/README.md#use),
-  [decision](packages/mediapipe-task-decision/README.md#quick-start) and
-  [retrieval](packages/mediapipe-task-retrieval/README.md#quick-start).
-- [Object detection guide](doc/guides/vision/object_detector.md), with a
-  [sample app](samples/object_detection/) for every platform, following
+  [vision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/README.md#samples-for-every-task),
+  [text](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-text/README.md#quick-start),
+  [audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md#use),
+  [decision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-decision/README.md#quick-start) and
+  [retrieval](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-retrieval/README.md#quick-start).
+- [Object detection guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/object_detector.md), with a
+  [sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/object_detection/) for every platform, following
   Google's Android guide and sample.
-- [Platform setup](doc/platform_setup.md): permissions, entitlements, minimum
+- [Platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md): permissions, entitlements, minimum
   OS versions, offline builds and browser hosting.
-- [Privacy and licenses](doc/privacy_and_licenses.md): what is downloaded, from
+- [Privacy and licenses](https://github.com/google/flutter-mediapipe/blob/main/doc/privacy_and_licenses.md): what is downloaded, from
   where, and under which license.
-- [Migration](MIGRATION.md) from Google's `mediapipe_text` and
+- [Migration](https://github.com/google/flutter-mediapipe/blob/main/MIGRATION.md) from Google's `mediapipe_text` and
   `mediapipe_core` 0.0.1 previews.
-- [Gallery](gallery/README.md): the full demo app, also
+- [Gallery](https://github.com/google/flutter-mediapipe/blob/main/gallery/README.md): the full demo app, also
   [live on GitHub Pages](https://google.github.io/flutter-mediapipe/).
-- [Contributing](CONTRIBUTING.md), including how to add a task.
+- [Contributing](https://github.com/google/flutter-mediapipe/blob/main/CONTRIBUTING.md), including how to add a task.
 
 ## Origin and license
 
-Source is licensed under [Apache-2.0](LICENSE), with upstream notices
+Source is licensed under [Apache-2.0](https://github.com/google/flutter-mediapipe/blob/main/LICENSE), with upstream notices
 retained.

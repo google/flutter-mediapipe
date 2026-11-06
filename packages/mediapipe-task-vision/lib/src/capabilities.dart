@@ -11,8 +11,7 @@ import 'vision_task_backend.dart';
 /// Devices keep the GPU.
 const _simulatorGpuGap =
     "Google's MediaPipe aborts the app on the iOS Simulator's GPU (Metal) path; "
-    'use the CPU delegate on the simulator. iPhones and iPads run the GPU. See '
-    'upstream-issues.md UP-031.';
+    'use the CPU delegate on the simulator. iPhones and iPads run the GPU.';
 
 /// Why an Android emulator offers the CPU only: it renders OpenGL ES in
 /// software (SwiftShader), where Google's GPU inference fails, through its
@@ -34,8 +33,7 @@ String? _emulatorGpuGap(TaskPlatform platform) =>
 const _faceDetectorGpuGap =
     "Google's Linux and Android libraries do not ship the LiteRT GPU plugin "
     "that Face Detector's GPU needs (libLiteRtGpuAccelerator.so); use the "
-    'CPU delegate. Face Landmarker runs on the GPU there. See '
-    'upstream-issues.md UP-046.';
+    'CPU delegate. Face Landmarker runs on the GPU there.';
 
 /// Why macOS offers the CPU only: on Metal, Google's library since 1.1.1
 /// differs from Google's own 1.1.0 wheel for every task, by up to a
@@ -43,7 +41,7 @@ const _faceDetectorGpuGap =
 /// where compared; Google is checking whether the change is intended. The
 /// CPU matches the 1.1.0 wheel exactly.
 /// The tasks keep `macosGpu`, which names the ones that return once Google
-/// confirms the new output (UP-057).
+/// confirms the new output.
 /// 32-bit Android (armeabi-v7a) runs the vision tasks on the CPU; this
 /// package has not validated Google's GPU path there.
 const _arm32GpuGap =
@@ -53,8 +51,7 @@ const _arm32GpuGap =
 const _macosGpuGap =
     "Since 1.1.1, Google's macOS library gives different results on Metal "
     "from Google's own 1.1.0 package, and Google is checking whether that is "
-    'intended; use the CPU delegate, which matches that package exactly. See '
-    'upstream-issues.md UP-057.';
+    'intended; use the CPU delegate, which matches that package exactly.';
 
 /// Query official FaceLandmarker platform support without creating a task.
 Future<TaskCapabilities> queryFaceLandmarkerCapabilities() async =>
@@ -137,7 +134,7 @@ Future<TaskCapabilities> queryHolisticLandmarkerCapabilities() async =>
 
 /// Holistic Landmarker runs on the CPU where Face Landmarker does; its GPU
 /// runs in browsers only, since Google's libraries cannot open its face
-/// blendshapes model on a desktop, iPhone or Android GPU (UP-026).
+/// blendshapes model on a desktop, iPhone or Android GPU.
 TaskCapabilities holisticLandmarkerCapabilitiesForPlatform(
   TaskPlatform platform,
 ) => _visionTaskCapabilities(
@@ -146,13 +143,13 @@ TaskCapabilities holisticLandmarkerCapabilitiesForPlatform(
   webAdapter: holisticLandmarkerBackendFactory != null,
   desktopGpuGap:
       'Google\'s desktop runtimes cannot open its face blendshapes model on '
-      'GPU (upstream-issues.md UP-026).',
+      'GPU.',
   iosGpuGap:
       'Google\'s iOS library cannot open its face blendshapes model on the '
-      'GPU (upstream-issues.md UP-026).',
+      'GPU.',
   androidGpuGap:
       'Google\'s Android library cannot open its face blendshapes model on '
-      'the GPU (upstream-issues.md UP-026).',
+      'the GPU.',
 );
 
 /// CPU on Google's vision library (Android, iOS, macOS arm64, Linux x64 and
@@ -233,12 +230,11 @@ Future<TaskCapabilities> queryImageSegmenterCapabilities() async =>
 /// Why Image Segmenter offers no GPU on Android: Google's Android task aborts
 /// the app when it reads a GPU mask on a PowerVR GPU and on a Pixel 3's
 /// Adreno 630, in its Java SDK and its C library alike, which no caller can
-/// catch (upstream-issues.md UP-061 and UP-023).
+/// catch.
 const _androidSegmenterGpuGap =
     "Google's Android Image Segmenter aborts the app when it reads a GPU "
     'mask on PowerVR and Adreno 630 GPUs, in its Java SDK and its C library '
-    'alike, which no caller can catch; use the CPU delegate. See '
-    'upstream-issues.md UP-061 and UP-023.';
+    'alike, which no caller can catch; use the CPU delegate.';
 
 /// Image Segmenter, declared as [imageClassifierCapabilitiesForPlatform],
 /// except on Android, where only the CPU is offered
@@ -279,8 +275,7 @@ TaskCapabilities imageEmbedderCapabilitiesForPlatform(TaskPlatform platform) =>
       'ImageEmbedder',
       webAdapter: imageEmbedderBackendFactory != null,
       macosGpu: true,
-      desktopGpuGap:
-          'Google\'s Linux runtime aborts on GPU (upstream-issues.md UP-027).',
+      desktopGpuGap: 'Google\'s Linux runtime aborts on GPU.',
     );
 
 /// Describe the package's stateful MagicTouch support on this process platform.
@@ -290,7 +285,7 @@ Future<TaskCapabilities> queryInteractiveSegmenterCapabilities() async =>
 /// Evaluate support for an explicit process platform snapshot: CPU on Google's
 /// vision library on Android, iOS, macOS and Linux, and the web adapter.
 /// Google's Windows library exports the stateful API too, but a stroke takes
-/// about 25 seconds on it (upstream-issues.md UP-048), so Windows stays off.
+/// about 25 seconds on it, so Windows stays off.
 TaskCapabilities interactiveSegmenterCapabilitiesForPlatform(
   TaskPlatform platform,
 ) {
@@ -317,14 +312,13 @@ TaskCapabilities interactiveSegmenterCapabilitiesForPlatform(
       Delegate.cpu:
           'InteractiveSegmenter requires macOS arm64, Linux x64, iOS, '
           "Android, or the web adapter package. Google's Windows library "
-          'runs it too slowly to offer (upstream-issues.md UP-048).',
+          'runs it too slowly to offer.',
       Delegate.gpu: platform.operatingSystem == 'macos'
           ? 'The official MediaPipe macOS GPU stroke shader requests GLSL 330 in '
                 'an OpenGL 2.1 context and fails to compile. Confirmed on both '
                 'the 1.0.0 and 1.0.1 official runtimes, so it is not fixed by '
                 'changing version. Metal itself is fine; only GL-shader '
-                'calculators are affected. This task supports CPU only (see '
-                'upstream-issues.md UP-008).'
+                'calculators are affected. This task supports CPU only.'
           : 'Interactive Segmenter GPU runs in browsers only; elsewhere it '
                 'supports CPU only.',
     },

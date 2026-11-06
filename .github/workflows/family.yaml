@@ -74,7 +74,7 @@ jobs:
           flutter pub get
           dart tool/download_models.dart $DOWNLOAD_MODELS
       # A task's close waits for Google's usage-logging upload, so a slow
-      # reply holds a test past the default 30 s (upstream-issues.md UP-025).
+      # reply holds a test past the default 30 s.
       - name: The ${{ inputs.family }} package against Google's Python answers
         working-directory: packages/mediapipe-task-${{ inputs.family }}
         run: dart test --timeout 180s --reporter expanded
@@ -140,11 +140,11 @@ jobs:
   web:
     if: ${{ inputs.jobs == 'all' || contains(inputs.jobs, 'web') }}
     # Google's browser Decision Maker and Universal Embedder run only on a
-    # hardware WebGPU adapter (UP-049, UP-052): Chromium on the Mac runner's
-    # Metal one runs the tasks and records the web GPU row. WebKit, whose page
-    # process on these hosts sometimes ends mid-journey with no error, runs
-    # by hand (CONTRIBUTING.md). Hosted Linux, with only SwiftShader, checks
-    # that the gallery refuses the tasks in web.yaml's Chromium journey.
+    # hardware WebGPU adapter: Chromium on the Mac runner's Metal one runs the
+    # tasks and records the web GPU row. WebKit, whose page process on these
+    # hosts sometimes ends mid-journey with no error, runs by hand
+    # (CONTRIBUTING.md). Hosted Linux, with only SwiftShader, checks that the
+    # gallery refuses the tasks in web.yaml's Chromium journey.
     name: web ${{ matrix.engine }} ${{ matrix.os }}
     strategy:
       fail-fast: false

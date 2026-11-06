@@ -87,11 +87,9 @@ declares.
 
 That was Google's 1.0.0 single library. The per-family libraries the
 packages bundle now export only the `Mp*` C API on macOS, Linux and iOS; the
-Windows DLLs add TensorFlow Lite's and LiteRT's C functions
-([UP-045](../../../upstream-issues.md#up-045-per-family-windows-libraries-export-tensorflow-lite-and-litert)),
-not absl. 1.1.0 adds one level setting to the C API, `min_log_severity` in the
-Proofreader and Summarizer options, which the packages set to Google's default
-of 4.
+Windows DLLs add TensorFlow Lite's and LiteRT's C functions, not absl. 1.1.0
+adds one level setting to the C API, `min_log_severity` in the Proofreader and
+Summarizer options, which the packages set to Google's default of 4.
 
 Redirecting file descriptor 2 into a pipe needs no symbols and catches both
 writers and every library, but it is process-wide, and a reader that falls
@@ -140,8 +138,8 @@ whose id has no pending request. The bundle's few direct `console.warn` and
   vision's `worker.js`. No package uses `package:logging` any more. The
   MPTRACE stderr lines and the `src/legacy` and `mediapipe_genai` records the
   first write-up listed were removed in `bbf198c` and `d9fbdd3`.
-- Google's "usage logging" is something else: the telemetry upload of
-  `upstream-issues.md` UP-025 (`MpBaseOptions.ca_bundle_path`).
+- Google's "usage logging" is something else: the telemetry upload that a
+  task's close waits for (`MpBaseOptions.ca_bundle_path`).
 
 ## Not tried
 

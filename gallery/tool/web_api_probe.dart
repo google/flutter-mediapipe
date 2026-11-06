@@ -850,7 +850,7 @@ Future<Map<String, Object?>> checkDetectionTasksApi(
   } finally {
     await pose.dispose();
   }
-  // A fresh task: Holistic's IMAGE results depend on earlier calls (UP-013).
+  // A fresh task: Holistic's IMAGE results depend on earlier calls.
   final holistic = await HolisticLandmarker.create(
     HolisticLandmarkerOptions(
       delegate: delegate,

@@ -1,224 +1,162 @@
-# mediapipe_core
+# MediaPipe Tasks for Flutter
 
-The shared layer of the MediaPipe task packages (`mediapipe_vision`,
-`mediapipe_text`, `mediapipe_audio`, `mediapipe_decision` and
-`mediapipe_retrieval`); apps normally get it through them rather than depending
-on it directly. It owns everything the task families share, so each of vision,
-text and audio works alone and an app using several loads one copy of each
-shared piece. That includes the code that downloads and verifies Google's
-MediaPipe libraries, which each family's build hook uses to bundle its own:
+<p align="center">
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.47.9-02569B?logo=flutter" alt="Tested with Flutter 3.47.9"></a>
+  <a href="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml"><img src="https://github.com/google/flutter-mediapipe/actions/workflows/web.yaml/badge.svg" alt="Web CI"></a>
+  <a href="https://github.com/google/flutter-mediapipe/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0 license"></a>
+</p>
+
+Google's [MediaPipe] Tasks for Dart and Flutter on Android, iOS, macOS, Linux,
+Windows and the web: detect faces and objects, track face, hand and pose
+landmarks, recognize gestures, classify and embed images, text and audio,
+segment images, and more. Every task runs Google's official MediaPipe
+runtime for its platform, with Google's pinned models bundled at build time.
 
 [MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
-| Platform | Runtime |
-| --- | --- |
-| Android 9+ (arm64-v8a, x86_64; armeabi-v7a on the CPU, without the large models), iOS 15+ (device, arm64 simulator), macOS 14+ arm64, Linux x64, Windows x64 | Google's MediaPipe 1.2.0 C library for each family (`MediaPipeTasksVisionC`, `libmediapipe_tasks_text`, and so on), bundled by that family's hook |
-| Web | Google's JavaScript runtime, through each family's web plugin |
+**[Try the live gallery](https://google.github.io/flutter-mediapipe/)**
 
-An app ships only the libraries of the families it depends on, and needs no
-setting to get them. The hooks download them from a pre-release of
-`hugocornellier/mediapipe_flutter_native`, where Google's development builds
-are posted unmodified until Google publishes them, and check every file's
-SHA-256 and size (`lib/src/native_assets/family_runtimes.dart`).
-`hooks.user_defines.mediapipe_core.asset_source` can point at a directory
-holding them, named by SHA-256, instead.
+## Which package do I need?
 
-## Installation
+| Package | Use it for | Install | Guide |
+| --- | --- | --- | --- |
+| [`mediapipe_vision`](https://pub.dev/packages/mediapipe_vision) | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | `flutter pub add mediapipe_vision` | [Vision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/README.md) |
+| [`mediapipe_text`](https://pub.dev/packages/mediapipe_text) | Text classification, embeddings (EmbeddingGemma included) and language detection on every platform; proofreading and summarization on every platform except the web, where they are not yet available | `flutter pub add mediapipe_text` | [Text](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-text/README.md) |
+| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification | `flutter pub add mediapipe_audio` | [Audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md) |
+| [`mediapipe_decision`](https://pub.dev/packages/mediapipe_decision) | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | `flutter pub add mediapipe_decision` | [Decision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-decision/README.md) |
+| [`mediapipe_retrieval`](https://pub.dev/packages/mediapipe_retrieval) | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | `flutter pub add mediapipe_retrieval` | [Retrieval](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-retrieval/README.md) |
 
-An app using a family does not need to add this package: it comes with
-`flutter pub add mediapipe_vision` or any other family. That covers its types
-and its commands, `dart run mediapipe_core:bundle_models` and
-`dart run mediapipe_core:web_runtime`; use `dart run`, since the older
-`flutter pub run` refuses a package your app does not list itself.
+Add only the families you use: each one bundles only Google's MediaPipe
+library for that family. Every family brings `mediapipe_core`, which holds the
+shared download code, model store and browser runtime settings
+([core guide](https://github.com/google/flutter-mediapipe/blob/main/doc/mediapipe_core.md)), and exports its types, so
+you do not add or import core yourself unless your own code imports
+`package:mediapipe_core/...`.
 
-Add it from pub.dev only if your own code imports `package:mediapipe_core/...`,
-because the `depend_on_referenced_packages` lint in Flutter's default rules
-expects an imported package to be listed:
+## Quick start
 
-```sh
-flutter pub add mediapipe_core
-```
-
-## What every family shares
-
-Each family's library (`package:mediapipe_vision/mediapipe_vision.dart`,
-`mediapipe_text`, `mediapipe_audio`, `mediapipe_decision` and
-`mediapipe_retrieval`) re-exports
-`package:mediapipe_core/mediapipe_core.dart`, so these types are the same
-on every platform and in every family:
-
-- `TaskOptions`, the base of every options class: exactly one of `model` (a
-  pinned `DownloadAsset`), `modelPath` and `modelBytes`, plus `delegate`
-  (`Delegate.cpu` or `Delegate.gpu`).
-- The value types results are made of, named after Google's containers:
-  `MediaPipeCategory`, `Classifications`, `Embedding`, `Detection`,
-  `BoundingBox`, `NormalizedKeypoint`, `NormalizedLandmark`, `Landmark`,
-  `Matrix`, `ConfidenceMask` and `CategoryMask`.
-- `MediaPipeException` and its subtypes: `RuntimeUnavailableException` (with a
-  `fix`), `ModelDownloadException` and `TaskException` (Google's runtime
-  refused a call; `statusCode`, `gpuUnavailable`).
-- `TaskCapabilities` and `TaskPlatform`, which every task's
-  `queryXxxCapabilities()` returns; `ModelStore` and `ModelSource`; and
-  `MediaPipeWebRuntime`.
-
-`package:mediapipe_core/platform_interface.dart` holds what family packages
-and platform plugins need and apps do not.
-
-## Verified downloads and offline builds
-
-Every native runtime and model pin names a primary URL, optional published
-mirrors, and one SHA-256. Core tries URLs in order and checks the digest before
-publishing a file. It reports every failed location when none matches. Each
-native library's primary URL names its file inside Google's nightly archive,
-which core reads with HTTP range requests, and its mirror is a copy in a
-GitHub pre-release. Model pins name no mirrors.
-
-Each request gets three attempts on a connection error, a timeout or HTTP
-408, 429, 500, 502, 503 or 504, waiting a random backoff or the host's
-`Retry-After` (at most 30 seconds), and a dropped download resumes where it
-stopped. At the last URL, a failed lookup or a lost connection keeps being
-retried for 75 seconds from the first failure, so a short network outage
-passes and a device with no network sees the error after that long. Any other
-failure, including a digest mismatch, moves to the next URL at once.
-
-For offline or mirrored builds, point every download at a local directory or
-an internal HTTP(S) root holding files named by their full SHA-256. That
-source is then used exclusively: the digest check still applies, and a
-missing or wrong file fails the build rather than falling back to the
-internet.
-
-- Build hooks read it from the app's pubspec (a relative directory resolves
-  against that pubspec):
-
-  ```yaml
-  hooks:
-    user_defines:
-      mediapipe_core:
-        asset_source: third_party/mediapipe-assets
-  ```
-
-  Hooks cannot use an environment variable here: Dart's hook runner passes
-  them only an allowlist of variables.
-- `ModelStore(source: ...)` takes the same kind of source at run time.
-- Command-line tools (`dart run`) read the `MEDIAPIPE_ASSET_SOURCE`
-  environment variable.
-
-From a checkout of this repository, fill such a directory for the build
-targets you need. Models are included for every target, since apps may use
-any family:
+The packages need Flutter 3.47 or newer; the latest stable release is
+recommended. Add a family from pub.dev, from your app's root:
 
 ```sh
-python3 -B packages/mediapipe-core/tool/mirror_runtime_assets.py \
-  --target macos/arm64 --target ios/arm64 --prefill /path/to/mediapipe-assets
+flutter pub add mediapipe_vision
 ```
 
-The same tool without `--prefill` is a dry run inventory. It lists each pin,
-its target, license information when known, and a proposed GitHub release
-asset name. It never uploads anything. The prefill path uses core's verified
-downloader. Copy the resulting SHA-named directory to the build machine, or
-serve it from an internal URL root.
+This adds `mediapipe_vision: ^0.1.3` to your app's `pubspec.yaml`. List the
+models your app uses in the same pubspec, and declare the folder they are
+bundled in:
 
-## Bundled models
+```yaml
+flutter:
+  assets:
+    - assets/mediapipe/
 
-Apps bundle the models they use at build time. Each family's `XxxModels.byName`
-names its models. The app lists the ones it needs per family in its pubspec,
-declares `assets/mediapipe/` under `flutter: assets:`, and runs from its root:
+hooks:
+  user_defines:
+    mediapipe_vision:
+      models: [face_landmarker]
+```
+
+Then bundle them from the app's root, and again whenever the list changes:
 
 ```sh
 dart run mediapipe_core:bundle_models
 ```
 
-The command downloads each listed model (from `asset_source` when it is set),
-checks it against its pinned SHA-256, and writes it into `assets/mediapipe/`,
-named by that SHA-256 with a readable `manifest.json` beside it. Models that
-are no longer listed are removed. With `--check` it changes nothing and fails
-when the folder does not match the lists, for CI. It reads each family's
-models by running a small generated program,
-`.dart_tool/mediapipe_core/bundle_models_registry.dart`, with the app's
-packages, since core cannot depend on the families.
+It downloads each listed model once, checks it against its pinned SHA-256 and
+writes it into `assets/mediapipe/`, so the model ships inside your app:
+nothing is downloaded at run time, and the app works offline from its first
+launch. In CI, `dart run mediapipe_core:bundle_models --check` fails when the
+folder does not match the list. Each family's `XxxModels.byName` lists the
+names it accepts.
 
-A task created with `model:` then looks for its model in this order:
-
-1. the store's cache;
-2. the app's bundled copy, copied into the cache once on native platforms,
-   where MediaPipe takes a file path;
-3. a download, only when `ModelStore.allowDownloads` is true.
-
-Otherwise `create` throws a `RuntimeUnavailableException` whose `fix` names
-the pubspec entry to add. `ModelStore().find(model)` performs the same lookup
-without ever using the network.
-
-## On-demand models
-
-Downloading at run time is opt-in. Set `ModelStore.allowDownloads = true`
-before creating tasks to let `model:` download what the app does not bundle;
-calling `get` or `prefetch` directly always may download.
-
-`ModelStore` and `DownloadAsset` come with every family's library. A family
-model pin can be passed directly to `get` or `prefetch`; `clear` removes the
-store's entries. `get` and `find` return a `ModelSource`: on native platforms
-its `path` is a file in application support, which can be given to the task
-options as `modelPath`. Each model keeps its original file name. Downloads go to an adjacent
-temporary file under a per-model lock shared across isolates and processes,
-and cached bytes are checked again on every read. iOS excludes this model folder
-from iCloud backup. On web `get` returns verified bytes from Cache Storage
-or the app's bundle, and otherwise downloads them. An invalid cached
-response is discarded.
-Core uses Flutter's `path_provider` for application support rather than
-asking every family to supply a directory, so the storage policy stays shared.
+Now create a task with the bundled model:
 
 ```dart
-import 'package:mediapipe_text/mediapipe_text.dart';
+import 'dart:typed_data';
 
-Future<void> prepareModels() async {
-  final store = ModelStore();
-  await store.prefetch(TextModels.bertClassifier);
-  final source = await store.get(TextModels.bertClassifier);
-  print(source.path); // A file on native platforms; `bytes` in browsers.
-}
-```
-
-Downloading needs Android's `INTERNET` permission, and a sandboxed macOS app
-needs `com.apple.security.network.client`. Bundled models and already
-verified cache entries work without network access.
-
-## Web runtime
-
-Browsers load Google's pinned MediaPipe JavaScript and WASM runtime for each
-task family (vision, text, audio) from jsDelivr. One setting moves all of them.
-For offline use or a strict Content Security Policy, copy the verified
-runtimes of the families your app uses into its `web/` folder, from the app
-root:
-
-```sh
-dart run mediapipe_core:web_runtime web/mediapipe
-```
-
-The tool downloads each family's pinned npm archive, checks its integrity and
-each listed file's SHA-384, and writes only the files the browser loads.
-Workers verify those same file digests from any configured root before
-loading the bundle and WASM through Blob URLs. Then, before creating the
-first task:
-
-```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
-void useSelfHostedRuntime() {
-  MediaPipeWebRuntime.baseUrl = 'mediapipe/';
+Future<int> countFaces(Uint8List rgba, int width, int height) async {
+  final landmarker = await FaceLandmarker.create(
+    FaceLandmarkerOptions(model: VisionModels.faceLandmarker),
+  );
+  try {
+    final result = await landmarker.detect(
+      VisionImage.fromPixels(
+        pixels: rgba,
+        width: width,
+        height: height,
+        format: VisionPixelFormat.rgba,
+      ),
+    );
+    return result.faceLandmarks.length;
+  } finally {
+    await landmarker.dispose();
+  }
 }
 ```
 
-`baseUrl` is an npm-style root, so another npm CDN such as
-`https://unpkg.com/` works as well. Each family's library exports the same
-class, and it does nothing off the web.
-Serve the files with CORS and CSP rules appropriate to your origin.
+A model that is not bundled makes `create` throw a
+`RuntimeUnavailableException` whose `fix` names the pubspec entry to add. To
+download models at run time instead, set `ModelStore.allowDownloads = true`
+before creating tasks; Android then needs the `INTERNET` permission, and a
+sandboxed macOS app the network client entitlement.
 
-## Issues and feedback
+On macOS, build the app for Apple Silicon only (two lines in its
+`AppInfo.xcconfig`; without them, release builds fail). See
+[platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md#macos). Your own models work too: pass
+`modelPath` or `modelBytes` instead of `model`.
 
-Please file issues, bugs, or feature requests in our [issue tracker](https://github.com/google/flutter-mediapipe/issues/new).
+## Where it runs
 
-Issues that are specific to Flutter can be filed in the [Flutter issue tracker](https://github.com/flutter/flutter/issues/new).
+| Family | Android | iOS | macOS arm64 | Linux x64 | Windows x64 | Web |
+| --- | --- | --- | --- | --- | --- | --- |
+| Vision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (classify, embed, detect language) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-To contribute a change to this plugin,
-please review our [contribution guide](https://github.com/google/flutter-mediapipe/blob/main/CONTRIBUTING.md)
-and open a [pull request](https://github.com/google/flutter-mediapipe/pulls).
+Every text task runs on every platform listed except Text Proofreader and Text
+Summarizer, which are not yet available on the web, matching the MediaPipe Tasks
+Web SDK.
+
+CPU works everywhere a family is listed, except that browsers run Decision
+and Retrieval on WebGPU alone, which needs a hardware adapter. GPU (Metal,
+OpenGL ES, WebGL or Android GPU) depends on the task; Macs run the vision
+tasks on the CPU for now, until Google confirms its Metal results since 1.1.1.
+Every cell is tested in CI on hosted
+runners, the Android emulator, the iOS Simulator and Chromium, Firefox and
+WebKit. The [vision status table](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/tool/VISION_TASKS_STATUS.md)
+lists each task, delegate, known upstream limit and physical-device result.
+Ask at run time with the `queryXxxCapabilities()` functions: they report the
+supported delegates and why any other is unavailable.
+
+## More
+
+- Samples for every task:
+  [vision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/README.md#samples-for-every-task),
+  [text](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-text/README.md#quick-start),
+  [audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md#use),
+  [decision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-decision/README.md#quick-start) and
+  [retrieval](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-retrieval/README.md#quick-start).
+- [Object detection guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/object_detector.md), with a
+  [sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/object_detection/) for every platform, following
+  Google's Android guide and sample.
+- [Platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md): permissions, entitlements, minimum
+  OS versions, offline builds and browser hosting.
+- [Privacy and licenses](https://github.com/google/flutter-mediapipe/blob/main/doc/privacy_and_licenses.md): what is downloaded, from
+  where, and under which license.
+- [Migration](https://github.com/google/flutter-mediapipe/blob/main/MIGRATION.md) from Google's `mediapipe_text` and
+  `mediapipe_core` 0.0.1 previews.
+- [Gallery](https://github.com/google/flutter-mediapipe/blob/main/gallery/README.md): the full demo app, also
+  [live on GitHub Pages](https://google.github.io/flutter-mediapipe/).
+- [Contributing](https://github.com/google/flutter-mediapipe/blob/main/CONTRIBUTING.md), including how to add a task.
+
+## Origin and license
+
+Source is licensed under [Apache-2.0](https://github.com/google/flutter-mediapipe/blob/main/LICENSE), with upstream notices
+retained.

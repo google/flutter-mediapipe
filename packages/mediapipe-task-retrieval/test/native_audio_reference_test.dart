@@ -57,9 +57,8 @@ void main() {
       : 'No EmbeddingGemma 2 model at $_model; set '
             'MEDIAPIPE_RETRIEVAL_AUDIO_MODEL.';
   // Google's audio embeddings vary from call to call, in its Python as here,
-  // by up to about 0.005 per value and 0.004 in a score (upstream-issues.md
-  // UP-058), so audio gets bounds that hold on every host, and records are
-  // compared as a set.
+  // by up to about 0.005 per value and 0.004 in a score, so audio gets bounds
+  // that hold on every host, and records are compared as a set.
   const tolerance = 0.01;
   const cosineFloor = 0.998;
   final clips = (_reference['audio']! as Map).cast<String, Map>();

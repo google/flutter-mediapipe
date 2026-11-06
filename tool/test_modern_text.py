@@ -52,7 +52,7 @@ def main():
 
     env = {**os.environ, 'MEDIAPIPE_MODERN_TEXT_REFERENCE_DIR': str(reference)}
     # A task's close waits for Google's usage-logging upload, so a slow reply
-    # holds a test past the default 30 s (upstream-issues.md UP-025).
+    # holds a test past the default 30 s.
     run(['dart', 'test', '--tags', 'modern-text', '--timeout', '180s',
          '--reporter', 'expanded'], TEXT,
         evidence / 'modern-text-tests.log', env)

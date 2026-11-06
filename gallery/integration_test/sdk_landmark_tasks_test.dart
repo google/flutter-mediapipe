@@ -51,7 +51,7 @@ void main() {
           final frame = await loadSample(subject.sample);
           final references = <Delegate, _Parts>{};
           // The package withdraws Holistic's GPU where Google's runtime cannot
-          // open its face blendshapes model (UP-026, iPhones included) and
+          // open its face blendshapes model (iPhones included) and
           // refuses it before Google's graph exists. A phone that must run the
           // GPU may lose it only to that documented gap.
           final capabilities = await subject.capabilities();
@@ -61,7 +61,7 @@ void main() {
           if (!gpuDeclared && _gpu == 'required') {
             expect(
               capabilities.unavailableReasons[Delegate.gpu],
-              contains('UP-026'),
+              contains('face blendshapes model'),
             );
             await expectLater(
               subject.open(model, Delegate.gpu, RunningMode.image),
@@ -285,8 +285,7 @@ final class _Subject {
 
   /// A fresh CPU task's pose segmentation mask and pose landmarks for one
   /// image, or null for a task without masks. Holistic smooths masks across
-  /// IMAGE calls and fails on a size change (upstream-issues.md), so every
-  /// image gets its own task.
+  /// IMAGE calls and fails on a size change, so every image gets its own task.
   final Future<({ConfidenceMask mask, List<NormalizedLandmark> pose})> Function(
     Uint8List model,
     VisionImage image,
@@ -482,7 +481,7 @@ final _subjects = <_Subject>[
 
 /// The pose segmentation mask on CPU: Google's mean, the body under the
 /// shoulder and hip landmarks, and a rotated input's mask turned back into
-/// its frame, as Google does for pose masks (unlike Image Segmenter, UP-017).
+/// its frame, as Google does for pose masks (unlike Image Segmenter).
 Future<void> _checkMasks(
   _Subject subject,
   Future<({ConfidenceMask mask, List<NormalizedLandmark> pose})> Function(
@@ -517,7 +516,7 @@ Future<void> _checkMasks(
   // As officialLandmarkReferences' rotated case: the upright pixels turned a
   // quarter turn counterclockwise, then rotation_degrees 90. That mask is 667
   // wide, so its rows are padded, which Google's Java Android SDK failed to
-  // convert (upstream-issues.md UP-018); its C library does not.
+  // convert; its C library does not.
   final turned = await maskOf(model, rotatedImage(frame, 270), 90);
   expect((turned.mask.width, turned.mask.height), (frame.height, frame.width));
   final turnedError = turnedConfidenceError(upright.mask, turned.mask, 270);

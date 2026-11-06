@@ -161,8 +161,7 @@ jobs:
       - name: Generate official CPU text references on this runner
         run: python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
       # No Metal references: the vision package withdraws the macOS GPU while
-      # Google's library since 1.1.1 differs there from its 1.1.0 wheel
-      # (upstream-issues.md UP-057).
+      # Google's library since 1.1.1 differs there from its 1.1.0 wheel.
       # make get/models already ran above for the independent references.
       # Keep the remaining make ci checks, with visible stage boundaries.
       - name: Analyze, format-check and test all packages
@@ -215,7 +214,7 @@ jobs:
   official-runtime-validation:
     # Every vision task on Google's vision library, against Google's
     # reference wheel on this runner: CPU references generated here. Metal is
-    # withdrawn for now (upstream-issues.md UP-057).
+    # withdrawn for now.
     name: Official macOS runtime / every served task against Google's wheel
     runs-on: macos-15
     timeout-minutes: 45

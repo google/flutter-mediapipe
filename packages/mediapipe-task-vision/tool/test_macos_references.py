@@ -5,7 +5,7 @@ Classifier, Image Embedder and Image Segmenter run on the CPU. Each is
 compared with the official wheel's output, generated on this machine: the
 wheel's CPU results drift between Apple CPUs, as cpu_reference.py records for
 every native job. Metal is withdrawn while Google's library since 1.1.1 gives
-different results there from its 1.1.0 wheel (upstream-issues.md UP-057);
+different results there from its 1.1.0 wheel;
 prepare_gpu_reference.py still writes the macOS Metal references for when it
 returns.
 """
@@ -108,8 +108,8 @@ def main():
                MEDIAPIPE_LANDMARK_TASKS='hand,pose,gesture,holistic')
     run(['dart', 'pub', 'get'], root, output / 'dart-pub-get.log', env=env)
     # A task's close waits for Google's usage-logging upload, so a slow reply
-    # holds a test past the default 30 s (upstream-issues.md UP-025); the
-    # upload request itself gives up after 60 s.
+    # holds a test past the default 30 s; the upload request itself gives up
+    # after 60 s.
     run(['dart', 'test', 'test/face_landmarker_test.dart',
          'test/landmark_tasks_test.dart', 'test/image_tasks_test.dart',
          'test/object_detector_test.dart', 'test/segmenter_tasks_test.dart',

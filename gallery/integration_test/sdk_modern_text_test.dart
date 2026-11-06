@@ -24,9 +24,8 @@ import 'support/device_log.dart';
 /// EmbeddingGemma's vectors come from another build of the same release on
 /// another CPU: the arm64 emulator and the iOS simulator reproduce Google's
 /// wheel bit for bit, while Google's x86_64 Android build on the x86_64
-/// emulator differs from its Linux x86_64 wheel by up to 0.008 per value
-/// (upstream-issues.md UP-036). So each value gets a bound, and each vector
-/// must point where Google's does.
+/// emulator differs from its Linux x86_64 wheel by up to 0.008 per value. So
+/// each value gets a bound, and each vector must point where Google's does.
 const _embeddingBound = 2e-2;
 const _embeddingCosine = 0.995;
 
@@ -37,16 +36,14 @@ const _quantizedBound = 2;
 /// Generated text is compared with Google's wheel of the same release on the
 /// same architecture, and Google's mobile and desktop builds of the same
 /// release do not always agree to the last character: greedy decoding picks
-/// a different word once floating-point noise flips a near-tie
-/// (upstream-issues.md UP-036). The Proofreader matches exactly on every
-/// build measured, so each of its outputs must match Google's from the
-/// start for at least this many characters, or in full when Google's is
-/// shorter. The Summarizer parts late in long summaries on the iOS
-/// simulator and, on the x86_64 Android emulator, anywhere and differently
-/// from run to run, so for it each output must have its mode's shape and a
-/// majority of the cases must match Google's exactly, which a wrong prompt,
-/// mode or token budget could not produce. Exact matches are counted in the
-/// log.
+/// a different word once floating-point noise flips a near-tie. The Proofreader
+/// matches exactly on every build measured, so each of its outputs must match
+/// Google's from the start for at least this many characters, or in full when
+/// Google's is shorter. The Summarizer parts late in long summaries on the iOS
+/// simulator and, on the x86_64 Android emulator, anywhere and differently from
+/// run to run, so for it each output must have its mode's shape and a majority
+/// of the cases must match Google's exactly, which a wrong prompt, mode or
+/// token budget could not produce. Exact matches are counted in the log.
 const _minSharedPrefix = 80;
 
 void main() {
@@ -553,7 +550,7 @@ void _expectSummaries(List<Map<String, Object?>> agreement) {
   );
 }
 
-/// Google's generation is not reproducible across devices (UP-036: the
+/// Google's generation is not reproducible across devices (the
 /// Galaxy A12 wrote a different, correct TL;DR for the lifecycle case), so a
 /// lifecycle check asks of one summary what the suite asks of every case:
 /// that it follows Google's for [_minSharedPrefix] characters.

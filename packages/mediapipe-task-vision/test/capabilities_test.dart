@@ -43,7 +43,7 @@ void main() {
       {Delegate.cpu},
     );
     // macOS 14 and iOS 15 or later, where Google's vision library runs; macOS
-    // on the CPU only for now (UP-057).
+    // on the CPU only for now.
     expect(
       handLandmarkerCapabilitiesForPlatform(
         platform('macos', 'arm64', '14.0'),
@@ -99,10 +99,13 @@ void main() {
       const TaskPlatform(operatingSystem: 'windows', architecture: 'x64'),
     );
     expect(windows.isSupported, isFalse);
-    expect(windows.unavailableReasons[Delegate.cpu], contains('UP-048'));
+    expect(
+      windows.unavailableReasons[Delegate.cpu],
+      contains('runs it too slowly to offer'),
+    );
   });
 
-  test('macOS offers the CPU only, with the reason (UP-057)', () {
+  test('macOS offers the CPU only, with the reason', () {
     // Google's library since 1.1.1 gives different Metal results from its
     // 1.1.0 wheel, so every task that ran on Metal reports the withdrawal;
     // Holistic and MagicTouch keep their own, older reasons.
@@ -124,13 +127,16 @@ void main() {
     ]) {
       final result = claim(mac);
       expect(result.supportedDelegates, {Delegate.cpu});
-      expect(result.unavailableReasons[Delegate.gpu], contains('UP-057'));
+      expect(
+        result.unavailableReasons[Delegate.gpu],
+        contains('different results on Metal'),
+      );
     }
     expect(
       holisticLandmarkerCapabilitiesForPlatform(
         mac,
       ).unavailableReasons[Delegate.gpu],
-      contains('UP-026'),
+      contains('face blendshapes model'),
     );
     expect(objectDetectorCapabilitiesForPlatform(mac).runtimeVersion, '1.2.0');
   });
@@ -201,17 +207,17 @@ void main() {
       architecture: 'arm64',
       version: '15.0',
     );
-    // macOS offers no GPU for now (UP-057).
+    // macOS offers no GPU for now.
     for (final (claim, onLinux) in [
       (poseLandmarkerCapabilitiesForPlatform, true),
       (gestureRecognizerCapabilitiesForPlatform, true),
       (imageClassifierCapabilitiesForPlatform, true),
       (imageSegmenterCapabilitiesForPlatform, true),
-      // UP-027: Google's Linux runtime aborts the embedder on GPU.
+      // Google's Linux runtime aborts the embedder on GPU.
       (imageEmbedderCapabilitiesForPlatform, false),
-      // UP-026: neither runtime opens Holistic's blendshapes model on GPU.
+      // Neither runtime opens Holistic's blendshapes model on GPU.
       (holisticLandmarkerCapabilitiesForPlatform, false),
-      // UP-046: Google's Linux library lacks Face Detector's LiteRT GPU plugin.
+      // Google's Linux library lacks Face Detector's LiteRT GPU plugin.
       (faceDetectorCapabilitiesForPlatform, false),
       (faceLandmarkerCapabilitiesForPlatform, true),
     ]) {
@@ -223,60 +229,55 @@ void main() {
       holisticLandmarkerCapabilitiesForPlatform(
         linux,
       ).unavailableReasons[Delegate.gpu],
-      contains('UP-026'),
+      contains('face blendshapes model'),
     );
     expect(
       faceDetectorCapabilitiesForPlatform(
         linux,
       ).unavailableReasons[Delegate.gpu],
-      allOf(contains('UP-046'), isNot(contains('Linux x64,'))),
+      allOf(contains('LiteRT GPU plugin'), isNot(contains('Linux x64,'))),
     );
   });
 
-  test(
-    'Image Segmenter offers only CPU on every Android GPU (UP-061, UP-023)',
-    () {
-      TaskPlatform android(String? gpu) => TaskPlatform(
-        operatingSystem: 'android',
-        architecture: 'arm64',
-        gpu: gpu,
-      );
-      // Google's task aborted the app on PowerVR and on a Pixel 3's Adreno
-      // 630, and a GPU nobody has tried may be next.
-      for (final gpu in [
-        'PowerVR Rogue GE8320 (Imagination Technologies)',
-        'Adreno (TM) 630 (Qualcomm)',
-        'Mali-G715 (ARM)',
-        'Adreno (TM) 750 (Qualcomm)',
-        null,
-      ]) {
-        final capabilities = imageSegmenterCapabilitiesForPlatform(
-          android(gpu),
-        );
-        expect(capabilities.supportedDelegates, {Delegate.cpu}, reason: gpu);
-        expect(
-          capabilities.unavailableReasons[Delegate.gpu],
-          allOf(contains('UP-061'), contains('UP-023')),
-        );
-      }
-      // Only Image Segmenter is withdrawn, and only on Android.
+  test('Image Segmenter offers only CPU on every Android GPU', () {
+    TaskPlatform android(String? gpu) => TaskPlatform(
+      operatingSystem: 'android',
+      architecture: 'arm64',
+      gpu: gpu,
+    );
+    // Google's task aborted the app on PowerVR and on a Pixel 3's Adreno
+    // 630, and a GPU nobody has tried may be next.
+    for (final gpu in [
+      'PowerVR Rogue GE8320 (Imagination Technologies)',
+      'Adreno (TM) 630 (Qualcomm)',
+      'Mali-G715 (ARM)',
+      'Adreno (TM) 750 (Qualcomm)',
+      null,
+    ]) {
+      final capabilities = imageSegmenterCapabilitiesForPlatform(android(gpu));
+      expect(capabilities.supportedDelegates, {Delegate.cpu}, reason: gpu);
       expect(
-        imageClassifierCapabilitiesForPlatform(
-          android('PowerVR Rogue GE8320 (Imagination Technologies)'),
-        ).supportedDelegates,
-        contains(Delegate.gpu),
+        capabilities.unavailableReasons[Delegate.gpu],
+        allOf(contains('PowerVR'), contains('Adreno 630')),
       );
-      const linuxPowerVr = TaskPlatform(
-        operatingSystem: 'linux',
-        architecture: 'x64',
-        gpu: 'PowerVR B-Series BXE-4-32 (Imagination Technologies)',
-      );
-      expect(
-        imageSegmenterCapabilitiesForPlatform(linuxPowerVr).supportedDelegates,
-        contains(Delegate.gpu),
-      );
-    },
-  );
+    }
+    // Only Image Segmenter is withdrawn, and only on Android.
+    expect(
+      imageClassifierCapabilitiesForPlatform(
+        android('PowerVR Rogue GE8320 (Imagination Technologies)'),
+      ).supportedDelegates,
+      contains(Delegate.gpu),
+    );
+    const linuxPowerVr = TaskPlatform(
+      operatingSystem: 'linux',
+      architecture: 'x64',
+      gpu: 'PowerVR B-Series BXE-4-32 (Imagination Technologies)',
+    );
+    expect(
+      imageSegmenterCapabilitiesForPlatform(linuxPowerVr).supportedDelegates,
+      contains(Delegate.gpu),
+    );
+  });
 
   test('an Android emulator rendering on SwiftShader offers the CPU only', () {
     TaskPlatform android(String? gpu) => TaskPlatform(
@@ -304,8 +305,10 @@ void main() {
       'image segmenter': imageSegmenterCapabilitiesForPlatform,
       'object detector': objectDetectorCapabilitiesForPlatform,
     };
-    // Withdrawn on every Android GPU, phones included (UP-046, UP-026,
-    // UP-061).
+    // Withdrawn on every Android GPU, phones included: Google's library lacks
+    // Face Detector's LiteRT GPU plugin, cannot open Holistic's face
+    // blendshapes model on the GPU, and aborts reading Image Segmenter's GPU
+    // mask.
     const phoneCpuOnly = {
       'face detector',
       'holistic landmarker',
@@ -333,8 +336,8 @@ void main() {
 
   test("Android phones offer Face Detector's and Holistic's CPU only", () {
     // Google's Android library lacks the LiteRT GPU plugin Face Detector's GPU
-    // needs (UP-046), and cannot open Holistic's face blendshapes model on the
-    // GPU (UP-026). Face Landmarker and the other tasks keep the GPU.
+    // needs, and cannot open Holistic's face blendshapes model on the GPU. Face
+    // Landmarker and the other tasks keep the GPU.
     for (final gpu in [
       'Mali-G715 (ARM)',
       'Adreno (TM) 750 (Qualcomm)',
@@ -346,15 +349,15 @@ void main() {
         architecture: 'arm64',
         gpu: gpu,
       );
-      for (final (claim, issue) in [
-        (faceDetectorCapabilitiesForPlatform, 'UP-046'),
-        (holisticLandmarkerCapabilitiesForPlatform, 'UP-026'),
+      for (final (claim, gap) in [
+        (faceDetectorCapabilitiesForPlatform, 'LiteRT GPU plugin'),
+        (holisticLandmarkerCapabilitiesForPlatform, 'face blendshapes model'),
       ]) {
         final capabilities = claim(phone);
         expect(capabilities.supportedDelegates, {Delegate.cpu}, reason: gpu);
         expect(
           capabilities.unavailableReasons[Delegate.gpu],
-          contains(issue),
+          contains(gap),
           reason: gpu,
         );
       }
@@ -380,7 +383,7 @@ void main() {
     }
   });
 
-  test('the iOS Simulator offers the CPU only (UP-031)', () {
+  test('the iOS Simulator offers the CPU only', () {
     // Google's iOS SDK aborts the app on the simulator's Metal path, so every
     // task that runs GPU on an iPhone offers only the CPU there.
     const device = TaskPlatform(
@@ -411,13 +414,13 @@ void main() {
       expect(capabilities.supportedDelegates, {Delegate.cpu}, reason: task);
       expect(
         capabilities.unavailableReasons[Delegate.gpu],
-        contains('UP-031'),
+        contains("iOS Simulator's GPU"),
         reason: task,
       );
     }
   });
 
-  test("an iPhone offers Holistic's CPU only (UP-026)", () {
+  test("an iPhone offers Holistic's CPU only", () {
     // Google's iOS library cannot open Holistic's face blendshapes model on
     // Metal, as on the desktop GPUs; the other landmark tasks keep the GPU.
     const device = TaskPlatform(
@@ -427,7 +430,10 @@ void main() {
     );
     final holistic = holisticLandmarkerCapabilitiesForPlatform(device);
     expect(holistic.supportedDelegates, {Delegate.cpu});
-    expect(holistic.unavailableReasons[Delegate.gpu], contains('UP-026'));
+    expect(
+      holistic.unavailableReasons[Delegate.gpu],
+      contains('face blendshapes model'),
+    );
     expect(poseLandmarkerCapabilitiesForPlatform(device).supportedDelegates, {
       Delegate.cpu,
       Delegate.gpu,
@@ -442,7 +448,7 @@ void main() {
           simulator: true,
         ),
       ).unavailableReasons[Delegate.gpu],
-      contains('UP-031'),
+      contains("iOS Simulator's GPU"),
     );
   });
 }

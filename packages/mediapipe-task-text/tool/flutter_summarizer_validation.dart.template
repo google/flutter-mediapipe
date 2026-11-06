@@ -6,15 +6,15 @@ void _check(bool condition, String message) {
 }
 
 /// Google's streamed text can differ from its completed text for the same
-/// input (upstream-issues.md UP-036), so a stream is compared with the
-/// reference's own streamed chunks, joined.
+/// input, so a stream is compared with the reference's own streamed chunks,
+/// joined.
 String _streamed(Map<String, dynamic> entry) =>
     (entry['stream'] as List).map((e) => (e as Map)['chunk'] as String? ?? '').join();
 
 /// Google's text differs between builds and machines late in long summaries,
-/// and can depend on the requests before it on the same task
-/// (upstream-issues.md UP-036), so every summary must follow Google's text for
-/// 80 characters, or in full when it is shorter. Exact matches are counted.
+/// and can depend on the requests before it on the same task, so every summary
+/// must follow Google's text for 80 characters, or in full when it is shorter.
+/// Exact matches are counted.
 bool _follows(String? actual, String? expected) {
   final a = expected ?? '';
   final b = actual ?? '';

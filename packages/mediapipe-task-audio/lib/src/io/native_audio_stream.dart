@@ -222,8 +222,7 @@ Object _decode(Pointer<bridge.MpFlutterAudioEvent> pointer) {
     );
   }
   if (event.status != 0) {
-    // Google's C callback carries a status and no message
-    // (upstream-issues.md UP-038).
+    // Google's C callback carries a status and no message.
     return TaskException(
       "Google's audio stream failed: ${_statusNames[event.status] ?? 'UNKNOWN'} "
       '(status ${event.status}).',

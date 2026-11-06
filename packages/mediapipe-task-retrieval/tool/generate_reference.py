@@ -70,7 +70,7 @@ IMAGE_TEXT = 'A dog running across the grass with a ball.'
 # Two of the audio package's clips, 16 kHz mono, and a sentence for each:
 # YAMNet hears speech in the first and a bird in the second. Each is cut to
 # its first 15,600 samples (0.975 s), the one length whose embedding Google's
-# runtime repeats exactly from call to call (upstream-issues.md UP-058).
+# runtime repeats exactly from call to call.
 AUDIO = {
     'speech': 'packages/mediapipe-task-audio/test/fixtures/speech_16000_hz_mono.wav',
     'bird': 'packages/mediapipe-task-audio/test/fixtures/two_heads_16000_hz_mono.wav',

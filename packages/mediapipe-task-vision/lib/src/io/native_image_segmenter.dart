@@ -30,8 +30,7 @@ final class NativeImageSegmenter
         ..output_category_mask = options.outputCategoryMask;
       // MpImageSegmenterCreate dereferences this pointer unconditionally and
       // segfaults on null, unlike the classifier options, whose C code checks.
-      // Google's own bindings always pass a string; see upstream-issues.md
-      // UP-009.
+      // Google's own bindings always pass a string.
       native.ref.display_names_locale = (options.displayNamesLocale ?? '')
           .toNativeUtf8(allocator: arena)
           .cast();

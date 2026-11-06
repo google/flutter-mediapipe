@@ -40,11 +40,10 @@ but does not impose hardware-dependent latency or RSS thresholds.
   `1e-6`. Quantized bytes, generated text and proofreading corrections match
   exactly, with one exception: Google's own wheel and C library give different
   long key-point summaries for the same request from run to run, alike for
-  their first 98 characters ([UP-036](../../upstream-issues.md#up-036-ios-summarizer-generations-drift-from-googles-wheel-late-in-long-summaries)),
-  so those four cases must follow Google's text for 80 characters, and the
-  report records whether each matched exactly. Expected native errors are
-  checked rather than treated as successes. Every case is checked, and the
-  report lists each one that failed.
+  their first 98 characters, so those four cases must follow Google's text for
+  80 characters, and the report records whether each matched exactly. Expected
+  native errors are checked rather than treated as successes. Every case is
+  checked, and the report lists each one that failed.
 - Three warmups followed by repeated inference with all four tasks alive,
   alternating completed and streamed generation. Every output is validated.
 - Separate task creation, first segmentation, repeated segmentation, image reset

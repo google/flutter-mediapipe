@@ -106,9 +106,9 @@ def main():
                     assert not any('error' in event for event in events), events
                     assert sum(e['done'] for e in events) == 1 and events[-1]['done']
                     # Google's streamed text can differ from its completed text
-                    # for the same input: on its x86_64 1.0.0 wheels it does
-                    # (upstream-issues.md UP-036). Both are recorded, and each
-                    # path of the package is compared with its own.
+                    # for the same input: on its x86_64 1.0.0 wheels it does.
+                    # Both are recorded, and each path of the package is
+                    # compared with its own.
                     streamed = ''.join(e['chunk'] or '' for e in events)
                     report['cases'].append({
                         'name': f'{mode.name.lower()}-{name}' + (f'-limit-{limit}' if limit else ''),

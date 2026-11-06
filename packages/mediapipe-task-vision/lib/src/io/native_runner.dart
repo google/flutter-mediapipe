@@ -96,7 +96,7 @@ NativeVisionTask<ImageSegmenterResult> nativeImageSegmenter(
 ) => NativeImageSegmenter(options);
 
 /// Refuses pose masks on the desktop GPUs where Google's runtime cannot
-/// produce them, with the reason (upstream-issues.md UP-028 and UP-030).
+/// produce them, with the reason.
 void validatePoseMasks(PoseLandmarkerOptions options) {
   if ((Platform.isMacOS || Platform.isLinux) &&
       options.delegate == Delegate.gpu &&
@@ -106,13 +106,11 @@ void validatePoseMasks(PoseLandmarkerOptions options) {
     throw UnsupportedError(
       Platform.isMacOS
           ? 'Google\'s macOS runtime cannot initialize the pose '
-                'segmentation mask upsampler on Metal (upstream-issues.md '
-                'UP-028). Request masks on the CPU, or landmarks alone on '
-                'the GPU.'
+                'segmentation mask upsampler on Metal. Request masks on the '
+                'CPU, or landmarks alone on the GPU.'
           : 'Google\'s Linux runtime returns pose masks on OpenGL ES as '
-                '8-bit RGBA images, not float confidences (upstream-issues.md '
-                'UP-030). Request masks on the CPU, or landmarks alone on the '
-                'GPU.',
+                '8-bit RGBA images, not float confidences. Request masks on '
+                'the CPU, or landmarks alone on the GPU.',
     );
   }
 }

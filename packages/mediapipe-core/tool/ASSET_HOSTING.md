@@ -302,8 +302,8 @@ they never wait.
 ## Also
 
 - `doc/privacy_and_licenses.md` lists `cdn.jsdelivr.net` as the browser
-  runtime's host; it changes with this, as do the READMEs of core and vision
-  that say the runtime loads from jsDelivr.
+  runtime's host; it changes with this, as do `doc/mediapipe_core.md` and
+  vision's README, which say the runtime loads from jsDelivr.
 - `gallery/tool/browser/test_browser.mjs` defaults its runtime roots to
   jsDelivr for the comparisons with Google's JavaScript; CI already passes it
   a self-hosted copy.

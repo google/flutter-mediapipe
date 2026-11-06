@@ -13,7 +13,7 @@ Browsers run it on CPU or WebGL 2, every other platform on the CPU. Google's
 Windows library exports the stateful API as well and its masks agree with the
 macOS wheel's within 0.045, but a stroke takes about 25 seconds on GitHub's
 Windows runner and Google's Windows Python wheel lacks the API, so Windows
-has no Interactive Segmenter (upstream-issues.md UP-048).
+has no Interactive Segmenter.
 
 Official sources:
 
@@ -183,9 +183,9 @@ three modern text tasks.
 elsewhere `create` refuses it with a `RuntimeUnavailableException`. Google's
 mobile SDKs run the task on the CPU. On macOS, Google's
 `HeatmapFromStrokesCalculatorGl` requests GLSL 330 in a macOS OpenGL 2.1
-context and fails to compile its shader, in both the 1.0.0 and 1.0.1 runtimes
-(upstream-issues.md UP-008). This was reproduced using the official Python API
-with valid RGBA input outside the sandbox. Linux's GPU path aborts (UP-029).
+context and fails to compile its shader, in both the 1.0.0 and 1.0.1 runtimes.
+This was reproduced using the official Python API with valid RGBA input outside
+the sandbox. Linux's GPU path aborts.
 Enabling Metal for the face tasks does not repair this separate stroke graph.
 There is no silent CPU fallback and no modified substitute pipeline.
 
@@ -201,10 +201,8 @@ Python ctypes definitions.
 
 The vision package's hook bundles Google's library unmodified except on macOS,
 where it shortens the system framework paths and signs the copy again to make
-room for Flutter's install name
-([UP-042](../../../upstream-issues.md#up-042-per-family-macos-and-simulator-libraries-have-no-header-room-for-a-rename)).
-Consumers need Flutter and Xcode, but no Python, Bazel, CMake or credentials
-for native downloads.
+room for Flutter's install name. Consumers need Flutter and Xcode, but no
+Python, Bazel, CMake or credentials for native downloads.
 
 ## Validation and measurements
 

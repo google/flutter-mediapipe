@@ -60,8 +60,7 @@ class _FishGamePageState extends State<FishGamePage>
   late final Delegate _delegate = preferredDelegate(_delegates);
 
   /// The standard model: the catalog's text-only EmbeddingGemma 2 (165 MB).
-  /// WebKit runs no EmbeddingGemma 2 model (UP-054), so there the page is a
-  /// card.
+  /// WebKit runs no EmbeddingGemma 2 model, so there the page is a card.
   DownloadAsset get _standard => widget.task.model;
   late final Ticker _ticker = createTicker(_frame);
   late final _game = FishGame(decide: _decide);

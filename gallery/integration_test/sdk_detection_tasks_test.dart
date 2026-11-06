@@ -51,7 +51,7 @@ void main() {
           final frame = await loadSample('portrait.jpg');
           final references = <Delegate, List<_Item>>{};
           // The package withdraws Face Detector's GPU where Google's library
-          // lacks LiteRT's GPU plugin (UP-046, every Android phone) and
+          // lacks LiteRT's GPU plugin (every Android phone) and
           // refuses it before Google's graph exists. A phone that must run the
           // GPU may lose it only to that documented gap.
           final capabilities = await subject.capabilities();
@@ -61,7 +61,7 @@ void main() {
           if (!gpuDeclared && _gpu == 'required') {
             expect(
               capabilities.unavailableReasons[Delegate.gpu],
-              contains('UP-046'),
+              contains('LiteRT GPU plugin'),
             );
             await expectLater(
               subject.open(model, Delegate.gpu, RunningMode.image),

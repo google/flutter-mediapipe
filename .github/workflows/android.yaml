@@ -170,9 +170,9 @@ jobs:
           outcome: ${{ steps.sdk.outcome }}
       # Only release builds run R8, and every test above is a debug build. R8
       # removes a field that is written but never read, so a plugin that keeps
-      # memory alive for native code that way loses it in release builds only
-      # (UP-033 in upstream-issues.md). This fails on any instance field R8
-      # removed from the plugins. The APK is the release gallery, for phones.
+      # memory alive for native code that way loses it in release builds only.
+      # This fails on any instance field R8 removed from the plugins. The APK is
+      # the release gallery, for phones.
       - name: Release gallery keeps every plugin field through R8
         if: ${{ !cancelled() }}
         run: |

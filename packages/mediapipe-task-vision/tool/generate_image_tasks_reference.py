@@ -30,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--delegate', choices=['cpu', 'gpu'], default='cpu')
     parser.add_argument('--output-dir', type=Path, default=ROOT / 'test/fixtures/image_tasks')
-    # Google's Linux 1.0.1 runtime aborts the embedder on GPU (UP-027).
+    # Google's Linux 1.0.1 runtime aborts the embedder on GPU.
     parser.add_argument('--tasks', default=','.join(MODELS),
                         help='Comma-separated subset of ' + ', '.join(MODELS))
     args = parser.parse_args()

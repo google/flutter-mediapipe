@@ -94,7 +94,7 @@ void main() {
           for (var i = 0; i < 3; i++) {
             final (run, close) = await _start(name, model);
             // A close waits for Google's usage-logging upload, whose request
-            // times out after 60 s (UP-025), so only a longer wait is a hang.
+            // times out after 60 s, so only a longer wait is a hang.
             await close().timeout(const Duration(seconds: 90));
             await expectLater(run('Late'), throwsStateError);
           }

@@ -219,7 +219,7 @@ void main() {
       );
     });
 
-    test('browsers get the GPU on a hardware WebGPU adapter (UP-049)', () {
+    test('browsers get the GPU on a hardware WebGPU adapter', () {
       TaskPlatform web(String? gpu) => TaskPlatform(
         operatingSystem: 'web',
         architecture: 'unknown',
@@ -235,7 +235,10 @@ void main() {
       addTearDown(() => decisionBackendFactory = null);
       final capabilities = decisionMakerCapabilitiesForPlatform(web(metal));
       expect(capabilities.supportedDelegates, {Delegate.gpu});
-      expect(capabilities.unavailableReasons[Delegate.cpu], contains('UP-049'));
+      expect(
+        capabilities.unavailableReasons[Delegate.cpu],
+        contains('fails every evaluation on the CPU delegate'),
+      );
       for (final gpu in [
         null,
         'WebGPU google swiftshader',
@@ -244,13 +247,15 @@ void main() {
       ]) {
         final refused = decisionMakerCapabilitiesForPlatform(web(gpu));
         expect(refused.isSupported, isFalse, reason: '$gpu');
-        expect(refused.unavailableReasons[Delegate.gpu], contains('UP-049'));
+        expect(
+          refused.unavailableReasons[Delegate.gpu],
+          contains('only on a hardware WebGPU adapter'),
+        );
       }
     });
 
     test('browsers refuse the models Google\'s runtime fails with: '
-        'EmbeddingGemma 2 in WebKit (UP-054), GLiNER2.5-Decide everywhere '
-        '(UP-055)', () {
+        'EmbeddingGemma 2 in WebKit, GLiNER2.5-Decide everywhere', () {
       TaskPlatform web(BrowserEngine? engine, [String? gpu]) => TaskPlatform(
         operatingSystem: 'web',
         architecture: 'unknown',
@@ -273,7 +278,7 @@ void main() {
         for (final delegate in Delegate.values) {
           expect(
             refused.unavailableReasons[delegate],
-            allOf(contains('UP-054'), contains('layaS256')),
+            allOf(contains('embeds every text as zeros'), contains('layaS256')),
             reason: '$delegate ${model.url}',
           );
         }
@@ -295,7 +300,10 @@ void main() {
             model: model,
           );
           expect(refused.isSupported, isFalse, reason: '$engine ${model.url}');
-          expect(refused.unavailableReasons[Delegate.gpu], contains('UP-055'));
+          expect(
+            refused.unavailableReasons[Delegate.gpu],
+            contains('aborts while it creates the task'),
+          );
         }
         for (final model in [
           null,
@@ -312,13 +320,13 @@ void main() {
           );
         }
       }
-      // Without a hardware adapter the browser's reason stays UP-049.
+      // Without a hardware adapter the reason stays the missing adapter.
       expect(
         decisionMakerCapabilitiesForPlatform(
           web(BrowserEngine.webkit, 'WebGPU apple apple (fallback adapter)'),
           model: DecisionModels.embeddingGemma2Text,
         ).unavailableReasons[Delegate.gpu],
-        contains('UP-049'),
+        contains('only on a hardware WebGPU adapter'),
       );
       // Native platforms are untouched by the browser's refusals.
       expect(

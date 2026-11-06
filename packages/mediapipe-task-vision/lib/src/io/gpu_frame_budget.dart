@@ -11,8 +11,8 @@ import '../types/vision_types.dart';
 /// wraps it in a texture from its OpenGL context's texture cache. MediaPipe
 /// flushes that cache only when the context closes, so the task keeps each
 /// frame it has processed: 1.2 MB a frame from a 640x480 camera, until an
-/// allocation fails inside MediaPipe and aborts the app (UP-032 in
-/// upstream-issues.md). Closing the task releases them all.
+/// allocation fails inside MediaPipe and aborts the app. Closing the task
+/// releases them all.
 ///
 /// A worker counts each image it processes and, once [limitBytes] of frames
 /// have gone to the GPU, closes its native task and opens an identical one.

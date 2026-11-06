@@ -115,9 +115,9 @@ const nativeTargets = [
   'windows/x64',
 ];
 
-/// Tasks Google's JavaScript runtime serves in browsers. It has no
-/// Proofreader or Summarizer, so the web build bundles EmbeddingGemma alone of
-/// the generative text tasks.
+/// Tasks Google's JavaScript runtime serves in browsers. Proofreader and
+/// Summarizer are not yet available on the web, so the web build bundles
+/// EmbeddingGemma alone of the generative text tasks.
 const webTasks = {
   'audio_classifier',
   'decision_maker',

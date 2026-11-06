@@ -1,3 +1,11 @@
+## 0.1.4
+
+- The README is now the repository's README, word for word, with absolute links
+  so it works on GitHub and on pub.dev. Its reference sections (shared types,
+  verified downloads and offline builds, bundled and on-demand models, the web
+  runtime) moved to [the core guide](https://github.com/google/flutter-mediapipe/blob/main/doc/mediapipe_core.md).
+- The README and code comments no longer refer to removed notes.
+
 ## 0.1.3
 
 - Downloads of models and native libraries wait out short network failures. At

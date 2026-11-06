@@ -26,10 +26,8 @@ app ships only the families it depends on, with no setting:
   macOS source-built face libraries are gone.
 - **macOS.** The hook bundles Google's dylib as is: since the October 9 build
   it leaves room for the install name Dart and Flutter write. The earlier
-  builds did not
-  ([UP-042](../../../upstream-issues.md#up-042-per-family-macos-and-simulator-libraries-have-no-header-room-for-a-rename)),
-  so the hook used to rename the system frameworks and sign a copy again.
-  `tasks_runtime` (the 95 MB opt-in) is gone: vision is 26.3 MB.
+  builds did not, so the hook used to rename the system frameworks and sign a
+  copy again. `tasks_runtime` (the 95 MB opt-in) is gone: vision is 26.3 MB.
 - **iOS.** The hook extracts the arm64 binary from Google's framework zip for
   a device or the Simulator (one zip each since October 9; one XCFramework
   before) and keeps Google's file name. Core's Objective-C++ adapter
@@ -57,8 +55,7 @@ app ships only the families it depends on, with no setting:
   which the Dart tests and `tool/official_wheels.py` share. Google has since
   published the final 1.1.0 wheel (October 6) and a 1.1.1 nightly (October
   13); the pin moves, and every fixture is regenerated, once Google says
-  whether 1.1.1's Metal output is intended
-  ([UP-057](../../../upstream-issues.md#up-057-the-111-macos-library-gives-different-metal-results-from-googles-110-wheel)).
+  whether 1.1.1's Metal output is intended.
 - **Text ABI.** The Proofreader and Summarizer options gained a trailing
   `int min_log_severity` in 1.1.0; the Dart structs have it, set to Google's
   default of 4.
@@ -111,8 +108,7 @@ candidate wheel), downloading the libraries from the release:
   build's output exactly in the 36 Image Classifier and Image Embedder cases
   compared, on Metal and on the CPU, so the change is in 1.1.1 itself. The
   vision package offers the CPU only on macOS until Google says whether the
-  new output is intended
-  ([UP-057](../../../upstream-issues.md#up-057-the-111-macos-library-gives-different-metal-results-from-googles-110-wheel)).
+  new output is intended.
 - **Android arm64 emulator** (API 31, CPU): the gallery's `sdk_all_test`
   (32 checks) and its still image test pass. Its logcat still shows the
   usage-logging client's `Failed to get JNIEnv` error.
@@ -158,8 +154,8 @@ and audio with the audio stream, Decision Maker and the retrieval tasks when
 the build bundles them, as CI's does since October 13, the live tiles, and the
 journey through every page), the still image test, and the modern text suite. EmbeddingGemma's
 largest error is 0.0, the Proofreader matches in 9 of 9 cases and the
-Summarizer in 8 of 10, within the documented rule
-([UP-036](../../../upstream-issues.md#up-036-ios-summarizer-generations-drift-from-googles-wheel-late-in-long-summaries)).
+Summarizer in 8 of 10, within the suite's rule for Google's text, which differs
+between builds late in long summaries.
 Use an API 31 image on Apple silicon: newer ones advertise the M4's SME, which
 the hypervisor refuses, so MediaPipe's CPU code stops with SIGILL.
 
@@ -168,12 +164,11 @@ from the release: Linux x64 and Windows x64 pass every CPU job (every vision
 task against Google's wheel on the runner, text, audio, the modern text
 tasks, the cameras, bundled models and the gallery); the x86_64 Android
 emulator passes its three suites and the arm64 iOS Simulator its 12; macOS
-passes every job but the GPU memory test on GitHub's virtual Mac
-([UP-032](../../../upstream-issues.md#up-032-macos-gpu-tasks-keep-every-frame-until-they-close)).
-On Linux's GPU (Mesa), Hand, Gesture and Pose and Image Segmenter's category
-mask match Google's GPU wheel exactly. With the GPU required, the Pixel 8a
-(Mali) and Galaxy S24 (Adreno) pass all 38 device tests; the Galaxy A12
-(PowerVR) passed 37, the 38th expecting the old plugin's error type.
+passes every job but the GPU memory test on GitHub's virtual Mac. On Linux's GPU
+(Mesa), Hand, Gesture and Pose and Image Segmenter's category mask match
+Google's GPU wheel exactly. With the GPU required, the Pixel 8a (Mali) and
+Galaxy S24 (Adreno) pass all 38 device tests; the Galaxy A12 (PowerVR) passed
+37, the 38th expecting the old plugin's error type.
 
 Against the old 1.0.0 references the split libraries failed 17 Face Detector
 GPU checks and one text embedding value. Google's own 1.1.0 wheel gives
@@ -186,18 +181,13 @@ test files shared its process; it now runs alone (`--tags isolated`).
 Done: the hosting above (an official URL from Google would replace it), Linux
 and Windows in CI, the Android phones on Test Lab (the Pixel 8a, Galaxy S24
 and Galaxy A12, GPU required; Face Detector's, Holistic's and PowerVR's Image
-Segmenter GPU are withdrawn there, see
-[UP-046](../../../upstream-issues.md#up-046-face-detectors-gpu-needs-a-litert-plugin-the-linux-and-android-libraries-do-not-ship),
-[UP-026](../../../upstream-issues.md#up-026-holistic-cannot-open-its-face-blendshapes-model-on-a-desktop-or-iphone-gpu)
-and
-[UP-023](../../../upstream-issues.md#up-023-android-image-segmenter-gpu-aborts-on-a-powervr-gpu)),
+Segmenter GPU are withdrawn there),
 the fresh-app harnesses on one pinned library per family (downloaded as an
 app would, or from a local folder through `MEDIAPIPE_ASSET_SOURCE`, which
 `tool/mirror_runtime_assets.py --prefill` fills), and the iPhone: every iOS
 suite on an iPhone 15 Pro with the GPU required, in a debug and a release
 build of the gallery, on `39e3558` (October 13, 2026; the simulator has no GPU
-path,
-[UP-031](../../../upstream-issues.md#up-031-ios-sdk-gpu-tasks-abort-on-the-ios-simulator)).
+path).
 Decision Maker and the retrieval tasks have not run on that phone, whose free
 storage would not hold their models beside the gallery. The debloat that
 preceded 0.1.0 (steps 1 to 9 of its plan) landed in `4b4ab7a`; the plan is in
@@ -234,10 +224,8 @@ the history (`git show 4b4ab7a:debloat-plan.md`). Still open:
   Info.plist and the app say, and signed; the macOS app is sandboxed with
   the camera, microphone and network entitlements. Google's iOS libraries
   call required-reason APIs without a privacy manifest, which the gallery
-  now declares
-  ([UP-062](../../../upstream-issues.md#up-062-the-ios-libraries-call-required-reason-apis-and-ship-no-privacy-manifest)).
-  Left: an App Store Connect validation, which needs a bundle ID of the
-  account's own instead of `com.example.mediapipeGallery` and an Apple
+  now declares. Left: an App Store Connect validation, which needs a bundle ID
+  of the account's own instead of `com.example.mediapipeGallery` and an Apple
   Distribution certificate.
 - **Notices.** Since October 9, every family ships Google's LICENSE and
   NOTICE, identical across families; the NOTICE opens with Google's
@@ -257,10 +245,8 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
   October 9 library exports 60 functions, identical on every platform: the
   two tasks, the Text and Image Embedder and `MpImage` functions they depend
   on, and the shared error, string list and logging functions.
-  Google's engine refuses the text-only EmbeddingGemma 2 model for the task
-  ([UP-050](../../../upstream-issues.md#up-050-universal-embedder-refuses-the-text-only-embeddinggemma-2-model)),
-  so the package pins the text and vision (388 MB) and the full (485 MB)
-  models.
+  Google's engine refuses the text-only EmbeddingGemma 2 model for the task, so
+  the package pins the text and vision (388 MB) and the full (485 MB) models.
 - **Decision Maker** (`mediapipe_decision`) runs on the per-family decision
   library through `familyRuntimes['decision']` on Android arm64, arm and
   x86_64, iOS device and simulator, macOS arm64, Linux x64 and Windows x64,
@@ -269,13 +255,11 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
   schema, JSON, context and prewarm evaluation) and the shared helpers; its
   answers match Google's wheel to float precision with Laya and with the
   text and vision EmbeddingGemma 2. Until the October 18 build it failed
-  every evaluation with the text-only EmbeddingGemma 2
-  ([UP-053](../../../upstream-issues.md#up-053-the-per-family-decision-library-fails-every-evaluation-with-the-text-only-embeddinggemma-2-model)),
-  and Windows, which had no decision library, ran the C library from
-  Google's 1.1.0 wheel. The October 18 build has a Windows decision library,
-  and its macOS library answers the text-only model's cases as Google's
-  wheel does. Google's C header for Decision Maker
-  (`packages/mediapipe-core/native/include`) matches the package's
+  every evaluation with the text-only EmbeddingGemma 2, and Windows, which had
+  no decision library, ran the C library from Google's 1.1.0 wheel. The October
+  18 build has a Windows decision library, and its macOS library answers the
+  text-only model's cases as Google's wheel does. Google's C header for Decision
+  Maker (`packages/mediapipe-core/native/include`) matches the package's
   bindings.
 
 ## Google's builds
@@ -308,8 +292,7 @@ nothing, and the October 8 decision libraries had no logger.
 The October 9 build (its `BUILD_INFO` is in `packages/mediapipe-core/native`):
 
 - **Header room.** Its macOS dylibs and iOS slices leave 15 to 28 KB, so the
-  hook bundles them as is
-  ([UP-042](../../../upstream-issues.md#up-042-per-family-macos-and-simulator-libraries-have-no-header-room-for-a-rename)).
+  hook bundles them as is.
 - **iOS packaging.** One framework zip for devices and one for the Simulator,
   instead of an XCFramework; the Simulator binary still holds arm64 and
   x86_64.
@@ -353,9 +336,9 @@ Google's URL above; the October 18 `BUILD_INFO` is in
   runtime.
 - **Android uploader.** The `Failed to get JNIEnv` message is gone from the
   Android libraries; an upload from an app has not been captured yet.
-- **Text-only EmbeddingGemma 2.** The decision library runs it (UP-053
-  fixed, checked on macOS arm64).
-- iOS framework zips still hold only the binary and `Info.plist` (UP-062).
+- **Text-only EmbeddingGemma 2.** The decision library runs it (checked on
+  macOS arm64).
+- iOS framework zips still hold only the binary and `Info.plist`.
 
 ## Flutter host environment
 
@@ -369,8 +352,7 @@ log, from `MpBaseOptions.host_environment` and `host_system`. Core's
 
 - Checked on 2026-10-13 by capturing the uploads on macOS, Linux, Windows
   and the iOS Simulator: each names FLUTTER but records the OS as unknown,
-  where the same `host_system` with Google's Python value (3) records it
-  ([UP-059](../../../upstream-issues.md#up-059-with-the-flutter-host-environment-the-usage-log-drops-the-os)).
+  where the same `host_system` with Google's Python value (3) records it.
 - `host_version` is `mpHostVersion`, written like a browser's user agent
   (`macOS 27.0 / Dart 3.13.4 / Flutter 3.47.5`), as Google asked on
   2026-10-13; the upload carries it as given (checked on macOS). Flutter's
@@ -386,71 +368,55 @@ log, from `MpBaseOptions.host_environment` and `host_system`. Core's
 
 Raised on the October 13, 2026 call: Google will add the missing headers to
 its next build, and is looking into the Windows decision library, the Metal
-change (UP-057), the OS in FLUTTER uploads (UP-059) and the Android
-uploader. The October 16 to 18 nightlies brought the headers, the Windows
-decision library, the OS in FLUTTER uploads (UP-059, fixed) and an Android
-uploader that opens its own connection with no JVM, all observed with the
-October 18 build. It agreed to the package layout (core plus one package per
-family).
+change, the OS in FLUTTER uploads and the Android uploader. The October 16 to 18
+nightlies brought the headers, the Windows decision library, the OS in FLUTTER
+uploads and an Android uploader that opens its own connection with no JVM, all
+observed with the October 18 build. It agreed to the package layout (core plus
+one package per family).
 
 Raised on the October 20, 2026 call, with the October 18 build observed
 uploading on every platform and family: no library version in native
 uploads, while web sends 1.2.0; the Semantic Retriever's uploads without
-host fields (UP-063); the headers' license text (UP-064); and the audio
-embeddings' shift and run-to-run variation (UP-058). Google will look into
-all four and fix the headers. Not reached, so still to raise: web's empty
-host_version (a `__HOST_VERSION__` next to `__HOST_ENVIRONMENT__`);
-whether Decision Maker's new logging is intended; closes that wait for the
-upload on phones too (UP-025); and the native nightly's cadence, how long
-dated builds stay in the bucket, and whether per-family builds will be
+host fields; the headers' license text; and the audio embeddings' shift and
+run-to-run variation. Google will look into all four and fix the headers. Not
+reached, so still to raise: web's empty host_version (a `__HOST_VERSION__` next
+to `__HOST_ENVIRONMENT__`); whether Decision Maker's new logging is intended;
+closes that wait for the upload on phones too; and the native nightly's cadence,
+how long dated builds stay in the bucket, and whether per-family builds will be
 part of official releases.
 
 - Raised on the October 15 call: Decision Maker reserves memory for its
   whole token budget, 6.7 GB at Python's default of 4096 tokens with
   EmbeddingGemma 2, and cuts a longer input off without an error; Universal
   Embedder does the same with its input length. Is the reservation intended,
-  and can the tasks report the cut-off
-  ([UP-060](../../../upstream-issues.md#up-060-decision-maker-and-universal-embedder-reserve-memory-for-their-whole-token-budget))?
+  and can the tasks report the cut-off?
 - Image Segmenter's GPU mask aborts the app on a Pixel 3 when its size is
   read, and every image accessor converts it first, so no caller can check;
-  Google's Java SDK aborted the same way on PowerVR (UP-023), so it is in
-  MediaPipe's shared GPU path. The package offers no Image Segmenter GPU on
-  Android until it is fixed
-  ([UP-061](../../../upstream-issues.md#up-061-image-segmenters-gpu-mask-aborts-the-app-when-it-is-read-on-a-pixel-3)).
+  Google's Java SDK aborted the same way on PowerVR, so it is in MediaPipe's
+  shared GPU path. The package offers no Image Segmenter GPU on Android until it
+  is fixed.
 - A privacy manifest for each iOS library, or the reasons for the
   required-reason APIs they call (`stat`, `fstat`, `NSUserDefaults`, and
-  `statfs` in retrieval), for apps to declare
-  ([UP-062](../../../upstream-issues.md#up-062-the-ios-libraries-call-required-reason-apis-and-ship-no-privacy-manifest)).
-- Whether 1.1.1's Metal output is intended
-  ([UP-057](../../../upstream-issues.md#up-057-the-111-macos-library-gives-different-metal-results-from-googles-110-wheel)).
+  `statfs` in retrieval), for apps to declare.
+- Whether 1.1.1's Metal output is intended.
 - Let the Semantic Retriever take base options, or copy its embedder's
-  host fields into its own usage uploads; Google is looking into it
-  ([UP-063](../../../upstream-issues.md#up-063-semantic-retrievers-usage-uploads-carry-no-os-host-environment-or-host-version)).
+  host fields into its own usage uploads; Google is looking into it.
 - A license comment on the five umbrella headers, and the Apache text
-  corrected in `audio_classifier.h`; Google will fix it
-  ([UP-064](../../../upstream-issues.md#up-064-the-umbrella-headers-have-no-license-text-and-the-audio-classifier-header-misstates-it)).
+  corrected in `audio_classifier.h`; Google will fix it.
 - WebKit still embeds every text as zeros with EmbeddingGemma 2 in the
   browser runtime's 1.2.0 nightlies of October 18 and 21 (retested October
   21 with Google's own JavaScript); its Decision Maker now answers "eat" at
-  0.9996 or more for every Hungry Fish sentence instead of tying at 0.333
-  ([UP-054](../../../upstream-issues.md#up-054-in-webkit-the-browser-runtime-embeds-every-input-as-zeros-with-embeddinggemma-2)).
-- The families each define the same Objective-C classes
-  ([UP-043](../../../upstream-issues.md#up-043-per-family-libraries-each-define-the-same-objective-c-classes)).
+  0.9996 or more for every Hungry Fish sentence instead of tying at 0.333.
+- The families each define the same Objective-C classes.
 - Apple GPU tasks abort on a three-channel image, as Google's 1.0.0 library
-  did
-  ([UP-044](../../../upstream-issues.md#up-044-apple-gpu-tasks-abort-on-a-three-channel-image-instead-of-failing)).
-- The Windows DLLs export TensorFlow Lite and LiteRT
-  ([UP-045](../../../upstream-issues.md#up-045-per-family-windows-libraries-export-tensorflow-lite-and-litert)).
+  did.
+- The Windows DLLs export TensorFlow Lite and LiteRT.
 - Ship LiteRT's GPU accelerator plugin with the Linux and Android libraries,
-  or link it in as on Apple: Face Detector's GPU cannot run without it
-  ([UP-046](../../../upstream-issues.md#up-046-face-detectors-gpu-needs-a-litert-plugin-the-linux-and-android-libraries-do-not-ship)).
-- OpenGL ES GPU category masks come back as float32 class values, not uint8
-  ([UP-047](../../../upstream-issues.md#up-047-opengl-es-gpu-category-masks-come-back-as-float32)).
+  or link it in as on Apple: Face Detector's GPU cannot run without it.
+- OpenGL ES GPU category masks come back as float32 class values, not uint8.
 - On GitHub's virtual Mac, LiteRT cannot create a Metal residency set and
-  Face Detector keeps about twice each frame
-  ([UP-032](../../../upstream-issues.md#up-032-macos-gpu-tasks-keep-every-frame-until-they-close)).
-- A Python wheel from the same build as the libraries, for the references
-  ([UP-036](../../../upstream-issues.md#up-036-ios-summarizer-generations-drift-from-googles-wheel-late-in-long-summaries)).
+  Face Detector keeps about twice each frame.
+- A Python wheel from the same build as the libraries, for the references.
   Google's first 1.1.1 wheel, `mediapipe-nightly` 1.1.1rc20261013, matches
   the October 9 build's Image Classifier and Image Embedder exactly; its
   Summarizer has not been compared.

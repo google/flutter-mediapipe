@@ -9,9 +9,9 @@ import '../types/results.dart';
 /// Google's Summarizer: a paragraph or key points for a text.
 ///
 /// One class on every platform. Google's native runtime serves it on a
-/// worker isolate on Android, iOS, macOS, Linux and Windows; Google's browser
-/// runtime has no Summarizer, which `queryTextSummarizerCapabilities()`
-/// reports, and there [create] throws [RuntimeUnavailableException].
+/// worker isolate on Android, iOS, macOS, Linux and Windows. It is not yet
+/// available on the web, which `queryTextSummarizerCapabilities()` reports,
+/// and there [create] throws [RuntimeUnavailableException].
 ///
 /// ```dart
 /// final task = await TextSummarizer.create(

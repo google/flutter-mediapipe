@@ -10,7 +10,7 @@ import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'support/scripted_camera.dart';
 
 // Face Landmarker runs on the CPU and the GPU here, which the Stats card's
-// switch needs; macOS offers the CPU only for now (upstream-issues.md UP-057).
+// switch needs; macOS offers the CPU only for now.
 const _platform = TaskPlatform(operatingSystem: 'linux', architecture: 'x64');
 
 Future<void> _pumpLivePage(WidgetTester tester, Size size) async {

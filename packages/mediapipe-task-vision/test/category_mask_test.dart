@@ -74,7 +74,7 @@ void main() {
     expect(_read([0, 1, 1, 0]).categories, [0, 255, 255, 0]);
   });
 
-  test('classes round to the nearest, not down (UP-024)', () {
+  test('classes round to the nearest, not down', () {
     // A truncating readback reports a class one low when the GPU's value
     // lands just under class / 255.
     final classes = [for (var k = 1; k < 255; k++) k];

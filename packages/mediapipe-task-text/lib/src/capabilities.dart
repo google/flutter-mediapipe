@@ -25,16 +25,16 @@ TaskCapabilities _onEveryRuntime(
 
 const _classicGpu = 'The official classic text tasks run on CPU only.';
 
-/// Google's browser text runtime (`@mediapipe/tasks-text`) has no
-/// Proofreader or Summarizer; see upstream-issues.md UP-034.
+/// Proofreader and Summarizer are not yet available on the web, matching
+/// the MediaPipe Tasks Web SDK (`@mediapipe/tasks-text`).
 const _noBrowserGenerativeTasks =
-    "Google's browser text runtime has no Proofreader or Summarizer "
-    '(upstream-issues.md UP-034). Run the task on Android, iOS, macOS, '
-    'Linux or Windows.';
+    'Text Proofreader and Text Summarizer are not yet available on the web, '
+    'matching the MediaPipe Tasks Web SDK. Run the task on Android, iOS, '
+    'macOS, Linux or Windows.';
 
 /// The Proofreader and Summarizer: CPU wherever Google's text library serves
-/// them (Android, iOS, macOS, Linux and Windows); browsers have neither
-/// task.
+/// them (Android, iOS, macOS, Linux and Windows); both are not yet available
+/// on the web.
 TaskCapabilities _generative(TaskPlatform platform) {
   const gpu = "Google's task accepts only the CPU delegate.";
   const targets = largeModelRuntimeTargets;
@@ -108,8 +108,8 @@ TaskCapabilities textEmbedderCapabilitiesForPlatform(
 Future<TaskCapabilities> queryTextProofreaderCapabilities() async =>
     textProofreaderCapabilitiesForPlatform(await currentTaskPlatform());
 
-/// Proofreader support on [platform]: CPU on Google's text library; browsers
-/// have no Proofreader.
+/// Proofreader support on [platform]: CPU on Google's text library; not yet
+/// available on the web.
 TaskCapabilities textProofreaderCapabilitiesForPlatform(
   TaskPlatform platform,
 ) => _generative(platform);
@@ -118,7 +118,7 @@ TaskCapabilities textProofreaderCapabilitiesForPlatform(
 Future<TaskCapabilities> queryTextSummarizerCapabilities() async =>
     textSummarizerCapabilitiesForPlatform(await currentTaskPlatform());
 
-/// Summarizer support on [platform]: CPU on Google's text library; browsers
-/// have no Summarizer.
+/// Summarizer support on [platform]: CPU on Google's text library; not yet
+/// available on the web.
 TaskCapabilities textSummarizerCapabilitiesForPlatform(TaskPlatform platform) =>
     _generative(platform);

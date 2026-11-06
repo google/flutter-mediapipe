@@ -61,7 +61,7 @@ def main():
            'MEDIAPIPE_AUDIO_REFERENCE_DIR': str(audio_reference)}
     # The text package's generative tasks run in tool/test_modern_text.py. A
     # task's close waits for Google's usage-logging upload, so a slow reply
-    # holds a test past the default 30 s (upstream-issues.md UP-025).
+    # holds a test past the default 30 s.
     for package, name, extra in ((TEXT, 'text', ['--exclude-tags', 'modern-text']),
                                  (AUDIO, 'audio', [])):
         run(['dart', 'test', *extra, '--timeout', '180s', '--reporter', 'expanded'],

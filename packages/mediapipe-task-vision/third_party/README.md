@@ -38,5 +38,5 @@ The tests compare the bundled library with Google's own Python API from its
 1.1.0 release candidate: the `mediapipe-nightly` 1.1.0rc20260925 wheel for
 macOS arm64, which `mediapipe_core`'s `referenceWheels` pins together with
 its C library. Google's first 1.1.1 wheel (1.1.1rc20261013, October 13) is
-not pinned until Google says whether 1.1.1's Metal output is intended
-(UP-057). The wheel is an independent oracle, not the application runtime.
+not pinned until Google says whether 1.1.1's Metal output is intended.
+The wheel is an independent oracle, not the application runtime.

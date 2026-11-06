@@ -8,8 +8,7 @@
 /// (`familyRuntimeVersion`, Google's 1.2.0 nightly of October 18). Google
 /// published 1.1.0 itself on October 6, 2026 and a 1.1.1 nightly on
 /// October 13; the pins move with the next regeneration of every fixture,
-/// once Google says whether the Metal output since 1.1.1 is intended
-/// (UP-057).
+/// once Google says whether the Metal output since 1.1.1 is intended.
 typedef ReferenceWheel = ({
   String version,
   String url,

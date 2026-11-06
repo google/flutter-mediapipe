@@ -37,9 +37,9 @@ uses.
 
 ## Today (phase 1)
 
-What ships is described once, in the core README's
-[Bundled models](../README.md#bundled-models) and
-[On-demand models](../README.md#on-demand-models): the pubspec lists (the keys
+What ships is described once, in the core guide's
+[Bundled models](../../../doc/mediapipe_core.md#bundled-models) and
+[On-demand models](../../../doc/mediapipe_core.md#on-demand-models): the pubspec lists (the keys
 of each family's `XxxModels.byName`), the command (`bin/bundle_models.dart`,
 with its logic in `lib/src/model_bundler.dart`) and the lookup order every
 family's `model:` follows through core's `resolvePinnedModel`

@@ -50,10 +50,9 @@ void main() {
         final frame = await loadSample('portrait.jpg');
         final references = <Delegate, ImageSegmenterResult>{};
         var shiftedClasses = false;
-        // On Android the package declares the GPU unsupported (UP-061,
-        // UP-023) and refuses to create it; iPhones offer it, the simulator
-        // does not. A phone that must run the GPU may lose it only to that
-        // documented gap.
+        // On Android the package declares the GPU unsupported and refuses to
+        // create it; iPhones offer it, the simulator does not. A phone that
+        // must run the GPU may lose it only to that documented gap.
         final capabilities = await queryImageSegmenterCapabilities();
         final gpuDeclared = capabilities.supportedDelegates.contains(
           Delegate.gpu,
@@ -62,7 +61,7 @@ void main() {
         if (!gpuDeclared && _gpu == 'required') {
           expect(
             capabilities.unavailableReasons[Delegate.gpu],
-            contains('UP-061'),
+            contains('reads a GPU mask'),
           );
           // Asked for anyway, the package refuses it before Google's task
           // exists, so the app lives on to run the CPU checks below.
@@ -78,7 +77,7 @@ void main() {
               isA<RuntimeUnavailableException>().having(
                 (error) => error.fix,
                 'fix',
-                contains('UP-061'),
+                contains('reads a GPU mask'),
               ),
             ),
           );
@@ -136,10 +135,10 @@ void main() {
             if (delegate == Delegate.gpu &&
                 match.categoryAgreement <= _categoryAgreement &&
                 _matchesShiftedUp(file, expected, match)) {
-              // UP-024: the category mask is Google's, one class low; the
+              // The category mask is Google's, one class low; the
               // shifted mask and the confidence masks match its reference.
               shiftedClasses = true;
-              _report('upstream', {'issue': 'UP-024'});
+              _report('upstream', {'issue': 'category_mask_one_class_low'});
             } else {
               _expectMatch(match);
             }
@@ -167,7 +166,7 @@ void main() {
                 rotationDegrees: turn,
               );
               // Masks have the input's dimensions but hold the upright mask
-              // resized to them, as Google's own runtimes return (UP-017).
+              // resized to them, as Google's own runtimes return.
               final (width, height) = turn % 180 == 0
                   ? (frame.width, frame.height)
                   : (frame.height, frame.width);
@@ -311,7 +310,7 @@ CategoryMask _shiftedUp(CategoryMask mask) => CategoryMask(
   ]),
 );
 
-/// UP-024: on a Galaxy S24's Adreno GPU, Google's category mask reports each
+/// On a Galaxy S24's Adreno GPU, Google's category mask reports each
 /// non-background class one index low (person as 14, not 15) while its
 /// confidence masks are right. Recognised only when shifting the classes back
 /// makes the category grid and class shares match and the confidence masks

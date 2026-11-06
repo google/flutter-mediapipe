@@ -14,7 +14,7 @@ import 'support/face_reference.dart' show macosGpuWithdrawn;
 void main() {
   test(
     'macOS GPU video releases the frames MediaPipe keeps, without its model '
-    'file (UP-032)',
+    'file',
     () async {
       // The gallery loads both the shared engine and Face Detector's own
       // library. Exercise that combination in this regression as well.
