@@ -1,12 +1,14 @@
 # mediapipe_core
 
-The shared layer of the MediaPipe task packages (`mediapipe_vision`,
+The shared layer of the [MediaPipe] task packages (`mediapipe_vision`,
 `mediapipe_text`, `mediapipe_audio`); apps normally get it through them rather
 than depending on it directly. It owns everything the
 task families share, so each of vision, text and audio works alone and an app
 using several loads one copy of each shared piece. That includes the code that
 downloads and verifies Google's MediaPipe libraries, which each family's build
 hook uses to bundle its own:
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 | Platform | Runtime |
 | --- | --- |

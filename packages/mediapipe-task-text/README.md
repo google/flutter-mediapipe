@@ -1,10 +1,12 @@
 # mediapipe_text
 
-Google's MediaPipe text tasks for Dart and Flutter: text classification, text
+Google's [MediaPipe] text tasks for Dart and Flutter: text classification, text
 embeddings (EmbeddingGemma included) and language detection on every
 platform, plus Proofreader and Summarizer on every platform but the web.
 Every task runs Google's official MediaPipe pipeline, and Google's pinned
 models are bundled with your app at build time.
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 ## Tasks and platforms
 

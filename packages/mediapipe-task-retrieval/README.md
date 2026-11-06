@@ -1,10 +1,12 @@
 # mediapipe_retrieval
 
-Google's MediaPipe retrieval tasks for Dart and Flutter. Universal Embedder
+Google's [MediaPipe] retrieval tasks for Dart and Flutter. Universal Embedder
 turns text, images and audio into vectors in one embedding space; Semantic
 Retriever indexes documents, images, audio and mixed records on the device and
 finds the ones nearest a query. Every call runs Google's official MediaPipe
 pipeline.
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 ## Platforms
 
