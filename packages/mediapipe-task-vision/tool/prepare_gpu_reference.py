@@ -317,8 +317,13 @@ def main():
             result = subprocess.run(["dart", "pub", "get"], cwd=root, env=env,
                                     stdout=log, stderr=subprocess.STDOUT)
             if result.returncode == 0:
+                # A task's close waits for Google's usage-logging upload, so a
+                # slow reply holds a test past the default 30 s
+                # (upstream-issues.md UP-025); the upload request itself gives
+                # up after 60 s.
                 result = subprocess.run([
-                    "dart", "test", *suites, "--reporter", "expanded",
+                    "dart", "test", *suites, "--timeout", "180s",
+                    "--reporter", "expanded",
                 ], cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
         print("\n".join((output / "dart-tests.log").read_text().splitlines()[-30:]),
               flush=True)

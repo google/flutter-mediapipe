@@ -207,19 +207,30 @@ jobs:
       # 45m is the most Test Lab gives a physical device: the Galaxy A12 took 29
       # minutes for its 18 tasks, and the phones that also run Decision Maker
       # and the retrieval tasks download 1.07 GB of models.
+      # Over quota, Test Lab rejects the matrix before any test starts: the step
+      # stays red, since no test passed, and its rows say quota-exceeded instead
+      # of failure. It is never retried, since a retry spends more of that quota.
       - name: Run every SDK suite on CPU and GPU
         id: testlab
         env:
           MODEL: ${{ matrix.model }}
           VERSION: ${{ matrix.version }}
-        run: >-
-          gcloud firebase test android run
-          --project "$FIREBASE_PROJECT_ID" --type instrumentation
-          --app gallery/build/app/outputs/apk/debug/app-debug.apk
-          --test gallery/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-          --device "model=$MODEL,version=$VERSION,locale=en,orientation=portrait"
-          --timeout 45m --results-history-name mediapipe-vision-sdk-android
-          --results-bucket "$RESULTS_BUCKET" --results-dir "$RESULTS_DIR"
+        run: |
+          set -o pipefail
+          status=0
+          gcloud firebase test android run \
+            --project "$FIREBASE_PROJECT_ID" --type instrumentation \
+            --app gallery/build/app/outputs/apk/debug/app-debug.apk \
+            --test gallery/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device "model=$MODEL,version=$VERSION,locale=en,orientation=portrait" \
+            --timeout 45m --results-history-name mediapipe-vision-sdk-android \
+            --results-bucket "$RESULTS_BUCKET" --results-dir "$RESULTS_DIR" \
+            2>&1 | tee "$RUNNER_TEMP/testlab.log" || status=$?
+          if [ "$status" != 0 ] && grep -q '^Reason: TEST_QUOTA_EXCEEDED' "$RUNNER_TEMP/testlab.log"; then
+            echo "::warning::$MODEL not run: Test Lab quota exceeded, so no test ran on it. Not a pass, and not retried."
+            echo "not_run=quota-exceeded" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
       - name: Download test artifacts
         if: always()
         run: |
@@ -247,7 +258,7 @@ jobs:
           platform: android
           delegate: cpu
           tasks: ${{ steps.tasks.outputs.all }}
-          outcome: ${{ steps.testlab.outcome }}
+          outcome: ${{ steps.testlab.outputs.not_run || steps.testlab.outcome }}
           tier: device
       # Vision tasks only: the text, audio, Decision Maker and retrieval tasks
       # run on the CPU alone on Android, and matrix.json marks their GPU unsupported.
@@ -259,7 +270,7 @@ jobs:
           platform: android
           delegate: gpu
           tasks: ${{ steps.gpu.outputs.tasks }}
-          outcome: ${{ steps.testlab.outcome }}
+          outcome: ${{ steps.testlab.outputs.not_run || steps.testlab.outcome }}
           tier: device
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()

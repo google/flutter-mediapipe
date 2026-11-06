@@ -9,6 +9,7 @@ import 'package:mediapipe_decision/mediapipe_decision.dart';
 
 import 'catalog.dart';
 import 'fish/fish_game.dart';
+import 'fish/fish_paint.dart';
 import 'live/task_models.dart';
 import 'live/task_settings.dart';
 import 'live/task_settings_panel.dart';
@@ -532,7 +533,7 @@ class _SeaPainter extends CustomPainter {
     );
     final encounter = world.encounter;
     for (final fish in world.others) {
-      _fish(canvas, fish, Color(fish.species!.color));
+      paintFish(canvas, fish, Color(fish.species!.color));
       _label(canvas, fish.species!.name, fish);
     }
     if (encounter != null) {
@@ -547,45 +548,7 @@ class _SeaPainter extends CustomPainter {
           ..strokeWidth = 3,
       );
     }
-    _fish(canvas, player, const Color(0xFFFF9800), outline: true);
-  }
-
-  void _fish(Canvas canvas, Fish fish, Color color, {bool outline = false}) {
-    final direction = fish.facingLeft ? -1.0 : 1.0;
-    final body = Rect.fromCenter(
-      center: Offset(fish.x, fish.y),
-      width: fish.size * 2.4,
-      height: fish.size * 1.5,
-    );
-    final tail = Path()
-      ..moveTo(fish.x - direction * fish.size * 1.0, fish.y)
-      ..lineTo(fish.x - direction * fish.size * 1.9, fish.y - fish.size * 0.7)
-      ..lineTo(fish.x - direction * fish.size * 1.9, fish.y + fish.size * 0.7)
-      ..close();
-    final paint = Paint()..color = color;
-    canvas
-      ..drawPath(tail, paint)
-      ..drawOval(body, paint);
-    if (outline) {
-      canvas.drawOval(
-        body,
-        Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5,
-      );
-    }
-    canvas
-      ..drawCircle(
-        Offset(fish.x + direction * fish.size * 0.6, fish.y - fish.size * 0.2),
-        math.max(1.5, fish.size * 0.16),
-        Paint()..color = Colors.white,
-      )
-      ..drawCircle(
-        Offset(fish.x + direction * fish.size * 0.65, fish.y - fish.size * 0.2),
-        math.max(0.8, fish.size * 0.08),
-        Paint()..color = Colors.black,
-      );
+    paintFish(canvas, player, const Color(0xFFFF9800));
   }
 
   void _label(Canvas canvas, String name, Fish fish) {

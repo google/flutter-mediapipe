@@ -20,13 +20,19 @@ inputs:
   modern-model-cache:
     description: Cache the three generative text models, 419 MB in all, by their pinned SHA-256.
     default: 'false'
+  official-wheel-cache:
+    description: >-
+      Cache what pip downloads for Google's official wheels, by their pinned
+      SHA-256, all held in reference_wheels.dart. For jobs that install them:
+      a job that does not would save an empty cache under the shared key.
+    default: 'false'
 runs:
   using: composite
   steps:
     - if: ${{ inputs.flutter == 'true' }}
       uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
       with:
-        flutter-version: '3.47.5'
+        flutter-version: '3.47.9'
         channel: stable
         cache: true
     - if: ${{ inputs.python == 'true' }}
@@ -151,3 +157,17 @@ runs:
           packages/mediapipe-task-text/models/proofread_quant_200m.litertlm
           packages/mediapipe-task-text/models/summarization_quant_200m_2modes.litertlm
         key: modern-text-models-${{ hashFiles('packages/mediapipe-task-text/lib/models.dart') }}
+    - if: ${{ inputs.official-wheel-cache == 'true' }}
+      shell: bash
+      run: echo "PIP_CACHE_DIR=$RUNNER_TEMP/pip-cache" >> "$GITHUB_ENV"
+    # Only main saves here too.
+    - if: ${{ inputs.official-wheel-cache == 'true' && github.event_name == 'pull_request' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ runner.temp }}/pip-cache
+        key: official-wheels-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('packages/mediapipe-core/lib/src/native_assets/reference_wheels.dart') }}
+    - if: ${{ inputs.official-wheel-cache == 'true' && github.event_name != 'pull_request' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ runner.temp }}/pip-cache
+        key: official-wheels-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('packages/mediapipe-core/lib/src/native_assets/reference_wheels.dart') }}

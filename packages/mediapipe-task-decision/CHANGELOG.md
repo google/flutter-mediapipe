@@ -1,3 +1,9 @@
+## 0.1.3
+
+- The README has an installation section using `flutter pub add`.
+- With `mediapipe_core` 0.1.3, downloads of models and native libraries wait out
+  short network failures.
+
 ## 0.1.2
 
 Release 0.1.2.

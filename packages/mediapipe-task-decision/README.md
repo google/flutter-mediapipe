@@ -37,9 +37,19 @@ browser with a hardware WebGPU adapter. The browser runtime also ignores
 `normalizePrior` and `scoringMode`
 ([UP-056](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-056-the-browser-decision-maker-ignores-normalizeprior-and-scoringmode)).
 
-## Quick start
+## Installation
 
-Add `mediapipe_decision: ^0.1.2` to your app's dependencies, then:
+Add the package from pub.dev, from your app's root:
+
+```sh
+flutter pub add mediapipe_decision
+```
+
+This adds `mediapipe_decision: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+comes with it, and `mediapipe_decision.dart` exports its types, so you do not add or
+import core yourself.
+
+## Quick start
 
 ```dart
 import 'package:mediapipe_decision/mediapipe_decision.dart';

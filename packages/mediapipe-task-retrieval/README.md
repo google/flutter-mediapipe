@@ -32,9 +32,19 @@ so `databasePath` is for the native platforms. In browsers the package fetches
 the model itself, since Google's task reads a `modelAssetPath` as a file
 ([UP-051](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-051-the-browser-universal-embedder-reads-modelassetpath-as-a-file-and-a-second-wasm-object-needs-the-loader-again)).
 
-## Quick start
+## Installation
 
-Add `mediapipe_retrieval: ^0.1.2` to your app's dependencies, then:
+Add the package from pub.dev, from your app's root:
+
+```sh
+flutter pub add mediapipe_retrieval
+```
+
+This adds `mediapipe_retrieval: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+comes with it, and `mediapipe_retrieval.dart` exports its types, so you do not add or
+import core yourself.
+
+## Quick start
 
 ```dart
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';

@@ -1,3 +1,11 @@
+// A task's close waits for Google's usage-logging upload, which gives up after
+// 60 s (upstream-issues.md UP-025), so a slow reply holds a test past the
+// default 30 s without any real work. The work here takes seconds, and
+// 3 minutes matches CI's --timeout 180s, so runs without that flag behave the
+// same, and a real deadlock still fails.
+@Timeout(Duration(minutes: 3))
+library;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';

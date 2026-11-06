@@ -43,10 +43,12 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/free-runner-disk
       - if: inputs.side == 'nightly'
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
         with:
+          official-wheel-cache: 'true'
           linux-profile: ffi
           modern-model-cache: 'true'
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
@@ -98,6 +100,8 @@ jobs:
       # builds and gave up on one corrupt archive (2026-10-22), so install
       # them here, retried.
       - uses: ./.github/actions/android-ndk
+      - name: Free disk before the emulator
+        run: df -h /
       - name: Official references, pixel formats, rotation, VIDEO, camera and every live tile
         id: sdk
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
@@ -170,7 +174,7 @@ jobs:
       - name: Release gallery keeps every plugin field through R8
         if: ${{ !cancelled() }}
         run: |
-          python3 -B -m unittest tool/ci/test_check_r8_usage.py
+          python3 -B -m unittest tool/ci/test_check_r8_usage.py tool/ci/test_run_release_suite.py
           dart run tool/gallery_builder/bin/prepare_gallery.dart --target android/arm64
           cd gallery
           flutter build apk --release --target-platform android-arm64
@@ -215,10 +219,12 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/free-runner-disk
       - if: inputs.side == 'nightly'
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
         with:
+          official-wheel-cache: 'true'
           linux-profile: ffi
           modern-model-cache: 'true'
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
@@ -264,6 +270,8 @@ jobs:
       # As in the job above: Gradle's own NDK and CMake downloads give up on
       # one corrupt archive.
       - uses: ./.github/actions/android-ndk
+      - name: Free disk before the emulator
+        run: df -h /
       - name: Every phone suite and the gallery journey in a release build
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:

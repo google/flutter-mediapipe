@@ -23,28 +23,17 @@ the [Interactive Segmenter guide](https://github.com/google/flutter-mediapipe/bl
 
 ## Installation
 
-Use **Flutter 3.47.5 stable** to match CI. The package requires Dart 3.12 or
-newer and the usual toolchain for your target platform. Add the vision
-package to your app's `pubspec.yaml`:
+The package needs Flutter 3.47 or newer, with the latest stable release
+recommended, and the usual toolchain for your target platform. Add the package
+from pub.dev, from your app's root:
 
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  mediapipe_vision: ^0.1.2
+```sh
+flutter pub add mediapipe_vision
 ```
 
-To use the repository's current code instead, clone it beside your app,
-depend on the package by path and point `mediapipe_core` at the clone too:
-
-```yaml
-dependencies:
-  mediapipe_vision:
-    path: ../flutter-mediapipe/packages/mediapipe-task-vision
-dependency_overrides:
-  mediapipe_core:
-    path: ../flutter-mediapipe/packages/mediapipe-core
-```
+This adds `mediapipe_vision: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+comes with it, and `mediapipe_vision.dart` exports its types, so you do not add or
+import core yourself.
 
 On Android, iOS, macOS, Linux and Windows the package's build hook bundles
 Google's MediaPipe vision library. In browsers its web plugin registers
@@ -165,8 +154,8 @@ Future<FaceLandmarker> createFromAsset() async {
 A model that is not bundled makes `create` throw a
 `RuntimeUnavailableException` whose `fix` names the pubspec entry to add. To
 download models at run time instead, set `ModelStore.allowDownloads = true`
-from `mediapipe_core` before creating tasks; Android release builds and
-sandboxed macOS apps then need network permission, as
+before creating tasks; Android release builds and sandboxed macOS apps then
+need network permission, as
 [platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md)
 describes. `ModelStore().prefetch(VisionModels.faceLandmarker)` downloads
 ahead of time, on an onboarding screen say.

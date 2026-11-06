@@ -311,17 +311,28 @@ class GalleryPageBody extends StatelessWidget {
   }
 }
 
-/// The row atop a task page: the page's own switch, if it has one, and Info.
+/// The row atop a task page: the page's own switch, if it has one, Info, and
+/// [TaskPackageLink] beside the switch, or under it when the row lacks the room.
 class TaskToolbar extends StatelessWidget {
   const TaskToolbar({super.key, required this.task, this.leading});
 
   final GalleryTask task;
   final Widget? leading;
 
+  /// The narrowest row that holds the widest switch, the link and Info at full
+  /// size.
+  static const _roomForLink = 600.0;
+
   @override
   Widget build(BuildContext context) {
     final phone = MediaQuery.sizeOf(context).width < Sizes.compact;
     final lead = leading;
+    final link = TaskPackageLink(task: task);
+    Widget fit(Widget child) => FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: child,
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: LayoutBuilder(
@@ -334,25 +345,65 @@ class TaskToolbar extends StatelessWidget {
             tooltip: 'About this task',
             onPressed: () => showTaskInfo(context, task),
           );
-          return Row(
+          final below = lead != null && constraints.maxWidth < _roomForLink;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: lead == null
-                      ? const SizedBox.shrink()
-                      : FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: lead,
+              Row(
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: fit(switch (lead) {
+                        null => link,
+                        _ when below => lead,
+                        _ => Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [lead, const SizedBox(width: 20), link],
                         ),
-                ),
+                      }),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  info,
+                ],
               ),
-              const SizedBox(width: 12),
-              info,
+              if (below) ...[const SizedBox(height: 6), fit(link)],
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// The package a task page runs, on pub.dev.
+class TaskPackageLink extends StatelessWidget {
+  const TaskPackageLink({super.key, required this.task});
+
+  final GalleryTask task;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = GalleryColors.of(context);
+    final package = task.category.package;
+    return Link(
+      uri: Uri.parse('https://pub.dev/packages/$package'),
+      target: LinkTarget.blank,
+      builder: (context, openLink) => InkWell(
+        onTap: openLink,
+        // Tall enough for a finger, since a phone shows this first.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            '$package on pub.dev',
+            style: TextStyle(
+              color: c.teal,
+              fontSize: Sizes.sm,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
       ),
     );
   }

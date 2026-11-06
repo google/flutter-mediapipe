@@ -48,6 +48,7 @@ jobs:
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
         with:
+          official-wheel-cache: 'true'
           linux-profile: gallery
           modern-model-cache: 'true'
       - name: Validate Linux CPU references and debug/release consumers
@@ -170,6 +171,7 @@ jobs:
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
         with:
+          official-wheel-cache: 'true'
           linux-profile: gallery
       # Through apt-install: the setup action's cache hit runs no apt-get update.
       - name: Install Mesa's EGL and OpenGL ES

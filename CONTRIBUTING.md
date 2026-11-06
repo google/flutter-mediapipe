@@ -85,6 +85,10 @@ The second run expects Decision Maker to answer on Laya, and Hungry Fish and bot
 retrieval tasks to be cards with their reason
 ([UP-054](upstream-issues.md#up-054-in-webkit-the-browser-runtime-embeds-every-input-as-zeros-with-embeddinggemma-2)).
 
+A journey that loses its page runs once more and prints a `::warning::`, so
+read the output even when it passes: a crash can be a real memory bug, and
+`build/ci-tmp/gallery-journey-webkit/report-lost-page.json` says where it went.
+
 ## Versions and the first release
 
 The first release is 0.1.0 of `mediapipe_core`, `mediapipe_vision`,

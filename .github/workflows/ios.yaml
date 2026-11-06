@@ -44,6 +44,7 @@ jobs:
         uses: ./.github/actions/nightly-pin
       - uses: ./.github/actions/setup
         with:
+          official-wheel-cache: 'true'
           modern-model-cache: 'true'
       - name: Make flutter test wait for the simulator log reader
         run: python3 -B tool/ci/patch_flutter_simulator_launch.py

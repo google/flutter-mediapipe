@@ -1,3 +1,14 @@
+## 0.1.3
+
+- Downloads of models and native libraries wait out short network failures. At
+  the last URL, a failed DNS lookup or a lost connection is retried for 75
+  seconds from the first failure, rather than giving up after three attempts
+  within seconds. Earlier URLs keep three attempts, so a blocked primary still
+  reaches its mirror quickly, and a digest mismatch still moves to the next URL
+  at once. With no network at all, the error now appears after about 75 seconds.
+- The README says this package comes with every family, and to add it from
+  pub.dev only if your own code imports `package:mediapipe_core`.
+
 ## 0.1.2
 
 Release 0.1.2.

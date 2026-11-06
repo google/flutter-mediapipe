@@ -16,10 +16,22 @@ No platform needs a setting. See
 for permissions, Linux graphics libraries and self-hosting the browser
 runtime.
 
+## Installation
+
+Add the package from pub.dev, from your app's root:
+
+```sh
+flutter pub add mediapipe_audio
+```
+
+This adds `mediapipe_audio: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+comes with it, and `mediapipe_audio.dart` exports its types, so you do not add or
+import core yourself.
+
 ## Use
 
-Add `mediapipe_audio: ^0.1.2` to your app's dependencies. Bundle the model
-with your app: list it in the app's pubspec and declare the folder it goes in.
+Bundle the model with your app: list it in the app's pubspec and declare the
+folder it goes in.
 
 ```yaml
 flutter:

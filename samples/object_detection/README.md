@@ -30,11 +30,13 @@ drawing code.
 
 ### Prerequisites
 
-- **Flutter 3.47.5 stable** (Dart 3.12 or newer), with the toolchain for the
-  platform you build: Android SDK, Xcode, Visual Studio, or the Linux desktop
-  packages.
-- A clone of this repository. The sample depends on `mediapipe_vision` by path
-  until the package is on pub.dev.
+- **Flutter 3.47 or newer** (the latest stable release is recommended), with
+  the toolchain for the platform you build: Android SDK, Xcode, Visual Studio,
+  or the Linux desktop packages.
+- A clone of this repository. The sample builds against the packages in the
+  checkout, which can be ahead of pub.dev. Your own app adds `mediapipe_vision`
+  from pub.dev; see its
+  [installation guide](../../packages/mediapipe-task-vision/README.md#installation).
 - Network access on the first build: the build hook downloads Google's
   MediaPipe vision library for the target and verifies its SHA-256.
 

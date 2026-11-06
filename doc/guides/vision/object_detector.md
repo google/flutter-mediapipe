@@ -25,8 +25,9 @@ it when modifying an existing app.
 
 ### Download the code
 
-The sample lives in this repository and depends on the packages by path, so
-clone the whole repository:
+The sample lives in this repository and builds against the packages in the
+checkout, so running it takes a clone of the whole repository. Your own app
+adds the package from pub.dev instead; see [Setup](#setup).
 
 ```sh
 git clone https://github.com/google/flutter-mediapipe.git
@@ -57,19 +58,19 @@ The following files contain the code that matters for object detection:
 ## Setup
 
 This section describes the key steps for setting up a Flutter project to use
-the Object Detector. Flutter 3.47.5 stable or newer and Dart 3.12 or newer
-are required.
+the Object Detector. It needs Flutter 3.47 or newer; the latest stable release
+is recommended.
 
 ### Dependencies
 
-The Object Detector is in the `mediapipe_vision` package:
+The Object Detector is in the `mediapipe_vision` package. Add it from pub.dev,
+from your app's root:
 
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  mediapipe_vision: ^0.1.2
+```sh
+flutter pub add mediapipe_vision
 ```
+
+This adds `mediapipe_vision: ^0.1.2` to your app's `pubspec.yaml`.
 
 On Android, iOS, macOS, Linux and Windows the package's build hook downloads
 Google's MediaPipe vision library for the target, verifies it and bundles it
