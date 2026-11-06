@@ -1,9 +1,11 @@
 # mediapipe_decision
 
-Google's MediaPipe Decision Maker for Dart and Flutter. Ask a yes-or-no,
+Google's [MediaPipe] Decision Maker for Dart and Flutter. Ask a yes-or-no,
 choice or score question about a piece of text and get Google's answer with
 calibrated probabilities, in one forward pass of a small model rather than by
 generating text. Every call runs Google's official MediaPipe pipeline.
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 ## Platforms
 

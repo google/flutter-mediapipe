@@ -1,9 +1,11 @@
 # mediapipe_vision
 
-MediaPipe vision tasks for Dart and Flutter. Use one Dart API to detect faces
+[MediaPipe] vision tasks for Dart and Flutter. Use one Dart API to detect faces
 and objects, track face/hand/pose landmarks, recognize gestures, classify or
 embed images, and segment images. The package uses Google's official
 MediaPipe task runtimes on supported platforms.
+
+[MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
 **[Try the live gallery](https://google.github.io/flutter-mediapipe/)** ·
 **[See every task and platform](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/tool/VISION_TASKS_STATUS.md)** ·
