@@ -40,7 +40,7 @@ recommended. Add a family from pub.dev, from your app's root:
 flutter pub add mediapipe_vision
 ```
 
-This adds `mediapipe_vision: ^0.1.2` to your app's `pubspec.yaml`. List the
+This adds `mediapipe_vision: ^0.1.3` to your app's `pubspec.yaml`. List the
 models your app uses in the same pubspec, and declare the folder they are
 bundled in:
 

@@ -70,7 +70,7 @@ from your app's root:
 flutter pub add mediapipe_vision
 ```
 
-This adds `mediapipe_vision: ^0.1.2` to your app's `pubspec.yaml`.
+This adds `mediapipe_vision: ^0.1.3` to your app's `pubspec.yaml`.
 
 On Android, iOS, macOS, Linux and Windows the package's build hook downloads
 Google's MediaPipe vision library for the target, verifies it and bundles it

@@ -45,7 +45,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_decision
 ```
 
-This adds `mediapipe_decision: ^0.1.2` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_decision: ^0.1.3` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_decision.dart` exports its types, so you do not add or
 import core yourself.
 
