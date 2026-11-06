@@ -63,7 +63,7 @@ class LandmarkOverlay extends CustomPainter {
             style: TextStyle(
               color: figure.color,
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               shadows: const [Shadow(blurRadius: 3)],
             ),
           ),

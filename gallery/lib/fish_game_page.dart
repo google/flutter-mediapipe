@@ -288,9 +288,9 @@ class _FishGamePageState extends State<FishGamePage>
                   last.answer.intent.name[0].toUpperCase() +
                       last.answer.intent.name.substring(1),
                   style: TextStyle(
-                    color: last.matched ? c.teal : Colors.redAccent,
+                    color: last.matched ? c.accent : Colors.redAccent,
                     fontSize: 22,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 10),

@@ -14,6 +14,7 @@ import 'live/live_camera_controller.dart';
 import 'live/camera_geometry.dart';
 import 'live/live_camera_view.dart';
 import 'live/live_registry.dart';
+import 'live/live_start_progress.dart';
 import 'live/mask_overlay.dart';
 import 'live/overlay_visibility.dart';
 import 'live/speed_history.dart';
@@ -985,41 +986,15 @@ class _LivePageState extends State<LivePage>
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Color(0xFFF0F3F2)),
                 ),
+                // The starting card below shows progress instead.
+                null when controller.initializing => const SizedBox.shrink(),
                 null => const CircularProgressIndicator(),
               },
             ),
-            if (controller.initializing &&
-                controller.frameSize != null &&
-                error == null)
+            if (controller.initializing && error == null)
               Center(
                 child: IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: const Color(0xDD101715),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Model initializing...',
-                            style: TextStyle(color: Color(0xFFF0F3F2)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: LiveStartCard(controller.startProgress),
                 ),
               ),
             if (controller.canSwitchCamera)
@@ -1043,7 +1018,11 @@ class _LivePageState extends State<LivePage>
                 '${controller.recentFramesPerSecond.toStringAsFixed(1)} fps',
                 '${controller.recentInferenceMilliseconds.toStringAsFixed(0)} ms',
               ]
-            : [controller.initializing ? 'Model initializing...' : 'Stopped'],
+            : [
+                controller.initializing
+                    ? controller.startProgress.summary
+                    : 'Stopped',
+              ],
         delegate: controller.delegate == Delegate.gpu ? 'GPU' : 'CPU',
         trailing: phone
             ? Row(

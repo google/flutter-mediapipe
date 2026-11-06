@@ -72,7 +72,7 @@ class DetectionOverlay extends CustomPainter {
         style: const TextStyle(
           color: _color,
           fontSize: 15,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           shadows: [Shadow(blurRadius: 3)],
         ),
       ),

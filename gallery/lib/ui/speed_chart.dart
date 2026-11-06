@@ -253,7 +253,7 @@ class SeriesToggle extends StatelessWidget {
           style: TextStyle(
             color: on ? c.text : c.muted,
             fontSize: Sizes.sm,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         if (milliseconds case final ms?) ...[

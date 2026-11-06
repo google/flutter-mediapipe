@@ -127,6 +127,8 @@ jobs:
           exit 1
       - name: Face Landmarker still image in Chromium
         run: node gallery/tool/browser/test_still_image.mjs
+      - name: Loading screen and model progress in Chromium
+        run: node gallery/tool/browser/test_loading_screen.mjs
       - name: Image Segmenter masks, legend and output types in Chromium
         run: node gallery/tool/browser/test_segmenter_display.mjs
       - name: Chromium CPU runtime, API and face webcam
@@ -245,6 +247,7 @@ jobs:
           path: |
             build/ci-tmp/web-browser-*/
             build/ci-tmp/worker-overlays/
+            build/ci-tmp/loading-screen-web/
             build/ci-tmp/gallery-journey-*/
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

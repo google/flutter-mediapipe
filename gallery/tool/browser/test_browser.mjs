@@ -265,6 +265,7 @@ async function apiChecks() {
   // The probe runs every browser task. Hosted runners emulate WebGL in
   // software, so the GPU pass can take minutes there.
   await wait(page, () => window.mediapipeApiTestReport, null, 300000);
+  assert.equal(await page.locator('#splash').count(), 0, 'The loading screen outlived the page it covers.');
   const api = await page.evaluate(() => window.mediapipeApiTestReport);
   fs.writeFileSync(path.join(evidence, 'api-report.json'), JSON.stringify(api, null, 2));
   assert.equal(api.status, 'passed', JSON.stringify(api));
@@ -930,6 +931,7 @@ async function textAudioChecks() {
   if (argumentsMap.runtime) query.set('runtime', argumentsMap.runtime);
   await page.goto(textAudioBase + (query.size ? '?' + query : ''));
   await wait(page, () => window.mediapipeTextAudioReport, null, 300000);
+  assert.equal(await page.locator('#splash').count(), 0, 'The loading screen outlived the page it covers.');
   context.off('request', recordRuntime);
   const api = await page.evaluate(() => window.mediapipeTextAudioReport);
   fs.writeFileSync(path.join(evidence, 'text-audio-runtime-requests.json'), JSON.stringify(runtimeRequests, null, 2));

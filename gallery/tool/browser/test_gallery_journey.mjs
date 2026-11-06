@@ -164,6 +164,8 @@ try {
   // plays the speech sample through its microphone path instead.
   await page.goto(base + (base.includes('?') ? '&' : '?') + 'microphone=sample');
   await sidebarItem('Home').waitFor({timeout: 120000});
+  // The page's loading screen must not outlive the home page it covers.
+  assert.equal(await page.locator('#splash').count(), 0, 'The loading screen outlived the page it covers.');
   // Google's browser Decision Maker answers only on a hardware WebGPU adapter,
   // by its own rule (UP-049), and its Universal Embedder creates a WebGPU
   // device for itself (UP-052); elsewhere the gallery shows their cards.

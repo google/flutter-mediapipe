@@ -83,6 +83,9 @@ answers in App Store Connect must describe.
 
 - This repository's source: [Apache-2.0](../LICENSE), with upstream notices
   retained.
+- The gallery's bundled Roboto font (`gallery/fonts/`): the
+  [SIL Open Font License 1.1](../gallery/fonts/OFL-Roboto.txt), Copyright 2011
+  The Roboto Project Authors. The font files are unmodified.
 - Google's MediaPipe runtimes: Apache-2.0. `mediapipe_core` carries the
   `LICENSE` and `NOTICE` Google ships with the libraries it pins
   (`third_party/`, identical for every family), which apps redistribute with

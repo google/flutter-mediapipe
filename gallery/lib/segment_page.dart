@@ -488,7 +488,7 @@ class _StrokePainter extends CustomPainter {
   final List<NormalizedKeypoint> active;
   final BrushMode activeBrush;
 
-  /// Include in the design's accent; Exclude and Lasso in the red and blue of
+  /// Include in the overlays' accent; Exclude and Lasso in the red and blue of
   /// Google's samples, the lasso filled lightly.
   static const _exclude = Color(0xFFE53935);
   static const _lasso = Color(0xFF2196F3);

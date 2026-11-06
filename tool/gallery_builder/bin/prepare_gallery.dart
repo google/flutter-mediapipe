@@ -179,6 +179,23 @@ Future<void> _prepare(
     }
   }
 
+  // The web gallery's model progress needs each model's size: GitHub Pages
+  // serves them gzipped, so a response's Content-Length is not it.
+  if (target == 'web') {
+    final models = Directory(p.join(gallery, 'assets/mediapipe'));
+    manifest['modelBytes'] = {
+      if (await models.exists())
+        for (final file
+            in models.listSync().whereType<File>().toList()
+              ..sort((a, b) => a.path.compareTo(b.path)))
+          if (RegExp(r'^[0-9a-f]{64}$').hasMatch(p.basename(file.path)))
+            p.basename(file.path): file.lengthSync(),
+    };
+    await File(p.join(gallery, 'assets/manifest.json')).writeAsString(
+      '${const JsonEncoder.withIndent('  ').convert(manifest)}\n',
+    );
+  }
+
   stdout.writeln('$target: ${tasks.length} task(s) bundled');
   for (final task in tasks) {
     stdout.writeln('  + $task');
@@ -334,12 +351,12 @@ $core$defines
 flutter:
   uses-material-design: true
   fonts:
-    - family: Arimo
+    - family: Roboto
       fonts:
-        - asset: fonts/Arimo-400.ttf
-        - asset: fonts/Arimo-600.ttf
-          weight: 600
-        - asset: fonts/Arimo-700.ttf
+        - asset: fonts/Roboto-400.ttf
+        - asset: fonts/Roboto-500.ttf
+          weight: 500
+        - asset: fonts/Roboto-700.ttf
           weight: 700
   assets:
     - assets/manifest.json

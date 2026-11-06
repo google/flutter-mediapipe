@@ -19,6 +19,7 @@ import 'package:mediapipe_audio/mediapipe_audio.dart';
 import 'package:mediapipe_gallery/audio/microphone.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
 import 'package:mediapipe_gallery/bundled_model_assets.dart';
+import 'package:mediapipe_gallery/web/splash.dart';
 
 @JS('mediapipeTextAudioReport')
 external set _report(JSAny? value);
@@ -85,6 +86,7 @@ const clips = ['speech_16000_hz_mono.wav', 'speech_48000_hz_mono.wav'];
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  hideSplash();
   if (Uri.base.queryParameters['runtime'] case final String runtime) {
     MediaPipeWebRuntime.baseUrl = runtime;
   }

@@ -251,7 +251,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
     final big = TextStyle(
       color: c.text,
       fontSize: 22,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
     );
     final muted = TextStyle(color: c.muted, fontSize: Sizes.sm);
     switch (_result) {
