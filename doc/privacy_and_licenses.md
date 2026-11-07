@@ -39,9 +39,9 @@ law requires it. The packages cannot turn the logging off.
 
 | Where | What the packages bundle | Usage logging |
 | --- | --- | --- |
-| macOS, Linux, Windows | Google's per-family 1.2.0 libraries | An uploader to `https://play.googleapis.com/log` in every library. Observed with Google's October 18 build on all three, every family: one request per task close, which Google accepts (HTTP 200). On macOS the User-Agent carries the process name. On Windows a close waits for its upload ([UP-025](../upstream-issues.md#up-025-windows-task-closes-wait-for-googles-usage-logging-upload)) |
+| macOS, Linux, Windows | Google's per-family 1.2.0 libraries | An uploader to `https://play.googleapis.com/log` in every library. Observed with Google's October 18 build on all three, every family: one request per task close, which Google accepts (HTTP 200). On macOS the User-Agent carries the process name. On Windows a close waits for its upload |
 | iOS | Google's per-family 1.2.0 libraries | The same uploader. Observed with the October 18 build on the iOS Simulator (every family) and on an iPhone: one request per task close, which Google accepts, with the app's bundle ID and version, the iOS version and the device model in the User-Agent |
-| Android | Google's per-family 1.2.0 libraries | The same uploader, which since the 1.2.0 nightlies opens its own connection rather than going through Java. Observed with the October 18 build on an emulator, where Google accepts one request per task close, and on physical phones from Android 9 to 15, 64-bit and 32-bit, where each task close opens one connection to Google of the same size and waits for it, up to about 2.5 s on the oldest phone ([UP-025](../upstream-issues.md#up-025-windows-task-closes-wait-for-googles-usage-logging-upload)) |
+| Android | Google's per-family 1.2.0 libraries | The same uploader, which since the 1.2.0 nightlies opens its own connection rather than going through Java. Observed with the October 18 build on an emulator, where Google accepts one request per task close, and on physical phones from Android 9 to 15, 64-bit and 32-bit, where each task close opens one connection to Google of the same size and waits for it, up to about 2.5 s on the oldest phone |
 | Browsers | Google's JavaScript runtimes | Requests from the page to `https://odml.pa.googleapis.com/v1/log` when a task closes and every 60 seconds while one is open. Observed with the October 18 build in Chromium and WebKit, every family, which Google accepts |
 
 Every family uploads, Decision Maker included: each was observed with the
@@ -49,8 +49,7 @@ October 18 build on macOS, Linux, Windows, the iOS Simulator and in browsers,
 and on Android phones for the vision, text, audio, Universal Embedder and
 Decision Maker closes. One task's uploads are incomplete: the Semantic
 Retriever's name no OS, host environment or host version, on every native
-platform and under Google's own Python, because its options take none
-([UP-063](../upstream-issues.md#up-063-semantic-retrievers-usage-uploads-carry-no-os-host-environment-or-host-version)).
+platform and under Google's own Python, because its options take none.
 
 Block those endpoints if your policy requires it: inference is unaffected. A
 task's close waits for its upload, so refuse the connection (for example
@@ -62,9 +61,7 @@ wait for the upload to time out (about 4 seconds on iOS).
 App Store Connect refuses an iOS app whose code calls an API on Apple's
 required-reason list without declaring why (ITMS-91053). Google's iOS
 libraries call some and carry no privacy manifest, and a Flutter build cannot
-add one to them
-([UP-062](../upstream-issues.md#up-062-the-ios-libraries-call-required-reason-apis-and-ship-no-privacy-manifest)),
-so an app that uses these packages declares them in its own
+add one to them, so an app that uses these packages declares them in its own
 `ios/Runner/PrivacyInfo.xcprivacy`, added to the Runner target in Xcode:
 
 | Families | Category (`NSPrivacyAccessedAPIType`) | Called through | The gallery's reason |
@@ -83,6 +80,9 @@ answers in App Store Connect must describe.
 
 - This repository's source: [Apache-2.0](../LICENSE), with upstream notices
   retained.
+- The gallery's bundled Roboto font (`gallery/fonts/`): the
+  [SIL Open Font License 1.1](../gallery/fonts/OFL-Roboto.txt), Copyright 2011
+  The Roboto Project Authors. The font files are unmodified.
 - Google's MediaPipe runtimes: Apache-2.0. `mediapipe_core` carries the
   `LICENSE` and `NOTICE` Google ships with the libraries it pins
   (`third_party/`, identical for every family), which apps redistribute with

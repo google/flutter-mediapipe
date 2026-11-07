@@ -25,8 +25,9 @@ on:
       - .github/workflows/samples.yaml
   workflow_dispatch:
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: samples-${{ github.ref }}
+  group: samples-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:

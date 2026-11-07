@@ -13,9 +13,9 @@ const _model = 'models/blaze_face_short_range.tflite';
 
 void main() {
   for (final delegate in Delegate.values) {
-    // Google's Linux library cannot run Face Detector's GPU (UP-046), so its
-    // wheel writes no same-host GPU reference for a group to load there; the
-    // refusal test below covers the Linux GPU instead.
+    // Google's Linux library cannot run Face Detector's GPU, so its wheel
+    // writes no same-host GPU reference for a group to load there; the refusal
+    // test below covers the Linux GPU instead.
     if (delegate == Delegate.gpu && Platform.isLinux) continue;
     group(
       delegate.name,
@@ -28,13 +28,16 @@ void main() {
   test('CPU is the default delegate', () {
     expect(FaceDetectorOptions(modelPath: _model).delegate, Delegate.cpu);
   });
-  test("Linux refuses Face Detector's GPU with its reason (UP-046)", () async {
+  test("Linux refuses Face Detector's GPU with its reason", () async {
     // Google's Linux library lacks the LiteRT GPU plugin that Face
     // Detector's GPU inference needs, so the package withdraws the GPU and
     // refuses it before Google's graph exists.
     final capabilities = await queryFaceDetectorCapabilities();
     expect(capabilities.supportedDelegates, {Delegate.cpu});
-    expect(capabilities.unavailableReasons[Delegate.gpu], contains('UP-046'));
+    expect(
+      capabilities.unavailableReasons[Delegate.gpu],
+      contains('LiteRT GPU plugin'),
+    );
     await expectLater(
       FaceDetector.create(
         FaceDetectorOptions(delegate: Delegate.gpu, modelPath: _model),
@@ -42,7 +45,7 @@ void main() {
       throwsA(isA<RuntimeUnavailableException>()),
     );
   }, skip: Platform.isLinux ? false : 'Linux only');
-  test('macOS refuses the GPU with its reason (UP-057)', () async {
+  test('macOS refuses the GPU with its reason', () async {
     final capabilities = await queryFaceDetectorCapabilities();
     expect(capabilities.supportedDelegates, {Delegate.cpu});
     await expectLater(
@@ -53,7 +56,7 @@ void main() {
         isA<RuntimeUnavailableException>().having(
           (error) => error.fix,
           'fix',
-          contains('UP-057'),
+          contains('different results on Metal'),
         ),
       ),
     );

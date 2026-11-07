@@ -198,7 +198,7 @@ TaskCapabilities _audio(TaskPlatform platform) =>
 
 /// The EmbeddingGemma 2 model Hungry Fish plays on by default on [platform]:
 /// the text-only one, or null where Google's runtime cannot run it, as in
-/// WebKit (UP-054).
+/// WebKit.
 DownloadAsset? fishGameModel(TaskPlatform platform) =>
     decisionMakerCapabilitiesForPlatform(
       platform,
@@ -467,7 +467,7 @@ final _catalog = <GalleryTask>[
   ),
   // Decision Maker playing a game, as Google's web demo plays its dino game.
   // Its model is the text-only EmbeddingGemma 2; in WebKit, which runs no
-  // EmbeddingGemma 2 model (UP-054), the tile is a card.
+  // EmbeddingGemma 2 model, the tile is a card.
   GalleryTask(
     id: 'decision_fish_game',
     runtimeId: 'decision_maker',

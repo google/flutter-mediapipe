@@ -16,10 +16,12 @@ on:
         type: string
         required: true
 
-# A newer push on the same branch supersedes the queued matrix; the hosted
-# macOS pool is small enough that stale runs otherwise starve the latest one.
+# A newer push to a pull request supersedes its queued matrix; the hosted macOS
+# pool is small enough that stale runs otherwise starve the latest one. A push
+# to main is keyed by its commit and never cancelled: GitHub marks a commit
+# failed when one of its runs is cancelled.
 concurrency:
-  group: ios-simulator-${{ github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
+  group: ios-simulator-${{ github.event_name == 'push' && github.sha || github.ref }}${{ inputs.side && format('-nightly-{0}-{1}', inputs.side, github.run_id) || '' }}
   cancel-in-progress: true
 
 # nightly-compare.yaml calls this workflow twice in one run, on the pinned
@@ -90,31 +92,13 @@ jobs:
       - name: Official references, pixel formats, rotation, VIDEO and every live tile
         id: sdk
         working-directory: gallery
-        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
         shell: bash
         env:
           DEVICE: ${{ steps.simulator.outputs.device }}
         run: |
-          device="$DEVICE"
           for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test runtime_test face_landmarker_still_image_test gallery_journey_test; do
-            for attempt in 1 2; do
-              status=0
-              # A hosted simulator sometimes stalls while loading the app and
-              # never starts the tests. Each file finishes in minutes, so a
-              # file that takes 15 runs once more on a rebooted simulator.
-              perl -e 'alarm shift; exec @ARGV' 900 flutter test -d "$device" \
-                integration_test/$test.dart \
-                --dart-define=SDK_GPU=skip --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
-              [ "$status" = 0 ] && break
-              if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
-                echo "$test stalled; rebooting the simulator and retrying"
-                xcrun simctl shutdown "$device" || true
-                xcrun simctl boot "$device"
-                xcrun simctl bootstatus "$device" -b
-                continue
-              fi
-              exit "$status"
-            done
+            # Each file finishes in minutes, so 15 is a stall.
+            bash tool/test_ios_simulator_suite.sh "$DEVICE" 900 "$test" --dart-define=SDK_GPU=skip
           done
       - name: Record ios CPU task coverage (ios-sdk-simulator)
         if: always()
@@ -131,27 +115,10 @@ jobs:
         id: text_audio
         if: ${{ !cancelled() && steps.simulator.outcome == 'success' }}
         working-directory: gallery
-        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
         shell: bash
         env:
           DEVICE: ${{ steps.simulator.outputs.device }}
-        run: |
-          device="$DEVICE"
-          for attempt in 1 2; do
-            status=0
-            perl -e 'alarm shift; exec @ARGV' 900 flutter test -d "$device" \
-              integration_test/sdk_text_audio_test.dart \
-              --dart-define=SDK_GPU=skip --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
-            [ "$status" = 0 ] && exit 0
-            if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
-              echo "sdk_text_audio_test stalled; rebooting the simulator and retrying"
-              xcrun simctl shutdown "$device" || true
-              xcrun simctl boot "$device"
-              xcrun simctl bootstatus "$device" -b
-              continue
-            fi
-            exit "$status"
-          done
+        run: bash tool/test_ios_simulator_suite.sh "$DEVICE" 900 sdk_text_audio_test --dart-define=SDK_GPU=skip
       - name: Record ios CPU retrieval coverage (ios-sdk-simulator-retrieval)
         if: always()
         uses: ./.github/actions/record-coverage
@@ -185,27 +152,10 @@ jobs:
         id: modern_text
         if: ${{ !cancelled() && steps.simulator.outcome == 'success' }}
         working-directory: gallery
-        # bash runs with pipefail, so `| tee` keeps flutter test's exit status.
         shell: bash
         env:
           DEVICE: ${{ steps.simulator.outputs.device }}
-        run: |
-          device="$DEVICE"
-          for attempt in 1 2; do
-            status=0
-            perl -e 'alarm shift; exec @ARGV' 1800 flutter test -d "$device" \
-              integration_test/sdk_modern_text_test.dart \
-              --reporter expanded 2>&1 | tee -a sdk-ios-simulator.log || status=$?
-            [ "$status" = 0 ] && exit 0
-            if [ "$status" = 142 ] && [ "$attempt" = 1 ]; then
-              echo "sdk_modern_text_test stalled; rebooting the simulator and retrying"
-              xcrun simctl shutdown "$device" || true
-              xcrun simctl boot "$device"
-              xcrun simctl bootstatus "$device" -b
-              continue
-            fi
-            exit "$status"
-          done
+        run: bash tool/test_ios_simulator_suite.sh "$DEVICE" 1800 sdk_modern_text_test
       - name: Record ios CPU modern text coverage (ios-sdk-simulator-modern-text)
         if: always()
         uses: ./.github/actions/record-coverage

@@ -170,7 +170,7 @@ class PreviewTransform {
   }
 
   /// Maps a normalized point in the upright frame to the preview box. Image
-  /// Segmenter masks come laid out upright (upstream-issues.md UP-017).
+  /// Segmenter masks come laid out upright.
   Offset mapUpright(double x, double y) => Offset(
     (mirror ? 1 - x : x) * uprightSize.width * scale + offsetX,
     y * uprightSize.height * scale + offsetY,

@@ -23,7 +23,7 @@ String? get _hostLibrary => referenceWheel(
 /// checked-in physical-Mac GPU references stay for when it returns.
 const macosGpuWithdrawn =
     "macOS withdraws the GPU while Google's Metal output since 1.1.1 differs "
-    'from its 1.1.0 wheel (upstream-issues.md UP-057).';
+    'from its 1.1.0 wheel.';
 
 /// Why the CPU comparisons with Google's checked-in outputs are skipped on
 /// this host, or null when they run: Google's CPU output drifts between Apple

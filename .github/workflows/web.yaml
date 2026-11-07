@@ -20,8 +20,9 @@ on:
 permissions:
   contents: read
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: web-face-${{ github.ref }}
+  group: web-face-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,8 +30,12 @@ jobs:
     if: ${{ !inputs.deploy_only }}
     runs-on: ubuntu-24.04
     # Setup, the API suites and both gallery tours (Chromium, then Firefox)
-    # ran past 45 minutes once retrieval and decision joined the gallery.
-    timeout-minutes: 60
+    # ran past 45 minutes once retrieval and decision joined the gallery; the
+    # slowest pass took 60, and slow setup mirrors have added 40. The tours have
+    # their own step limits, so a hang there fails by name before this one.
+    timeout-minutes: 90
+    outputs:
+      stale: ${{ steps.newer_commit.outputs.stale }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/setup
@@ -72,15 +77,7 @@ jobs:
         run: |
           flutter pub get
           flutter analyze lib test
-          for attempt in 1 2; do
-            status=0
-            timeout 300 flutter test --platform chrome test/web || status=$?
-            if [ "$status" = 124 ] && [ "$attempt" = 1 ]; then
-              echo "flutter test --platform chrome hung; retrying"
-              continue
-            fi
-            exit "$status"
-          done
+          bash ../../gallery/tool/test_chrome_suite.sh 'vision browser tests' test/web
       - name: Analyze text and audio browser code
         run: |
           for family in text audio; do
@@ -95,23 +92,14 @@ jobs:
           for compiler in javascript wasm; do
             flags=""
             if [ "$compiler" = wasm ]; then flags="--wasm"; fi
-            for attempt in 1 2; do
-              status=0
-              timeout 300 flutter test --platform chrome $flags test/web || status=$?
-              if [ "$status" = 124 ] && [ "$attempt" = 1 ]; then
-                echo "flutter test --platform chrome ($compiler) hung; retrying"
-                continue
-              fi
-              [ "$status" = 0 ] || exit "$status"
-              break
-            done
+            bash ../../gallery/tool/test_chrome_suite.sh "audio browser tests ($compiler)" $flags test/web
           done
-      - name: Analyze and test gallery geometry and the video file reader
+      - name: Analyze and test gallery geometry, its download log and the video file reader
         working-directory: gallery
         run: |
           flutter pub get
           flutter analyze lib tool/web_api_probe.dart tool/web_text_audio_probe.dart
-          flutter test --platform chrome test/camera_geometry_test.dart test/camera_frame_test.dart test/camera_selection_test.dart
+          flutter test --platform chrome test/camera_geometry_test.dart test/camera_frame_test.dart test/camera_selection_test.dart test/model_download_log_test.dart
           cd packages/video_frames && flutter test --reporter expanded
       - name: Build release gallery and API probe
         id: build
@@ -139,6 +127,8 @@ jobs:
           exit 1
       - name: Face Landmarker still image in Chromium
         run: node gallery/tool/browser/test_still_image.mjs
+      - name: Loading screen and model progress in Chromium
+        run: node gallery/tool/browser/test_loading_screen.mjs
       - name: Image Segmenter masks, legend and output types in Chromium
         run: node gallery/tool/browser/test_segmenter_display.mjs
       - name: Chromium CPU runtime, API and face webcam
@@ -182,13 +172,17 @@ jobs:
         id: text_audio_webkit
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node gallery/tool/browser/test_browser.mjs --browser=webkit --suite=text-audio --official-runtime=/runtime/
+      # Each tour's slowest pass is under half its limit (13.4 and 7.3 minutes),
+      # and the limit leaves room for the tour's own longest wait, 10 minutes.
       - name: Every release gallery sidebar task in Chromium
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        timeout-minutes: 30
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: node gallery/tool/browser/test_gallery_journey.mjs
       - name: Every release gallery sidebar task in Firefox
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        timeout-minutes: 20
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: xvfb-run -a node gallery/tool/browser/test_gallery_journey.mjs --browser=firefox --headed=true
@@ -253,11 +247,38 @@ jobs:
           path: |
             build/ci-tmp/web-browser-*/
             build/ci-tmp/worker-overlays/
+            build/ci-tmp/loading-screen-web/
             build/ci-tmp/gallery-journey-*/
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: web-gallery-release
           path: gallery/build/web/
+      # Main runs do not cancel each other, so an older one can finish after a
+      # newer one, and must not deploy over it. A newer commit skips the deploy,
+      # which also skips verify-deployment and leaves the run green. The release
+      # bot's commit does not count: its push starts no runs, so nothing else
+      # would deploy this commit. If GitHub cannot answer, the run warns and
+      # deploys its own tested commit.
+      - name: Check main has no newer commit to deploy
+        id: newer_commit
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3; do
+            newer=$(timeout 30 gh api "repos/$GITHUB_REPOSITORY/compare/$GITHUB_SHA...main" \
+              --jq '[.commits[] | select(.commit.committer.name != "github-actions[bot]")] | length') || newer=""
+            if [[ "$newer" =~ ^[0-9]+$ ]]; then
+              if [ "$newer" != 0 ]; then
+                echo "::notice::main has $newer newer commits, so $GITHUB_SHA is not deployed"
+                echo "stale=true" >> "$GITHUB_OUTPUT"
+              fi
+              exit 0
+            fi
+            echo "::warning::Could not compare $GITHUB_SHA with main (attempt $attempt of 3)"
+            [ "$attempt" = 3 ] || sleep 10
+          done
+          echo "::warning::Deploying $GITHUB_SHA without knowing whether main has a newer commit"
 
   # Safari's engine, on macOS. Linux WebKit builds give a worker's
   # OffscreenCanvas no WebGL context, and Google's vision tasks need one even
@@ -328,7 +349,7 @@ jobs:
 
   deploy:
     needs: browser
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.browser.outputs.stale != 'true')
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:

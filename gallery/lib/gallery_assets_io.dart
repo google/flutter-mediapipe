@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:mediapipe_vision/mediapipe_vision.dart'
     show DownloadAsset, ModelStore;
+
+import 'model_download_log.dart';
 
 /// Samples unpacked to real files, because the native tasks read paths, and
 /// the models `dart run mediapipe_core:bundle_models` bundled.
@@ -22,7 +26,9 @@ final class GalleryAssets {
 
   ImageProvider imageProvider(String name) => FileImage(file(name));
 
-  static final _models = ModelStore();
+  static final _models = ModelStore(
+    client: ModelDownloadLog(http.Client(), (line) => debugPrint(line)),
+  );
 
   /// The bundled copy of [model] as a file, verified against its pin and
   /// cached once, exactly as a task created with `model:` finds it.

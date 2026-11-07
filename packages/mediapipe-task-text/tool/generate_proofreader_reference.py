@@ -82,8 +82,8 @@ def main():
                 assert not any('error' in event for event in events), events
                 assert sum(e['done'] for e in events) == 1 and events[-1]['done']
                 # Google's streamed text can differ from its completed text for
-                # the same input (upstream-issues.md UP-036); both are recorded
-                # and each path of the package is compared with its own.
+                # the same input; both are recorded and each path of the package
+                # is compared with its own.
                 streamed = ''.join(e['text'] or '' for e in events)
                 report['cases'].append({'name': name + (f'-limit-{limit}' if limit else ''),
                     'input': text, 'max_num_tokens': limit, 'result': sync,

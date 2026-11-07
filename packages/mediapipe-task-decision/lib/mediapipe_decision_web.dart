@@ -16,8 +16,8 @@ abstract final class MediaPipeDecisionWeb {
   /// Installs the browser backend before the first task is created.
   static void registerWith(Registrar registrar) {
     decisionBackendFactory = _WorkerDecisionMaker.create;
-    // Google's runtime answers only on a hardware WebGPU adapter (UP-049),
-    // so the capability query needs to know which one this browser has.
+    // Google's runtime answers only on a hardware WebGPU adapter, so the
+    // capability query needs to know which one this browser has.
     taskPlatformGpuReader ??= readWebGpuAdapter;
   }
 }

@@ -10,10 +10,13 @@ next to the change as a patch, pin_nightly's report and its log:
     python3 -B tool/ci/nightly_pin.py --nightly newest --out build/nightly-pin
 
 With GITHUB_OUTPUT set it writes the step outputs: nightly, generation,
-previous, scope, patched (true when the patch exists), api_changed, web (true
-when the browser runtimes moved too) and web_note. It fails only when
-pin_nightly stopped for another reason than a C API change (no complete
-build, or a new MediaPipe version, which is moved by hand).
+previous, scope, patched (true when the patch exists), api_changed, held (true
+when the newest build names a new MediaPipe version), network_failed (true when
+the network kept pin_nightly from choosing a build, which only warns, and the
+only output that is set then), web (true when the browser runtimes moved too)
+and web_note. It fails when pin_nightly stopped for another reason than the
+network, a C API change or that new version, which is moved by hand, and when
+that version has stopped the comparison for over FAIL_AFTER_DAYS.
 
 The browser pins are each family's `assets/runtime.json` (version, the
 tarball's npm integrity, every loaded file's SHA-384) and the version core's
@@ -21,6 +24,7 @@ tarball's npm integrity, every loaded file's SHA-384) and the version core's
 """
 import argparse
 import base64
+import datetime
 import hashlib
 import io
 import json
@@ -42,6 +46,10 @@ WEB_VERSION_NAMED = [
 ]
 # The weekly cron line; any other schedule is the daily set.
 FULL_SCHEDULE = '0 14 * * 0'
+# How long a new MediaPipe version may stop the comparison before a run warns,
+# and before it fails, counted from Google's first build of it.
+WARN_AFTER_DAYS = 14
+FAIL_AFTER_DAYS = 90
 
 
 def scope_of(event, schedule, full):
@@ -126,6 +134,53 @@ def pin_web(stamp):
     return f'browser runtimes moved from {old} to {version}', True
 
 
+def today():
+    return datetime.datetime.now(datetime.timezone.utc).date()
+
+
+def add_to_summary(note):
+    if os.environ.get('GITHUB_STEP_SUMMARY'):
+        with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as step:
+            step.write(note + '\n')
+
+
+def network_failed(failure):
+    """Reports a run the network kept from choosing a build: a warning on every
+    event, since nothing was compared and the next run tries again."""
+    note = (f"The comparison did not run: the network failed while choosing Google's build "
+            f'({failure}). The next run tries again.')
+    add_to_summary(note)
+    print(f'::warning::{note}', flush=True)
+
+
+def hold(stop, event):
+    """Reports a comparison that a new MediaPipe version has stopped: a log line,
+    a warning past WARN_AFTER_DAYS, a failure past FAIL_AFTER_DAYS. A pull request
+    only warns, since it did not cause this. When the network kept pin_nightly
+    from counting the days it warns and passes; the next run counts again."""
+    note = (f"The comparison is stopped: Google's nightlies name MediaPipe {stop['version']} "
+            f"and the pin is on {stop['pinned']}. Move the version by hand (pin_nightly.py) "
+            'to compare again.')
+    level = 'warning'
+    if stop['since'] is None:
+        note += ' The days behind could not be counted on this run.'
+    else:
+        since = datetime.datetime.strptime(stop['since'], '%Y%m%d').date()
+        days = (today() - since).days
+        red = since + datetime.timedelta(days=FAIL_AFTER_DAYS + 1)
+        note += (f" {days} days behind, since {stop['since']}. Scheduled runs fail from "
+                 f'{red.isoformat()}.')
+        if days > FAIL_AFTER_DAYS and event != 'pull_request':
+            level = 'error'
+            note = f'Nightly comparison stopped for over {FAIL_AFTER_DAYS} days. {note}'
+        elif days <= WARN_AFTER_DAYS:
+            level = None
+    add_to_summary(note)
+    print(f'::{level}::{note}' if level else note, flush=True)
+    if level == 'error':
+        raise SystemExit(note)
+
+
 def outputs(values):
     lines = ''.join(f'{key}={value}\n' for key, value in values.items())
     print(lines, end='')
@@ -152,10 +207,18 @@ def main():
             cwd=REPO, stdout=log, stderr=subprocess.STDOUT).returncode
     print(log_path.read_text(encoding='utf-8'), end='', flush=True)
     if not report_path.exists():
-        raise SystemExit(f'pin_nightly.py exited {status} before choosing a build.')
+        raise SystemExit(f'pin_nightly.py exited {status} and wrote no report.')
     report = json.loads(report_path.read_text(encoding='utf-8'))
+    if report.get('network_failure'):
+        network_failed(report['network_failure'])
+        outputs({'network_failed': 'true'})
+        return
     api_changed = bool(report['api_changes'])
-    if status != 0 and not api_changed:
+    # Only the newest build: a night asked for by name was asked for to be pinned.
+    stop = report.get('version_stop') if args.nightly == 'newest' else None
+    if stop:
+        hold(stop, args.event)
+    elif status != 0 and not api_changed:
         raise SystemExit(f'pin_nightly.py exited {status}.')
     patched = status == 0 and report['written']
     web, web_note = False, 'not pinned: the native pin did not apply'
@@ -179,6 +242,7 @@ def main():
              'previous': report['previous'],
              'scope': scope_of(args.event, args.schedule, args.full),
              'patched': str(patched).lower(), 'api_changed': str(api_changed).lower(),
+             'held': str(bool(stop)).lower(), 'network_failed': 'false',
              'web': str(web).lower(), 'web_note': web_note})
 
 

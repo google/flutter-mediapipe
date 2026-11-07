@@ -101,8 +101,7 @@ instead.
 ## Windows x64
 
 - CPU inference. Google's Windows library may wait for a usage-log upload when
-  a task is disposed
-  ([UP-025](../upstream-issues.md#up-025-windows-task-closes-wait-for-googles-usage-logging-upload)).
+  a task is disposed.
 
 ## Web
 
@@ -157,15 +156,15 @@ dart run mediapipe_core:bundle_models --check  # verify only, for CI
 ```
 
 What the command writes, how a task created with `model:` finds its model and
-how to opt in to run-time downloads are in the core README's
-[Bundled models](../packages/mediapipe-core/README.md#bundled-models) and
-[On-demand models](../packages/mediapipe-core/README.md#on-demand-models).
+how to opt in to run-time downloads are in the core guide's
+[Bundled models](mediapipe_core.md#bundled-models) and
+[On-demand models](mediapipe_core.md#on-demand-models).
 
 ### Offline and mirrored builds
 
 `asset_source` points the build hooks and `bundle_models` at a directory or
 an internal URL root holding files named by their full SHA-256, and
 `ModelStore(source: ...)` reads models from the same kind of source at run
-time. The core README's
-[Verified downloads and offline builds](../packages/mediapipe-core/README.md#verified-downloads-and-offline-builds)
+time. The core guide's
+[Verified downloads and offline builds](mediapipe_core.md#verified-downloads-and-offline-builds)
 explains both and the tool that fills such a directory from a checkout.

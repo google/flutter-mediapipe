@@ -7,6 +7,11 @@ name: Nightly comparison
 # nightly only, or a value the nightly moves beyond its tolerance is reported
 # in the run's summary and its nightly-compare artifact, and opens no issue;
 # a daily run that finds a regression or drift then runs the full matrix.
+# A new MediaPipe version in Google's nightlies stops the comparison until the
+# version is moved by hand: a line in the run's summary, then a warning and
+# then a failed scheduled run (tool/ci/nightly_pin.py WARN_AFTER_DAYS and
+# FAIL_AFTER_DAYS). A network failure while choosing Google's build also
+# compares nothing: a warning, and the next run tries again.
 # Nothing here pushes, releases or uses a secret besides GITHUB_TOKEN.
 on:
   schedule:
@@ -92,7 +97,7 @@ jobs:
       # old is compared again. Dispatches and pull requests always run.
       - name: Look for an earlier comparison of this build
         id: compared
-        if: ${{ github.event_name == 'schedule' }}
+        if: ${{ github.event_name == 'schedule' && steps.pin.outputs.network_failed != 'true' }}
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: build/nightly-compared
@@ -111,8 +116,13 @@ jobs:
           PATCHED: ${{ steps.pin.outputs.patched }}
           API_CHANGED: ${{ steps.pin.outputs.api_changed }}
           WEB_NOTE: ${{ steps.pin.outputs.web_note }}
+          HELD: ${{ steps.pin.outputs.held }}
+          NETWORK_FAILED: ${{ steps.pin.outputs.network_failed }}
         run: |
-          if [ -n "$COMPARED" ]; then
+          if [ "$HELD" = true ] || [ "$NETWORK_FAILED" = true ]; then
+            # The pin step wrote the summary's line.
+            echo 'report=false' >> "$GITHUB_OUTPUT"
+          elif [ -n "$COMPARED" ]; then
             echo "Nightly $NIGHTLY (generation $GENERATION) was compared already ($COMPARED); nothing to run." >> "$GITHUB_STEP_SUMMARY"
             echo 'report=false' >> "$GITHUB_OUTPUT"
           elif [ "$NIGHTLY" = "$PREVIOUS" ] && [ "$EVENT" = schedule ]; then

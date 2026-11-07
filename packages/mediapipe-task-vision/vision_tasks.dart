@@ -29,7 +29,7 @@ const visionRuntimeTasks = <String, Set<String>>{
   // task there, though no capability claims it.
   'android/arm': visionTasks,
   // Google's Windows library exports the stateful Interactive Segmenter but
-  // runs a stroke in about 25 seconds (upstream-issues.md UP-048).
+  // runs a stroke in about 25 seconds.
   'windows/x64': {
     'face_detector',
     'face_landmarker',

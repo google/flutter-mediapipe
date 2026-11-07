@@ -2,9 +2,9 @@
 
 R8 drops a field that is written but never read. A plugin that keeps memory
 alive for native code that way, such as a model buffer Google's SDK reads in
-place (UP-033 in upstream-issues.md), loses it in release builds only, and
-inference then reads freed memory. Static constants and synthetic references
-to an outer class are expected to go, so they pass.
+place, loses it in release builds only, and inference then reads freed
+memory. Static constants and synthetic references to an outer class are
+expected to go, so they pass.
 
 Usage, after a release build:
   python3 -B tool/ci/check_r8_usage.py gallery/build/app/outputs/mapping/release/usage.txt

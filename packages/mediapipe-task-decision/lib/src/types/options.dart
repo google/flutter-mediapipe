@@ -30,6 +30,6 @@ final class DecisionMakerOptions extends TaskOptions {
   /// EmbeddingGemma 2 on a Mac's CPU, about 0.6 GB at 512 tokens, 1 GB at
   /// 2048 and 6.7 GB at 4096, Google's Python default, where iOS stops an
   /// iPhone 15 Pro app at about 3.4 GB. Raise it only for longer inputs, on a
-  /// device with the memory for them (upstream-issues.md UP-060).
+  /// device with the memory for them.
   final int maxNumTokens;
 }

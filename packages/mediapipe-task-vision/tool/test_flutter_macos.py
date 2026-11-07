@@ -58,8 +58,7 @@ flutter:
                     app / "assets/portrait.rgb")
     (app / "integration_test").mkdir(exist_ok=True)
     # The CPU only, as on Linux and Windows: macOS withdraws the GPU while
-    # Google's library since 1.1.1 gives different Metal results from its wheel
-    # (upstream-issues.md UP-057).
+    # Google's library since 1.1.1 gives different Metal results from its wheel.
     for source, destination in [
             ("flutter_smoke_test.dart.template",
              "integration_test/face_detector_test.dart"),

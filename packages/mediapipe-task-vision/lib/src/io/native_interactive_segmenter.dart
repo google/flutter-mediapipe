@@ -22,7 +22,7 @@ final class NativeInteractiveSegmenter
     if (Platform.isWindows) {
       throw UnsupportedError(
         "Google's Windows library runs the Interactive Segmenter at about 25 "
-        'seconds a stroke (upstream-issues.md UP-048), so the package does '
+        'seconds a stroke, so the package does '
         'not offer it there.',
       );
     }

@@ -76,7 +76,7 @@ test:
 # Every package's suite. Decision's and Retrieval's reference tests skip
 # unless `make models_all` downloaded their models. Each suite gets 180 s a
 # test, as in CI: a task's close waits for Google's usage-logging upload, and
-# a slow reply holds a test past the default 30 s (upstream-issues.md UP-025).
+# a slow reply holds a test past the default 30 s.
 test_only:
 	@for package in core $(TASK_FAMILIES); do $(MAKE) test_$$package || exit $$?; done
 

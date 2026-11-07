@@ -26,29 +26,28 @@ final _unregistered = pluginNotRegistered('mediapipe_retrieval');
 final _noPlugin = '${_unregistered.message} ${_unregistered.fix}';
 
 /// Google's browser Universal Embedder creates a WebGPU device for itself
-/// and has no CPU path (upstream-issues.md UP-052).
+/// and has no CPU path.
 const _browserCpu =
     "Google's browser Universal Embedder (@mediapipe/tasks-retrieval) "
-    'runs on a WebGPU device only (upstream-issues.md UP-052). Use '
-    'Delegate.gpu.';
+    'runs on a WebGPU device only. Use Delegate.gpu.';
 
 String _noWebGpu(TaskPlatform platform) =>
     "Google's browser Universal Embedder runs only on a hardware WebGPU "
     'adapter: it creates a WebGPU device for itself and refuses a software '
-    'one (upstream-issues.md UP-052). This browser has '
+    'one. This browser has '
     '${platform.gpu ?? 'no WebGPU adapter'}.';
 
-/// Why both tasks are unavailable in WebKit (UP-054).
+/// Why both tasks are unavailable in WebKit.
 const embeddingGemma2WebKitUnavailable =
     "In WebKit, the engine of Safari and of every browser on iOS, Google's "
     'browser Universal Embedder (@mediapipe/tasks-retrieval) returns '
     'zeros for every input with both EmbeddingGemma 2 models, so no document '
-    'matches any query (upstream-issues.md UP-054). Use a Chromium browser.';
+    'matches any query. Use a Chromium browser.';
 
 /// Both tasks' support on [platform]: the CPU on Google's retrieval library
 /// natively, and the GPU in browsers once the plugin registers, on a hardware
 /// WebGPU adapter only, since Google's browser runtime has no CPU path, and
-/// not in WebKit, where it embeds everything as zeros (UP-054).
+/// not in WebKit, where it embeds everything as zeros.
 TaskCapabilities _capabilities(TaskPlatform platform) {
   final web = platform.operatingSystem == 'web';
   final noLibrary = platform.target == 'android/arm'

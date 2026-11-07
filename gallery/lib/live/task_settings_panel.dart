@@ -238,7 +238,7 @@ class _TaskSettingsPanelState extends State<TaskSettingsPanel> {
               (_dragging[setting.key] ?? widget.values.share(setting.key))
                   .toStringAsFixed(2),
               style: TextStyle(
-                color: c.teal,
+                color: c.accentText,
                 fontSize: Sizes.xs,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),

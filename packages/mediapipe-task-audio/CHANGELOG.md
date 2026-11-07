@@ -1,3 +1,7 @@
+## 0.1.4
+
+- No changes to this package. It is released with `mediapipe_core` 0.1.4 so that all the packages keep one version.
+
 ## 0.1.3
 
 - The README has an installation section using `flutter pub add`.

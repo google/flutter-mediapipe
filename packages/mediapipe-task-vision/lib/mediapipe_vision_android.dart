@@ -13,7 +13,7 @@ abstract final class MediaPipeVisionAndroid {
   /// Called by Flutter before the first public task is created.
   static void registerWith() {
     // The GPU's name lets a task declare a GPU family it fails on, such as
-    // Image Segmenter on PowerVR (UP-023), before anything runs there.
+    // Image Segmenter on PowerVR, before anything runs there.
     taskPlatformGpuReader = () => _channel.invokeMethod<String>('gpuRenderer');
   }
 }

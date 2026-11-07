@@ -4,7 +4,7 @@
 <dict>
 	<!--
 	Google's MediaPipe frameworks call APIs that App Store Connect requires a
-	reason for, and ship no privacy manifest of their own (UP-062), so the app
+	reason for, and ship no privacy manifest of their own, so the app
 	declares them; doc/privacy_and_licenses.md lists them per family. Data
 	collection is left to the App Privacy answers in App Store Connect.
 	-->

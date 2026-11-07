@@ -13,6 +13,7 @@ import 'camera_geometry.dart';
 import 'camera_frame.dart';
 import 'camera_selection.dart';
 import 'frame_timings.dart';
+import 'live_start_progress.dart';
 import 'live_task.dart';
 import 'operation_queue.dart';
 import 'still_image.dart';
@@ -70,6 +71,7 @@ class LiveCameraController<T> extends ChangeNotifier {
   bool running = false;
   bool changing = false;
   bool get initializing => false;
+  final startProgress = LiveStartProgress();
   void setProcessingPaused(bool paused) {}
   String? error;
 

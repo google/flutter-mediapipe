@@ -337,7 +337,7 @@ mixin SimilarityState<T extends StatefulWidget, I, E extends Object>
                             value ?? '--',
                             key: ValueKey('$id-similarity-value'),
                             style: TextStyle(
-                              color: c.teal,
+                              color: c.accentText,
                               fontSize: 40,
                               fontWeight: FontWeight.w700,
                               height: 1.1,

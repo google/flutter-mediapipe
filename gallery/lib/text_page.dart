@@ -329,8 +329,8 @@ class _TextPageState extends State<TextPage>
               style: switch (edit.type) {
                 ProofreadingCorrectionType.same => TextStyle(color: c.muted),
                 ProofreadingCorrectionType.insertion => TextStyle(
-                  color: c.teal,
-                  fontWeight: FontWeight.w600,
+                  color: c.accentText,
+                  fontWeight: FontWeight.w500,
                 ),
                 ProofreadingCorrectionType.deletion => TextStyle(
                   color: error,

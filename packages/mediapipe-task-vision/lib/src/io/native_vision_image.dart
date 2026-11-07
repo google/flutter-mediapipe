@@ -12,10 +12,10 @@ import 'pixel_conversion.dart';
 /// Builds a native image from [input], copying pixels into [arena].
 ///
 /// Set [expandRgbForGpu] when the task runs on the GPU: Apple's GPU image
-/// upload aborts the process on an ImageFrame without alpha (UP-044), so
-/// opaque alpha is added before entering the official graph, on every host as
-/// in the GPU references. That covers files too, which Google's decoder turns
-/// into three channels for a JPEG and one for a grayscale image.
+/// upload aborts the process on an ImageFrame without alpha, so opaque alpha is
+/// added before entering the official graph, on every host as in the GPU
+/// references. That covers files too, which Google's decoder turns into three
+/// channels for a JPEG and one for a grayscale image.
 mp.MpImagePtr createVisionImage(
   Arena arena,
   VisionImage input, {

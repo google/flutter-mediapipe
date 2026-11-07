@@ -12,8 +12,7 @@ final _softwareAdapter = RegExp(
 );
 
 /// Whether [platform] names a hardware WebGPU adapter, the only one Google's
-/// browser Decision Maker answers on (UP-049) and its Universal Embedder runs
-/// on (UP-052).
+/// browser Decision Maker answers on and its Universal Embedder runs on.
 bool hasHardwareWebGpu(TaskPlatform platform) => switch (platform.gpu) {
   final gpu? =>
     gpu.startsWith(webGpuAdapterPrefix) && !_softwareAdapter.hasMatch(gpu),

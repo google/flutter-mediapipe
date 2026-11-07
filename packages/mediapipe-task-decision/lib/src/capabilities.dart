@@ -12,19 +12,18 @@ import 'decision_backend.dart' show decisionBackendFactory;
 /// cannot hold its models ([largeModelNeeds64Bit]).
 const decisionRuntimeTargets = largeModelRuntimeTargets;
 
-/// Why the EmbeddingGemma 2 models are unavailable in WebKit (UP-054).
+/// Why the EmbeddingGemma 2 models are unavailable in WebKit.
 const embeddingGemma2WebKitUnavailable =
     "In WebKit, the engine of Safari and of every browser on iOS, Google's "
     'browser Decision Maker (@mediapipe/tasks-decision) embeds every '
     'text as zeros with the EmbeddingGemma 2 models, so every option scores '
-    'the same (upstream-issues.md UP-054). Use DecisionModels.layaS256, or a '
-    'Chromium browser.';
+    'the same. Use DecisionModels.layaS256, or a Chromium browser.';
 
-/// Why GLiNER2.5-Decide is unavailable in browsers (UP-055).
+/// Why GLiNER2.5-Decide is unavailable in browsers.
 const glinerBrowserUnavailable =
     "Google's browser Decision Maker (@mediapipe/tasks-decision) aborts "
-    'while it creates the task with either GLiNER2.5-Decide model '
-    '(upstream-issues.md UP-055). Use DecisionModels.layaS256 in browsers.';
+    'while it creates the task with either GLiNER2.5-Decide model. Use '
+    'DecisionModels.layaS256 in browsers.';
 
 /// Why Google's browser runtime cannot run [model] in the browser [platform]
 /// names, or null when it can.
@@ -48,11 +47,11 @@ const _noLibrary =
     'macOS arm64, Linux x64 and Windows x64, and browsers run its JavaScript '
     'runtime.';
 
-/// Google's browser runtime fails on the CPU (upstream-issues.md UP-049).
+/// Google's browser runtime fails on the CPU.
 const _browserCpu =
     "Google's browser Decision Maker (@mediapipe/tasks-decision) fails "
-    'every evaluation on the CPU delegate (upstream-issues.md UP-049). Use '
-    'Delegate.gpu, its WebGPU path, as Google\'s web demo does.';
+    'every evaluation on the CPU delegate. Use Delegate.gpu, its WebGPU path, '
+    'as Google\'s web demo does.';
 
 const _desktopGpu =
     "Google's library runs Decision Maker on the CPU; this package has not "
@@ -64,13 +63,13 @@ final _noPlugin = '${_unregistered.message} ${_unregistered.fix}';
 String _noWebGpu(TaskPlatform platform) =>
     "Google's browser Decision Maker answers only on a hardware WebGPU "
     'adapter; without one it falls back to its CPU path, where every '
-    'evaluation fails (upstream-issues.md UP-049). This browser has '
+    'evaluation fails. This browser has '
     '${platform.gpu ?? 'no WebGPU adapter'}.';
 
 /// Query Decision Maker support on this platform without loading a model.
 /// Pass [model] to learn where that model runs: neither EmbeddingGemma 2
-/// model in WebKit (UP-054), GLiNER2.5-Decide nowhere in browsers (UP-055),
-/// and every other pinned model wherever the task runs.
+/// model in WebKit, GLiNER2.5-Decide nowhere in browsers, and every other
+/// pinned model wherever the task runs.
 Future<TaskCapabilities> queryDecisionMakerCapabilities([
   DownloadAsset? model,
 ]) async => decisionMakerCapabilitiesForPlatform(
@@ -80,9 +79,9 @@ Future<TaskCapabilities> queryDecisionMakerCapabilities([
 
 /// Decision Maker support on [platform]: the CPU on Google's native
 /// libraries, and the GPU in browsers once the plugin registers, since
-/// Google's browser runtime fails on the CPU (UP-049). With [model], the
-/// support for that model: Google's browser runtime fails with EmbeddingGemma
-/// 2 in WebKit (UP-054) and with GLiNER2.5-Decide in every browser (UP-055).
+/// Google's browser runtime fails on the CPU. With [model], the support for
+/// that model: Google's browser runtime fails with EmbeddingGemma 2 in WebKit
+/// and with GLiNER2.5-Decide in every browser.
 TaskCapabilities decisionMakerCapabilitiesForPlatform(
   TaskPlatform platform, {
   DownloadAsset? model,

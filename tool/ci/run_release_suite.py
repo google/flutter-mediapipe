@@ -30,16 +30,48 @@ PACKAGE = 'com.example.mediapipe_gallery'
 # flutter_test's last report line; a run that never prints one has stalled.
 VERDICT = re.compile(r'(All tests passed!|Some tests failed\.)')
 # How often a silent Android run is checked, in seconds, and how long it may
-# stay silent. The longest silence in passing runs was 496 s, Decision Maker on
-# the Android 9 emulator (November 5, 2026), where a stalled run went on to sit
+# stay silent. The longest silence in passing runs was 764 s, Decision Maker on
+# the Android 9 emulator (November 6, 2026), where a stalled run went on to sit
 # silent for its last 37 minutes (October 22).
 POLL = 60
 SILENCE = 1200
+# What a failed build prints when the network failed it and a second build can
+# pass: core's download of the native libraries (verified_download.dart: a
+# host's passing error or a lost connection, not a SHA-256 mismatch or an HTTP
+# 404), and Gradle's download of an Android SDK package.
+NETWORK_ERROR = re.compile(
+    r'Verified download failed: .*(?:HTTP (?:408|429|50[0234])\b|ClientException(?!: Redirect)'
+    r'|SocketException|TimeoutException)'
+    r'|An error occurred while preparing SDK package .*Error on ZipFile')
+# Seconds before the one more build.
+BUILD_RETRY_DELAY = 30
+# gallery/lib/model_download_log.dart's lines. One counts as heard only if it
+# reports more megabytes than the last for its file, which start again at each
+# HTTP answer: a slow download finishes, while an answer with no bytes or a
+# repeated line cannot hold off SILENCE. A line every 100 MB means a download
+# slower than about 0.08 MB/s still ends at SILENCE, and a faster one that never
+# finishes at the run's timeout.
+PROGRESS = 'MODEL_DOWNLOAD '
+DOWNLOAD = re.compile(r'^MODEL_DOWNLOAD (.+): (?:HTTP .*|(\d+)(?: of \d+)? MB in \d+ s(?:, ended)?)$')
 EXECUTABLES = {
     'linux': f'build/linux/x64/release/bundle/{NAME}',
     'windows': f'build/windows/x64/runner/Release/{NAME}.exe',
     'macos': f'build/macos/Build/Products/Release/{NAME}.app/Contents/MacOS/{NAME}',
 }
+
+
+def run_build(command):
+    """Runs the build, echoing its output; returns its exit status and whether
+    the output names a network failure."""
+    # Windows resolves flutter.bat only through the shell.
+    process = subprocess.Popen(command, cwd=GALLERY, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, shell=sys.platform == 'win32')
+    network = False
+    for raw in process.stdout:
+        line = raw.decode('utf-8', 'replace').rstrip()
+        print(line, flush=True)
+        network = network or NETWORK_ERROR.search(line) is not None
+    return process.wait(), network
 
 
 def build(args):
@@ -50,8 +82,14 @@ def build(args):
     else:
         command = ['flutter', 'build', args.target, '--release', '-t', args.suite, *defines]
     print('+ ' + ' '.join(command), flush=True)
-    # Windows resolves flutter.bat only through the shell.
-    subprocess.run(command, cwd=GALLERY, check=True, shell=sys.platform == 'win32')
+    status, network = run_build(command)
+    if status != 0 and network:
+        print(f'::warning::The {args.target} release build failed on the network; '
+              f'building once more in {BUILD_RETRY_DELAY} s.', flush=True)
+        time.sleep(BUILD_RETRY_DELAY)
+        status, _ = run_build(command)
+    if status != 0:
+        raise subprocess.CalledProcessError(status, command)
 
 
 def death_check(adb):
@@ -111,6 +149,24 @@ def dump_log(device):
         print('The device did not answer logcat.', flush=True)
 
 
+def heard_from(line, received):
+    """Whether [line] shows the app moving: any line but a download's, or a
+    download's with more megabytes than [received], the counts so far by file."""
+    if not line.startswith(PROGRESS):
+        return True
+    match = DOWNLOAD.match(line)
+    if not match:
+        return False
+    name, megabytes = match.groups()
+    if megabytes is None:
+        received[name] = 0
+        return False
+    if int(megabytes) <= received.get(name, 0):
+        return False
+    received[name] = int(megabytes)
+    return True
+
+
 def verdict(process, timeout, dead=None):
     """flutter_test's last report line, echoing the app's output, or None if
     none arrives within [timeout] seconds or, given a death_check, if the app
@@ -124,6 +180,8 @@ def verdict(process, timeout, dead=None):
     threading.Thread(target=read, daemon=True).start()
     deadline = time.monotonic() + timeout
     heard = time.monotonic()
+    progress = None
+    received = {}
     while (left := deadline - time.monotonic()) > 0:
         try:
             line = lines.get(timeout=min(left, POLL))
@@ -131,16 +189,21 @@ def verdict(process, timeout, dead=None):
             if dead and dead():
                 print('The app or its device has gone.', flush=True)
                 return None
-            if dead and time.monotonic() - heard > SILENCE:
-                print(f'The app has been silent for over {SILENCE} s.', flush=True)
+        else:
+            if line is None:
                 return None
-            continue
-        heard = time.monotonic()
-        if line is None:
-            return None
-        print(line, flush=True)
-        if match := VERDICT.search(line):
-            return match.group(1)
+            print(line, flush=True)
+            if match := VERDICT.search(line):
+                return match.group(1)
+            if line.startswith(PROGRESS):
+                progress = line
+            if heard_from(line, received):
+                heard = time.monotonic()
+        if dead and time.monotonic() - heard > SILENCE:
+            print(f'The app has been silent for over {SILENCE} s.', flush=True)
+            break
+    if progress:
+        print(f'Its last download line: {progress}', flush=True)
     return None
 
 

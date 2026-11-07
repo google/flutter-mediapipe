@@ -1,3 +1,10 @@
+## 0.1.4
+
+- The README's links to `mediapipe_core`'s reference sections point to
+  [the core guide](https://github.com/google/flutter-mediapipe/blob/main/doc/mediapipe_core.md),
+  where those sections moved.
+- Error messages and the README no longer refer to removed notes.
+
 ## 0.1.3
 
 - The README installs the package with `flutter pub add`, drops the steps for
@@ -23,12 +30,12 @@ The first release.
   Embedder, Image Segmenter and Interactive Segmenter on Android, iOS, macOS,
   Linux, Windows and the web, through Google's official runtimes. Windows has
   no Interactive Segmenter: Google's Windows runtime takes about 25 seconds
-  a stroke (UP-048).
+  a stroke.
 - On 32-bit Android (armeabi-v7a) every task runs on the CPU; the GPU is not
   offered there yet.
 - Image Segmenter offers only the CPU on Android: Google's Android task
   aborts the app when it reads a GPU mask on PowerVR and Adreno 630 GPUs,
-  in its C library and its Java SDK alike (UP-061, UP-023).
+  in its C library and its Java SDK alike.
 - Every task is one class with the same API on every platform, and
   `mediapipe_vision.dart` is the only app library. Tasks use Google's verbs
   (`detect`, `recognize`, `classify`, `embed` and `segment`, and their
@@ -64,8 +71,8 @@ The first release.
   apps that do not use them.
 - On macOS every task runs on the CPU for now: Google's library since 1.1.1 gives
   different Metal results from its 1.1.0 wheel, so the GPU stays withdrawn
-  until Google says whether the change is intended (UP-057).
+  until Google says whether the change is intended.
 - On macOS, a GPU task reopens its native task after converting 1 GiB of
   frames, since Google's macOS GPU path keeps every frame until the task
-  closes (UP-032 in upstream-issues.md). Tasks that reopen hold their model
-  in memory, so the app may delete the model file after creating them.
+  closes. Tasks that reopen hold their model in memory, so the app may delete
+  the model file after creating them.

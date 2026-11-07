@@ -240,7 +240,7 @@ class _RetrievalPageState extends State<RetrievalPage> with RevisionedState {
                       style: TextStyle(
                         color: c.text,
                         fontSize: i == 0 ? 18 : Sizes.md,
-                        fontWeight: i == 0 ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: i == 0 ? FontWeight.w500 : FontWeight.w400,
                         height: 1.35,
                       ),
                     ),

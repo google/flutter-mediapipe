@@ -48,8 +48,8 @@ void compare(TextSummarizerResult result, Map<String, dynamic> entry) {
 }
 
 /// Google's streamed text can differ from its completed text for the same
-/// input (upstream-issues.md UP-036), so the stream is compared with the
-/// reference's own streamed chunks, joined ([expectFollows]).
+/// input, so the stream is compared with the reference's own streamed chunks,
+/// joined ([expectFollows]).
 void compareStream(
   List<TextSummarizerUpdate> updates,
   Map<String, dynamic> entry,

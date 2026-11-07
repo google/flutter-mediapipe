@@ -85,15 +85,13 @@ Three gates, in order:
    Summarizer add 419 MB of models, so a native gallery is about 770 MB;
    their integration suite compares with Google's references from
    `--modern-text-reference` or the text package's checked-in fixtures.
-   **The web gallery has no Proofreader or Summarizer**: Google's browser
-   runtime does not include them
-   ([UP-034](../upstream-issues.md#up-034-browser-text-runtime-omits-proofreader-and-summarizer)),
-   so the web build bundles EmbeddingGemma alone and shows the other two as
-   cards that say why. Decision Maker and its game, Hungry Fish, bundle no
-   model: Laya (678 MB) and EmbeddingGemma 2 (165 MB) download on first use, verified into the model cache natively and fetched
-   by Google's runtime in browsers, which show the two only on a hardware
-   WebGPU adapter
-   ([UP-049](../upstream-issues.md#up-049-the-browser-decision-maker-fails-every-evaluation-without-a-hardware-webgpu-adapter)).
+   **Proofreader and Summarizer are not yet available in the web gallery**,
+   matching the MediaPipe Tasks Web SDK, so the web build bundles EmbeddingGemma
+   alone and shows the other two as cards that say so. Decision Maker and its
+   game, Hungry Fish, bundle no model: Laya (678 MB) and EmbeddingGemma 2
+   (165 MB) download on first use, verified into the model cache natively and
+   fetched by Google's runtime in browsers, which show the two only on a
+   hardware WebGPU adapter.
 2. **Validated**: `lib/catalog.dart` asks the package's own capability query.
    Nothing restates support by hand, so a task validated on a new platform
    appears here with no code change.

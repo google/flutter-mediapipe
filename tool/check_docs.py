@@ -26,7 +26,7 @@ from families import PACKAGES, package_folders, package_name, task_families  # n
 
 DOCS = [
     'README.md', 'MIGRATION.md', 'CONTRIBUTING.md',
-    'doc/platform_setup.md', 'doc/privacy_and_licenses.md',
+    'doc/mediapipe_core.md', 'doc/platform_setup.md', 'doc/privacy_and_licenses.md',
     'doc/guides/vision/object_detector.md',
     *(f'packages/{folder}/README.md' for folder in package_folders()),
 ]

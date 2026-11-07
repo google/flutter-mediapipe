@@ -16,8 +16,8 @@ abstract final class MediaPipeRetrievalWeb {
   /// Installs the browser backend before the first task is created.
   static void registerWith(Registrar registrar) {
     retrievalBackendFactory = _WorkerUniversalEmbedder.create;
-    // Google's runtime runs only on a hardware WebGPU adapter (UP-052), so
-    // the capability query needs to know which one this browser has.
+    // Google's runtime runs only on a hardware WebGPU adapter, so the
+    // capability query needs to know which one this browser has.
     taskPlatformGpuReader ??= readWebGpuAdapter;
   }
 }

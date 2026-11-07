@@ -37,7 +37,7 @@ void main() {
   );
 
   test('WebKit keeps Decision Maker on Laya, and shows Hungry Fish and the '
-      'retrieval tasks as cards with their reason (UP-054)', () {
+      'retrieval tasks as cards with their reason', () {
     final webKit = _browser(BrowserEngine.webkit);
     expect(tiles(webKit), {'Decision Maker'});
     for (final title in [
@@ -45,7 +45,11 @@ void main() {
       'Universal Embedder',
       'Semantic Retriever',
     ]) {
-      expect(reason(webKit, title), contains('UP-054'), reason: title);
+      expect(
+        reason(webKit, title),
+        contains('In WebKit, the engine of Safari'),
+        reason: title,
+      );
     }
     expect(fishGameModel(webKit), isNull);
   });
@@ -75,7 +79,7 @@ void main() {
     );
   });
 
-  test('browsers offer no GLiNER2.5-Decide model (UP-055)', () {
+  test('browsers offer no GLiNER2.5-Decide model', () {
     for (final engine in BrowserEngine.values) {
       final offered = [
         for (final model in taskModels['decision_maker']!)

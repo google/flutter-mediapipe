@@ -154,8 +154,8 @@ double turnedConfidenceError(
 /// same relative position.
 ///
 /// Google's Image Segmenter answers a rotated input with the upright mask
-/// resized to the input's dimensions, not turned back (upstream-issues.md
-/// UP-017), so this is how a rotated result matches the upright one.
+/// resized to the input's dimensions, not turned back, so this is how a
+/// rotated result matches the upright one.
 double stretchedCategoryAgreement(
   CategoryMask upright,
   CategoryMask stretched,

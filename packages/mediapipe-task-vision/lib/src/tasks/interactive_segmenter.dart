@@ -15,7 +15,7 @@ import '../vision_task_backend.dart';
 /// worker isolate on Android, iOS, macOS and Linux; Google's browser runtime
 /// serves it through the registered web adapter. Google's Windows library
 /// has it too, but runs a stroke in about 25 seconds, so the capability
-/// query reports Windows as unavailable (upstream-issues.md UP-048).
+/// query reports Windows as unavailable.
 ///
 /// ```dart
 /// final task = await InteractiveSegmenter.create(

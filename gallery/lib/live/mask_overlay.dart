@@ -153,8 +153,8 @@ final class SegmentationMaskImages extends ChangeNotifier {
 /// its edges stay smooth, at [opacity].
 ///
 /// Google's segmenter answers a rotated frame with the upright mask resized to
-/// the frame's dimensions (upstream-issues.md UP-017), so the mask covers the
-/// upright frame rather than being turned as landmarks are.
+/// the frame's dimensions, so the mask covers the upright frame rather than
+/// being turned as landmarks are.
 class MaskOverlay extends CustomPainter {
   MaskOverlay(this.masks, {required this.transform, required this.opacity})
     : super(repaint: masks);

@@ -68,8 +68,7 @@ OpenGL ES is software (SwiftShader).
   tests, CPU then GPU): Google's CPU references on a Pixel 8a (Mali), a Galaxy
   S24 (Adreno) and a Galaxy A12 (PowerVR), and its GPU references on the
   Pixel 8a and the S24, except two Image Segmenter defects in that SDK's GPU
-  path: category values one class low on the S24 (UP-024) and an abort on
-  the A12 (UP-023).
+  path: category values one class low on the S24 and an abort on the A12.
   Google's GPU inference differs from its CPU inference for the image-model
   tasks (portrait.jpg's top class scores 0.80 on GPU, 0.31 on CPU, on every GPU
   tried), so GPU results are compared with the wheel's GPU output.
@@ -88,39 +87,37 @@ OpenGL ES is software (SwiftShader).
 
 ## Upstream limits
 
-Details and reproductions are in [upstream-issues.md](../../../upstream-issues.md).
-
-- [b] UP-048: Google's Windows library exports the stateful Interactive
+- [b] Google's Windows library exports the stateful Interactive
   Segmenter and its masks agree with the macOS wheel's within 0.045, but a
   stroke takes about 25 s on GitHub's Windows runner against 0.3 s on its
   Linux runner, and Google's Windows Python wheel lacks the API. The package
   does not offer the task on Windows.
-- [d] UP-028 and UP-030: Google's desktop GPU paths give no float Pose masks
+- [d] Google's desktop GPU paths give no float Pose masks
   (Metal fails; OpenGL ES returns 8-bit RGBA images), so the package refuses
   masks on those GPUs with the reason; landmarks run, and masks run on CPU.
-- [e] UP-026: neither desktop runtime nor Google's iOS library opens
+- [e] Neither desktop runtime nor Google's iOS library opens
   Holistic's face blendshapes model on the GPU delegate.
-- [f] UP-027: Google's Linux runtime aborts the Image Embedder on OpenGL ES.
-- [g] UP-008 and UP-029: the stroke segmenter's GPU path fails on macOS and
+- [f] Google's Linux runtime aborts the Image Embedder on OpenGL ES.
+- [g] The stroke segmenter's GPU path fails on macOS and
   aborts on Linux.
-- [h] UP-057: Google's macOS library since 1.1.1 gives different Metal results
+- [h] Google's macOS library since 1.1.1 gives different Metal results
   from its 1.1.0 wheel for every task, by up to a different top class. Its
   1.1.1 nightly wheel matches the library in the Image Classifier and Image
   Embedder cases compared, so the change is in 1.1.1; the package offers the
   CPU only on macOS until Google says whether it is intended.
-- [i] UP-046: Google's Linux and Android libraries ship without the LiteRT
+- [i] Google's Linux and Android libraries ship without the LiteRT
   plugin Face Detector's GPU graph needs, so the package offers the CPU there.
-- [j] UP-061 and UP-023: Google's Android Image Segmenter aborts the app when
+- [j] Google's Android Image Segmenter aborts the app when
   it reads a GPU mask: its C library on a Pixel 3 (Adreno 630), and its Java
   SDK before it on PowerVR GPUs (Galaxy A12, Pixel 10, Pixel 11). No caller
   can catch it, so the package offers the CPU only on Android, where every
   check passes; the GPU had matched Google's GPU reference on Mali (Pixel
   8a) and Adreno 750 (Galaxy S24).
-- UP-024: the same SDK's Image Segmenter category mask was one class low on
+- The same SDK's Image Segmenter category mask was one class low on
   GPU on an Adreno GPU (Galaxy S24): person read 14, not 15. Confidence masks
   were right, so the most confident class recovers it. Its C library has not
   run on an Adreno GPU yet.
-- UP-025: Google's Windows runtime uploads usage logs to
+- Google's Windows runtime uploads usage logs to
   `play.googleapis.com`, and closing a task waits for the upload: usually one
   round trip, sometimes 20 to 34 s. CI's tests get 180 s each so a slow
   upload does not fail them.

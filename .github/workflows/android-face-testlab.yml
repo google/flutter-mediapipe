@@ -242,8 +242,9 @@ jobs:
           grep -hE 'SDK_[A-Z_]+ \{' testlab-results/logcat > testlab-results/measurements.log || true
           # Not declared on Android, so their suites check the refusal or only
           # record the GPU: Interactive Segmenter's (browsers only), Face
-          # Detector's (no LiteRT GPU plugin, UP-046), Holistic's (UP-026) and
-          # Image Segmenter's (UP-061, UP-023).
+          # Detector's (no LiteRT GPU plugin), Holistic's (its face blendshapes
+          # model does not open) and Image Segmenter's (reading a GPU mask aborts
+          # the app).
       - name: The GPU tasks this device ran
         if: always()
         id: gpu

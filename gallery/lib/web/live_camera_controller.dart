@@ -13,10 +13,12 @@ import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:web/web.dart' as web;
 import '../live/camera_selection.dart';
 import '../live/frame_timings.dart';
+import '../live/live_start_progress.dart';
 import '../live/live_subjects.dart';
 import '../live/live_task.dart';
 import '../live/operation_queue.dart';
 import 'model_cache.dart';
+import 'runtime_warm_up.dart';
 import 'test_hooks.dart';
 
 extension type _VideoCallbacks(JSObject object) implements JSObject {
@@ -108,6 +110,9 @@ class LiveCameraController<T> extends ChangeNotifier {
   bool changing = false;
   bool initializing = false;
   String? error;
+
+  /// What a start is waiting on, shown while [initializing].
+  final startProgress = LiveStartProgress();
 
   /// The frame on screen when processing paused, which the view draws with
   /// Flutter while [previewHidden]; null if it could not be captured.
@@ -409,12 +414,13 @@ class LiveCameraController<T> extends ChangeNotifier {
     running = false;
     changing = true;
     initializing = true;
+    startProgress.restart();
     error = null;
     if (chosen == Delegate.gpu) notice = null;
     result = null;
     _cancelCallback();
     _changed();
-    return _operations.add(() async {
+    final starting = _operations.add(() async {
       final keepCamera = _stream != null && description == null;
       if (keepCamera) {
         await _releaseTask();
@@ -434,10 +440,16 @@ class LiveCameraController<T> extends ChangeNotifier {
           throw StateError('Camera access requires HTTPS or localhost.');
         }
         this.delegate = chosen;
+        // Google's runtime and the warm-up sample download with the model
+        // rather than after it.
+        unawaited(WebRuntimeWarmUp.vision());
+        final warmUpImage = sample == null || task is FixedFrameSizeLiveTask
+            ? null
+            : (rootBundle.load(sample)..ignore());
         // Load the model and open the task while the camera starts: on a phone
         // each takes seconds and neither needs the other. Every path below
         // awaits it, so a task that opens late is still released.
-        opening = _openTask(chosen, pinned)..ignore();
+        opening = _openTask(chosen, pinned, generation)..ignore();
         try {
           if (keepCamera) {
             // A rebuild of the platform view can pause the existing video even
@@ -448,6 +460,9 @@ class LiveCameraController<T> extends ChangeNotifier {
             // Show the camera while the worker warms up. Frame processing still
             // starts only after warm-up has cleared the sample's tracking state.
             await _openCamera(selected, generation);
+          }
+          if (generation == _generation) {
+            startProgress.cameraOpen();
             _changed();
           }
         } catch (_) {
@@ -459,9 +474,9 @@ class LiveCameraController<T> extends ChangeNotifier {
           await _release();
           return;
         }
-        final warmedUpTo = task is FixedFrameSizeLiveTask
+        final warmedUpTo = warmUpImage == null
             ? -1
-            : await _warmUp(sample);
+            : await _warmUp(warmUpImage);
         taskReady = true;
         if (_closed || generation != _generation) {
           await _release();
@@ -524,14 +539,44 @@ class LiveCameraController<T> extends ChangeNotifier {
         unawaited(start(delegate: Delegate.cpu));
       }
     });
+    WebModelCache.startingUntil(starting);
+    return starting;
   }
 
-  Future<void> _openTask(Delegate chosen, DownloadAsset model) async {
+  Future<void> _openTask(
+    Delegate chosen,
+    DownloadAsset model,
+    int generation,
+  ) async {
     final loader = modelLoader;
     final bytes = loader != null
         ? await loader()
-        : await WebModelCache.load(model);
+        : await WebModelCache.load(
+            model,
+            onProgress: (received, total) {
+              if (generation == _generation &&
+                  startProgress.modelReceived(received, total)) {
+                _changed();
+              }
+            },
+          );
+    if (generation == _generation) {
+      startProgress.modelLoaded();
+      _changed();
+    }
+    // A model that arrives first would have the worker fetch the runtime a
+    // second time beside the warm-up; it reads the warm-up's copy instead. A
+    // stalled warm-up only costs this wait: the worker then fetches for itself
+    // and reports its own failure.
+    await WebRuntimeWarmUp.vision().timeout(
+      const Duration(seconds: 15),
+      onTimeout: () {},
+    );
     await task.open(chosen, bytes);
+    if (generation == _generation) {
+      startProgress.taskOpen();
+      _changed();
+    }
     _opened = true;
     _results = task.results.listen(_onResult, onError: _onResultError);
   }
@@ -817,9 +862,8 @@ class LiveCameraController<T> extends ChangeNotifier {
   /// detector run only once it finds something, hence a sample with a
   /// subject; the blank frame then clears the tracking the sample left.
   /// Returns the last timestamp used, which camera frames continue after.
-  Future<int> _warmUp(String? sample) async {
-    if (sample == null) return -1;
-    final data = await rootBundle.load(sample);
+  Future<int> _warmUp(Future<ByteData> sample) async {
+    final data = await sample;
     final bytes = data.buffer.asUint8List(
       data.offsetInBytes,
       data.lengthInBytes,

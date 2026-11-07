@@ -124,9 +124,9 @@ try {
   const manifestResponse = await page.request.get(new URL('assets/assets/manifest.json', base).href);
   assert.ok(manifestResponse.ok(), 'release manifest unavailable');
   const manifest = await manifestResponse.json();
-  // Google's browser runtime has no Proofreader or Summarizer (UP-034), so a
-  // web build bundles them for the text probe's comparison only; the gallery
-  // shows their cards, not tiles. EmbeddingGemma is a tile.
+  // Proofreader and Summarizer are not yet available on the web, so a web build
+  // bundles them for the text probe's comparison only; the gallery shows their
+  // cards, not tiles. EmbeddingGemma is a tile.
   const probeOnly = new Set(['text_proofreader', 'text_summarizer']);
   for (const id of manifest.tasks.filter(id => !probeOnly.has(id))) {
     assert.ok(cases[id], `new bundled task ${id} needs a gallery journey`);
@@ -146,8 +146,8 @@ try {
   const liveFrames = delegate =>
     page.getByText(new RegExp(`^(?!0\\.0 fps)\\d+\\.\\d fps · \\d+ ms · ${delegate.toUpperCase()}$`));
   // A runtime that embeds every input as zeros scores every option the same,
-  // and a tie reads as the first option (UP-054), so options whose score
-  // rows ("shipping 0.87") all read the same fail here.
+  // and a tie reads as the first option, so options whose score rows ("shipping
+  // 0.87") all read the same fail here.
   const assertScoresDiffer = async (names, what) => {
     const scores = [];
     for (const name of names) {
@@ -155,7 +155,7 @@ try {
       scores.push(row.slice(name.length + 1));
     }
     assert.ok(new Set(scores).size > 1,
-      `${what}: every option scored ${scores[0]}, as when Google's runtime embeds every input as zeros (UP-054)`);
+      `${what}: every option scored ${scores[0]}, as when Google's runtime embeds every input as zeros`);
   };
   // A still image's status line names the delegate that produced it.
   const stillRan = delegate =>
@@ -164,9 +164,11 @@ try {
   // plays the speech sample through its microphone path instead.
   await page.goto(base + (base.includes('?') ? '&' : '?') + 'microphone=sample');
   await sidebarItem('Home').waitFor({timeout: 120000});
+  // The page's loading screen must not outlive the home page it covers.
+  assert.equal(await page.locator('#splash').count(), 0, 'The loading screen outlived the page it covers.');
   // Google's browser Decision Maker answers only on a hardware WebGPU adapter,
-  // by its own rule (UP-049), and its Universal Embedder creates a WebGPU
-  // device for itself (UP-052); elsewhere the gallery shows their cards.
+  // by its own rule, and its Universal Embedder creates a WebGPU device for
+  // itself; elsewhere the gallery shows their cards.
   hardwareWebGpu = await page.evaluate(async () => {
     const adapter = await navigator.gpu?.requestAdapter({powerPreference: 'high-performance'});
     const info = adapter?.info ?? {};
@@ -174,12 +176,13 @@ try {
       !/fallback|swiftshader|llvmpipe|software|lavapipe/i.test(`${info.vendor} ${info.architecture} ${info.description}`);
   });
   // On a hardware adapter WebKit still runs no EmbeddingGemma 2 model, as
-  // Google's runtime embeds every input there as zeros (UP-054): the
-  // retrieval tasks and Hungry Fish are cards, and Decision Maker runs Laya.
+  // Google's runtime embeds every input there as zeros: the retrieval tasks and
+  // Hungry Fish are cards, and Decision Maker runs Laya.
   const webKitZeros = browserName === 'webkit' && hardwareWebGpu;
   const refused = new Set(!hardwareWebGpu ? ['decision_maker', 'universal_embedder', 'semantic_retriever']
     : webKitZeros ? ['universal_embedder', 'semantic_retriever'] : []);
-  const refusedReason = webKitZeros ? /UP-054/ : /UP-049|UP-052/;
+  const refusedReason = webKitZeros ? /In WebKit, the engine of Safari/
+    : /fails every evaluation on the CPU delegate|runs on a WebGPU device only|only on a hardware WebGPU adapter/;
   // --tasks=a,b visits only those of the bundled tasks.
   const only = args.tasks ? new Set(args.tasks.split(',')) : null;
   for (const id of refused) if (only && !only.has(id)) refused.delete(id);
@@ -294,7 +297,7 @@ try {
       const undefinedSimilarity = similarity.filter({hasText: /NaN/});
       await similarity.filter({hasText: /-?\d\.\d{4}/}).or(error).or(undefinedSimilarity).first().waitFor({timeout: 600000});
       assert.equal(await error.count(), 0, `${id}: ${await page.locator('flt-semantics').allInnerTexts()}`);
-      assert.equal(await undefinedSimilarity.count(), 0, `${id}: the similarity is NaN, as when Google's runtime embeds every input as zeros (UP-054)`);
+      assert.equal(await undefinedSimilarity.count(), 0, `${id}: the similarity is NaN, as when Google's runtime embeds every input as zeros`);
       const dog = await value();
       enter(`${id}:elephant`);
       await page.locator('[flt-semantics-identifier="universal-2-samples"]')
@@ -320,7 +323,7 @@ try {
       await page.getByRole('button', {name: 'Search', exact: true}).click();
       await top.or(error).or(none).first().waitFor({timeout: 600000});
       assert.equal(await error.count(), 0, `${id}: ${await page.locator('flt-semantics').allInnerTexts()}`);
-      assert.equal(await none.count(), 0, `${id}: no document matched, as when Google's runtime embeds every input as zeros (UP-054)`);
+      assert.equal(await none.count(), 0, `${id}: no document matched, as when Google's runtime embeds every input as zeros`);
       assert.match((await top.textContent()) ?? '', spec.retrieve, `${id}: best match`);
       report.checks.push(`${id}:cpu:search`);
       await page.screenshot({path: path.join(evidence, `${id}.png`)});
@@ -343,7 +346,7 @@ try {
         enter(`${id}:game-refused`);
         assert.equal(await sidebarItem('Hungry Fish').count(), 0, `${id}: Hungry Fish is a tile in WebKit`);
         await sidebarItem('Home').click();
-        await page.getByText(/UP-054/).first().waitFor({timeout: 120000});
+        await page.getByText(/In WebKit, the engine of Safari/).first().waitFor({timeout: 120000});
         report.checks.push(`${id}:game-refused`);
       } else {
         // Hungry Fish, the same runtime playing a game: Google's wording gets

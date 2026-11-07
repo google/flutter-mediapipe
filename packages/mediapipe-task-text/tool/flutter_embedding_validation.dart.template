@@ -170,17 +170,16 @@ List<Map<String, String>> _edits(List<ProofreadingCorrection> corrections) => [
 ];
 
 /// Google's streamed text can differ from its completed text for the same
-/// input (upstream-issues.md UP-036), so a stream is compared with the
-/// reference's own streamed events: their text joined, and the corrections of
-/// the last one.
+/// input, so a stream is compared with the reference's own streamed events:
+/// their text joined, and the corrections of the last one.
 List<Map<String, dynamic>> _events(Map<String, dynamic> entry) =>
     (entry['stream'] as List).cast<Map<String, dynamic>>();
 String _streamedText(Map<String, dynamic> entry) =>
     _events(entry).map((e) => e['text'] as String? ?? '').join();
 
-/// Google's text can depend on the requests before it on the same task
-/// (upstream-issues.md UP-036), so a request run out of the reference's order
-/// must follow Google's text for 80 characters, or in full when it is shorter.
+/// Google's text can depend on the requests before it on the same task, so a
+/// request run out of the reference's order must follow Google's text for 80
+/// characters, or in full when it is shorter.
 bool _follows(String? actual, String? expected) {
   final a = expected ?? '';
   final b = actual ?? '';

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:web/web.dart' as web;
 import 'package:mediapipe_gallery/bundled_model_assets.dart';
+import 'package:mediapipe_gallery/web/splash.dart';
 
 @JS('mediapipeApiTestReport')
 external set _report(JSObject value);
@@ -848,7 +850,7 @@ Future<Map<String, Object?>> checkDetectionTasksApi(
   } finally {
     await pose.dispose();
   }
-  // A fresh task: Holistic's IMAGE results depend on earlier calls (UP-013).
+  // A fresh task: Holistic's IMAGE results depend on earlier calls.
   final holistic = await HolisticLandmarker.create(
     HolisticLandmarkerOptions(
       delegate: delegate,
@@ -872,6 +874,7 @@ Future<Map<String, Object?>> checkDetectionTasksApi(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  hideSplash();
   Map<String, Object?> report;
   try {
     report = await checkApi();

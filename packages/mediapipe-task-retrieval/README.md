@@ -20,19 +20,15 @@ library, which this package's build hook downloads and checks against its
 SHA-256 on Android 9+, iOS 15+, macOS 14+, Linux and Windows, on the CPU; and
 `@mediapipe/tasks-retrieval` 1.2.0-rc.20261018 in browsers, on the GPU delegate. Google's
 browser Universal Embedder creates a WebGPU device for itself and has no CPU
-path
-([UP-052](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-052-the-browser-universal-embedder-runs-only-on-a-hardware-webgpu-adapter)),
-so the capability queries offer browsers only the GPU, and only on a
+path, so the capability queries offer browsers only the GPU, and only on a
 hardware WebGPU adapter; there both tasks answer as the native library does,
 except in WebKit, the engine of Safari and of every browser on iOS, where
-Google's runtime returns zeros for every input with both models, so the
-queries offer neither task there
-([UP-054](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-054-in-webkit-the-browser-runtime-embeds-every-input-as-zeros-with-embeddinggemma-2)).
-Two more differences the browser runtime imposes: images and audio go in as
-bytes and samples there, never as file paths, and the index stays in memory,
-so `databasePath` is for the native platforms. In browsers the package fetches
-the model itself, since Google's task reads a `modelAssetPath` as a file
-([UP-051](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-051-the-browser-universal-embedder-reads-modelassetpath-as-a-file-and-a-second-wasm-object-needs-the-loader-again)).
+Google's runtime returns zeros for every input with both models, so the queries
+offer neither task there. Two more differences the browser runtime imposes:
+images and audio go in as bytes and samples there, never as file paths, and the
+index stays in memory, so `databasePath` is for the native platforms. In
+browsers the package fetches the model itself, since Google's task reads a
+`modelAssetPath` as a file.
 
 ## Installation
 
@@ -95,9 +91,8 @@ metadata; `metadataFilter` keeps only records carrying every given pair.
 other modalities. On Android, iOS and the desktops an image or audio record's
 text is the path it was inserted with, or its id when it came from bytes or
 samples alone. Audio needs the full model, and Google's audio embeddings vary
-slightly from call to call
-([UP-058](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-058-universal-embedders-audio-embeddings-change-from-call-to-call)).
-A retriever runs on its embedder's worker: dispose it before the embedder.
+slightly from call to call. A retriever runs on its embedder's worker: dispose
+it before the embedder.
 
 ## Models
 

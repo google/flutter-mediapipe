@@ -18,6 +18,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Live face landmarks in Flutter with Google's official MediaPipe browser runtime.">
 
   <!-- iOS meta tags & icons -->
@@ -31,8 +32,60 @@
 
   <title>MediaPipe Flutter Gallery</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    The loading screen shows while Flutter's engine and the app download.
+    Colors are the gallery's light theme (lib/ui/design.dart, which
+    test/loading_screen_test.dart compares with them). It names Roboto but
+    does not load it: a web font here would hold the page's load event and
+    the first paint on one more download. The app removes the screen once the
+    home page has drawn (lib/web/splash.dart).
+  -->
+  <style>
+    html, body { margin: 0; background: #FFFFFF; }
+    #splash {
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 14px; background: #FFFFFF;
+      font: 15px/1.4 Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      color: #202124;
+    }
+    #splash .mark {
+      width: 44px; height: 44px; border-radius: 10px; background: #1A73E8;
+      color: #FFFFFF; font-weight: 700; font-size: 22px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #splash .title { font-size: 18px; font-weight: 500; }
+    #splash .bar {
+      position: relative; overflow: hidden; width: 180px; height: 4px;
+      border-radius: 2px; background: #D2E3FC; margin-top: 4px;
+    }
+    #splash .bar::after {
+      content: ""; position: absolute; top: 0; bottom: 0; left: -40%;
+      width: 40%; border-radius: 2px; background: #1A73E8;
+      animation: splash-slide 1.1s ease-in-out infinite;
+    }
+    #splash .note { color: #5F6368; font-size: 13px; }
+    @keyframes splash-slide { to { left: 100%; } }
+    @media (prefers-reduced-motion: reduce) {
+      #splash .bar::after { animation: none; left: 0; width: 100%; opacity: 0.5; }
+    }
+  </style>
 </head>
 <body>
+  <div id="splash" role="progressbar" aria-label="Loading MediaPipe Flutter Gallery">
+    <div class="mark">M</div>
+    <div class="title">MediaPipe Flutter Gallery</div>
+    <div class="bar"></div>
+    <div class="note">Loading...</div>
+  </div>
+  <script>
+    // The app cannot report a download that never arrives, so the page does.
+    setTimeout(function () {
+      var note = document.querySelector('#splash .note');
+      if (note) note.textContent = 'This is taking longer than usual. Check your connection, or reload the page.';
+    }, 30000);
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

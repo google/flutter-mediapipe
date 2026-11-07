@@ -100,7 +100,8 @@ Future<TextTaskRunner<I, R>> openClassicTextTask<I, R, O extends TaskOptions>(
 
 /// Opens a generative text task (Proofreader or Summarizer) on Google's
 /// native runtime through [native], after [capabilities] admits the
-/// delegate. Browsers have neither task, which [capabilities] reports.
+/// delegate. Both are not yet available on the web, which [capabilities]
+/// reports.
 Future<TextStreamRunner<String, R, U>>
 openGenerativeTextTask<R, U, O extends TaskOptions>(
   O options, {

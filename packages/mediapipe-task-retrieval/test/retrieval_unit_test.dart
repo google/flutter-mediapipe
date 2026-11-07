@@ -354,7 +354,7 @@ void main() {
       }
     });
 
-    test('browsers get the GPU on a hardware WebGPU adapter (UP-052)', () {
+    test('browsers get the GPU on a hardware WebGPU adapter', () {
       TaskPlatform web(String? gpu) => TaskPlatform(
         operatingSystem: 'web',
         architecture: 'unknown',
@@ -375,7 +375,7 @@ void main() {
         expect(capabilities.supportedDelegates, {Delegate.gpu});
         expect(
           capabilities.unavailableReasons[Delegate.cpu],
-          contains('UP-052'),
+          contains('runs on a WebGPU device only'),
         );
       }
       for (final gpu in [
@@ -386,12 +386,15 @@ void main() {
       ]) {
         final refused = universalEmbedderCapabilitiesForPlatform(web(gpu));
         expect(refused.isSupported, isFalse, reason: '$gpu');
-        expect(refused.unavailableReasons[Delegate.gpu], contains('UP-052'));
+        expect(
+          refused.unavailableReasons[Delegate.gpu],
+          contains('only on a hardware WebGPU adapter'),
+        );
       }
     });
 
     test('WebKit gets neither task: Google\'s runtime embeds everything as '
-        'zeros there (UP-054)', () {
+        'zeros there', () {
       TaskPlatform web(
         BrowserEngine? engine, [
         String gpu = 'WebGPU apple apple',
@@ -412,19 +415,19 @@ void main() {
         for (final delegate in Delegate.values) {
           expect(
             refused.unavailableReasons[delegate],
-            contains('UP-054'),
+            contains('zeros for every input'),
             reason: '$delegate',
           );
         }
         for (final engine in [BrowserEngine.blink, BrowserEngine.gecko, null]) {
           expect(query(web(engine)).supportedDelegates, {Delegate.gpu});
         }
-        // Without a hardware adapter the reason stays UP-052.
+        // Without a hardware adapter the reason stays the missing adapter.
         expect(
           query(
             web(BrowserEngine.webkit, 'WebGPU apple apple (fallback adapter)'),
           ).unavailableReasons[Delegate.gpu],
-          contains('UP-052'),
+          contains('only on a hardware WebGPU adapter'),
         );
       }
     });

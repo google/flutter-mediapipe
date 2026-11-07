@@ -2,7 +2,8 @@
 
 Google's [MediaPipe] text tasks for Dart and Flutter: text classification, text
 embeddings (EmbeddingGemma included) and language detection on every
-platform, plus Proofreader and Summarizer on every platform but the web.
+platform, plus Proofreader and Summarizer on every platform except the web,
+where they are not yet available.
 Every task runs Google's official MediaPipe pipeline, and Google's pinned
 models are bundled with your app at build time.
 
@@ -24,9 +25,8 @@ All text tasks run on the CPU. The runtimes are Google's: its MediaPipe
 macOS 14+, Linux and Windows, which this package's hook bundles, and
 `@mediapipe/tasks-text` 1.2.0-rc.20261018 in browsers.
 
-Google's browser runtime has no Proofreader or Summarizer
-([UP-034](https://github.com/google/flutter-mediapipe/blob/main/upstream-issues.md#up-034-browser-text-runtime-omits-proofreader-and-summarizer)),
-which their capability queries report there.
+Proofreader and Summarizer are not yet available on the web, matching the
+MediaPipe Tasks Web SDK. Their capability queries report this in browsers.
 
 No platform needs a setting. See
 [platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md)

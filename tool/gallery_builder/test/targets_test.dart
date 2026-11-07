@@ -21,7 +21,7 @@ void main() {
       );
     }
     // Google's Windows library runs the stateful segmenter too slowly to
-    // offer (upstream-issues.md UP-048).
+    // offer.
     expect(
       targetTasks['windows/x64'],
       isNot(contains('interactive_segmenter')),

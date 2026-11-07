@@ -41,10 +41,14 @@ Google's archive.
 import argparse
 import datetime
 import difflib
+import errno
 import hashlib
+import http.client
 import json
 from pathlib import Path
 import re
+import socket
+import ssl
 import struct
 import subprocess
 import sys
@@ -111,6 +115,23 @@ SENTENCES = {
 }
 
 
+def transient_status(code):
+    return code in (408, 429) or code >= 500
+
+
+def network_failure(error):
+    """Whether `error` is the network failing rather than an answer from Google:
+    a failed lookup, a connection lost, refused or unreachable, a timeout, or an
+    HTTP status that Fetcher retries."""
+    if isinstance(error, urllib.error.HTTPError):
+        return transient_status(error.code)
+    if isinstance(error, urllib.error.URLError):
+        error = error.reason
+    return isinstance(error, (socket.gaierror, ConnectionError, TimeoutError, ssl.SSLEOFError,
+                              http.client.IncompleteRead)) or \
+        getattr(error, 'errno', None) in (errno.ENETDOWN, errno.ENETUNREACH, errno.EHOSTUNREACH)
+
+
 class Fetcher:
     """HTTP GETs with retries, counting what they download."""
 
@@ -125,7 +146,7 @@ class Fetcher:
                 request = urllib.request.Request(url, headers=headers or {})
                 return urllib.request.urlopen(request, timeout=60)
             except urllib.error.HTTPError as error:
-                if error.code not in (408, 429) and error.code < 500 or attempt == 3:
+                if not transient_status(error.code) or attempt == 3:
                     raise
             except (urllib.error.URLError, TimeoutError, ConnectionError):
                 if attempt == 3:
@@ -338,6 +359,8 @@ def check_build(fetcher, stamp, paths):
     try:
         archive = Archive(fetcher, f'{OBJECTS}{stamp}/{zip_name}')
     except (SystemExit, urllib.error.URLError, struct.error) as error:
+        if network_failure(error):
+            raise
         return f'archive not readable: {error}'
     needed = [*paths, 'BUILD_INFO']
     for family in families(paths):
@@ -351,11 +374,36 @@ def check_build(fetcher, stamp, paths):
     return text, archive
 
 
+def nightly_stamps(fetcher):
+    """Google's nightly folders, newest first."""
+    _, folders = listing(fetcher, PREFIX, '/')
+    return sorted((folder[len(PREFIX):].rstrip('/') for folder in folders
+                   if re.fullmatch(r'\d{8}/', folder[len(PREFIX):])), reverse=True)
+
+
+def version_stop_since(fetcher, stamp, version, pinned_stamp):
+    """The first night of the unbroken run of builds, up to `stamp`, that name
+    a MediaPipe version other than `version`. Google's folders date a stop with
+    no state of ours. With every build of `version` pruned, it is the pinned
+    build's own night, the earliest the run can have begun, so that pruning
+    cannot keep a stop from ever growing old. A night whose BUILD_INFO answers
+    404 has none and is passed over, as `pick_build` passes over it; a 404 on
+    the folder listing raises, like any other error."""
+    since = stamp
+    for night in nightly_stamps(fetcher):
+        if night > stamp:
+            continue
+        named = parse_build_info(fetcher.text(f'{OBJECTS}{night}/BUILD_INFO') or '')
+        if named.get('mediapipe_version') == version:
+            return since
+        if named.get('mediapipe_version'):
+            since = night
+    return pinned_stamp
+
+
 def pick_build(fetcher, requested, paths):
     """The `(stamp, build_info_text, archive)` to pin."""
-    _, folders = listing(fetcher, PREFIX, '/')
-    stamps = sorted((folder[len(PREFIX):].rstrip('/') for folder in folders
-                     if re.fullmatch(r'\d{8}/', folder[len(PREFIX):])), reverse=True)
+    stamps = nightly_stamps(fetcher)
     print(f"Google's nightly folders: {', '.join(reversed(stamps))}")
     candidates = stamps if requested == 'newest' else [requested]
     if requested != 'newest' and requested not in stamps:
@@ -467,22 +515,39 @@ def main():
         parser.error('--nightly takes YYYYMMDD or newest')
     old = current_pins()
     fetcher = Fetcher()
-    stamp, info_text, archive = pick_build(fetcher, args.nightly, old['paths'])
-    info = parse_build_info(info_text)
-    report = {'nightly': stamp, 'previous': old['stamp'], 'build_info': info,
-              'archive': archive.url, 'generation': archive.generation,
-              'api_changes': None, 'comment_only_headers': None,
-              'notices_changed': [], 'written': False}
 
     def write_report():
         if args.report:
             args.report.parent.mkdir(parents=True, exist_ok=True)
             args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
 
+    try:
+        stamp, info_text, archive = pick_build(fetcher, args.nightly, old['paths'])
+    except (OSError, http.client.HTTPException) as error:
+        if not network_failure(error):
+            raise
+        report = {'network_failure': f'{type(error).__name__}: {error}'}
+        write_report()
+        raise SystemExit(f"Could not read Google's bucket: {report['network_failure']}")
+    info = parse_build_info(info_text)
+    report = {'nightly': stamp, 'previous': old['stamp'], 'build_info': info,
+              'archive': archive.url, 'generation': archive.generation,
+              'api_changes': None, 'comment_only_headers': None,
+              'notices_changed': [], 'written': False}
+
     print(f"Pinning {stamp}: MediaPipe {info['mediapipe_version']}, Kokoro build "
           f"{info.get('kokoro_build_number')}, changelist {info.get('piper_changelist')}; "
           f'archive {archive.size} bytes, generation {archive.generation}.')
     if info['mediapipe_version'] != old['version']:
+        try:
+            since = version_stop_since(fetcher, stamp, old['version'], old['stamp'])
+        except (OSError, http.client.HTTPException) as error:
+            if not network_failure(error):
+                raise
+            print(f'Could not date the stop: {error}')
+            since = None
+        report['version_stop'] = {
+            'version': info['mediapipe_version'], 'pinned': old['version'], 'since': since}
         write_report()
         raise SystemExit(f"MediaPipe {info['mediapipe_version']} replaces "
                          f"{old['version']}: the tests and docs name the version, so "

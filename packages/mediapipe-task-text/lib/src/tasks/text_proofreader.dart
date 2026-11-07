@@ -9,9 +9,9 @@ import '../types/results.dart';
 /// Google's Proofreader: corrected text and the edits that make it.
 ///
 /// One class on every platform. Google's native runtime serves it on a
-/// worker isolate on Android, iOS, macOS, Linux and Windows; Google's browser
-/// runtime has no Proofreader, which `queryTextProofreaderCapabilities()`
-/// reports, and there [create] throws [RuntimeUnavailableException].
+/// worker isolate on Android, iOS, macOS, Linux and Windows. It is not yet
+/// available on the web, which `queryTextProofreaderCapabilities()` reports,
+/// and there [create] throws [RuntimeUnavailableException].
 ///
 /// ```dart
 /// final task = await TextProofreader.create(

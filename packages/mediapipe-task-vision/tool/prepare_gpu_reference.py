@@ -185,7 +185,7 @@ def main():
                              "checkout whose hand model is present")
     parser.add_argument("--landmark-tasks", action="store_true",
                         help="Also generate Hand, Gesture and Pose Landmarker "
-                             "references (Holistic has no GPU path, UP-026)")
+                             "references (Holistic has no GPU path)")
     parser.add_argument("--image-tasks", action="store_true",
                         help="Also generate Image Classifier and Embedder references")
     parser.add_argument("--segmenter-tasks", action="store_true",
@@ -205,10 +205,9 @@ def main():
              + (IMAGE_FILES if "image" in groups else ())
              + (SEGMENTER_FILES if "segmenter" in groups else ()))
     # The tasks the package offers on this GPU: no Holistic on either (its
-    # blendshapes model does not open on GPU, UP-026), no embedder or Face
-    # Detector on Linux (aborts, UP-027; no LiteRT GPU plugin, UP-046), and
-    # Pose without masks (Metal fails, UP-028; OpenGL ES returns 8-bit RGBA
-    # masks, UP-030).
+    # blendshapes model does not open on GPU), no embedder or Face Detector on
+    # Linux (aborts; no LiteRT GPU plugin), and Pose without masks (Metal fails;
+    # OpenGL ES returns 8-bit RGBA masks).
     from cpu_reference import host_target as _host
     on_metal = _host() == "macos/arm64"
     generator_arguments = {
@@ -227,8 +226,8 @@ def main():
     wheel_url, wheel_sha256, library_sha256, version = wheel_pin(target)
     metal = target == "macos/arm64"
     # Face Detector's GPU runs on LiteRT since 1.1.0, and Google's Linux
-    # library lacks LiteRT's GPU plugin (UP-046): the package withdraws that
-    # GPU there, and the Face Detector suite checks the refusal instead.
+    # library lacks LiteRT's GPU plugin: the package withdraws that GPU there,
+    # and the Face Detector suite checks the refusal instead.
     if not metal:
         tasks = tuple(task for task in tasks if task[0] != "face_detector")
         files = tuple(name for name in files
@@ -318,9 +317,8 @@ def main():
                                     stdout=log, stderr=subprocess.STDOUT)
             if result.returncode == 0:
                 # A task's close waits for Google's usage-logging upload, so a
-                # slow reply holds a test past the default 30 s
-                # (upstream-issues.md UP-025); the upload request itself gives
-                # up after 60 s.
+                # slow reply holds a test past the default 30 s; the upload
+                # request itself gives up after 60 s.
                 result = subprocess.run([
                     "dart", "test", *suites, "--timeout", "180s",
                     "--reporter", "expanded",

@@ -113,7 +113,7 @@ void main() {
   );
 
   test('browsers run the classic tasks and EmbeddingGemma, not the '
-      'generative tasks (UP-034)', () {
+      'generative tasks', () {
     textTaskBackendFactory = _unused;
     for (final name in [
       'text classifier',
@@ -131,7 +131,7 @@ void main() {
       for (final delegate in Delegate.values) {
         expect(
           result.unavailableReasons[delegate],
-          contains('UP-034'),
+          contains('not yet available on the web'),
           reason: '$name ${delegate.name}',
         );
       }

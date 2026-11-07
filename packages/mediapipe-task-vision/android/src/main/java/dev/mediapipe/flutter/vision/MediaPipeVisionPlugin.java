@@ -14,9 +14,9 @@ import io.flutter.plugin.common.MethodChannel;
 
 /**
  * Names the device's GPU for the vision capabilities, which withdraw a GPU
- * path on the GPU families where Google's runtime fails (upstream-issues.md
- * UP-023). The tasks themselves run on Google's MediaPipe vision library
- * through Dart FFI; this plugin does not touch them.
+ * path on the GPU families where Google's runtime fails. The tasks themselves
+ * run on Google's MediaPipe vision library through Dart FFI; this plugin does
+ * not touch them.
  */
 public final class MediaPipeVisionPlugin implements FlutterPlugin {
   private MethodChannel channel;

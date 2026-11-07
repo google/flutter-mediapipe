@@ -19,8 +19,9 @@ on:
         required: false
         default: all
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: decision-${{ github.ref }}-${{ inputs.jobs || 'all' }}
+  group: decision-${{ github.event_name == 'push' && github.sha || github.ref }}-${{ inputs.jobs || 'all' }}
   cancel-in-progress: true
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
       family: decision
       tasks: decision_maker
       integration-test: decision_maker_test
-      # EmbeddingGemma 2 for memory_budget_test.dart's macOS check (UP-060).
+      # EmbeddingGemma 2 for memory_budget_test.dart's macOS check.
       model-path: |
         packages/mediapipe-task-decision/models/laya_s256.task
         packages/mediapipe-task-decision/models/embeddinggemma-2-text-vision-440m.litertlm

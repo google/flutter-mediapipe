@@ -32,7 +32,7 @@ final class BooleanQuestion {
   final double? temperature;
 
   /// Whether to subtract the empty-context prior. Google's browser runtime
-  /// ignores it (upstream-issues.md UP-056).
+  /// ignores it.
   final bool normalizePrior;
 
   /// The question as Google's JavaScript API names it.
@@ -92,12 +92,11 @@ final class ChoiceQuestion {
   /// Softmax temperature; null uses the model's calibrated one.
   final double? temperature;
 
-  /// How the options are scored. Google's browser runtime ignores it
-  /// (upstream-issues.md UP-056).
+  /// How the options are scored. Google's browser runtime ignores it.
   final ChoiceScoringMode scoringMode;
 
   /// Whether to subtract the empty-context prior. Google's browser runtime
-  /// ignores it (upstream-issues.md UP-056).
+  /// ignores it.
   final bool normalizePrior;
 
   /// The question as Google's JavaScript API names it.

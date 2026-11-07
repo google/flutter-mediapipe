@@ -42,7 +42,7 @@ class DecisionPage extends StatefulWidget {
   final GalleryTask task;
 
   /// The platform the capability query evaluated, which decides the
-  /// delegate: the CPU on the desktop, the GPU in browsers (UP-049).
+  /// delegate: the CPU on the desktop, the GPU in browsers.
   final TaskPlatform platform;
   final VoidCallback? onOpenMenu;
 
@@ -55,7 +55,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
   late final TaskSettingValues _values = TaskSettingValues(_id);
   late final List<TaskSetting> _settings = taskSettings[_id] ?? const [];
   // Only the alternatives the package accepts here: browsers run neither
-  // GLiNER2.5-Decide model (UP-055).
+  // GLiNER2.5-Decide model.
   late final List<TaskModel> _models = [
     for (final model in taskModels[_id] ?? const <TaskModel>[])
       if (decisionRunsModel(widget.platform, model)) model,
@@ -251,7 +251,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
     final big = TextStyle(
       color: c.text,
       fontSize: 22,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
     );
     final muted = TextStyle(color: c.muted, fontSize: Sizes.sm);
     switch (_result) {

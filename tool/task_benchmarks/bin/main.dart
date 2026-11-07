@@ -139,10 +139,10 @@ void compare(Object? actual, Object? expected, String label) {
 /// Google's long key-point summaries are not reproducible: its macOS wheel
 /// wrote three or four different summaries for each of these requests across
 /// three runs, and its C library's varied from run to run too, all alike for at
-/// least their first 98 characters (upstream-issues.md UP-036). Those cases
-/// must follow Google's text from the start, as the text package requires
-/// where it cannot replay Google's requests, and the report records whether
-/// they matched exactly; every other case must match exactly.
+/// least their first 98 characters. Those cases must follow Google's text from
+/// the start, as the text package requires where it cannot replay Google's
+/// requests, and the report records whether they matched exactly; every other
+/// case must match exactly.
 bool unreproducible(Json entry) =>
     entry['task'] == 'summarizer' &&
     entry['name'] == 'long' &&

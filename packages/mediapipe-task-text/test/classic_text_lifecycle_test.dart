@@ -93,10 +93,13 @@ void main() {
         () async {
           for (var i = 0; i < 3; i++) {
             final (run, close) = await _start(name, model);
-            await close().timeout(const Duration(seconds: 10));
+            // A close waits for Google's usage-logging upload, whose request
+            // times out after 60 s, so only a longer wait is a hang.
+            await close().timeout(const Duration(seconds: 90));
             await expectLater(run('Late'), throwsStateError);
           }
         },
+        timeout: const Timeout(Duration(minutes: 5)),
       );
 
       test('creation reports an invalid model and leaves no task', () async {

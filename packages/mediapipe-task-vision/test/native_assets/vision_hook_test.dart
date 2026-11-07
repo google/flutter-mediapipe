@@ -112,7 +112,7 @@ void main() {
     // The hook refuses any task missing from these rows, so widening them
     // without adding the task to a platform job would claim coverage nothing
     // proves. Google's Windows library runs the stateful Interactive
-    // Segmenter too slowly to offer (upstream-issues.md UP-048).
+    // Segmenter too slowly to offer.
     expect(
       visionRuntimeTasks.keys,
       unorderedEquals(familyRuntimes['vision']!.keys),

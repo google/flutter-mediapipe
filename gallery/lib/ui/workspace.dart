@@ -77,8 +77,8 @@ class TopBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: c.text,
-                    fontWeight: FontWeight.w600,
-                    fontSize: Sizes.md,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
                   ),
                 ),
               ),
@@ -398,7 +398,7 @@ class TaskPackageLink extends StatelessWidget {
           child: Text(
             '$package on pub.dev',
             style: TextStyle(
-              color: c.teal,
+              color: c.accentText,
               fontSize: Sizes.sm,
               decoration: TextDecoration.underline,
             ),
@@ -446,7 +446,7 @@ Future<void> showTaskInfo(BuildContext context, GalleryTask task) {
                 child: Text(
                   guide,
                   style: TextStyle(
-                    color: c.teal,
+                    color: c.accentText,
                     fontSize: Sizes.sm,
                     decoration: TextDecoration.underline,
                   ),
@@ -500,7 +500,7 @@ class GemmaNotice extends StatelessWidget {
         child: Text(
           text,
           style: style.copyWith(
-            color: c.teal,
+            color: c.accentText,
             decoration: TextDecoration.underline,
           ),
         ),

@@ -171,9 +171,29 @@ Future<void> _prepare(
       // A phone build should not fail on one dropped connection; a rerun
       // keeps the models already verified.
       if (attempt == 3) rethrow;
-      stderr.writeln('  attempt $attempt failed ($error); retrying');
+      stderr.writeln(
+        '::warning::Bundling the gallery models failed on attempt $attempt of '
+        '3 ($error); retrying',
+      );
       await Future<void>.delayed(Duration(seconds: 2 * attempt));
     }
+  }
+
+  // The web gallery's model progress needs each model's size: GitHub Pages
+  // serves them gzipped, so a response's Content-Length is not it.
+  if (target == 'web') {
+    final models = Directory(p.join(gallery, 'assets/mediapipe'));
+    manifest['modelBytes'] = {
+      if (await models.exists())
+        for (final file
+            in models.listSync().whereType<File>().toList()
+              ..sort((a, b) => a.path.compareTo(b.path)))
+          if (RegExp(r'^[0-9a-f]{64}$').hasMatch(p.basename(file.path)))
+            p.basename(file.path): file.lengthSync(),
+    };
+    await File(p.join(gallery, 'assets/manifest.json')).writeAsString(
+      '${const JsonEncoder.withIndent('  ').convert(manifest)}\n',
+    );
   }
 
   stdout.writeln('$target: ${tasks.length} task(s) bundled');
@@ -301,6 +321,7 @@ dependencies:
     path: ../packages/mediapipe-task-retrieval
   web: ^1.1.1
   crypto: ^3.0.6
+  http: ^1.6.0
   file_selector: ^1.0.3
   image_picker: ^1.2.2
   video_frames:
@@ -330,12 +351,12 @@ $core$defines
 flutter:
   uses-material-design: true
   fonts:
-    - family: Arimo
+    - family: Roboto
       fonts:
-        - asset: fonts/Arimo-400.ttf
-        - asset: fonts/Arimo-600.ttf
-          weight: 600
-        - asset: fonts/Arimo-700.ttf
+        - asset: fonts/Roboto-400.ttf
+        - asset: fonts/Roboto-500.ttf
+          weight: 500
+        - asset: fonts/Roboto-700.ttf
           weight: 700
   assets:
     - assets/manifest.json

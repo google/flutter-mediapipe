@@ -1,7 +1,7 @@
 /// Browsers have no native runtime: the classic tasks and EmbeddingGemma run
 /// through the registered browser plugin, so reaching these means it did not
 /// register, and the generative tasks' capability queries refuse browsers
-/// first (upstream-issues.md UP-034).
+/// first.
 library;
 
 import 'package:mediapipe_core/platform_interface.dart'

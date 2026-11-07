@@ -13,8 +13,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
 concurrency:
-  group: coverage-gate-${{ github.ref }}
+  group: coverage-gate-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 permissions:

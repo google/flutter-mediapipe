@@ -13,6 +13,8 @@ so a new family reaches them. This checks the rest:
   `assets/runtime.json`; the Flutter version in the docs against CI's; and
   models two families pin, which must be identical so apps download them once;
   and the browser alignment oracle's tolerances against the Dart oracle's.
+- **One README in two places:** core's README, which is `mediapipe_core`'s
+  pub.dev page, is a byte-for-byte copy of the root README.
 
     python3 -B tool/check_repository.py
 
@@ -36,6 +38,9 @@ ALIGNMENT_ORACLES = ['gallery/integration_test/support/alignment_oracle.dart',
 
 # Where the docs name the Flutter version CI runs.
 FLUTTER_DOCS = ['README.md', 'gallery/tool/WEB_FACE.md']
+
+# The root README's copy, which pub.dev shows as mediapipe_core's page.
+CORE_README = 'packages/mediapipe-core/README.md'
 
 # The README's "Where it runs" rows and the coverage-matrix tasks each stands
 # for; together they must cover the matrix.
@@ -216,10 +221,21 @@ def alignment_tolerances(problems):
             problems.append(f'{name}: the alignment oracles disagree: {found}')
 
 
+def readme_copy(problems):
+    # A real file: publish_check.py leaves symlinks out of the package. Bytes,
+    # so line endings and a final newline count.
+    copy = REPO / CORE_README
+    if (copy.is_symlink() or not copy.is_file()
+            or copy.read_bytes() != (REPO / 'README.md').read_bytes()):
+        problems.append(f'{CORE_README}: must be identical to README.md, the file '
+                        f'to edit. Move any change made in the copy to README.md, '
+                        f'then run: cp README.md {CORE_README}')
+
+
 def main():
     problems = []
     for check in (family_lists, pubspec_pins, runtime_versions, flutter_versions,
-                  shared_models, alignment_tolerances):
+                  shared_models, alignment_tolerances, readme_copy):
         check(problems)
     for problem in problems:
         print(problem)
