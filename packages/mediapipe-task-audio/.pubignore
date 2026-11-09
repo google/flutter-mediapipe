@@ -7,8 +7,10 @@ build/
 # validation evidence and benchmarks live in the repository, not the package.
 /tool/
 /test/
-# The bridge's AddressSanitizer test; the build hook compiles only the bridge.
+# The bridges' AddressSanitizer tests; the build hook compiles only the
+# bridges.
 /native/audio_stream_bridge_test.c
+/native/text_to_speech_guard_test.c
 /dart_test.yaml
 # It includes the repository's shared options, which are not published.
 /analysis_options.yaml

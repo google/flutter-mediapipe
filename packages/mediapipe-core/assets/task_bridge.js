@@ -17,14 +17,15 @@
     }
     state.pending.clear();
   }
-  function request(state, type, input) {
+  function request(state, type, input, onChunk) {
     if (state.dead) return Promise.reject(new Error('MediaPipe worker is closed'));
     return new Promise((resolve, reject) => {
       const id = state.next++;
       // Creation fetches the model, which for Decision Maker is 680 MB.
       const limit = type === 'create' ? 600000 : 120000;
-      const timer = setTimeout(() => fail(state, new Error('MediaPipe worker request timed out')), limit);
-      state.pending.set(id, {resolve, reject, timer});
+      const timer = state.longRequests ? undefined
+        : setTimeout(() => fail(state, new Error('MediaPipe worker request timed out')), limit);
+      state.pending.set(id, {resolve, reject, timer, onChunk});
       const transfers = [];
       if (input?.modelBytes) transfers.push(input.modelBytes.buffer);
       if (input?.samples) transfers.push(input.samples.buffer);
@@ -38,14 +39,20 @@
     });
   }
   globalThis.mediapipeTasks = {
-    async create(workerUrl, options) {
+    // With longRequests no request has a time limit: the speech tasks' time
+    // grows with their input, and Parakeet's download with the connection.
+    async create(workerUrl, options, longRequests) {
       const worker = new Worker(workerUrl, {type: 'module'});
       const id = next++;
-      const state = {id, worker, pending: new Map(), next: 0, dead: false};
+      const state = {id, worker, pending: new Map(), next: 0, dead: false, longRequests};
       workers.set(id, state);
       worker.onmessage = ({data}) => {
         const pending = state.pending.get(data.id);
         if (!pending) return;
+        if ('chunk' in data) {
+          pending.onChunk?.(data.chunk);
+          return;
+        }
         clearTimeout(pending.timer);
         state.pending.delete(data.id);
         if (data.error) pending.reject(new Error(data.error));
@@ -68,6 +75,24 @@
       const state = workers.get(id);
       if (!state) return Promise.reject(new Error('MediaPipe task is closed'));
       return request(state, 'run', input);
+    },
+    // Like run, with each of the request's chunks passed to onChunk until
+    // done settles; cancel asks the worker to stop the request.
+    stream(id, input, onChunk) {
+      const state = workers.get(id);
+      if (!state) return {done: Promise.reject(new Error('MediaPipe task is closed')), cancel() {}};
+      const requestId = state.next;
+      return {
+        done: request(state, 'run', input, onChunk),
+        cancel() {
+          if (state.pending.has(requestId)) state.worker.postMessage({id: requestId, type: 'cancel'});
+        },
+      };
+    },
+    // Cancels every request the worker has received, as its family's worker
+    // script defines a cancel for each; nothing once the worker has closed.
+    cancelAll(id) {
+      workers.get(id)?.worker.postMessage({type: 'cancelAll'});
     },
     async close(id) {
       const state = workers.get(id);

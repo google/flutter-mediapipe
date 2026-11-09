@@ -136,6 +136,11 @@ void main() {
       expect(nativeString(fromPath.modelAssetPath), 'models/x.task');
       expect(fromPath.modelAssetBuffer, nullptr);
       expect(fromPath.modelAssetBufferCount, 0);
+
+      final onGpu = arena<MpBaseOptions>().ref;
+      fillBaseOptions(onGpu, arena, delegate: Delegate.gpu);
+      // MP_DELEGATE_GPU since 1.2.1.
+      expect(onGpu.delegate, 2);
     });
   });
 

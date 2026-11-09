@@ -22,7 +22,7 @@ runtime for its platform, with Google's pinned models bundled at build time.
 | --- | --- | --- | --- |
 | [`mediapipe_vision`](https://pub.dev/packages/mediapipe_vision) | Face and object detection; face, hand, pose and holistic landmarks; gestures; image classification, embeddings and segmentation | `flutter pub add mediapipe_vision` | [Vision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/README.md) |
 | [`mediapipe_text`](https://pub.dev/packages/mediapipe_text) | Text classification, embeddings (EmbeddingGemma included) and language detection on every platform; proofreading and summarization on every platform except the web, where they are not yet available | `flutter pub add mediapipe_text` | [Text](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-text/README.md) |
-| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification | `flutter pub add mediapipe_audio` | [Audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md) |
+| [`mediapipe_audio`](https://pub.dev/packages/mediapipe_audio) | Audio classification, speech to text and text to speech, on every platform | `flutter pub add mediapipe_audio` | [Audio](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-audio/README.md) |
 | [`mediapipe_decision`](https://pub.dev/packages/mediapipe_decision) | Yes-or-no, choice and score questions about a text (Decision Maker), on every platform | `flutter pub add mediapipe_decision` | [Decision](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-decision/README.md) |
 | [`mediapipe_retrieval`](https://pub.dev/packages/mediapipe_retrieval) | Text, images and audio in one embedding space (Universal Embedder) and an on-device vector index over them (Semantic Retriever), on every platform | `flutter pub add mediapipe_retrieval` | [Retrieval](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-retrieval/README.md) |
 
@@ -117,6 +117,7 @@ On macOS, build the app for Apple Silicon only (two lines in its
 | Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | |
 | Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Audio (transcribe, speak) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
@@ -126,9 +127,9 @@ Web SDK.
 
 CPU works everywhere a family is listed, except that browsers run Decision
 and Retrieval on WebGPU alone, which needs a hardware adapter. GPU (Metal,
-OpenGL ES, WebGL or Android GPU) depends on the task; Macs run the vision
-tasks on the CPU for now, until Google confirms its Metal results since 1.1.1.
-Every cell is tested in CI on hosted
+OpenGL ES, WebGL, WebGPU or Android GPU) depends on the task; Macs run the
+vision tasks on the CPU for now, until Google confirms its Metal results since
+1.1.1. Every cell is tested in CI on hosted
 runners, the Android emulator, the iOS Simulator and Chromium, Firefox and
 WebKit. The [vision status table](https://github.com/google/flutter-mediapipe/blob/main/packages/mediapipe-task-vision/tool/VISION_TASKS_STATUS.md)
 lists each task, delegate, known upstream limit and physical-device result.

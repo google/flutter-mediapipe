@@ -36,9 +36,9 @@ export async function loadVerifiedRuntime(pinUrl, baseUrl, family) {
   globalThis.__HOST_ENVIRONMENT__ = 'FLUTTER_WEB';
   try {
     const bundle = await import(await verified(`${family.toLowerCase()}_bundle.mjs`));
-    // With `true` the resolver returns the module build (no SIMD probe since
-    // 1.2.2-rc.20261103, which ships no no-SIMD build); it fetches nothing
-    // given a relative root.
+    // With `true` the resolver returns the module build (no SIMD probe in
+    // 1.2.2, which ships no no-SIMD build); it fetches nothing given a
+    // relative root.
     const paths = await bundle.FilesetResolver[`for${family}Tasks`]('wasm', true);
     const name = path => `wasm/${path.split('/').pop()}`;
     const files = {
@@ -55,16 +55,35 @@ export async function loadVerifiedRuntime(pinUrl, baseUrl, family) {
 // Runs each request a family's worker receives after the one before it, so
 // creation, requests and shutdown keep their order, and replies under the
 // request's id with what reply makes of run's result, or with its error.
-// transfers names what the reply hands over rather than copies.
+// transfers names what the reply hands over rather than copies. A cancel, of
+// one request or of every one received so far, marks each cancelled and
+// calls the onCancel that run may set on it while it runs.
 export function installWorkerQueue(run, {reply = result => ({result}), transfers = () => []} = {}) {
   let operations = Promise.resolve();
+  const requests = new Map();
   self.onmessage = ({data}) => {
+    // Outside the queue, since it has to reach the request the queue is running.
+    if (data.type === 'cancel' || data.type === 'cancelAll') {
+      for (const [id, request] of requests) {
+        if (data.type === 'cancel' && id !== data.id) continue;
+        request.cancelled = true;
+        request.onCancel?.();
+      }
+      return;
+    }
+    const request = {
+      cancelled: false,
+      emit: (chunk, transfer = []) => self.postMessage({id: data.id, chunk}, transfer),
+    };
+    requests.set(data.id, request);
     operations = operations.then(async () => {
       try {
-        const result = await run(data.type, data.input);
+        const result = await run(data.type, data.input, request);
         self.postMessage({id: data.id, ...reply(result)}, transfers(result));
       } catch (error) {
         self.postMessage({id: data.id, error: error?.message || String(error)});
+      } finally {
+        requests.delete(data.id);
       }
     });
   };

@@ -31,6 +31,10 @@ final class AudioData
   new AudioData({required Float32List samples, required double sampleRate, int channels = 1})
 abstract final class AudioModels
   new AudioModels()
+  static DownloadAsset kokoro
+  static DownloadAsset parakeetTdtV3
+  static DownloadAsset phonon
+  static DownloadAsset pocketTtsEn
   static DownloadAsset yamnet
   static Map<String, DownloadAsset> byName
 enum AudioRunningMode extends Enum
@@ -41,6 +45,96 @@ enum AudioRunningMode extends Enum
   static List<AudioRunningMode> values
   value AudioRunningMode.audioClips
   value AudioRunningMode.audioStream
+final class AudioTranscriber
+  Delegate get delegate
+  Future<AudioTranscriberResult> finishStream()
+  Future<AudioTranscriberResult> transcribe(AudioData audio, {bool endOfStream = true})
+  Future<void> dispose()
+  Future<void> prewarm()
+  static Future<AudioTranscriber> create(AudioTranscriberOptions options)
+final class AudioTranscriberOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get cacheDirectory
+  String? get modelPath
+  String? get prompt
+  TranscriberModelArchitecture get modelArchitecture
+  Uint8List? get modelBytes
+  bool get enableInterimResults
+  int get sampleRateHz
+  new AudioTranscriberOptions({DownloadAsset? model, String? modelPath, Delegate delegate = Delegate.cpu, int sampleRateHz = 16000, bool enableInterimResults = false, TranscriberModelArchitecture modelArchitecture = TranscriberModelArchitecture.auto, String? prompt, String? cacheDirectory})
+final class AudioTranscriberResult
+  List<TranscriptionSegment> get segments
+  String get text
+  String toString()
+  new AudioTranscriberResult(List<TranscriptionSegment> segments)
+final class TextToSpeech
+  Delegate get delegate
+  Future<List<TextToSpeechVoice>> listVoices()
+  Future<TextToSpeechResult> synthesize(String text, {String? voiceId, String? locale})
+  Future<void> dispose()
+  Stream<TextToSpeechResult> synthesizeStream(String text, {String? voiceId, String? locale})
+  static Future<TextToSpeech> create(TextToSpeechOptions options)
+  void cancel()
+final class TextToSpeechOptions extends TaskOptions
+  Delegate get delegate
+  DownloadAsset? get model
+  String? get cacheDirectory
+  String? get defaultLocale
+  String? get defaultVoiceId
+  String? get modelPath
+  Uint8List? get modelBytes
+  double get speakingRate
+  int get targetBucket
+  new TextToSpeechOptions({DownloadAsset? model, String? modelPath, Delegate delegate = Delegate.cpu, String? defaultVoiceId, String? defaultLocale, double speakingRate = 1, int targetBucket = 0, String? cacheDirectory})
+final class TextToSpeechResult
+  AudioData toAudioData()
+  Duration get duration
+  Float32List get samples
+  List<WordTimestamp> get wordTimestamps
+  String toString()
+  bool get isFinal
+  int get chunkIndex
+  int get sampleRateHz
+  new TextToSpeechResult({required Float32List samples, required int sampleRateHz, List<WordTimestamp> wordTimestamps = const [], int chunkIndex = 0, bool isFinal = true})
+final class TextToSpeechVoice
+  String get displayName
+  String get locale
+  String get voiceId
+  String toString()
+  bool get isDownloaded
+  int get sampleRateHz
+  new TextToSpeechVoice({required String voiceId, required String displayName, required String locale, required int sampleRateHz, required bool isDownloaded})
+enum TranscriberModelArchitecture extends Enum
+  int get index
+  new TranscriberModelArchitecture()
+  static List<TranscriberModelArchitecture> values
+  static TranscriberModelArchitecture auto
+  static TranscriberModelArchitecture omni
+  value TranscriberModelArchitecture.auto
+  value TranscriberModelArchitecture.omni
+final class TranscriptionSegment
+  String get transcript
+  String toString()
+  bool get isFinal
+  int get fromTimestampMilliseconds
+  int get toTimestampMilliseconds
+  new TranscriptionSegment({required String transcript, required bool isFinal, required int fromTimestampMilliseconds, required int toTimestampMilliseconds})
+final class WordTimestamp
+  String get word
+  String toString()
+  double get endSeconds
+  double get startSeconds
+  int get end
+  int get start
+  new WordTimestamp({required String word, required int start, required int end, required double startSeconds, required double endSeconds})
 function TaskCapabilities audioClassifierCapabilitiesForPlatform(TaskPlatform platform)
+function TaskCapabilities audioTranscriberCapabilitiesForPlatform(TaskPlatform platform)
 function AudioData decodeWav(Uint8List bytes)
 function Future<TaskCapabilities> queryAudioClassifierCapabilities()
+function Future<TaskCapabilities> queryAudioTranscriberCapabilities()
+function Future<TaskCapabilities> queryTextToSpeechCapabilities()
+getter Map<String, String?> get speechRuntimeTargets
+function TaskCapabilities textToSpeechCapabilitiesForPlatform(TaskPlatform platform)
+getter Map<String, String?> get textToSpeechGpuTargets
+getter Map<String, String?> get transcriberGpuTargets

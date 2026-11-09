@@ -54,6 +54,7 @@ README_ROWS = {
     'Text (EmbeddingGemma)': ['embedding_gemma'],
     'Text (proofread, summarize)': ['text_proofreader', 'text_summarizer'],
     'Audio': ['audio_classifier'],
+    'Audio (transcribe, speak)': ['audio_transcriber', 'text_to_speech'],
     'Decision': ['decision_maker'],
     'Retrieval': ['semantic_retriever', 'universal_embedder'],
 }

@@ -21,6 +21,20 @@ final _claims = <String, TaskCapabilities Function(TaskPlatform)>{
   'pose_landmarker': poseLandmarkerCapabilitiesForPlatform,
 };
 
+// The iPhone GPU claims that wait for the nightly Test Lab iPhones (the
+// matrix's step 5). Remove each one once its cell is 'device'.
+const _unprovedGpu = {
+  'face_detector / ios',
+  'face_landmarker / ios',
+  'gesture_recognizer / ios',
+  'hand_landmarker / ios',
+  'image_classifier / ios',
+  'image_embedder / ios',
+  'image_segmenter / ios',
+  'object_detector / ios',
+  'pose_landmarker / ios',
+};
+
 Never _unused(Object? _) => throw UnimplementedError();
 
 void main() {
@@ -39,6 +53,6 @@ void main() {
   });
 
   test('coverage matrix agrees with the vision capability claims', () {
-    expect(coverageMatrixProblems(_claims), isEmpty);
+    expect(coverageMatrixProblems(_claims, unprovedGpu: _unprovedGpu), isEmpty);
   });
 }

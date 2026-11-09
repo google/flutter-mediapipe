@@ -17,6 +17,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'src/classifier_settings.dart';
+import 'src/delegate.dart';
 import 'src/exceptions.dart';
 import 'src/host_io.dart';
 import 'src/value_types.dart';
@@ -189,8 +190,8 @@ final class MpEmbeddingResult extends Struct {
   external bool hasTimestampMs;
 }
 
-/// Fills Google's base options for the CPU, the only delegate the C API
-/// families run on, with the model at [modelPath] or in [modelBytes] (or
+/// Fills Google's base options for [delegate], the CPU unless a task has
+/// proved its GPU path, with the model at [modelPath] or in [modelBytes] (or
 /// none, for a task such as Semantic Retriever that loads no model), and the
 /// host as Flutter on this OS, with [mpHostVersion], which Google's usage log
 /// records (it records neither while the environment is unknown). Bytes and
@@ -201,11 +202,12 @@ void fillBaseOptions(
   Arena arena, {
   String? modelPath,
   Uint8List? modelBytes,
+  Delegate delegate = Delegate.cpu,
 }) {
   target
     ..fileDescriptor = -1
-    // MP_DELEGATE_CPU.
-    ..delegate = 1
+    // MP_DELEGATE_GPU or MP_DELEGATE_CPU.
+    ..delegate = delegate == Delegate.gpu ? 2 : 1
     // MP_HOST_ENVIRONMENT_FLUTTER.
     ..hostEnvironment = 5
     ..hostSystem = mpHostSystem

@@ -2,7 +2,26 @@ abstract interface class AudioTaskBackend
   Future<List<Object?>> classify(Float32List samples, double sampleRate)
   Future<void> dispose()
   new AudioTaskBackend()
+abstract interface class AudioTranscriberRunner
+  Future<AudioTranscriberResult> finishStream()
+  Future<AudioTranscriberResult> transcribe(Float32List samples, bool endOfStream)
+  Future<void> dispose()
+  Future<void> prewarm()
+  new AudioTranscriberRunner()
+abstract interface class TextToSpeechRunner
+  Future<List<TextToSpeechVoice>> listVoices()
+  Future<TextToSpeechResult> synthesize(String text, String? voiceId, String? locale)
+  Future<void> dispose()
+  Stream<TextToSpeechResult> synthesizeStream(String text, String? voiceId, String? locale)
+  new TextToSpeechRunner()
+  void cancel()
 getter Future<AudioTaskBackend> Function(Map<String, Object?>)? get audioTaskBackendFactory
 setter set audioTaskBackendFactory(Future<AudioTaskBackend> Function(Map<String, Object?>)? value)
+getter Future<AudioTranscriberRunner> Function(AudioTranscriberOptions)? get audioTranscriberOpener
+setter set audioTranscriberOpener(Future<AudioTranscriberRunner> Function(AudioTranscriberOptions)? value)
+getter bool get browserOnMac
+setter set browserOnMac(bool value)
 getter void Function(int)? get debugGoogleStreamTimestamp
 setter set debugGoogleStreamTimestamp(void Function(int)? value)
+getter Future<TextToSpeechRunner> Function(TextToSpeechOptions)? get textToSpeechOpener
+setter set textToSpeechOpener(Future<TextToSpeechRunner> Function(TextToSpeechOptions)? value)

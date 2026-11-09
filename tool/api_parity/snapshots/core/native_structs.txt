@@ -92,7 +92,7 @@ final class MpEmbeddingResult extends Struct
   set timestampMs(int value)
 function void checkNativeStatus(int Function(Pointer<Pointer<Char>>) call, void Function(Pointer<Char>) errorFree, {Object Function(String, int)? failure})
 function List<Classifications> copyClassifications(MpClassificationResult result)
-function void fillBaseOptions(MpBaseOptions target, Arena arena, {String? modelPath, Uint8List? modelBytes})
+function void fillBaseOptions(MpBaseOptions target, Arena arena, {String? modelPath, Uint8List? modelBytes, Delegate delegate = Delegate.cpu})
 function void fillClassifierOptions(MpClassifierOptions target, Arena arena, ClassifierSettings settings)
 function String? nativeString(Pointer<Char> value, {bool emptyIsNull = false})
 function Pointer<Pointer<Char>> nativeStrings(Arena arena, List<String> values)

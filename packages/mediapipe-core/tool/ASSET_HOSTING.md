@@ -172,7 +172,8 @@ so packages shipping the runtimes would bring those files from
 `packages/mediapipe-core/third_party/`, as core already does for the native
 libraries. Models need a check per model before
 anyone mirrors them: `mirror_runtime_assets.py` marks the Gemma-based ones
-`Gemma Terms`, whose notice must travel with every copy.
+`Gemma Terms`, whose notice must travel with every copy, and Parakeet and
+PocketTTS `CC-BY-4.0`, which need attribution with every copy.
 
 **A shared CDN no longer saves downloads.** Browsers partition their HTTP
 cache by top-level site (Chrome since 86, Firefox since 85, Safari earlier),
