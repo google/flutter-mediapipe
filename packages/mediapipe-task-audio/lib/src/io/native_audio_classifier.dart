@@ -88,15 +88,17 @@ final class _NativeAudioClassifier implements AudioClassifierRunner {
 /// Resolves core's runtime before the first call, to explain a missing one.
 void requireNativeAudioRuntime() {
   try {
-    Native.addressOf<
-      NativeFunction<
-        Int32 Function(
-          Pointer<mp.MpAudioClassifierOptions>,
-          Pointer<Pointer<Void>>,
-          Pointer<Pointer<Char>>,
-        )
-      >
-    >(mp.create);
+    runJniOnLoad(
+      Native.addressOf<
+        NativeFunction<
+          Int32 Function(
+            Pointer<mp.MpAudioClassifierOptions>,
+            Pointer<Pointer<Void>>,
+            Pointer<Pointer<Char>>,
+          )
+        >
+      >(mp.create),
+    );
   } on ArgumentError catch (error) {
     if (missingLinuxGraphicsLibraries('$error') case final missing?) {
       throw missing;

@@ -70,15 +70,17 @@ Future<TextToSpeechRunner> openNativeTextToSpeech(
 /// one.
 void _requireSpeechRuntime(String task) {
   try {
-    Native.addressOf<
-      NativeFunction<
-        Int32 Function(
-          Pointer<asr.MpAudioTranscriberOptions>,
-          Pointer<Pointer<Void>>,
-          Pointer<Pointer<Char>>,
-        )
-      >
-    >(asr.create);
+    runJniOnLoad(
+      Native.addressOf<
+        NativeFunction<
+          Int32 Function(
+            Pointer<asr.MpAudioTranscriberOptions>,
+            Pointer<Pointer<Void>>,
+            Pointer<Pointer<Char>>,
+          )
+        >
+      >(asr.create),
+    );
   } on ArgumentError catch (error) {
     if (missingLinuxGraphicsLibraries('$error') case final missing?) {
       throw missing;

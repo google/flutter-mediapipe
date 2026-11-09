@@ -194,8 +194,9 @@ final class MpEmbeddingResult extends Struct {
 /// proved its GPU path, with the model at [modelPath] or in [modelBytes] (or
 /// none, for a task such as Semantic Retriever that loads no model), and the
 /// host as Flutter on this OS, with [mpHostVersion], which Google's usage log
-/// records (it records neither while the environment is unknown). Bytes and
-/// strings are copied into [arena], which may free them once the task exists:
+/// records (it records neither while the environment is unknown), and the app
+/// as [mpAppId] and [mpAppVersion], where there are any. Bytes and strings are
+/// copied into [arena], which may free them once the task exists:
 /// Google copies them when it creates the task.
 void fillBaseOptions(
   MpBaseOptions target,
@@ -212,6 +213,12 @@ void fillBaseOptions(
     ..hostEnvironment = 5
     ..hostSystem = mpHostSystem
     ..hostVersion = mpHostVersion.toNativeUtf8(allocator: arena).cast();
+  final appId = mpAppId;
+  if (appId != null) target.appId = appId.toNativeUtf8(allocator: arena).cast();
+  final appVersion = mpAppVersion;
+  if (appVersion != null) {
+    target.appVersion = appVersion.toNativeUtf8(allocator: arena).cast();
+  }
   if (modelBytes != null) {
     final buffer = arena<Uint8>(modelBytes.length);
     buffer.asTypedList(modelBytes.length).setAll(0, modelBytes);

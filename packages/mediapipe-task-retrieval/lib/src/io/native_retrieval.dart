@@ -30,15 +30,17 @@ void requireRetrievalRuntime() {
     );
   }
   try {
-    Native.addressOf<
-      NativeFunction<
-        Int32 Function(
-          Pointer<mp.MpUniversalEmbedderOptions>,
-          Pointer<Pointer<Void>>,
-          mp.MpErrorOut,
-        )
-      >
-    >(mp.embedderCreate);
+    runJniOnLoad(
+      Native.addressOf<
+        NativeFunction<
+          Int32 Function(
+            Pointer<mp.MpUniversalEmbedderOptions>,
+            Pointer<Pointer<Void>>,
+            mp.MpErrorOut,
+          )
+        >
+      >(mp.embedderCreate),
+    );
   } catch (error) {
     if (missingLinuxGraphicsLibraries('$error') case final missing?) {
       throw missing;

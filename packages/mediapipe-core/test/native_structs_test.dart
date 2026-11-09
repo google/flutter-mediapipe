@@ -8,7 +8,7 @@ import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_core/native_structs.dart';
 import 'package:mediapipe_core/platform_interface.dart'
-    show ClassifierSettings, mpHostSystem, mpHostVersion;
+    show ClassifierSettings, mpAppId, mpAppVersion, mpHostSystem, mpHostVersion;
 import 'package:test/test.dart';
 
 void main() {
@@ -130,6 +130,11 @@ void main() {
       expect(fromBytes.hostEnvironment, 5);
       expect(fromBytes.hostSystem, mpHostSystem);
       expect(nativeString(fromBytes.hostVersion), mpHostVersion);
+      // This test's host is not an app on Android or iOS.
+      expect(mpAppId, isNull);
+      expect(mpAppVersion, isNull);
+      expect(fromBytes.appId, nullptr);
+      expect(fromBytes.appVersion, nullptr);
 
       final fromPath = arena<MpBaseOptions>().ref;
       fillBaseOptions(fromPath, arena, modelPath: 'models/x.task');

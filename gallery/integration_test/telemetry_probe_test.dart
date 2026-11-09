@@ -25,8 +25,9 @@ import 'support/sdk_frames.dart';
 /// its peer and the bytes TCP_INFO counts for it, so the log shows whether a
 /// close opened a connection and how much it carried. Large models download
 /// before the watch starts, so their connections stay out of it.
-/// The API 31 emulator, through a TLS proxy, showed one connection per close to
-/// play.googleapis.com carrying a POST /log that Google answered with 200.
+/// With Google's October 18 build, the API 31 emulator, through a TLS proxy,
+/// showed one connection per close to play.googleapis.com carrying a POST /log
+/// that Google answered with 200. With 1.2.2 it shows none.
 /// Reports only: it never fails on what the network did.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -127,9 +128,8 @@ void main() {
         final vector = (await embedder.embedText(
           'A puppy playing fetch outside.',
         )).embeddings.single;
-        // Google's MpSemanticRetrieverOptions has no base_options, so its
-        // upload (task 29) carries no host fields; this shows whether its
-        // close opens a connection of its own.
+        // This shows whether the retriever's close opens a connection of its
+        // own for its upload (task 29).
         final retriever = await SemanticRetriever.create(
           SemanticRetrieverOptions(embedder: embedder),
         );

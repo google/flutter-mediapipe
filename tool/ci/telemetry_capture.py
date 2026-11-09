@@ -265,7 +265,9 @@ def report(out):
                 print(f'   {EVENTS.get(first(task, 2, 0), first(task, 2, 0)):17} '
                       f'task {first(task, 1)}, environment {environment} '
                       f'({ENVIRONMENTS.get(environment, "?")}), OS {first(host, 1, 0)}, '
-                      f'host_version {version.decode("utf-8", "replace")!r}')
+                      f'host_version {version.decode("utf-8", "replace")!r}, '
+                      f'app_id {first(host, 2, b"").decode("utf-8", "replace")!r}, '
+                      f'app_version {first(host, 3, b"").decode("utf-8", "replace")!r}')
             (out / f"body_{record['index']}.decoded.txt").write_text(
                 '\n'.join(show(body)) + '\n', encoding='utf-8')
         except (ValueError, IndexError, TypeError) as error:

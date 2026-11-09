@@ -25,15 +25,17 @@ void requireTextTasksRuntime() {
     );
   }
   try {
-    Native.addressOf<
-      NativeFunction<
-        Int32 Function(
-          Pointer<mp.MpTextClassifierOptions>,
-          Pointer<Pointer<Void>>,
-          Pointer<Pointer<Char>>,
-        )
-      >
-    >(mp.classifierCreate);
+    runJniOnLoad(
+      Native.addressOf<
+        NativeFunction<
+          Int32 Function(
+            Pointer<mp.MpTextClassifierOptions>,
+            Pointer<Pointer<Void>>,
+            Pointer<Pointer<Char>>,
+          )
+        >
+      >(mp.classifierCreate),
+    );
   } catch (error) {
     if (missingLinuxGraphicsLibraries('$error') case final missing?) {
       throw missing;

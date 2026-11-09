@@ -29,15 +29,17 @@ void requireDecisionRuntime() {
     );
   }
   try {
-    Native.addressOf<
-      NativeFunction<
-        Int32 Function(
-          Pointer<mp.MpDecisionMakerOptions>,
-          Pointer<Pointer<Void>>,
-          Pointer<Pointer<Char>>,
-        )
-      >
-    >(mp.create);
+    runJniOnLoad(
+      Native.addressOf<
+        NativeFunction<
+          Int32 Function(
+            Pointer<mp.MpDecisionMakerOptions>,
+            Pointer<Pointer<Void>>,
+            Pointer<Pointer<Char>>,
+          )
+        >
+      >(mp.create),
+    );
   } catch (error) {
     if (missingLinuxGraphicsLibraries('$error') case final missing?) {
       throw missing;

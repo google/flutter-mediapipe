@@ -30,6 +30,8 @@ getter String get largeModelNeeds64Bit
 getter Map<String, String?> get largeModelRuntimeTargets
 getter int get maxStreamTimestampMilliseconds
 function StateError? missingLinuxGraphicsLibraries(String loaderError)
+getter String? get mpAppId
+getter String? get mpAppVersion
 getter int get mpHostSystem
 getter String get mpHostVersion
 function String nativeModelPath(String path)
@@ -37,6 +39,7 @@ function RuntimeUnavailableException pluginNotRegistered(String package)
 function void requireDelegate(TaskCapabilities capabilities, Delegate delegate)
 function Future<ModelSource> resolvePinnedModel(DownloadAsset model, {String? family, Map<String, DownloadAsset> registry = const {}})
 function Future<void> resolveTaskModel(TaskOptions options)
+function void runJniOnLoad(Pointer<NativeType> symbol)
 function MediaPipeException taskException(Object error)
 getter Future<String?> Function()? get taskPlatformGpuReader
 setter set taskPlatformGpuReader(Future<String?> Function()? value)
