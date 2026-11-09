@@ -33,7 +33,7 @@ from pub.dev, from your app's root:
 flutter pub add mediapipe_vision
 ```
 
-This adds `mediapipe_vision: ^0.1.3` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_vision: ^0.2.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_vision.dart` exports its types, so you do not add or
 import core yourself.
 

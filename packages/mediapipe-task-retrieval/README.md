@@ -38,7 +38,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_retrieval
 ```
 
-This adds `mediapipe_retrieval: ^0.1.3` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_retrieval: ^0.2.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_retrieval.dart` exports its types, so you do not add or
 import core yourself.
 
