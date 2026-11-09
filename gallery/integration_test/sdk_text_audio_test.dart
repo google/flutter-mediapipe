@@ -185,25 +185,19 @@ void main() {
         ),
       );
       try {
+        // Google's 1.2.2 wheel: it drops every language below about 0.3, so
+        // maxResults 3 gives one each.
         for (final (text, expected) in [
-          (
-            'Hello, world!',
-            [('en', 0.994802), ('de', 0.001138), ('hu', 0.000523)],
-          ),
-          (
-            'Quiero agua, por favor.',
-            [('es', 0.998336), ('gl', 0.001423), ('pt', 0.000164)],
-          ),
-          (
-            'こんにちは、元気ですか？',
-            [('ja', 0.99923), ('ms', 0.000075), ('id', 0.000041)],
-          ),
+          ('Hello, world!', [('en', 0.994802)]),
+          ('Quiero agua, por favor.', [('es', 0.998336)]),
+          ('こんにちは、元気ですか？', [('ja', 0.99923)]),
         ]) {
           final predictions = (await detector.detect(
             text,
           )).predictions.toList();
-          expect(predictions.first.languageCode, expected.first.$1);
-          for (final (i, (_, probability)) in expected.indexed) {
+          expect(predictions, hasLength(expected.length));
+          for (final (i, (code, probability)) in expected.indexed) {
+            expect(predictions[i].languageCode, code);
             expect(
               predictions[i].probability,
               closeTo(probability, _scoreBound),

@@ -59,7 +59,7 @@ final class WebRuntimePin {
   /// npm package, such as `@mediapipe/tasks-vision`.
   final String package;
 
-  /// Pinned npm version, a release or a prerelease such as `1.2.0-rc.20261018`.
+  /// Pinned npm version, a release or a prerelease such as `1.2.2-rc.20261103`.
   final String version;
 
   /// Base64 SHA-512 of the npm tarball, as npm's `integrity` records it.

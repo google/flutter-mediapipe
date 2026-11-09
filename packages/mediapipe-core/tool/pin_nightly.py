@@ -1,7 +1,8 @@
-"""Pins Google's per-family libraries to one of its nightly builds.
+"""Pins Google's per-family libraries to one of its nightly or release builds.
 
 Google publishes each nightly of its MediaPipe Tasks C libraries in a dated
-folder of its bucket, `prebuilts/mediapipe_tasks_c/<YYYYMMDD>/`: an archive of
+folder of its bucket, `prebuilts/mediapipe_tasks_c/<YYYYMMDD>/`, and each
+release in a versioned one, `prebuilts/mediapipe_tasks_c/<X.Y.Z>/`: an archive of
 every family's libraries, headers and notices, with its `BUILD_INFO` beside
 it. This moves what a bump moves together:
 
@@ -17,6 +18,7 @@ it. This moves what a bump moves together:
     python3 -B packages/mediapipe-core/tool/pin_nightly.py --nightly 20261018
     python3 -B packages/mediapipe-core/tool/pin_nightly.py --nightly newest \
         --generation --report build/pin.json
+    python3 -B packages/mediapipe-core/tool/pin_nightly.py --release 1.2.2 --adopt
 
 `newest` is the newest complete build: its `BUILD_INFO` names its date and
 every family, and its archive holds every file the pins name, with each
@@ -26,17 +28,17 @@ family's headers and notices. It prints why it skipped any newer folder.
 `--generation` pins the archive URL to the generation it hashed
 (`...zip?generation=<x-goog-generation>`), which the bucket keeps when the
 name is uploaded again; comparison runs of a nightly use it. A build this
-project adopts keeps the plain URL, and its files get a mirror release.
+project adopts keeps the plain URL.
 `--report` writes what it found as JSON, the C API changes included, even
 when it stops.
 
 Nothing is written, and the exit status is non-zero, when the C API changed
 beyond comments (the bindings would need regenerating), when the MediaPipe
 version changed (tests and docs name it), or when a sentence to update is
-missing. Only the archive's directory, the headers and notices and the pinned
-members are downloaded (about 300 MB). The mirror release the version names
-(`familyRuntimeBaseUrl`) is not posted: until it is, the hooks have only
-Google's archive.
+missing. `--adopt` writes anyway, for a build this project moves to with its
+bindings and the tests that name the version in the same change; it prints
+the API changes, and removes the headers the build no longer ships. Only the archive's directory, the headers and notices and the pinned
+members are downloaded (about 300 MB).
 """
 import argparse
 import datetime
@@ -75,42 +77,44 @@ DOWNLOAD_LIMIT = 4 * 10 ** 9
 
 # The sentences that name the pinned build, by file from the repository root.
 # `{long}` is "October 18, 2026", `{day}` "October 18", `{iso}` "2026-10-18"
-# and `{stamp}` "20261018"; `{version}` is BUILD_INFO's mediapipe_version, and
-# `{generation}` the archive's generation query on a line of its own, if any.
+# and `{stamp}` "20261018", all from BUILD_INFO's build_date; `{version}` is its
+# mediapipe_version, `{kind}` "nightly" or "release", `{folder}` the bucket
+# folder ("20261018" or "1.2.2"), `{tag}` `familyRuntimeVersion`
+# ("1.2.0-nightly.20261018" or "1.2.2"), and `{generation}` the archive's
+# generation query on a line of its own, if any.
 # Each must be in its file, as the current pin renders it. Other mentions of
 # a build are its history, or the browser runtime's npm pin, and stay.
 SENTENCES = {
     'packages/mediapipe-core/lib/src/native_assets/family_runtimes.dart': [
-        'libraries: the {version} nightly build of {long}.',
-        "const familyRuntimeVersion = '{version}-nightly.{stamp}';",
+        'libraries: the {version} {kind} build of {long}.',
+        "const familyRuntimeVersion = '{tag}';",
         "/// Google's archive of the {long} build, where the hooks download",
-        "    'mediapipe_tasks_c/{stamp}/mediapipe_tasks_c_{stamp}.zip{generation}';",
-        "/// Every file comes from Google's nightly build of {long}\n"
+        "    'mediapipe_tasks_c/{folder}/mediapipe_tasks_c_{folder}.zip{generation}';",
+        "/// Every file comes from Google's {kind} build of {long}\n"
         '/// (MediaPipe {version}), unmodified.',
     ],
     'packages/mediapipe-core/lib/src/capabilities/task_capabilities.dart': [
-        '/// {version} per-family libraries (its nightly build of {long}) on',
+        '/// {version} per-family libraries (its {kind} build of {long}) on',
     ],
     'packages/mediapipe-core/lib/src/native_assets/reference_wheels.dart': [
-        "(`familyRuntimeVersion`, Google's {version} nightly of {day}).",
+        "(`familyRuntimeVersion`, Google's {version} {kind} of {day}).",
     ],
     'packages/mediapipe-core/native/README.md': [
-        "they come from: MediaPipe {version}, Google's nightly of {iso}.",
+        "they come from: MediaPipe {version}, Google's {kind} of {iso}.",
     ],
     'packages/mediapipe-core/third_party/README.md': [
-        'Google ships with its MediaPipe {version}\nnightly build of {long}',
+        'Google ships with its MediaPipe {version}\n{kind} build of {long}',
     ],
     'packages/mediapipe-core/tool/PER_FAMILY_RUNTIMES.md': [
-        "pins Google's MediaPipe {version} nightly build of {long}",
+        "pins Google's MediaPipe {version} {kind} build of {long}",
         '`https://storage.googleapis.com/mediapipe-assets/prebuilts/'
-        'mediapipe_tasks_c/{stamp}/mediapipe_tasks_c_{stamp}.zip`.',
-        '`per-family-v{version}-nightly.{stamp}`',
+        'mediapipe_tasks_c/{folder}/mediapipe_tasks_c_{folder}.zip`.',
     ],
     'packages/mediapipe-task-decision/README.md': [
-        'library (its nightly build of {long})',
+        'library (its {kind} build of {long})',
     ],
     'packages/mediapipe-task-vision/third_party/README.md': [
-        'here from MediaPipe {version}, the\nnightly build of {long}.',
+        'here from MediaPipe {version}, the\n{kind} build of {long}.',
     ],
 }
 
@@ -316,18 +320,33 @@ class Archive:
         return hasher.hexdigest(), self.entries[name]['size']
 
 
+def is_release(folder):
+    """Whether bucket `folder` is a release (`X.Y.Z`), not a nightly
+    (`YYYYMMDD`)."""
+    return re.fullmatch(r'\d+\.\d+\.\d+', folder) is not None
+
+
 def current_pins():
-    """The current pin: `{'stamp', 'version', 'generation', 'paths'}` from
-    `familyRuntimes`, `paths` in source order and `generation` None for the
-    plain archive URL."""
+    """The current pin: `{'folder', 'stamp', 'version', 'generation',
+    'paths'}` from `familyRuntimes`, `paths` in source order and `generation`
+    None for the plain archive URL. A release pin's date is its BUILD_INFO's
+    build_date."""
     source = FAMILY_RUNTIMES.read_text(encoding='utf-8')
-    version, stamp = re.search(
-        r"^const familyRuntimeVersion = '([^']+)-nightly\.(\d{8})';", source, re.M).groups()
+    tag = re.search(r"^const familyRuntimeVersion = '([^']+)';", source, re.M).group(1)
+    nightly = re.fullmatch(r'(.+)-nightly\.(\d{8})', tag)
+    if nightly:
+        version, stamp = nightly.groups()
+        folder = stamp
+    elif is_release(tag):
+        version = folder = tag
+        stamp = parse_build_info(BUILD_INFO.read_text(encoding='utf-8'))['build_date']
+    else:
+        raise SystemExit(f'{FAMILY_RUNTIMES}: familyRuntimeVersion {tag!r} is not parseable')
     generation = re.search(r"\.zip'\n\s*'\?generation=(\d+)';", source)
     paths = re.findall(r"FamilyRuntime\(\s*'([^']+)',\s*'[0-9a-f]{64}',\s*\d+,\s*\)", source)
     if len(paths) != source.count(': FamilyRuntime(\n'):
         raise SystemExit(f'{FAMILY_RUNTIMES}: a FamilyRuntime entry is not parseable')
-    return {'stamp': stamp, 'version': version, 'paths': paths,
+    return {'folder': folder, 'stamp': stamp, 'version': version, 'paths': paths,
             'generation': generation and generation.group(1)}
 
 
@@ -339,25 +358,30 @@ def families(paths):
     return sorted({path.split('/', 1)[0] for path in paths})
 
 
-def check_build(fetcher, stamp, paths):
-    """Build `stamp`'s `(build_info_text, archive)`, or the reason it is not
-    complete."""
-    names, _ = listing(fetcher, f'{PREFIX}{stamp}/')
-    names = {name[len(PREFIX) + len(stamp) + 1:] for name in names}
+def check_build(fetcher, folder, paths):
+    """Build `folder`'s `(build_info_text, archive)`, or the reason it is not
+    complete. A nightly's BUILD_INFO names its folder as its build_date, a
+    release's as its mediapipe_version."""
+    names, _ = listing(fetcher, f'{PREFIX}{folder}/')
+    names = {name[len(PREFIX) + len(folder) + 1:] for name in names}
     if 'BUILD_INFO' not in names:
         return 'no BUILD_INFO'
-    zip_name = f'mediapipe_tasks_c_{stamp}.zip'
+    zip_name = f'mediapipe_tasks_c_{folder}.zip'
     if zip_name not in names:
         return f'no {zip_name}'
-    text = fetcher.text(f'{OBJECTS}{stamp}/BUILD_INFO')
+    text = fetcher.text(f'{OBJECTS}{folder}/BUILD_INFO')
     info = parse_build_info(text or '')
-    if info.get('build_date') != stamp or not info.get('mediapipe_version'):
-        return f'BUILD_INFO does not name build_date={stamp} and a mediapipe_version'
+    if is_release(folder):
+        if (info.get('mediapipe_version') != folder
+                or not re.fullmatch(r'\d{8}', info.get('build_date', ''))):
+            return f'BUILD_INFO does not name mediapipe_version={folder} and a build_date'
+    elif info.get('build_date') != folder or not info.get('mediapipe_version'):
+        return f'BUILD_INFO does not name build_date={folder} and a mediapipe_version'
     missing = set(families(paths)) - set(info.get('domains', '').split())
     if missing:
         return f"BUILD_INFO's domains lack {sorted(missing)}"
     try:
-        archive = Archive(fetcher, f'{OBJECTS}{stamp}/{zip_name}')
+        archive = Archive(fetcher, f'{OBJECTS}{folder}/{zip_name}')
     except (SystemExit, urllib.error.URLError, struct.error) as error:
         if network_failure(error):
             raise
@@ -402,18 +426,26 @@ def version_stop_since(fetcher, stamp, version, pinned_stamp):
 
 
 def pick_build(fetcher, requested, paths):
-    """The `(stamp, build_info_text, archive)` to pin."""
-    stamps = nightly_stamps(fetcher)
+    """The `(folder, build_info_text, archive)` to pin: `requested` is a
+    nightly's date, a release's version, or `newest`, the newest complete
+    nightly."""
+    _, folders = listing(fetcher, PREFIX, '/')
+    folders = [folder[len(PREFIX):].rstrip('/') for folder in folders]
+    stamps = sorted((folder for folder in folders if re.fullmatch(r'\d{8}', folder)),
+                    reverse=True)
+    releases = sorted((folder for folder in folders if is_release(folder)),
+                      key=lambda folder: [int(part) for part in folder.split('.')])
     print(f"Google's nightly folders: {', '.join(reversed(stamps))}")
+    print(f"Google's release folders: {', '.join(releases)}")
     candidates = stamps if requested == 'newest' else [requested]
-    if requested != 'newest' and requested not in stamps:
+    if requested != 'newest' and requested not in folders:
         raise SystemExit(f'No folder {PREFIX}{requested}/ in {BUCKET}.')
-    for stamp in candidates:
-        result = check_build(fetcher, stamp, paths)
+    for folder in candidates:
+        result = check_build(fetcher, folder, paths)
         if isinstance(result, str):
-            print(f'Skipped {stamp}: {result}')
+            print(f'Skipped {folder}: {result}')
             continue
-        return (stamp, *result)
+        return (folder, *result)
     raise SystemExit('No complete build.')
 
 
@@ -440,7 +472,8 @@ def headers(archive, names):
 
 def compare_headers(new):
     """Prints how `new` differs from `native/include`; returns the API
-    changes (beyond comments), one line each."""
+    changes (beyond comments), one line each, and the headers changed in
+    comments only."""
     old = {str(path.relative_to(HEADERS)): path.read_bytes()
            for path in HEADERS.rglob('*') if path.is_file()}
     changes = [f'added {name}' for name in sorted(set(new) - set(old))]
@@ -463,23 +496,37 @@ def compare_headers(new):
     return changes, comment_only
 
 
-def render(template, stamp, version, generation=None):
+def tag(pin):
+    """`familyRuntimeVersion` for `pin`: a release's version, or a nightly's
+    version and date."""
+    if is_release(pin['folder']):
+        return pin['version']
+    return f"{pin['version']}-nightly.{pin['stamp']}"
+
+
+def render(template, pin):
+    """`template` for `pin`, a `{'folder', 'stamp', 'version'}` with an
+    optional `generation`."""
+    stamp, generation = pin['stamp'], pin.get('generation')
     date = datetime.date(int(stamp[:4]), int(stamp[4:6]), int(stamp[6:]))
     day = f'{date:%B} {date.day}'
     query = f"'\n    '?generation={generation}" if generation else ''
     return template.format(long=f'{day}, {date.year}', day=day, iso=date.isoformat(),
-                           stamp=stamp, version=version, generation=query)
+                           stamp=stamp, version=pin['version'], folder=pin['folder'],
+                           kind='release' if is_release(pin['folder']) else 'nightly',
+                           tag=tag(pin), generation=query)
 
 
-def rewritten_sources(old, stamp, version, generation, digests):
-    """`{path: new text}` for every file `SENTENCES` names, with the pins in
-    `family_runtimes.dart` replaced by `digests`."""
+def rewritten_sources(old, new, digests):
+    """`{path: new text}` for every file `SENTENCES` names, moved from pin
+    `old` to pin `new`, with the pins in `family_runtimes.dart` replaced by
+    `digests`."""
     texts, problems = {}, []
     for relative, templates in SENTENCES.items():
         text = (REPO / relative).read_text(encoding='utf-8')
         for template in templates:
-            before = render(template, old['stamp'], old['version'], old['generation'])
-            after = render(template, stamp, version, generation)
+            before = render(template, old)
+            after = render(template, new)
             if before not in text:
                 problems.append(f'{relative}: no "{before}"')
             text = text.replace(before, after)
@@ -502,17 +549,22 @@ def rewritten_sources(old, stamp, version, generation, digests):
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--nightly', required=True,
-                        help='a build folder, YYYYMMDD, or newest')
+    build = parser.add_mutually_exclusive_group(required=True)
+    build.add_argument('--nightly', help='a nightly folder, YYYYMMDD, or newest')
+    build.add_argument('--release', help='a release folder, X.Y.Z')
     parser.add_argument('--dry-run', action='store_true',
                         help='report what would change without writing')
     parser.add_argument('--generation', action='store_true',
                         help='pin the archive URL to the generation hashed')
     parser.add_argument('--report', type=Path,
                         help='write what was found to this JSON file')
+    parser.add_argument('--adopt', action='store_true',
+                        help='write even when the MediaPipe version or the C API changes')
     args = parser.parse_args()
-    if args.nightly != 'newest' and not re.fullmatch(r'\d{8}', args.nightly):
+    if args.nightly and args.nightly != 'newest' and not re.fullmatch(r'\d{8}', args.nightly):
         parser.error('--nightly takes YYYYMMDD or newest')
+    if args.release and not is_release(args.release):
+        parser.error('--release takes X.Y.Z')
     old = current_pins()
     fetcher = Fetcher()
 
@@ -522,7 +574,8 @@ def main():
             args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
 
     try:
-        stamp, info_text, archive = pick_build(fetcher, args.nightly, old['paths'])
+        folder, info_text, archive = pick_build(fetcher, args.nightly or args.release,
+                                                old['paths'])
     except (OSError, http.client.HTTPException) as error:
         if not network_failure(error):
             raise
@@ -530,17 +583,18 @@ def main():
         write_report()
         raise SystemExit(f"Could not read Google's bucket: {report['network_failure']}")
     info = parse_build_info(info_text)
-    report = {'nightly': stamp, 'previous': old['stamp'], 'build_info': info,
+    report = {'nightly': folder, 'previous': old['folder'], 'build_info': info,
               'archive': archive.url, 'generation': archive.generation,
               'api_changes': None, 'comment_only_headers': None,
               'notices_changed': [], 'written': False}
 
-    print(f"Pinning {stamp}: MediaPipe {info['mediapipe_version']}, Kokoro build "
+    print(f"Pinning {folder}: MediaPipe {info['mediapipe_version']}, Kokoro build "
           f"{info.get('kokoro_build_number')}, changelist {info.get('piper_changelist')}; "
           f'archive {archive.size} bytes, generation {archive.generation}.')
-    if info['mediapipe_version'] != old['version']:
+    if info['mediapipe_version'] != old['version'] and not args.adopt:
         try:
-            since = version_stop_since(fetcher, stamp, old['version'], old['stamp'])
+            since = version_stop_since(fetcher, info['build_date'], old['version'],
+                                       old['stamp'])
         except (OSError, http.client.HTTPException) as error:
             if not network_failure(error):
                 raise
@@ -551,7 +605,7 @@ def main():
         write_report()
         raise SystemExit(f"MediaPipe {info['mediapipe_version']} replaces "
                          f"{old['version']}: the tests and docs name the version, so "
-                         'move it by hand.')
+                         'move it by hand, or --adopt it.')
     build_info = archive.read('BUILD_INFO')
     if build_info.decode('utf-8') != info_text:
         raise SystemExit("The archive's BUILD_INFO is not the one beside it.")
@@ -559,7 +613,7 @@ def main():
     new_headers = headers(archive, archive.entries)
     changes, comment_only = compare_headers(new_headers)
     report['api_changes'], report['comment_only_headers'] = changes, comment_only
-    if changes:
+    if changes and not args.adopt:
         write_report()
         raise SystemExit('The C API changed, so the bindings need regenerating '
                          '(make generate); nothing written:\n  ' + '\n  '.join(changes))
@@ -582,7 +636,9 @@ def main():
     generation = archive.generation if args.generation else None
     if args.generation and not generation:
         raise SystemExit(f'{archive.url}: no x-goog-generation header to pin.')
-    texts = rewritten_sources(old, stamp, old['version'], generation, digests)
+    new = {'folder': folder, 'stamp': info['build_date'],
+           'version': info['mediapipe_version'], 'generation': generation}
+    texts = rewritten_sources(old, new, digests)
     changed = [relative for relative, text in texts.items()
                if (REPO / relative).read_text(encoding='utf-8') != text]
     print(f'Downloaded {fetcher.downloaded} bytes.')
@@ -592,6 +648,9 @@ def main():
         return
     for relative in changed:
         (REPO / relative).write_text(texts[relative], encoding='utf-8')
+    for path in sorted(HEADERS.rglob('*')):
+        if path.is_file() and str(path.relative_to(HEADERS)) not in new_headers:
+            path.unlink()
     for name, data in new_headers.items():
         target = HEADERS / name
         if not target.exists() or target.read_bytes() != data:
@@ -604,17 +663,20 @@ def main():
         for number, line in enumerate(texts[relative].splitlines(), 1):
             if relative.endswith('.dart') and len(line) > 80:
                 print(f'{relative}:{number} is {len(line)} columns: rewrap it.')
-    if stamp != old['stamp']:
-        print(f"Still naming the {old['stamp']} build (its history, or the browser "
+    if folder != old['folder']:
+        print(f"Still naming the {old['folder']} build (its history, or the browser "
               'runtime, which this does not move):', flush=True)
-        mentions = {render(form, old['stamp'], old['version'])
-                    for form in ('{stamp}', '{iso}', '{day}')}
+        mentions = {render(form, {**old, 'generation': None})
+                    for form in ('{stamp}', '{iso}', '{day}', '{tag}')}
         patterns = [part for mention in sorted(mentions) for part in ('-e', mention)]
         subprocess.run(['git', 'grep', '-n', '-F', *patterns, '--', '.', ':!*.h',
                         f':!{Path(__file__).resolve().relative_to(REPO)}'], cwd=REPO)
     report['written'] = True
     write_report()
-    print(f'Pinned {stamp}. Then: git diff --stat, and the checks in CONTRIBUTING.md.')
+    if changes:
+        print('The C API changed; regenerate or update the bindings:\n  ' +
+              '\n  '.join(changes))
+    print(f'Pinned {folder}. Then: git diff --stat, and the checks in CONTRIBUTING.md.')
 
 
 if __name__ == '__main__':

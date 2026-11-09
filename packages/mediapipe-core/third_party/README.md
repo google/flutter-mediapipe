@@ -1,8 +1,8 @@
 # Google's notices
 
-`LICENSE` and `NOTICE` are the files Google ships with its MediaPipe 1.2.0
-nightly build of October 18, 2026 (byte for byte those of its October 9
-build), the build whose libraries every family bundles (`lib/src/native_assets/family_runtimes.dart`). Google's delivery has
+`LICENSE` and `NOTICE` are the files Google ships with its MediaPipe 1.2.2
+release build of November 2, 2026, the build whose libraries every family
+bundles (`lib/src/native_assets/family_runtimes.dart`). Google's delivery has
 the same two files for every family, so core carries them once, unmodified,
 and every package keeps a copy of `NOTICE` at its root.
 An app that bundles any family's library redistributes them with it.

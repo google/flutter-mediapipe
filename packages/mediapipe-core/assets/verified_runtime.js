@@ -36,8 +36,9 @@ export async function loadVerifiedRuntime(pinUrl, baseUrl, family) {
   globalThis.__HOST_ENVIRONMENT__ = 'FLUTTER_WEB';
   try {
     const bundle = await import(await verified(`${family.toLowerCase()}_bundle.mjs`));
-    // The resolver only picks the variant this browser supports (SIMD or
-    // not); it fetches nothing given a relative root.
+    // With `true` the resolver returns the module build (no SIMD probe since
+    // 1.2.2-rc.20261103, which ships no no-SIMD build); it fetches nothing
+    // given a relative root.
     const paths = await bundle.FilesetResolver[`for${family}Tasks`]('wasm', true);
     const name = path => `wasm/${path.split('/').pop()}`;
     const files = {

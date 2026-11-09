@@ -5,9 +5,12 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:mediapipe_core/src/native_assets/reference_wheels.dart';
 
-/// Google's pinned official wheel on this host, from core's reference table.
+/// Google's pinned official wheel on this host, from core's 1.2.2 table: its
+/// Language Detector drops low-probability languages since 1.1.0.
 ({String runtime, String library, String wheel})? officialTextRuntime() {
-  final wheel = referenceWheel(Abi.current().toString().replaceFirst('_', '/'));
+  final wheel = releaseReferenceWheel(
+    Abi.current().toString().replaceFirst('_', '/'),
+  );
   return wheel == null
       ? null
       : (

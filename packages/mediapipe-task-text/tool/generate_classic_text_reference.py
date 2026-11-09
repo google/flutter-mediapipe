@@ -11,13 +11,14 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'mediapipe-core/tool'))
 from official_embedding_layout import use_header_embedding_layout  # noqa: E402
-from official_wheels import MACOS, host_runtime  # noqa: E402
+from official_wheels import host_runtime  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 from model_pins import model_sha256  # noqa: E402
 
 PACKAGE = Path(__file__).resolve().parents[1]
-# The checked-in baseline's library: Google's macOS arm64 build core bundles.
-LIBRARY_SHA256 = MACOS['library_sha256']
+# Core's table of Google's 1.2.2 wheels: its Language Detector drops
+# low-probability languages that the 1.1.0 wheel reported.
+WHEELS = 'releaseReferenceWheels'
 MODELS = {
     'classifier': ('bert_classifier.tflite', model_sha256('bert_classifier.tflite')),
     'embedder': ('universal_sentence_encoder.tflite', model_sha256('universal_sentence_encoder.tflite')),
@@ -43,7 +44,7 @@ def main():
     from mediapipe.tasks.python.components.containers.classification_result_c import MpClassificationResultC, MpClassificationsC
     from mediapipe.tasks.python.components.containers.category_c import MpCategoryC
     from mediapipe.tasks.python.components.containers.embedding_result_c import MpEmbeddingResultC, MpEmbeddingC
-    runtime = host_runtime()
+    runtime = host_runtime(WHEELS)
     assert mp.__version__ == runtime['version']
     library = Path(mp.__file__).parent / 'tasks/c' / runtime['library']
     assert hashlib.sha256(library.read_bytes()).hexdigest() == runtime['library_sha256']

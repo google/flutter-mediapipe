@@ -1,15 +1,13 @@
 # Per-family runtimes
 
 Status on 2026-10-19: every family, on Android, iOS, macOS, Linux and
-Windows, pins Google's MediaPipe 1.2.0 nightly build of October 18, 2026
+Windows, pins Google's MediaPipe 1.2.2 release build of November 2, 2026
 (see [Google's builds](#googles-builds)), which Google publishes at
-`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/20261018/mediapipe_tasks_c_20261018.zip`.
+`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/1.2.2/mediapipe_tasks_c_1.2.2.zip`.
 The hooks read each pinned file from that archive with HTTP range requests,
-falling back to the mirror pre-release `per-family-v1.2.0-nightly.20261018` on
-`hugocornellier/mediapipe_flutter_native` (not posted yet), beside the
-earlier builds in `per-family-v1.1.1-dev.20261009` and
-`per-family-v1.1.0-dev.20261005`, and CI and Firebase Test Lab run them (see [Validated](#validated) and
-[Before the release](#before-the-release)). Paths are from the repository root.
+its only source, and CI and Firebase Test Lab run them (see
+[Validated](#validated) and [Before the release](#before-the-release)). Paths
+are from the repository root.
 
 ## What changed
 
@@ -70,16 +68,14 @@ downloads one library and not the 483 MB archive. Each request gets three
 attempts on a connection error, a timeout or HTTP 408, 429, 500, 502, 503 or
 504, with a random backoff of up to 1 s × 2^attempt (at most 30 s) or the
 host's `Retry-After`, and a dropped download resumes from its last byte.
-Another status, a host that ignores ranges or a digest mismatch moves to the
-mirror at once.
+Another status, a host that ignores ranges or a digest mismatch fails the
+download at once.
 
-`familyRuntimeBaseUrl` points at the mirror pre-release. Google gives several
-targets' libraries the same file name (four different
-`libmediapipe_tasks_vision.so`), so each mirror asset is named
-`<sha256>-<Google's file name>`; the hook checks its SHA-256 and size and
-saves it under Google's name. `hooks.user_defines.mediapipe_core.asset_source`
-replaces both hosts with a directory holding each file under its SHA-256,
-for offline builds. That setting covers every pinned download, so the
+`hooks.user_defines.mediapipe_core.asset_source` replaces Google's host with a
+directory holding each file under its SHA-256, for offline builds; Google gives
+several targets' libraries the same file name (four different
+`libmediapipe_tasks_vision.so`), and the hook saves each under Google's name
+once it has checked its SHA-256 and size. That setting covers every pinned download, so the
 directory must also hold the models an app bundles. The gallery builder takes
 `--asset-source`.
 
@@ -275,12 +271,12 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
 every library's SHA-256 and size, computed as the hooks check them, Google's
 headers, `BUILD_INFO` and notices, and the sentences that name the pinned
 build. It stops, writing nothing, if the C API or the MediaPipe version
-changed. It does not post the mirror release: a build this project adopts
-gets one, keeping the plain archive URL. Runs that only compare a nightly
-with the pinned build pass `--generation`, which pins the archive URL to the
-generation it hashed (`...zip?generation=<x-goog-generation>`): Google's
-bucket keeps that generation when the name is uploaded again, and the hooks
-read it with the same range requests, so no mirror is needed.
+changed. A build this project adopts keeps the plain archive URL. Runs that
+only compare a nightly with the pinned build pass `--generation`, which pins
+the archive URL to the generation it hashed
+(`...zip?generation=<x-goog-generation>`): Google's bucket keeps that
+generation when the name is uploaded again, and the hooks read it with the
+same range requests.
 `tool/test_pin_nightly.py` tests the rewriting offline.
 
 The October 8 phone rebuilds added Google's usage-logging client

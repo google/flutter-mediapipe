@@ -69,17 +69,12 @@ void main() {
     }
   });
 
-  test("every library downloads from Google's archive, then the mirror", () {
+  test("every library downloads from Google's archive alone", () {
     final runtimes = [
       for (final targets in familyRuntimes.values) ...targets.values,
     ];
     for (final runtime in runtimes) {
-      // Google reuses file names across targets, so the mirror's digest
-      // leads.
-      expect(runtime.asset.urls, [
-        '$familyRuntimeArchiveUrl#${runtime.path}',
-        '$familyRuntimeBaseUrl/${runtime.sha256}-${runtime.fileName}',
-      ]);
+      expect(runtime.asset.urls, ['$familyRuntimeArchiveUrl#${runtime.path}']);
       expect(runtime.path, endsWith('/${runtime.fileName}'));
     }
     expect({

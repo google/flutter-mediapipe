@@ -174,7 +174,7 @@ void main() {
           _platform(os, arch, version),
         );
         expect(capabilities.supportedDelegates, {Delegate.cpu}, reason: os);
-        expect(capabilities.runtimeVersion, '1.2.0', reason: os);
+        expect(capabilities.runtimeVersion, '1.2.2', reason: os);
       }
       expect(
         decisionMakerCapabilitiesForPlatform(

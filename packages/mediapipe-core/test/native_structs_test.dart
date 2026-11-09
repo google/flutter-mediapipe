@@ -125,7 +125,8 @@ void main() {
       ]);
       expect(fromBytes.modelAssetPath, nullptr);
       expect(fromBytes.fileDescriptor, -1);
-      expect(fromBytes.delegate, 0);
+      // MP_DELEGATE_CPU since 1.2.1.
+      expect(fromBytes.delegate, 1);
       expect(fromBytes.hostEnvironment, 5);
       expect(fromBytes.hostSystem, mpHostSystem);
       expect(nativeString(fromBytes.hostVersion), mpHostVersion);

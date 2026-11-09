@@ -157,7 +157,7 @@ def runtime_versions(problems):
     # Families without their own browser constant (`_browserRuntimeVersion`)
     # report core's tasksRuntimeVersionOn.
     core = read('packages/mediapipe-core/lib/src/capabilities/task_capabilities.dart')
-    web = re.search(r"operatingSystem == 'web' \? '([^']+)'", core).group(1)
+    web = re.search(r"_webRuntimeVersion = '([^']+)'", core).group(1)
     for family, folder in task_families().items():
         capabilities = (PACKAGES / folder / 'lib/src/capabilities.dart').read_text(
             encoding='utf-8')

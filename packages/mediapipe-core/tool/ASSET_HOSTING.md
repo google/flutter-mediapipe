@@ -1,8 +1,8 @@
 # Asset hosting
 
 Native downloads are done; browsers are not started. Build hooks now read
-Google's per-family libraries from Google's own bucket, fall back to this
-project's mirror release, and retry and resume every download. A browser
+Google's per-family libraries from Google's own bucket, and retry and resume
+every download. A browser
 still loads Google's runtime from one CDN with one `fetch` per file, and
 models still have one host each. Found on 2026-10-15, on `main` at
 `ed23dcb`, after a jsDelivr outage failed three CI jobs on PR #88; refreshed
@@ -18,15 +18,15 @@ No single host's outage breaks an app, a build or a CI run:
    fallbacks. Not started.
 2. **Every pin can have fallback hosts.** Each host must serve the pinned
    bytes, which are checked before use, so adding a host never weakens
-   anything. Done for the native libraries; models and browser runtimes
-   still have one host.
+   anything. The mechanism is done; native libraries, models and browser
+   runtimes each have one host today.
 3. **Every download retries.** A few attempts per host, only for transient
    failures, with exponential backoff and jitter, resuming partial native
    downloads, then the next host. Done for native downloads; browsers still
    make one attempt.
 4. **Google's official hosting fits in when it exists.** Done for the native
-   libraries: Google's bucket is their primary host and this project's
-   release their fallback. Google's bucket holds no browser runtimes.
+   libraries: Google's bucket is their only host. Google's bucket holds no
+   browser runtimes.
 
 ## What happened
 
@@ -51,15 +51,13 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
 
 ## Done since 2026-10-15
 
-- **Google's bucket, then a mirror, for the native libraries** (#89,
-  2026-10-19). `packages/mediapipe-core/lib/src/native_assets/family_runtimes.dart`:
+- **Google's bucket for the native libraries** (#89, 2026-10-19). `packages/mediapipe-core/lib/src/native_assets/family_runtimes.dart`:
   each `FamilyRuntime.asset` is the member of Google's archive
   (`familyRuntimeArchiveUrl`,
   `storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/20261018/mediapipe_tasks_c_20261018.zip`),
-  read with range requests, then the same file in this project's
-  pre-release `per-family-v1.2.0-nightly.20261018` of
-  `hugocornellier/mediapipe_flutter_native` (`familyRuntimeBaseUrl`, posted
-  2026-10-19), named `<sha256>-<file>`.
+  read with range requests. Since 0.2.0 it names Google's 1.2.2 release, the
+  hooks' only source: the project's own copy of the libraries, a fallback for
+  the nightlies, is gone.
 - **Retries, backoff and resume for every native download** (#89).
   `packages/mediapipe-core/lib/src/verified_download.dart`: each request gets
   up to 3 attempts on a connection error, a timeout or HTTP 408, 429, 500,
@@ -76,8 +74,7 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
 - **Generation pins for comparison runs** (#100).
   `packages/mediapipe-core/tool/pin_nightly.py --generation` pins the archive
   URL to `...zip?generation=<x-goog-generation>`, which Google's bucket keeps
-  when the name is uploaded again, so a nightly under comparison needs no
-  mirror. An adopted build keeps the plain URL and gets a mirror release.
+  when the name is uploaded again. An adopted build keeps the plain URL.
 - **CI's own downloads** (#98). `.github/actions/setup` and
   `.github/actions/apt-install` cache the Linux packages, fail fast on a slow
   apt mirror and switch mirrors; `.github/actions/android-ndk` installs the
@@ -89,7 +86,7 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
 | Asset | Fetched by | From | Fallback today |
 | --- | --- | --- | --- |
 | Browser runtime: bundle and WASM | each family's `assets/worker.js`, through core's `assets/verified_runtime.js` | `cdn.jsdelivr.net` (`MediaPipeWebRuntime.defaultBaseUrl`) | none: one `baseUrl`, one `fetch` per file |
-| Native per-family libraries | build hooks, through `downloadVerified` | Google's archive on `storage.googleapis.com` (`familyRuntimeArchiveUrl`) | this project's release (`familyRuntimeBaseUrl`), with retries on both |
+| Native per-family libraries | build hooks, through `downloadVerified` | Google's archive on `storage.googleapis.com` (`familyRuntimeArchiveUrl`) | none; retried |
 | Reference wheels, for generating test references | reference tools, pinned in `reference_wheels.dart` | `files.pythonhosted.org` | none |
 | Models, native | `ModelStore`, `bundle_models`, through `downloadVerified` | `storage.googleapis.com`, `huggingface.co` | `DownloadAsset.mirrors`, but no pin names one; retried |
 | Models, web | `ModelStore` (`model_store_web.dart`), workers given a `modelPath` | the same | the same mirrors, one `fetch` each |
@@ -102,7 +99,7 @@ What already helps in browsers:
 
 - `dart run mediapipe_core:web_runtime web/mediapipe` and
   `MediaPipeWebRuntime.baseUrl = 'mediapipe/'` self-host the browser runtime.
-  It is opt-in, takes a step after every runtime bump, and copies all seven
+  It is opt-in, takes a step after every runtime bump, and copies all five
   files `runtime.json` lists, though a browser loads three of them (below).
 - `DownloadAsset.mirrors` are tried in order. The `asset_source` user define,
   `ModelStore(source: ...)` and `MEDIAPIPE_ASSET_SOURCE` replace every host
@@ -121,31 +118,30 @@ per file and location, with no retry and no timeout of its own.
 
 **A browser loads three files per family.** The loader calls
 `FilesetResolver.for<Family>Tasks('wasm', true)`. With `true` (use a module),
-Google's resolver skips its SIMD check and always returns the module build.
-From `text_bundle.mjs` 1.2.0-rc.20261018, read on 2026-10-22, unchanged
-since 1.0.1:
+Google's resolver always returns the module build.
+From `text_bundle.mjs` 1.2.2, read on 2026-11-04:
 
 ```js
-async function Wo(t){if(t)return!0; /* ...SIMD probe... */}
-async function Ho(t,e,r){return{wasmLoaderPath:`${e}/${t}_${r=`wasm${r?"_module":""}${await Wo(r)?"":"_nosimd"}_internal`}.js`,wasmBinaryPath:`${e}/${t}_${r}.wasm`}}
+function $o(t,e,r){return r=`wasm${r?"_module":""}_internal`,Promise.resolve({wasmLoaderPath:`${e}/${t}_${r}.js`,wasmBinaryPath:`${e}/${t}_${r}.wasm`})}
 ```
 
 So the files are `<family>_bundle.mjs` and
-`wasm/<family>_wasm_module_internal.{js,wasm}`. The SIMD and no-SIMD builds
-in `runtime.json` are never loaded, and `verified_runtime.js`'s comment that
-the resolver "only picks the variant this browser supports (SIMD or not)" is
-wrong for this call.
+`wasm/<family>_wasm_module_internal.{js,wasm}`. The other build in
+`runtime.json` is never loaded. 1.2.2-rc.20261103 dropped the no-SIMD builds
+and the SIMD probe, so `runtime.json` lists five files, where 1.2.0-rc listed
+seven.
 
-**Sizes.** The three files of the pinned 1.2.0-rc.20261018 runtimes,
-measured on 2026-10-22: vision 15.0 MB, text 7.4, audio 7.0, retrieval 23.7,
-decision 26.1, so 79 MB for all five. `gzip -9` takes retrieval's 23.4 MB
-WASM to 6.7 MB (29%), and all fifteen files to 23 MB. All seven files are
-about three times that (npm unpacked: vision 46 MB, text 24, audio 23,
-retrieval 73, decision 81). pub.dev refuses a package over 100 MB. The
-repository's pack is 73 MB. The browser pins have moved once since they were
-added: #89 (2026-10-19) took all five to 1.2.0-rc.20261018, from 1.0.1 for
-vision, text and audio and 1.1.0 for decision and retrieval. Committed files
-would grow the history by about 23 MB compressed at each bump of all five.
+**Sizes.** The three files of the pinned 1.2.2 runtimes, measured on
+2026-11-04: vision 15.1 MB, text 7.4, audio 22.1, retrieval 24.2, decision
+26.6, so 95 MB for all five. Audio tripled from 7.0 MB in 1.2.0-rc.20261018
+when it gained the speech tasks. `gzip -9` takes retrieval's 23.8 MB WASM to
+6.9 MB (29%), and all fifteen files to 28 MB. All five files of each family
+are twice that (vision 30 MB, text 15, audio 44, retrieval 48, decision 53).
+pub.dev refuses a package over 100 MB. The repository's pack is 73 MB. The
+browser pins have moved twice since they were added: #89 (2026-10-19) took
+all five to 1.2.0-rc.20261018, from 1.0.1 for vision, text and audio and 1.1.0
+for decision and retrieval, and 0.2.0 took them to 1.2.2. Committed files
+would grow the history by about 28 MB compressed at each bump of all five.
 
 **Cross-origin rules decide which hosts a browser can use.** A worker
 fetching from another origin needs `Access-Control-Allow-Origin` on the
@@ -163,18 +159,18 @@ The host's `Content-Type` does not matter: the loader wraps the checked bytes
 in blob URLs with the right MIME type itself.
 
 **Range requests work on every native host.** `curl -r 0-99` got HTTP 206
-from Google's archive, the mirror release (through
-`release-assets.githubusercontent.com`) and `huggingface.co` on 2026-10-22.
-Neither Google's bucket nor the mirror release honors `If-Range`: given an
-`ETag` that does not match, both still answered 206 rather than 200. A file
+from Google's archive and `huggingface.co` on 2026-10-22. Google's bucket does
+not honor `If-Range`: given an `ETag` that does not match, it still answered
+206 rather than 200. A file
 that changed between attempts is caught by the final SHA-256 check, not by
 the host.
 
 **Licenses allow it.** Google's npm runtimes are Apache-2.0 (`package.json`'s
-`license`), and since 1.2.0-rc.20261018 each tarball carries `LICENSE` and
-`NOTICE` files, so the packages may ship the runtimes with those files, as
-core already does for the native libraries in
-`packages/mediapipe-core/third_party/`. Models need a check per model before
+`license`). The nightlies (1.2.0-rc.20261018, 1.2.2-rc.20261104) carry `LICENSE`
+and `NOTICE` files, but the 1.2.2 release tarballs do not (checked 2026-11-04),
+so packages shipping the runtimes would bring those files from
+`packages/mediapipe-core/third_party/`, as core already does for the native
+libraries. Models need a check per model before
 anyone mirrors them: `mirror_runtime_assets.py` marks the Gemma-based ones
 `Gemma Terms`, whose notice must travel with every copy.
 

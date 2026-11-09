@@ -1,5 +1,5 @@
 // Copyright 2026 The MediaPipe Authors. Licensed under Apache 2.0.
-// Adapted from MediaPipe 1.1.0's C headers
+// Adapted from MediaPipe 1.2.2's C headers
 // mediapipe/tasks/c/retrieval/universal_embedder/universal_embedder.h and
 // mediapipe/tasks/c/retrieval/semantic_retriever/semantic_retriever.h, which
 // Google's Python ctypes retrieval/universal_embedder.py and
@@ -27,6 +27,41 @@ final class MpUniversalEmbedderOptions extends Struct {
   @Int32()
   external int activationDataType;
   external Pointer<Char> cacheDir;
+
+  /// Per-modality `MpDelegate`s; 0 (`MP_DELEGATE_DEFAULT`) is
+  /// [baseOptions]'s.
+  @Int32()
+  external int textDelegate;
+  @Int32()
+  external int visionDelegate;
+  @Int32()
+  external int audioDelegate;
+}
+
+final class MpUniversalEmbedderImage extends Struct {
+  external Pointer<Char> bytes;
+  @Int32()
+  external int size;
+}
+
+final class MpUniversalEmbedderAudio extends Struct {
+  external Pointer<Float> samples;
+  @Int32()
+  external int size;
+}
+
+final class MpUniversalEmbedderPartValue extends Union {
+  external Pointer<Char> text;
+  external MpUniversalEmbedderImage image;
+  external MpUniversalEmbedderAudio audio;
+}
+
+/// `MpUniversalEmbedderPart`: one part of a content block; [type] is 1 for
+/// text, 2 for an image and 3 for audio (`MpUniversalEmbedderPartType`).
+final class MpUniversalEmbedderPart extends Struct {
+  @Int32()
+  external int type;
+  external MpUniversalEmbedderPartValue value;
 }
 
 final class MpKeyValuePair extends Struct {
@@ -79,6 +114,8 @@ final class MpTaskPart extends Struct {
 }
 
 final class MpSemanticRetrieverOptions extends Struct {
+  /// The host Google's usage log records; the retriever loads no model.
+  external MpBaseOptions baseOptions;
   external Pointer<Char> databasePath;
   @Int32()
   external int embeddingDimension;
@@ -160,6 +197,23 @@ external int embedAudio(
   Pointer<Void> embedder,
   Pointer<Float> audioData,
   int audioDataSize,
+  Pointer<MpEmbeddingResult> result,
+  MpErrorOut error,
+);
+
+@Native<
+  Int32 Function(
+    Pointer<Void>,
+    Pointer<MpUniversalEmbedderPart>,
+    Int32,
+    Pointer<MpEmbeddingResult>,
+    MpErrorOut,
+  )
+>(symbol: 'MpUniversalEmbedderEmbedContent', assetId: _asset)
+external int embedContent(
+  Pointer<Void> embedder,
+  Pointer<MpUniversalEmbedderPart> parts,
+  int partsCount,
   Pointer<MpEmbeddingResult> result,
   MpErrorOut error,
 );

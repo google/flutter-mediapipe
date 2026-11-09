@@ -37,7 +37,9 @@ final class MpBaseOptions extends Struct {
   @Int32()
   external int fileDescriptor;
 
-  /// The `MpDelegate` the graph runs on: 0 is the CPU, 1 the GPU.
+  /// The `MpDelegate` the graph runs on: 1 is the CPU, 2 the GPU, and 0
+  /// the task's default. Google renumbered them in 1.2.1, when 0 stopped
+  /// being the CPU.
   @Int32()
   external int delegate;
 
@@ -188,7 +190,8 @@ final class MpEmbeddingResult extends Struct {
 }
 
 /// Fills Google's base options for the CPU, the only delegate the C API
-/// families run on, with the model at [modelPath] or in [modelBytes], and the
+/// families run on, with the model at [modelPath] or in [modelBytes] (or
+/// none, for a task such as Semantic Retriever that loads no model), and the
 /// host as Flutter on this OS, with [mpHostVersion], which Google's usage log
 /// records (it records neither while the environment is unknown). Bytes and
 /// strings are copied into [arena], which may free them once the task exists:
@@ -201,7 +204,8 @@ void fillBaseOptions(
 }) {
   target
     ..fileDescriptor = -1
-    ..delegate = 0
+    // MP_DELEGATE_CPU.
+    ..delegate = 1
     // MP_HOST_ENVIRONMENT_FLUTTER.
     ..hostEnvironment = 5
     ..hostSystem = mpHostSystem
@@ -212,9 +216,9 @@ void fillBaseOptions(
     target
       ..modelAssetBuffer = buffer.cast()
       ..modelAssetBufferCount = modelBytes.length;
-  } else {
+  } else if (modelPath != null) {
     target.modelAssetPath = nativeModelPath(
-      modelPath!,
+      modelPath,
     ).toNativeUtf8(allocator: arena).cast();
   }
 }

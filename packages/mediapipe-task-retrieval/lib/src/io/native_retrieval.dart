@@ -75,7 +75,11 @@ final class NativeUniversalEmbedder
         ..activationDataType = options.activationDataType.index
         ..cacheDir = options.cacheDir == null
             ? nullptr
-            : options.cacheDir!.toNativeUtf8(allocator: arena).cast();
+            : options.cacheDir!.toNativeUtf8(allocator: arena).cast()
+        // MP_DELEGATE_DEFAULT: every modality runs on the base delegate.
+        ..textDelegate = 0
+        ..visionDelegate = 0
+        ..audioDelegate = 0;
       final output = arena<Pointer<Void>>();
       _check((error) => mp.embedderCreate(native, output, error));
       _handle = output.value;
@@ -200,6 +204,7 @@ final class NativeUniversalEmbedder
           );
         case 'retriever.create':
           final native = arena<mp.MpSemanticRetrieverOptions>();
+          fillBaseOptions(native.ref.baseOptions, arena);
           native.ref
             ..databasePath = string(request['databasePath'] as String?)
             ..embeddingDimension = request['embeddingDimension']! as int
