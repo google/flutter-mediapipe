@@ -14,6 +14,7 @@ import sys
 import tempfile
 import unittest
 import unittest.mock
+import urllib.error
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import nightly_compare as compare  # noqa: E402
@@ -215,14 +216,45 @@ class Pin(unittest.TestCase):
         versions = {value['version'] for value in pins.values()}
         self.assertEqual(len(versions), 1)
         version = versions.pop()
-        self.assertEqual(pin.web_version(version, '20261021'),
-                         version.rpartition('-rc.')[0] + '-rc.20261021')
         for relative in pin.WEB_VERSION_NAMED:
-            self.assertIn(f"'{version}'", (REPO / relative).read_text(encoding='utf-8'))
+            self.assertIn(f"_webRuntimeVersion = '{version}'",
+                          (REPO / relative).read_text(encoding='utf-8'))
         for path, value in pins.items():
             # nightly_pin.py rewrites runtime.json with json.dumps(indent=2).
             self.assertEqual(path.read_text(encoding='utf-8'),
                              json.dumps(value, indent=2) + '\n', path)
+
+    def test_web_version_from_a_release_or_a_prerelease(self):
+        self.assertEqual(pin.web_version('1.2.2', '20261105'), '1.2.2-rc.20261105')
+        self.assertEqual(pin.web_version('1.2.2-rc.20261103', '20261105'), '1.2.2-rc.20261105')
+
+    def test_npm_down_leaves_the_browser_pins(self):
+        """npm failing after its retries costs the browser comparison, not
+        the native one, and changes no file."""
+        files = [*pin.runtime_pins(), *(REPO / relative for relative in pin.WEB_VERSION_NAMED)]
+        before = {path: path.read_bytes() for path in files}
+        down = urllib.error.HTTPError(pin.REGISTRY, 503, 'Service Unavailable', {}, None)
+        with unittest.mock.patch('urllib.request.urlopen', side_effect=down) as urlopen, \
+                unittest.mock.patch('time.sleep'):
+            note, pinned = pin.pin_web('20261021')
+        self.assertFalse(pinned)
+        self.assertIn('npm failed', note)
+        self.assertEqual(urlopen.call_count, len(pin.RETRY_DELAYS) + 1)
+        self.assertEqual({path: path.read_bytes() for path in files}, before)
+
+    def test_fetch_retries_only_what_may_pass(self):
+        answer = unittest.mock.MagicMock()
+        answer.__enter__.return_value.read.return_value = b'{}'
+        dropped = urllib.error.URLError(ConnectionResetError('reset'))
+        with unittest.mock.patch('urllib.request.urlopen',
+                                 side_effect=[dropped, answer]) as urlopen, \
+                unittest.mock.patch('time.sleep'):
+            self.assertEqual(pin.fetch(pin.REGISTRY), b'{}')
+        self.assertEqual(urlopen.call_count, 2)
+        absent = urllib.error.HTTPError(pin.REGISTRY, 404, 'Not Found', {}, None)
+        with unittest.mock.patch('urllib.request.urlopen', side_effect=absent) as urlopen:
+            self.assertIsNone(pin.registry_entry('@mediapipe/tasks-vision', '0.0.0'))
+        self.assertEqual(urlopen.call_count, 1)
 
 
 class PinStop(unittest.TestCase):
@@ -230,7 +262,8 @@ class PinStop(unittest.TestCase):
     STOP = {'version': '1.2.2', 'pinned': '1.2.0', 'since': '20261030'}
 
     def run_pin(self, day, status=1, stop=STOP, api_changes=None, event='schedule',
-                nightly='newest', network_failure=None, no_report=False):
+                nightly='newest', network_failure=None, network_failed_while=None,
+                no_report=False):
         """The outputs, the step summary, what was printed and the failure, if any."""
         with tempfile.TemporaryDirectory() as temp:
             folder = Path(temp)
@@ -240,6 +273,9 @@ class PinStop(unittest.TestCase):
                 report['version_stop'] = stop
             if network_failure:
                 report = {'network_failure': network_failure}
+            if network_failed_while:
+                report.update(network_failure=network_failure,
+                              network_failed_while=network_failed_while)
             fake = folder / 'pin_nightly.py'
             write = '' if no_report else f"open(out, 'w').write({json.dumps(json.dumps(report))})\n"
             fake.write_text(f'import json, sys\n'
@@ -342,6 +378,22 @@ class PinStop(unittest.TestCase):
             self.assertNotIn('::error::', printed)
             self.assertIn(f'::warning::{self.NETWORK_NOTE}', printed)
             self.assertIn(self.NETWORK_NOTE, summary)
+
+    def test_a_network_failure_reading_the_chosen_build_warns_naming_the_read(self):
+        # pin_nightly keeps the rest of its report then; the network failure wins.
+        for event in 'schedule', 'workflow_dispatch', 'pull_request':
+            lines, summary, printed, failure = self.run_pin(
+                (2027, 6, 1), event=event, stop=None, api_changes=[],
+                network_failure='IncompleteRead: IncompleteRead(0 bytes read)',
+                network_failed_while="hashing 20261106's vision/lib.so from its archive")
+            self.assertIsNone(failure)
+            self.assertEqual(lines, {'network_failed': 'true'})
+            note = ("The comparison did not run: the network failed while hashing "
+                    "20261106's vision/lib.so from its archive (IncompleteRead: "
+                    'IncompleteRead(0 bytes read)). The next run tries again.')
+            self.assertIn(f'::warning::{note}', printed)
+            self.assertIn(note, summary)
+            self.assertNotIn('::error::', printed)
 
     def test_a_run_that_chose_a_build_says_the_network_did_not_fail(self):
         self.assertEqual(self.run_pin((2026, 11, 6))[0]['network_failed'], 'false')

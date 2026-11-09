@@ -15,6 +15,7 @@ import types
 import unittest
 from unittest import mock
 import urllib.error
+import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pin_nightly  # noqa: E402
@@ -334,6 +335,163 @@ class ChoosingABuildTest(unittest.TestCase):
         missing = urllib.error.HTTPError('u', 404, 'no', None, None)
         for broken in {'/BUILD_INFO': missing}, {'/BUILD_INFO': b'<html>'}, {self.FOLDERS: b'{}'}:
             self.assert_dated(self.run_walk(**broken), self.pins['stamp'])
+
+
+class AfterThePickTest(unittest.TestCase):
+    """main after it chose a build, on the real Fetcher and Archive: Google's
+    bucket as ChoosingABuildTest gives it, with a real archive of that build
+    read by ranges, and `self.members` breaking the reads of one member."""
+    STAMPS, NIGHT = ChoosingABuildTest.STAMPS, '20261106'
+    ZIP = f'{NIGHT}/mediapipe_tasks_c_{NIGHT}.zip'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pins = pin_nightly.current_pins()
+        cls.domains = ' '.join(pin_nightly.families(cls.pins['paths']))
+        cls.info = (f"build_date={cls.NIGHT}\nmediapipe_version={cls.pins['version']}\n"
+                    f'domains={cls.domains}\n')
+        cls.header = str(sorted(pin_nightly.HEADERS.rglob('*.h'))[0].relative_to(
+            pin_nightly.HEADERS))
+        members = {'BUILD_INFO': cls.info.encode()}
+        for family in pin_nightly.families(cls.pins['paths']):
+            for name in 'LICENSE', 'NOTICE':
+                members[f'{family}/{name}'] = (pin_nightly.NOTICES / name).read_bytes()
+            for path in pin_nightly.HEADERS.rglob('*'):
+                if path.is_file():
+                    members[f'{family}/include/{path.relative_to(pin_nightly.HEADERS)}'] = \
+                        path.read_bytes()
+        for path in cls.pins['paths']:
+            members[path] = f'a library, {path}'.encode()
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_STORED) as archive:
+            for name, data in members.items():
+                archive.writestr(name, data)
+        cls.archive = buffer.getvalue()
+        with zipfile.ZipFile(io.BytesIO(cls.archive)) as archive:
+            # Each member's bytes in the archive, from its local header to its end.
+            cls.spans = {item.filename: (item.header_offset, item.header_offset + 30 +
+                                         len(item.filename) + item.compress_size)
+                         for item in archive.infolist()}
+
+    def answer(self, request, timeout):
+        """The archive by ranges, `self.members[name]` for a range in member
+        `name` ('corrupt' flips a byte of its data); anything else as
+        ChoosingABuildTest answers it."""
+        if not request.full_url.endswith(self.ZIP):
+            return ChoosingABuildTest.answer(self, request, timeout)
+        self.urls.append(request.full_url)
+        size = len(self.archive)
+        first, last = re.fullmatch(r'bytes=(\d*)-(\d*)', request.get_header('Range')).groups()
+        if not first:
+            # The tail with the directory, which every member's reads follow.
+            first = max(size - int(last), 0)
+            return self.ranged(self.archive[first:], first, size - 1)
+        first, last = int(first), int(last)
+        for name, broken in self.members.items():
+            start, end = self.spans[name]
+            if not start <= first < end:
+                continue
+            self.hits[name] = self.hits.get(name, 0) + 1
+            if isinstance(broken, Exception):
+                raise broken
+            if broken != 'corrupt':
+                # A Body whose read loses the connection, after its range's headers.
+                return self.ranged(broken, first, last)
+            if first > start:
+                data = bytearray(self.archive[first:last + 1])
+                data[-1] ^= 0xff
+                return self.ranged(bytes(data), first, last)
+        return self.ranged(self.archive[first:last + 1], first, last)
+
+    def ranged(self, data, first, last):
+        body = data if isinstance(data, Body) else Body(data)
+        body.status = 206
+        body.headers['Content-Range'] = f'bytes {first}-{last}/{len(self.archive)}'
+        body.headers['ETag'] = '"1"'
+        return body
+
+    def run_main(self, **broken):
+        """The failure main raises (None when it finishes) and the report it
+        wrote, None if it wrote none. A dry run, so nothing is written."""
+        self.members, self.broken, self.urls, self.hits, failure = broken, {}, [], {}, None
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory, 'report.json')
+            argv = ['pin_nightly.py', '--nightly', 'newest', '--dry-run',
+                    '--report', str(report)]
+            with mock.patch.object(sys, 'argv', argv), \
+                    mock.patch.object(pin_nightly.urllib.request, 'urlopen', self.answer), \
+                    mock.patch.object(pin_nightly.time, 'sleep'), \
+                    mock.patch('sys.stdout', io.StringIO()):
+                try:
+                    pin_nightly.main()
+                except BaseException as error:
+                    failure = error
+            written = report.exists() and json.loads(report.read_text(encoding='utf-8'))
+        return failure, written or None
+
+    def stages(self):
+        """`{member: what the report says was being read}` for one member of
+        each read after the pick."""
+        night, path = self.NIGHT, self.pins['paths'][0]
+        family = pin_nightly.families(self.pins['paths'])[0]
+        return {'BUILD_INFO': f"reading {night}'s BUILD_INFO from its archive",
+                f'{family}/include/{self.header}': f"reading {night}'s C headers from its archive",
+                f'{family}/LICENSE': f"reading {night}'s LICENSE files from its archive",
+                path: f"hashing {night}'s {path} from its archive"}
+
+    def test_with_nothing_broken_the_dry_run_hashes_every_pin(self):
+        failure, report = self.run_main()
+        self.assertIsNone(failure)
+        self.assertEqual((report['nightly'], report['api_changes'], report['written']),
+                         (self.NIGHT, [], False))
+        self.assertNotIn('network_failure', report)
+
+    def test_a_network_failure_after_the_pick_is_reported_with_what_was_read(self):
+        for name, what in self.stages().items():
+            for make in ChoosingABuildTest.NETWORK:
+                error = make()
+                failure, report = self.run_main(**{name: error})
+                self.assertIsInstance(failure, SystemExit, (name, error))
+                self.assertEqual(report['network_failure'], f'{type(error).__name__}: {error}',
+                                 (name, error))
+                self.assertEqual(report['network_failed_while'], what)
+                self.assertEqual(report['nightly'], self.NIGHT)
+                self.assertIn(what, str(failure))
+                self.assertEqual(self.hits, {name: 3}, (name, error))
+
+    def test_a_connection_lost_in_a_member_is_a_network_failure(self):
+        for name, what in self.stages().items():
+            for lost in http.client.IncompleteRead(b''), ConnectionResetError(), \
+                    TimeoutError(), ssl.SSLEOFError():
+                failure, report = self.run_main(**{name: Body(lost)})
+                self.assertIsInstance(failure, SystemExit, (name, lost))
+                self.assertEqual(report['network_failure'], f'{type(lost).__name__}: {lost}')
+                self.assertEqual(report['network_failed_while'], what)
+
+    def test_a_member_that_does_not_match_its_directory_stays_a_failure(self):
+        for name in self.stages():
+            failure, report = self.run_main(**{name: 'corrupt'})
+            self.assertIsInstance(failure, SystemExit, name)
+            self.assertIn('CRC', str(failure), name)
+            self.assertIsNone(report, name)
+
+    def test_a_404_or_other_definite_answer_after_the_pick_stays_a_failure(self):
+        # The archive's directory named the member a moment before, so a 404
+        # now is Google's answer, not the network: the build went or changed.
+        for name in self.stages():
+            for code in 400, 403, 404, 410:
+                error = urllib.error.HTTPError('u', code, 'no', None, None)
+                failure, report = self.run_main(**{name: error})
+                self.assertIs(failure, error, (name, code))
+                self.assertIsNone(report, (name, code))
+                self.assertEqual(self.hits, {name: 1}, (name, code))
+
+    def test_an_error_that_is_not_the_network_after_the_pick_stays_a_failure(self):
+        for error in (urllib.error.URLError(ssl.SSLCertVerificationError(1, 'bad certificate')),
+                      http.client.BadStatusLine('junk'), OSError(errno.ENOSPC, 'full')):
+            failure, report = self.run_main(**{self.pins['paths'][0]: error})
+            self.assertIs(failure, error)
+            self.assertIsNone(report)
 
 
 class Body(io.BytesIO):

@@ -68,7 +68,7 @@ class GateTest(unittest.TestCase):
 
     def test_matrix_covers_every_task_platform_and_delegate(self):
         matrix = gate.load_matrix()
-        self.assertEqual(len(matrix), 21)
+        self.assertEqual(len(matrix), 23)
         for task, platforms in matrix.items():
             self.assertEqual(sorted(platforms), sorted(gate.PLATFORMS), task)
             for platform, delegates in platforms.items():

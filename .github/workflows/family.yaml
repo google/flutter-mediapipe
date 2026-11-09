@@ -1,6 +1,6 @@
 name: Family checks
 
-# One family's checks, called by decision.yaml and retrieval.yaml: the package
+# One family's checks, called by decision.yaml, retrieval.yaml and speech.yaml: the package
 # against Google's Python answers on each desktop, the gallery's test and
 # journey on the desktops, and the browser journey, recording task coverage
 # rows for the gate. The phones run the test and the journey in android.yaml
@@ -26,9 +26,43 @@ on:
         type: string
         required: true
       download-models:
-        description: The models tool/download_models.dart downloads by name, space-separated, or its default set
+        description: The models tool/download_models.dart downloads by name, space-separated, or its default set; the package tests fail without the ones named
         type: string
         default: ''
+      test-paths:
+        description: The package tests to run, space-separated, or every test
+        type: string
+        default: ''
+      prepare-reference:
+        description: >-
+          A script in the package's tool/ that regenerates Google's Python
+          answers on the runner into build/<family>-reference, or none
+        type: string
+        default: ''
+      reference-env:
+        description: The variable that points the package tests at that reference
+        type: string
+        default: ''
+      macos-gpu-tasks:
+        description: The family's tasks whose integration test proves the GPU on the Mac runner; its coverage cells
+        type: string
+        default: ''
+      macos-model-path:
+        description: Model files only the Mac package job downloads, one per line, for its own cache
+        type: string
+        default: ''
+      macos-download-models:
+        description: The models only the Mac package job downloads by name, space-separated; its tests fail without them
+        type: string
+        default: ''
+      macos-package-gpu-tasks:
+        description: The family's tasks whose package test proves the GPU on the Mac runner; its coverage cells
+        type: string
+        default: ''
+      web-delegate:
+        description: The delegate the browser journey runs the family's tasks on
+        type: string
+        default: gpu
       jobs:
         description: Jobs to run (package, gallery, web), comma-separated, or all
         type: string
@@ -48,7 +82,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/setup
         with:
-          python: 'false'
+          python: ${{ inputs.prepare-reference != '' }}
           linux-profile: ffi
       # Only main saves the models: a pull request that saved its own copy added
       # up to 1.9 GB to the repository's 10 GB of cache, and the eviction that
@@ -65,19 +99,72 @@ jobs:
         with:
           path: ${{ inputs.model-path }}
           key: ${{ inputs.family }}-models-${{ hashFiles(format('packages/mediapipe-task-{0}/lib/models.dart', inputs.family)) }}
+      # The Mac's own models, under their own key, so the other runners
+      # neither download nor cache them.
+      - if: runner.os == 'macOS' && inputs.macos-model-path != '' && github.event_name == 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ inputs.macos-model-path }}
+          key: ${{ inputs.family }}-macos-models-${{ hashFiles(format('packages/mediapipe-task-{0}/lib/models.dart', inputs.family)) }}
+      - if: runner.os == 'macOS' && inputs.macos-model-path != '' && github.event_name != 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ inputs.macos-model-path }}
+          key: ${{ inputs.family }}-macos-models-${{ hashFiles(format('packages/mediapipe-task-{0}/lib/models.dart', inputs.family)) }}
       - name: Download Google's models
         working-directory: packages/mediapipe-task-${{ inputs.family }}
         shell: bash
         env:
           DOWNLOAD_MODELS: ${{ inputs.download-models }}
+          MACOS_DOWNLOAD_MODELS: ${{ inputs.macos-download-models }}
         run: |
           flutter pub get
           dart tool/download_models.dart $DOWNLOAD_MODELS
+          required="$DOWNLOAD_MODELS"
+          if [ "$RUNNER_OS" = macOS ] && [ -n "$MACOS_DOWNLOAD_MODELS" ]; then
+            dart tool/download_models.dart $MACOS_DOWNLOAD_MODELS
+            required="$required $MACOS_DOWNLOAD_MODELS"
+          fi
+          # The tests that need these fail without them instead of skipping.
+          echo "MEDIAPIPE_REQUIRED_MODELS=$required" >> "$GITHUB_ENV"
+      # Google's own Python on this runner, from the pinned wheel, where the
+      # checked-in macOS answers would not hold elsewhere.
+      - name: Google's Python answers on this runner
+        if: inputs.prepare-reference != ''
+        working-directory: packages/mediapipe-task-${{ inputs.family }}
+        shell: bash
+        env:
+          FAMILY: ${{ inputs.family }}
+          PREPARE_REFERENCE: ${{ inputs.prepare-reference }}
+          REFERENCE_ENV: ${{ inputs.reference-env }}
+        run: |
+          python=python3; if [ "$RUNNER_OS" = Windows ]; then python=python; fi
+          "$python" -B "tool/$PREPARE_REFERENCE" --output-dir "$GITHUB_WORKSPACE/build/$FAMILY-reference"
+          echo "$REFERENCE_ENV=$GITHUB_WORKSPACE/build/$FAMILY-reference" >> "$GITHUB_ENV"
       # A task's close waits for Google's usage-logging upload, so a slow
       # reply holds a test past the default 30 s.
       - name: The ${{ inputs.family }} package against Google's Python answers
+        id: package
         working-directory: packages/mediapipe-task-${{ inputs.family }}
-        run: dart test --timeout 180s --reporter expanded
+        shell: bash
+        env:
+          TEST_PATHS: ${{ inputs.test-paths }}
+        # TEST_PATHS is unquoted on purpose: it holds several paths.
+        run: dart test --timeout 180s --reporter expanded $TEST_PATHS
+      - name: Record macos GPU ${{ inputs.family }} package coverage
+        if: always() && runner.os == 'macOS' && inputs.macos-package-gpu-tasks != ''
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-${{ inputs.family }}-package-gpu
+          platform: macos
+          delegate: gpu
+          tasks: ${{ inputs.macos-package-gpu-tasks }}
+          outcome: ${{ steps.package.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && inputs.prepare-reference != ''
+        with:
+          name: ${{ inputs.family }}-reference-${{ matrix.os }}
+          path: build/${{ inputs.family }}-reference/
 
   gallery:
     if: ${{ inputs.jobs == 'all' || contains(inputs.jobs, 'gallery') }}
@@ -136,6 +223,15 @@ jobs:
           delegate: cpu
           tasks: ${{ inputs.tasks }}
           outcome: ${{ steps.app.outcome == 'success' && steps.journey.outcome || steps.app.outcome }}
+      - name: Record macos GPU ${{ inputs.family }} coverage
+        if: always() && matrix.device == 'macos' && inputs.macos-gpu-tasks != ''
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: macos-${{ inputs.family }}-gpu
+          platform: macos
+          delegate: gpu
+          tasks: ${{ inputs.macos-gpu-tasks }}
+          outcome: ${{ steps.app.outcome == 'success' && steps.journey.outcome || steps.app.outcome }}
 
   web:
     if: ${{ inputs.jobs == 'all' || contains(inputs.jobs, 'web') }}
@@ -192,13 +288,13 @@ jobs:
         env:
           TASKS: ${{ inputs.tasks }}
         run: node gallery/tool/browser/test_gallery_journey.mjs --browser=${{ matrix.browser }} --tasks="$TASKS"
-      - name: Record web GPU ${{ inputs.family }} coverage
+      - name: Record web ${{ inputs.web-delegate }} ${{ inputs.family }} coverage
         if: always() && matrix.browser == 'chromium'
         uses: ./.github/actions/record-coverage
         with:
           suite: web-${{ inputs.family }}-chromium-${{ matrix.os }}
           platform: web
-          delegate: gpu
+          delegate: ${{ inputs.web-delegate }}
           tasks: ${{ inputs.tasks }}
           outcome: ${{ steps.web_journey.outcome }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

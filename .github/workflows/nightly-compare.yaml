@@ -10,8 +10,9 @@ name: Nightly comparison
 # A new MediaPipe version in Google's nightlies stops the comparison until the
 # version is moved by hand: a line in the run's summary, then a warning and
 # then a failed scheduled run (tool/ci/nightly_pin.py WARN_AFTER_DAYS and
-# FAIL_AFTER_DAYS). A network failure while choosing Google's build also
-# compares nothing: a warning, and the next run tries again.
+# FAIL_AFTER_DAYS). A network failure while choosing Google's build, or
+# reading its archive after, also compares nothing: a warning, and the next
+# run tries again.
 # Nothing here pushes, releases or uses a secret besides GITHUB_TOKEN.
 on:
   schedule:

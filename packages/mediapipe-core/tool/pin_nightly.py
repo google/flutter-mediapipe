@@ -30,7 +30,12 @@ family's headers and notices. It prints why it skipped any newer folder.
 name is uploaded again; comparison runs of a nightly use it. A build this
 project adopts keeps the plain URL.
 `--report` writes what it found as JSON, the C API changes included, even
-when it stops.
+when it stops. When the network fails, in choosing the build or in reading
+its archive after (BUILD_INFO, headers, notices, the pinned files), it stops
+with `network_failure` in the report, and `network_failed_while` naming what
+it was reading once a build was chosen; tool/ci/nightly_pin.py only warns on
+that. A definite answer (a 404 included) or a file that does not match its
+directory stays a failure.
 
 Nothing is written, and the exit status is non-zero, when the C API changed
 beyond comments (the bindings would need regenerating), when the MediaPipe
@@ -41,6 +46,7 @@ the API changes, and removes the headers the build no longer ships. Only the arc
 members are downloaded (about 300 MB).
 """
 import argparse
+import contextlib
 import datetime
 import difflib
 import errno
@@ -573,6 +579,20 @@ def main():
             args.report.parent.mkdir(parents=True, exist_ok=True)
             args.report.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
 
+    @contextlib.contextmanager
+    def reading(what):
+        """Stops on a network failure while `what` is read from the chosen
+        build, as on one while choosing it: in the report, and a non-zero exit."""
+        try:
+            yield
+        except (OSError, http.client.HTTPException) as error:
+            if not network_failure(error):
+                raise
+            report.update(network_failure=f'{type(error).__name__}: {error}',
+                          network_failed_while=what)
+            write_report()
+            raise SystemExit(f"The network failed while {what}: {report['network_failure']}")
+
     try:
         folder, info_text, archive = pick_build(fetcher, args.nightly or args.release,
                                                 old['paths'])
@@ -606,11 +626,13 @@ def main():
         raise SystemExit(f"MediaPipe {info['mediapipe_version']} replaces "
                          f"{old['version']}: the tests and docs name the version, so "
                          'move it by hand, or --adopt it.')
-    build_info = archive.read('BUILD_INFO')
+    with reading(f"reading {folder}'s BUILD_INFO from its archive"):
+        build_info = archive.read('BUILD_INFO')
     if build_info.decode('utf-8') != info_text:
         raise SystemExit("The archive's BUILD_INFO is not the one beside it.")
 
-    new_headers = headers(archive, archive.entries)
+    with reading(f"reading {folder}'s C headers from its archive"):
+        new_headers = headers(archive, archive.entries)
     changes, comment_only = compare_headers(new_headers)
     report['api_changes'], report['comment_only_headers'] = changes, comment_only
     if changes and not args.adopt:
@@ -619,7 +641,8 @@ def main():
                          '(make generate); nothing written:\n  ' + '\n  '.join(changes))
     notices = {}
     for name in ('LICENSE', 'NOTICE'):
-        copies = {archive.read(f'{family}/{name}') for family in families(old['paths'])}
+        with reading(f"reading {folder}'s {name} files from its archive"):
+            copies = {archive.read(f'{family}/{name}') for family in families(old['paths'])}
         if len(copies) != 1:
             raise SystemExit(f'The families ship different {name} files.')
         notices[name] = copies.pop()
@@ -631,7 +654,8 @@ def main():
 
     digests = {}
     for path in old['paths']:
-        digests[path] = archive.digest(path)
+        with reading(f"hashing {folder}'s {path} from its archive"):
+            digests[path] = archive.digest(path)
         print(f'  {digests[path][0]} {digests[path][1]:>9} {path}')
     generation = archive.generation if args.generation else None
     if args.generation and not generation:

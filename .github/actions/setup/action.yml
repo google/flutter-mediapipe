@@ -117,6 +117,16 @@ runs:
           echo installed=true >> "$GITHUB_OUTPUT"
         else
           echo 'The cached packages did not install; downloading them.' >&2
+          # dpkg leaves the packages whose dependencies failed unpacked, and
+          # apt then plans nothing, from any mirror, until they are gone
+          # (reproduced on ubuntu-24.04, 2026-10-23). Removing them leaves
+          # what a miss starts from.
+          broken=$(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' |
+            awk 'substr($1, 2, 1) ~ /[UFH]/ { print $2 }')
+          if [ -n "$broken" ]; then
+            echo "Removing what dpkg left half installed: $broken" >&2
+            sudo dpkg --remove --force-depends $broken
+          fi
         fi
     # A miss, or a hit that could not install, downloads the files under time
     # limits, from another mirror when one fails.

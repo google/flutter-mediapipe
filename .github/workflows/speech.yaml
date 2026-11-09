@@ -1,0 +1,158 @@
+name: Speech
+
+permissions:
+  contents: read
+
+# The Audio Transcriber and Text to Speech checks, as family.yaml runs them:
+# the package against Google's Python answers, regenerated on each desktop from
+# Google's pinned speech wheel, and the gallery's test and journey on the
+# desktops; and the browsers here, against Google's JavaScript, as the models
+# are too large for web.yaml. The phones run the test and the journey in
+# android.yaml and ios.yaml. Dispatch by hand to run a subset of the jobs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      jobs:
+        description: Jobs to run (package, gallery, web, browser), comma-separated
+        required: false
+        default: package,gallery,web,browser
+
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
+concurrency:
+  group: speech-${{ github.event_name == 'push' && github.sha || github.ref }}-${{ inputs.jobs || 'all' }}
+  cancel-in-progress: true
+
+jobs:
+  speech:
+    name: Speech
+    uses: ./.github/workflows/family.yaml
+    with:
+      family: audio
+      tasks: audio_transcriber,text_to_speech
+      integration-test: speech_test
+      # Parakeet TDT 0.6B v3 (615 MB), Phonon (87 MB) and PocketTTS English
+      # (163 MB).
+      model-path: |
+        packages/mediapipe-task-audio/models/parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm
+        packages/mediapipe-task-audio/models/phonon_int8.litertlm
+        packages/mediapipe-task-audio/models/pocket_tts_en_int8.litertlm
+      download-models: parakeet_tdt_v3 phonon pocket_tts_en
+      test-paths: test/speech_test.dart
+      prepare-reference: prepare_speech_reference.py
+      reference-env: MEDIAPIPE_SPEECH_REFERENCE_DIR
+      web-delegate: cpu
+      macos-gpu-tasks: audio_transcriber
+      # Kokoro (295 MB), for Text to Speech's GPU test, on the Mac alone.
+      macos-model-path: packages/mediapipe-task-audio/models/kokoro_int8_gpu_fp16.litertlm
+      macos-download-models: kokoro
+      macos-package-gpu-tasks: text_to_speech
+      jobs: ${{ inputs.jobs || 'package,gallery,web' }}
+
+  browser:
+    if: ${{ !inputs.jobs || contains(inputs.jobs, 'browser') }}
+    name: browser ${{ matrix.browser }} ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Hosted Linux has no hardware WebGPU adapter, so its browsers must
+        # refuse the transcriber's GPU delegate. Chromium on the Mac runner's
+        # Metal adapter must run it, and records the web GPU row.
+        include:
+          - {os: ubuntu-24.04, browser: chromium, gpu: false}
+          - {os: ubuntu-24.04, browser: firefox, gpu: false}
+          - {os: ubuntu-24.04, browser: webkit, gpu: false}
+          - {os: macos-15, browser: chromium, gpu: true}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          linux-profile: browser
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: gallery/tool/browser/package-lock.json
+      # family.yaml's models, under its key.
+      - if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            packages/mediapipe-task-audio/models/parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm
+            packages/mediapipe-task-audio/models/phonon_int8.litertlm
+            packages/mediapipe-task-audio/models/pocket_tts_en_int8.litertlm
+          key: audio-models-${{ hashFiles('packages/mediapipe-task-audio/lib/models.dart') }}
+      - if: github.event_name != 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            packages/mediapipe-task-audio/models/parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm
+            packages/mediapipe-task-audio/models/phonon_int8.litertlm
+            packages/mediapipe-task-audio/models/pocket_tts_en_int8.litertlm
+          key: audio-models-${{ hashFiles('packages/mediapipe-task-audio/lib/models.dart') }}
+      # PocketTTS too, which the browsers do not use, so this job saves the
+      # same cache entry as family.yaml's package job.
+      - name: Download Google's models
+        working-directory: packages/mediapipe-task-audio
+        run: |
+          flutter pub get
+          dart tool/download_models.dart parakeet_tdt_v3 phonon pocket_tts_en
+      - name: Prepare the web gallery
+        run: dart run tool/gallery_builder/bin/prepare_gallery.dart --target web --tasks audio_transcriber,text_to_speech,face_detector
+      - name: Install Playwright's browser
+        working-directory: gallery/tool/browser
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          npm ci
+          npx playwright install "$BROWSER"
+          if [ "$RUNNER_OS" = Linux ]; then npx playwright install-deps --dry-run "$BROWSER"; fi
+      - name: Build the speech probe and Google's runtimes
+        working-directory: gallery
+        run: |
+          flutter pub get
+          flutter analyze tool/web_speech_probe.dart
+          flutter build web --release --base-href /speech-probe/ --no-web-resources-cdn --output build/web-speech -t tool/web_speech_probe.dart
+          dart run mediapipe_core:web_runtime build/web-runtime
+      - name: Start the probe server
+        run: |
+          nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -sf -o /dev/null --max-time 5 http://127.0.0.1:8866/speech-probe/ && exit 0
+            sleep 2
+          done
+          cat web-server.log
+          exit 1
+      - name: The speech tasks against Google's JavaScript
+        id: speech
+        env:
+          BROWSER: ${{ matrix.browser }}
+          REQUIRE_GPU: ${{ matrix.gpu }}
+        run: node gallery/tool/browser/test_browser.mjs --browser="$BROWSER" --suite=speech --official-runtime=/runtime/ --require-speech-gpu="$REQUIRE_GPU"
+      - name: Record web CPU speech coverage
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-speech-${{ matrix.browser }}-${{ matrix.os }}
+          platform: web
+          delegate: cpu
+          tasks: audio_transcriber,text_to_speech
+          outcome: ${{ steps.speech.outcome }}
+      - name: Record web GPU Audio Transcriber coverage
+        if: always() && matrix.gpu
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: web-speech-gpu-${{ matrix.browser }}-${{ matrix.os }}
+          platform: web
+          delegate: gpu
+          tasks: audio_transcriber
+          outcome: ${{ steps.speech.outcome }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: speech-browser-${{ matrix.browser }}-${{ matrix.os }}
+          path: build/ci-tmp/web-browser-${{ matrix.browser }}/
