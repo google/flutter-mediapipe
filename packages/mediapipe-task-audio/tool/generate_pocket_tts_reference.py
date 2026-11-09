@@ -6,15 +6,17 @@ host, as generate_speech_reference.py does for Phonon, on
 in a second one, the same utterance at speaking rate 1.5, and a stream. Never
 derive expected values from the Dart implementation.
 
-Google's 1.2.2 runtime does not give every task it creates the same answer on
-every host: on GitHub's Linux runners with AMD EPYC 9V45 processors, each new
-task times the fox's words on one of two 15 ms grids (brown ending at 0.96 s
-or 0.975 s), about half the time each, in its Python on the wheel's library or
-on the family library the package bundles, and in the package alike, while
-every synthesis on one task keeps that task's grid. So where the first tasks'
+Google's 1.2.2 runtime does not repeat itself on Linux x86-64: each new task
+gives one of a few close answers, and which ones depends on the process as
+well as the host, in its Python on the wheel's library and in the package on
+the family library alike. Over 600 tasks on ten GitHub runners (AMD EPYC 7763,
+9V74 and 9V45, Intel Xeon 8370C), every answer kept its length and words,
+while a word's times moved by up to 60 ms (the fox at rate 1.5; 15 ms at rate
+1) and a 100 ms window's level by up to 0.009. So where the first tasks'
 samples differ, each case keeps every distinct answer from CREATES tasks, the
-first as before and the others as its `alternatives`, and the tests accept
-the package's answer only when it is one of Google's.
+first as before and the others as its `alternatives`. The package's own task
+may still draw an answer this process never gave, so speech_test.dart
+compares PocketTTS on Linux within that spread of Google's own answers.
 """
 import argparse
 import hashlib
@@ -42,9 +44,7 @@ UTTERANCES = {
 # Spoken by a task created with speaking_rate 1.5.
 FAST_UTTERANCE = UTTERANCES['fox'][0]
 # Tasks created for each case where the first SETTLE disagree sample for
-# sample, as they never do on macOS or Windows. With two answers, each from at
-# least a third of tasks, the package's task gives one that 32 of Google's
-# missed less than once in a million runs of a case.
+# sample, as they never do on macOS or Windows.
 SETTLE, CREATES = 4, 32
 # speech_test.dart's _levelDelta: answers within it of each other are one.
 LEVEL_DELTA = 2e-3
