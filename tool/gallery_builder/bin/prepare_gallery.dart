@@ -96,7 +96,7 @@ Future<void> _prepare(
   await _replaceDirectory(samplesDirectory);
   final sampleNames = <String>[];
   for (final entry in samples.entries) {
-    if (!tasks.contains('audio_classifier') && entry.value.endsWith('.wav')) {
+    if (!tasks.any(audioSampleTasks.contains) && entry.value.endsWith('.wav')) {
       continue;
     }
     if (!tasks.any(embedderSampleTasks.contains) &&
@@ -339,6 +339,7 @@ dependency_overrides:
 
 dev_dependencies:
   camera_platform_interface: ^2.13.1
+  ffi: ^2.1.4
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

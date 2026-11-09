@@ -13,7 +13,9 @@ import 'package:mediapipe_gallery/live_page.dart';
 import 'package:mediapipe_gallery/main.dart' show GalleryAssets;
 import 'package:mediapipe_gallery/retrieval_page.dart';
 import 'package:mediapipe_gallery/segment_page.dart';
+import 'package:mediapipe_gallery/speech_page.dart';
 import 'package:mediapipe_gallery/text_page.dart';
+import 'package:mediapipe_gallery/transcriber_page.dart';
 import 'package:mediapipe_gallery/ui/design.dart';
 import 'package:mediapipe_gallery/ui/workspace.dart';
 import 'package:mediapipe_gallery/universal_embedder_page.dart';
@@ -50,6 +52,8 @@ const _packages = {
   'image_embedder': 'mediapipe_vision',
   'interactive_segmenter': 'mediapipe_vision',
   'audio_classifier': 'mediapipe_audio',
+  'audio_transcriber': 'mediapipe_audio',
+  'text_to_speech': 'mediapipe_audio',
   'language_detector': 'mediapipe_text',
   'text_classifier': 'mediapipe_text',
   'text_embedder': 'mediapipe_text',
@@ -69,6 +73,8 @@ const _pageFiles = {
   GalleryDemo.embed: 'embed_page.dart',
   GalleryDemo.text: 'text_page.dart',
   GalleryDemo.audio: 'audio_page.dart',
+  GalleryDemo.transcribe: 'transcriber_page.dart',
+  GalleryDemo.speak: 'speech_page.dart',
   GalleryDemo.decision: 'decision_page.dart',
   GalleryDemo.game: 'fish_game_page.dart',
   GalleryDemo.universalEmbed: 'universal_embedder_page.dart',
@@ -103,6 +109,8 @@ Widget _page(GalleryTask task, TaskPlatform platform) => switch (task.demo) {
   GalleryDemo.embed => EmbedPage(task: task, platform: platform),
   GalleryDemo.text => TextPage(task: task),
   GalleryDemo.audio => AudioPage(task: task),
+  GalleryDemo.transcribe => TranscriberPage(task: task, platform: platform),
+  GalleryDemo.speak => SpeechPage(task: task, platform: platform),
   GalleryDemo.decision => DecisionPage(task: task, platform: platform),
   GalleryDemo.game => FishGamePage(task: task, platform: platform),
   GalleryDemo.universalEmbed => UniversalEmbedderPage(

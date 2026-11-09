@@ -16,6 +16,8 @@ fs.mkdirSync(evidence, {recursive: true});
 // This table describes user-facing actions, not which tasks a build contains.
 // The release manifest decides that; an unknown bundled task fails the test.
 const cases = {
+  audio_transcriber: {title: 'Audio Transcriber', transcribe: "Send a text to Mike, I'll be home late tomorrow."},
+  text_to_speech: {title: 'Text to Speech', speak: /, 9 words$/},
   face_detector: {title: 'Face Detector', sample: 'portrait.jpg', result: /[1-9]\d* faces? detected/},
   face_landmarker: {title: 'Face Landmarker', sample: 'portrait.jpg', result: /[1-9]\d* faces? detected/},
   gesture_recognizer: {title: 'Gesture Recognizer', sample: 'thumb_up.jpg', result: /[1-9]\d* hands? recognized/},
@@ -101,6 +103,7 @@ browser.on('disconnected', () => lifecycle('browser disconnected'));
 let page;
 let hardwareWebGpu = false;
 let retry = false;
+let transcriberWebGpu = false;
 try {
   const context = await browser.newContext({viewport: {width: 1280, height: 900}});
   context.on('close', () => lifecycle('context closed'));
@@ -175,6 +178,8 @@ try {
     return !!adapter && !adapter.isFallbackAdapter &&
       !/fallback|swiftshader|llvmpipe|software|lavapipe/i.test(`${info.vendor} ${info.architecture} ${info.description}`);
   });
+  transcriberWebGpu = hardwareWebGpu && process.platform === 'darwin' && browserName !== 'firefox' &&
+    await page.evaluate(async () => (await navigator.gpu.requestAdapter({powerPreference: 'high-performance'})).info.vendor === 'apple');
   // On a hardware adapter WebKit still runs no EmbeddingGemma 2 model, as
   // Google's runtime embeds every input there as zeros: the retrieval tasks and
   // Hungry Fish are cards, and Decision Maker runs Laya.
@@ -186,8 +191,11 @@ try {
   // --tasks=a,b visits only those of the bundled tasks.
   const only = args.tasks ? new Set(args.tasks.split(',')) : null;
   for (const id of refused) if (only && !only.has(id)) refused.delete(id);
+  // Their models are 615 MB and 87 MB, so speech.yaml names them and web.yaml's
+  // tour of every task passes them by.
+  const namedOnly = new Set(['audio_transcriber', 'text_to_speech']);
   const expected = manifest.tasks.filter(id =>
-    !probeOnly.has(id) && !refused.has(id) && (!only || only.has(id)));
+    !probeOnly.has(id) && !refused.has(id) && (only ? only.has(id) : !namedOnly.has(id)));
   assert.ok(expected.length + refused.size > 0, 'empty release task list');
   for (const id of refused) {
     if (!manifest.tasks.includes(id)) continue;
@@ -326,6 +334,32 @@ try {
       assert.equal(await none.count(), 0, `${id}: no document matched, as when Google's runtime embeds every input as zeros`);
       assert.match((await top.textContent()) ?? '', spec.retrieve, `${id}: best match`);
       report.checks.push(`${id}:cpu:search`);
+      await page.screenshot({path: path.join(evidence, `${id}.png`)});
+    } else if (spec.transcribe || spec.speak) {
+      // The first run fetches the task's model from Hugging Face.
+      const [check, button, answer] = spec.transcribe
+        ? ['transcribe', 'Transcribe', spec.transcribe] : ['speak', 'Speak', spec.speak];
+      // The transcript's own element: the page's description of the clip holds
+      // the same sentence, before any transcription and on either delegate.
+      const output = spec.transcribe
+        ? page.locator('[flt-semantics-identifier="transcriber-text"]') : page.getByText(answer);
+      const result = spec.transcribe ? output.filter({hasText: answer}) : output;
+      const error = page.getByText('Error', {exact: true});
+      // The page offers the GPU delegate only where a test saw the work: Chromium
+      // and WebKit on a Mac's Apple adapter.
+      const delegates = delegatesFor(id).filter(delegate => delegate === 'cpu' || transcriberWebGpu);
+      for (const delegate of delegates) {
+        enter(`${id}:${delegate}:${check}`);
+        if (delegates.length > 1) {
+          await delegateButton(delegate).click();
+          // Choosing a delegate clears the other one's answer.
+          await output.waitFor({state: 'hidden', timeout: 30000});
+        }
+        await page.getByRole('button', {name: button, exact: true}).click();
+        await result.or(error).first().waitFor({timeout: 600000});
+        assert.equal(await error.count(), 0, `${id}: ${await page.locator('flt-semantics').allInnerTexts()}`);
+        report.checks.push(`${id}:${delegate}:${check}`);
+      }
       await page.screenshot({path: path.join(evidence, `${id}.png`)});
     } else if (spec.decision) {
       const error = page.getByText('Error', {exact: true});

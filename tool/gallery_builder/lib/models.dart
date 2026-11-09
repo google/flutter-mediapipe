@@ -15,6 +15,7 @@ typedef BundledModel = ({String family, String name});
 /// The model the gallery uses for every task some target bundles.
 const models = <String, BundledModel>{
   'audio_classifier': (family: 'mediapipe_audio', name: 'yamnet'),
+  'audio_transcriber': (family: 'mediapipe_audio', name: 'parakeet_tdt_v3'),
   'decision_maker': (family: 'mediapipe_decision', name: 'laya_s256'),
   'embedding_gemma': (family: 'mediapipe_text', name: 'embedding_gemma'),
   'face_detector': (family: 'mediapipe_vision', name: 'face_detector'),
@@ -45,6 +46,7 @@ const models = <String, BundledModel>{
   ),
   'text_proofreader': (family: 'mediapipe_text', name: 'proofreader'),
   'text_summarizer': (family: 'mediapipe_text', name: 'summarizer'),
+  'text_to_speech': (family: 'mediapipe_audio', name: 'phonon'),
   'universal_embedder': (
     family: 'mediapipe_retrieval',
     name: 'embedding_gemma_2_text_vision',
@@ -83,11 +85,14 @@ const modernTextReferences = {
 };
 
 /// Tasks whose model the gallery downloads on first use instead of bundling:
-/// Decision Maker's smallest is 678 MB and the retrieval tasks' 388 MB, each
-/// more than every other model put together.
+/// Decision Maker's smallest is 678 MB, the retrieval tasks' 388 MB, and the
+/// speech tasks' Parakeet 615 MB and Phonon 87 MB, too large to bundle beside
+/// the others.
 const downloadedModelTasks = {
+  'audio_transcriber',
   'decision_maker',
   'semantic_retriever',
+  'text_to_speech',
   'universal_embedder',
 };
 
@@ -95,11 +100,13 @@ const downloadedModelTasks = {
 /// for.
 const nonVisionTasks = {
   'audio_classifier',
+  'audio_transcriber',
   'decision_maker',
   'language_detector',
   'semantic_retriever',
   'text_classifier',
   'text_embedder',
+  'text_to_speech',
   'universal_embedder',
   ...modernTextTasks,
 };
@@ -120,6 +127,7 @@ const nativeTargets = [
 /// EmbeddingGemma alone of the generative text tasks.
 const webTasks = {
   'audio_classifier',
+  'audio_transcriber',
   'decision_maker',
   'embedding_gemma',
   'face_detector',
@@ -137,6 +145,7 @@ const webTasks = {
   'semantic_retriever',
   'text_classifier',
   'text_embedder',
+  'text_to_speech',
   'universal_embedder',
 };
 
@@ -193,3 +202,6 @@ const embedderSamples = {'dog.jpg', 'cat.png', 'elephant.png'};
 
 /// The tasks whose pages offer [embedderSamples].
 const embedderSampleTasks = {'image_embedder', 'universal_embedder'};
+
+/// The tasks whose pages offer the `.wav` samples.
+const audioSampleTasks = {'audio_classifier', 'audio_transcriber'};
