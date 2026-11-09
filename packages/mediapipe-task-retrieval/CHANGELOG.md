@@ -1,3 +1,13 @@
+## 0.2.0
+
+- Google's MediaPipe 1.2.2 native release (build of November 2, 2026)
+  replaces 1.2.0 on Android, iOS, macOS, Linux and Windows, and
+  `@mediapipe/tasks-*` 1.2.2 replaces 1.2.0-rc.20261018 in browsers.
+- Binds the 1.2.2 retrieval C API: Semantic Retriever options now lead with
+  Google's base options, which the retriever fills as the other tasks do, so
+  Google's usage log records the host for it too. Universal Embedder takes
+  Google's per-modality delegate fields, left at their default.
+
 ## 0.1.4
 
 - Error messages and the README no longer refer to removed notes.

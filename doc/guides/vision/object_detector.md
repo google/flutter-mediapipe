@@ -408,7 +408,7 @@ and the mirroring of front cameras.
 | Platform | CPU | GPU |
 | --- | --- | --- |
 | Android | Google's library | Supported GPUs on arm64 devices; CPU only on emulators |
-| iOS | Google's library | Metal |
+| iOS | Google's library | Metal, tested on an iPhone 15 Pro (iOS 27) with Google's 1.2.2 library, not on iPads |
 | macOS (Apple Silicon) | Google's library | Not available for now |
 | Linux x64 | Google's library | OpenGL ES; EGL and a GPU driver required |
 | Windows x64 | Google's library | Not available |

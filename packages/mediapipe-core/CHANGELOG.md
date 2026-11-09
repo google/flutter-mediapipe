@@ -1,3 +1,25 @@
+## 0.2.0
+
+- Google's MediaPipe 1.2.2 native release (build of November 2, 2026)
+  replaces 1.2.0 on Android, iOS, macOS, Linux and Windows, and
+  `@mediapipe/tasks-*` 1.2.2 replaces 1.2.0-rc.20261018 in browsers.
+- Sends Google's renumbered `MpDelegate` values (0 is now the default, 1 the
+  CPU, 2 the GPU), which 1.2.1 changed in the C API.
+- `pin_nightly.py --release X.Y.Z` pins Google's release builds as well as
+  nightlies.
+- `fillBaseOptions` gives Google's libraries the app's ID and version on
+  Android and iOS, as Google's native SDKs do: the package name and
+  `versionCode` on Android, the bundle ID and `CFBundleShortVersionString` on
+  iOS. Every task accepts them, but with 1.2.2 only eight tasks' usage uploads
+  carry them; `doc/privacy_and_licenses.md` names them. Core now depends on
+  `jni` and `jni_flutter`, which `path_provider_android` already brings into
+  Android apps.
+- On Android each family runs its Google library's `JNI_OnLoad` once, before
+  its first task, so usage uploads leave Android apps with 1.2.2 as on other
+  platforms; Flutter's `dlopen` of the library does not run it.
+- Removes `familyRuntimeBaseUrl` and the native libraries' unused mirror URL:
+  Google's archive is now their only source.
+
 ## 0.1.4
 
 - The README is now the repository's README, word for word, with absolute links

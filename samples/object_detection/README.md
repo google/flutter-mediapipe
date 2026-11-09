@@ -93,6 +93,8 @@ COCO classes. To try another model, replace `model:` in
   detector opens, the helper says so and switches to the CPU, as Google's
   sample does; the package itself never falls back.
 - **macOS GPU**: not available for now, so macOS runs on the CPU.
+- **iOS GPU**: offered on iPhones and iPads, and tested on an iPhone 15 Pro
+  (iOS 27) with Google's 1.2.2 library. iPads were not tested.
 - **Camera rotation**: phone frames arrive in sensor layout. The sample
   passes their rotation to MediaPipe and turns the boxes upright with the
   preview.

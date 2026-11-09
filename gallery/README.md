@@ -108,13 +108,16 @@ editor wherever its runtime runs.
 
 ## Gemma models
 
-EmbeddingGemma, the Proofreader and the Summarizer are Gemma models, under the
+EmbeddingGemma 300M (the EmbeddingGemma page), the Proofreader and the
+Summarizer are Gemma models, under the
 [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and its
 [Prohibited Use Policy](https://ai.google.dev/gemma/prohibited_use_policy)
 rather than Apache 2.0. The gallery passes the terms on as the terms ask:
 each of these pages, and its Info dialog, says that Gemma is provided under
 and subject to them and links to both. Anyone redistributing a gallery build
-takes on the same terms.
+takes on the same terms. The EmbeddingGemma 2 models the gallery downloads
+for Hungry Fish (on Decision Maker) and the Universal Embedder are Apache
+2.0, per their model cards.
 
 ## Live camera
 
@@ -139,7 +142,8 @@ Foundation on Windows, GStreamer on Linux, and in browsers a `<video>` element
 stepped one frame at a time. The vision package decodes nothing.
 Switching back to **Camera** reopens the live stream task. Interactive Segmenter is image-only and uses its own editor.
 Windows exposes CPU only. Face and Hand Landmarker also expose GPU on Linux,
-Apple platforms, Android phones and web.
+iPhones (tested on an iPhone 15 Pro, iOS 27, with Google's 1.2.2 library),
+Android phones and web.
 Web uses browser-native capture and transferable bitmaps while sharing these
 controls and the same overlay painter. Web GPU requires worker WebGL 2 support.
 
