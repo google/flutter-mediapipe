@@ -31,6 +31,7 @@ const base = argumentsMap['base-url'] || 'http://localhost:8866/flutter-mediapip
 const gallery = base + (base.includes('?') ? '&' : '?') + 'test-hooks';
 const apiBase = argumentsMap['api-url'] || 'http://localhost:8866/api-probe/';
 const textAudioBase = argumentsMap['text-audio-url'] || 'http://localhost:8866/text-audio-probe/';
+const speechBase = argumentsMap['speech-url'] || 'http://localhost:8866/speech-probe/';
 // Where the direct comparisons load Google's own JavaScript: jsDelivr, or with
 // --official-runtime=<url> a copy `dart run mediapipe_core:web_runtime` wrote,
 // so the comparisons do not depend on the CDN.
@@ -263,8 +264,15 @@ async function apiChecks() {
   observe(page);
   await page.goto(apiBase + (delegate === 'GPU' ? '?delegate=gpu' : ''));
   // The probe runs every browser task. Hosted runners emulate WebGL in
-  // software, so the GPU pass can take minutes there.
-  await wait(page, () => window.mediapipeApiTestReport, null, 300000);
+  // software, so the GPU pass can take minutes there. Its time is logged and
+  // kept in the report, to compare with the iOS user agent run's probe_ms.
+  const started = Date.now();
+  try {
+    await wait(page, () => window.mediapipeApiTestReport, null, 300000);
+  } finally {
+    report.api_probe_ms = Date.now() - started;
+    console.log(`API probe (${delegate}): ${report.api_probe_ms} ms`);
+  }
   assert.equal(await page.locator('#splash').count(), 0, 'The loading screen outlived the page it covers.');
   const api = await page.evaluate(() => window.mediapipeApiTestReport);
   fs.writeFileSync(path.join(evidence, 'api-report.json'), JSON.stringify(api, null, 2));
@@ -578,7 +586,14 @@ async function iosUserAgentCpuCheck() {
     assert.equal(result.worker.document_type, 'undefined');
     assert.equal(result.worker.offscreen_canvas_type, 'function');
     await page.evaluate(() => window.testResumeTaskCreation());
-    await wait(page, () => window.mediapipeApiTestReport);
+    // The whole API probe, as in apiChecks, so it gets apiChecks' limit.
+    const started = Date.now();
+    try {
+      await wait(page, () => window.mediapipeApiTestReport, null, 300000);
+    } finally {
+      result.probe_ms = Date.now() - started;
+      console.log(`iOS user agent API probe: ${result.probe_ms} ms`);
+    }
     result.api = await page.evaluate(() => window.mediapipeApiTestReport);
     assert.equal(result.api.status, 'passed',
       'iOS Firefox UA CPU task must construct and run: ' + (result.api.error || JSON.stringify(result.api)));
@@ -1141,6 +1156,282 @@ async function textAudioChecks() {
   report.checks.push('gallery-text-embedder-compare');
 }
 
+// Prefixed to the audio worker by speechChecks, and reports to its page: the
+// WebGPU work it does and the stream chunks it sends.
+const webGpuCounters = `{
+  const work = new BroadcastChannel('webgpu-work');
+  const post = self.postMessage;
+  self.postMessage = function (message, ...rest) {
+    if (message?.chunk) work.postMessage('chunk');
+    return post.call(this, message, ...rest);
+  };
+  if (self.GPUQueue) {
+    const submit = GPUQueue.prototype.submit;
+    GPUQueue.prototype.submit = function (buffers) {
+      work.postMessage('submit');
+      return submit.call(this, buffers);
+    };
+  }
+  // WebKit on Linux exposes GPUQueue to workers without GPUDevice.
+  if (self.GPUDevice) {
+    for (const name of ['createComputePipeline', 'createComputePipelineAsync']) {
+      const create = GPUDevice.prototype[name];
+      GPUDevice.prototype[name] = function (...options) {
+        work.postMessage('pipeline');
+        return create.apply(this, options);
+      };
+    }
+  }
+}
+`;
+
+// The probe's long input, past Parakeet's 5 s window, against Google's
+// JavaScript on the same page (`official`), as the short clip is: the same
+// final transcripts and times, one starting where the last ended, the last
+// ending with the input, and the three copies' words in full. Not against
+// Google's Python reference: its 1.2.2 runtime finalizes the same input at
+// other points (1.25 s apart on macOS, where 1.2.2's JavaScript finalizes
+// 2.5 s apart in every browser), so only Google's JavaScript answers for the
+// browser. A stream finalizes segments before it finishes, each interim
+// segment is replaced by a final one from the same time, and a second stream
+// on the task answers as the first.
+function longAudioChecks(transcriber, official, transcript) {
+  // The input's length, as the reference records it.
+  const {frames, rate} = JSON.parse(fs.readFileSync(path.join(repo,
+    'packages/mediapipe-task-audio/test/fixtures/official_speech_reference.json'), 'utf8'))
+    .cases.transcriber['long-16k'];
+  const expected = official.long_whole;
+  assert.ok(expected.every(s => s.isFinal), 'Google\'s JavaScript left a whole input interim');
+  assert.equal(expected.map(s => s.transcript).join(' '), [transcript, transcript, transcript].join(' '),
+    'Google\'s JavaScript on the long input');
+  const finals = segments => {
+    const kept = segments.filter(s => s.isFinal);
+    assert.deepEqual(kept, expected);
+    kept.forEach((s, i) => {
+      assert.ok(s.to > s.from && s.from === (i ? kept[i - 1].to : 0), `segment ${i} is ${s.from}-${s.to} ms`);
+    });
+    assert.ok(Math.abs(kept.at(-1).to - frames * 1000 / rate) <= 100, 'the last ends at ' + kept.at(-1).to);
+  };
+  finals(transcriber.long_whole);
+  const calls = transcriber.long_interim;
+  const all = calls.flat();
+  finals(all);
+  assert.ok(calls.slice(0, -1).flat().some(s => s.isFinal), 'nothing final before the stream finished');
+  assert.ok(calls.at(-1).every(s => s.isFinal), 'the finish leaves something interim');
+  assert.ok(all.some(s => !s.isFinal), 'no interim segments');
+  all.forEach((s, i) => {
+    if (!s.isFinal) {
+      assert.equal(all.slice(i + 1).filter(l => l.isFinal && l.from === s.from).length, 1, `interim segment ${i} is replaced`);
+    }
+  });
+  assert.deepEqual(transcriber.long_interim_again, calls, 'a second stream on the task');
+}
+
+// Audio Transcriber and Text to Speech through the Dart API, against Google's
+// JavaScript on the same page, runtime, models and inputs, sample for sample.
+async function speechChecks() {
+  // Chromium's full build: its headless shell has no WebGPU adapter.
+  const browser = await ({chromium, firefox, webkit}[browserName]).launch({
+    headless: argumentsMap.headed !== 'true',
+    ...(browserName === 'chromium' ? {channel: 'chromium', args: ['--enable-unsafe-webgpu']} : {}),
+  });
+  browsers.push(browser);
+  report.browser_version = browser.version();
+  const context = await browser.newContext();
+  // Counts the WebGPU work of the audio worker, the only proof the GPU delegate
+  // ran: Google's runtime stays on the CPU without a word where it can.
+  await context.route('**/assets/packages/mediapipe_audio/assets/worker.js', async route => {
+    const response = await route.fetch();
+    await route.fulfill({response, body: webGpuCounters + await response.text()});
+  });
+  const page = await context.newPage();
+  await page.addInitScript(bundledModelsScript, officialRuntime);
+  await page.addInitScript(() => {
+    window.webGpuWork = {submit: 0, pipeline: 0};
+    window.workerChunks = 0;
+    new BroadcastChannel('webgpu-work').onmessage = ({data}) => {
+      if (data === 'chunk') window.workerChunks++;
+      else window.webGpuWork[data]++;
+    };
+  });
+  observe(page);
+  const models = new URL('/speech-models/', speechBase).href;
+  const parakeet = models + 'parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm';
+  const phonon = models + 'phonon_int8.litertlm';
+  const query = new URLSearchParams({parakeet, phonon});
+  if (argumentsMap.runtime) query.set('runtime', argumentsMap.runtime);
+  await page.goto(speechBase + '?' + query);
+  await wait(page, () => window.mediapipeSpeechReport, null, 1200000);
+  const api = await page.evaluate(() => window.mediapipeSpeechReport);
+  fs.writeFileSync(path.join(evidence, 'speech-report.json'), JSON.stringify(api, null, 2));
+  assert.equal(api.status, 'passed', JSON.stringify(api));
+  assert.deepEqual(api.capabilities, {transcriber: true, speech: true});
+  await wait(page, () => mediapipeTasks.stats().activeWorkers === 0);
+  report.checks.push('speech-worker-cleanup');
+
+  const transcript = "Send a text to Mike, I'll be home late tomorrow.";
+  assert.equal(api.transcriber.text, transcript);
+  assert.equal(api.transcriber.whole.length, 1);
+  assert.equal(api.transcriber.whole[0].isFinal, true);
+  assert.ok(Math.abs(api.transcriber.whole[0].to - 4272) <= 100, 'the segment ends at ' + api.transcriber.whole[0].to);
+  assert.equal(api.transcriber.wrong_rate, 'audio.sampleRate: The task was created for 16000 Hz');
+  assert.equal(api.transcriber.after_dispose, 'StateError');
+  assert.equal(api.speech.after_dispose, 'StateError');
+  assert.equal(api.speech.gpu, 'RuntimeUnavailableException');
+  assert.equal(api.speech.voices.length, 5);
+  assert.equal(api.speech.voices[0].voiceId, 'freya');
+  assert.equal(api.speech.fox.sampleRateHz, 24000);
+  assert.ok(Math.abs(api.speech.fox.samples - 74880) <= 2 * 1920, 'the fox has ' + api.speech.fox.samples + ' samples');
+  report.checks.push('speech-api-expected-answers');
+
+  // The counters around each phase: the CPU run and Text to Speech must do no
+  // WebGPU work, so what the GPU run adds is its own.
+  const gpu = api.transcriber_gpu;
+  const {after_cpu: afterCpu, after_gpu: afterGpu, after_speech: afterSpeech} = api.work;
+  const work = {submit: afterGpu.submit - afterCpu.submit, pipeline: afterGpu.pipeline - afterCpu.pipeline};
+  report.speech_gpu = {offered: gpu.offered, adapter: gpu.adapter ?? null, ...work, reason: gpu.reason ?? null};
+  assert.deepEqual(afterCpu, {submit: 0, pipeline: 0}, 'WebGPU work in the CPU transcriber run');
+  assert.deepEqual(afterSpeech, afterGpu, 'WebGPU work in Text to Speech on the CPU');
+  if (argumentsMap['require-speech-gpu'] === 'true') assert.equal(gpu.offered, true, 'no GPU offered: ' + gpu.reason);
+  // The package offers it only where this suite saw the work: Chromium and
+  // WebKit on a Mac's Apple adapter.
+  const proved = process.platform === 'darwin' && browserName !== 'firefox' && /^WebGPU apple\b/.test(gpu.adapter ?? '');
+  assert.equal(gpu.offered, proved, `offered on ${gpu.adapter}: ${gpu.reason}`);
+  if (gpu.offered) {
+    // The model's graph on the GPU, not a stray call: one clip took 41 pipelines
+    // and 9 submits in Chromium on Metal, and 40 and 9 in WebKit.
+    assert.ok(work.pipeline >= 30 && work.submit >= 5, 'the GPU delegate did too little WebGPU work: ' + JSON.stringify(work));
+    assert.equal(gpu.text, transcript);
+    assert.ok(Math.abs(gpu.whole[0].to - 4272) <= 100, 'the GPU segment ends at ' + gpu.whole[0].to);
+  } else {
+    assert.equal(gpu.refused, 'RuntimeUnavailableException');
+    assert.match(gpu.reason, /hardware WebGPU adapter|a test proved/, 'the refusal says why');
+    assert.deepEqual(work, {submit: 0, pipeline: 0}, 'WebGPU work with no GPU offered');
+  }
+  report.checks.push('audio-transcriber-gpu-does-the-work');
+
+  const official = await page.evaluate(async ({parakeet, phonon}) => {
+    const {bundle, files} = await window.officialTasks('audio');
+    const decode = async name => {
+      const wav = new DataView(await (await fetch(new URL('assets/assets/samples/' + name, document.baseURI))).arrayBuffer());
+      let at = 12;
+      while (at + 8 <= wav.byteLength) {
+        const tag = String.fromCharCode(...[0, 1, 2, 3].map(i => wav.getUint8(at + i)));
+        const size = wav.getUint32(at + 4, true);
+        if (tag === 'data') return Float32Array.from({length: size >> 1}, (_, i) => wav.getInt16(at + 8 + 2 * i, true) / 32768);
+        at += 8 + size + (size & 1);
+      }
+      throw new Error('no data chunk in ' + name);
+    };
+    const segments = result => result.segments.map(s =>
+      ({transcript: s.transcript, isFinal: s.isFinal, from: s.fromTimestampMs, to: s.toTimestampMs}));
+    const asr = options => bundle.AudioTranscriber.createFromOptions(files,
+      {modelArchitecture: 'AUTO', baseOptions: {delegate: 'CPU', modelAssetPath: parakeet}, ...options});
+    const blocks = samples => Array.from({length: Math.ceil(samples.length / 16000)},
+      (_, i) => samples.slice(i * 16000, (i + 1) * 16000));
+    const streamed = async (task, samples) => {
+      const calls = [];
+      for (const block of blocks(samples)) calls.push(segments(await task.transcribe(block, false)));
+      calls.push(segments(await task.finishStream()));
+      return calls;
+    };
+    const clip = await decode('speech_16000_hz_mono.wav');
+    const transcriber = {};
+    let task = await asr({sampleRateHz: 16000, enableInterimResults: false});
+    await task.prewarm();
+    transcriber.whole = segments(await task.transcribe(clip));
+    transcriber.stream = await streamed(task, clip);
+    // The clip three times with a second of silence between copies, as the
+    // probe and generate_speech_reference.py build it.
+    const long = new Float32Array(3 * clip.length + 2 * 16000);
+    for (let copy = 0; copy < 3; copy++) long.set(clip, copy * (clip.length + 16000));
+    transcriber.long_whole = segments(await task.transcribe(long));
+    task.close();
+    task = await asr({sampleRateHz: 16000, enableInterimResults: true});
+    transcriber.interim = await streamed(task, clip);
+    transcriber.long_interim = await streamed(task, long);
+    transcriber.long_interim_again = await streamed(task, long);
+    task.close();
+    task = await asr({sampleRateHz: 48000, enableInterimResults: false});
+    transcriber.resampled = segments(await task.transcribe(await decode('speech_48000_hz_mono.wav')));
+    task.close();
+
+    // Google's UTF-8 byte offsets as the UTF-16 indices the package gives.
+    const index = (text, byte) =>
+      new TextDecoder().decode(new TextEncoder().encode(text).slice(0, byte)).length;
+    const audio = async (text, result) => ({
+      sha256: [...new Uint8Array(await crypto.subtle.digest('SHA-256',
+        new Uint8Array(result.samples.buffer, result.samples.byteOffset, result.samples.byteLength)))]
+        .map(b => b.toString(16).padStart(2, '0')).join(''),
+      samples: result.samples.length,
+      sampleRateHz: result.sampleRateHz,
+      chunkIndex: result.chunkIndex ?? 0,
+      isFinal: result.isFinal ?? true,
+      words: (result.wordTimestamps ?? []).map(w =>
+        [w.word, index(text, w.startChar), index(text, w.endChar), w.startSec, w.endSec]),
+    });
+    const tts = options => bundle.TextToSpeech.createFromOptions(files,
+      {speakingRate: 1, targetBucket: 0,
+        baseOptions: {delegate: 'CPU', modelAssetPath: phonon}, ...options});
+    const fox = 'The quick brown fox jumps over the lazy dog.';
+    const french = "Bonjour, comment allez-vous aujourd'hui ?";
+    const nonAscii = 'Café über naïve 😀 done.';
+    const streamText = 'Hello there. This is the second sentence, and it is longer. Third!';
+    const speech = {};
+    task = await tts({});
+    speech.voices = (await task.listVoices()).map(({voiceId, displayName, locale, sampleRateHz, isDownloaded}) =>
+      ({voiceId, displayName, locale, sampleRateHz, isDownloaded}));
+    speech.fox = await audio(fox, await task.synthesize(fox));
+    speech.french = await audio(french, await task.synthesize(french, {voiceId: 'claire', locale: 'fr-FR'}));
+    speech.non_ascii = await audio(nonAscii, await task.synthesize(nonAscii));
+    const stream = await task.synthesizeStream(streamText);
+    speech.stream = [];
+    for (let chunk; (chunk = await stream.readNext());) speech.stream.push(await audio(streamText, chunk));
+    stream.close();
+    task.close();
+    task = await tts({speakingRate: 1.5});
+    speech.faster = await audio(fox, await task.synthesize(fox));
+    task.close();
+    return {transcriber, speech};
+  }, {parakeet, phonon});
+  fs.writeFileSync(path.join(evidence, 'speech-official.json'), JSON.stringify(official, null, 2));
+  for (const name of ['whole', 'stream', 'interim', 'resampled', 'long_whole', 'long_interim', 'long_interim_again']) {
+    assert.deepEqual(api.transcriber[name], official.transcriber[name], 'transcriber ' + name);
+  }
+  report.checks.push('audio-transcriber-match-official-javascript');
+  longAudioChecks(api.transcriber, official.transcriber, transcript);
+  report.checks.push('audio-transcriber-past-its-window');
+  for (const name of ['voices', 'fox', 'french', 'non_ascii', 'stream', 'faster']) {
+    assert.deepEqual(api.speech[name], official.speech[name], 'speech ' + name);
+  }
+  report.checks.push('text-to-speech-match-official-javascript');
+
+  assert.equal(api.speech.cancelled_chunks, 1);
+  // The worker sent 2 of 72 chunks in each browser, and sends them all if the
+  // cancel does nothing; half leaves room for a slow page on a busy machine.
+  assert.ok(api.speech.uncancelled_chunks > 8, 'the whole text is ' + api.speech.uncancelled_chunks + ' chunks');
+  assert.ok(api.speech.cancelled_worker_chunks < api.speech.uncancelled_chunks / 2,
+    'the worker sent ' + api.speech.cancelled_worker_chunks + ' of ' + api.speech.uncancelled_chunks + ' chunks after a cancel');
+  assert.deepEqual(api.speech.after_cancel, official.speech.fox, 'a call after a cancelled stream');
+  assert.ok(api.speech.order.length >= 2 && api.speech.order.at(-1) === 'call',
+    'a stream\'s chunks ahead of the call after it: ' + api.speech.order);
+  report.checks.push('speech-stream-cancel-and-order');
+
+  const cancelled = 'TaskException(1): Synthesis cancelled.';
+  assert.deepEqual(api.speech.task_cancel, {running: cancelled, queued: cancelled, stream_chunks: 0});
+  assert.deepEqual(api.speech.after_task_cancel, official.speech.fox, 'a call after the task\'s cancel');
+  assert.deepEqual(api.speech.after_idle_cancel, official.speech.fox, 'a call after a cancel with nothing in flight');
+  assert.equal(api.speech.cancel_after_dispose, 'accepted');
+  report.checks.push('speech-task-cancel');
+  assert.equal(api.pinned.without_download, 'RuntimeUnavailableException');
+  assert.deepEqual(api.pinned.fox, official.speech.fox, 'the pinned model, as bytes');
+  report.checks.push('speech-pinned-model-as-bytes');
+  report.speech_cache = typeof api.speech.cached === 'string' ? api.speech.cached : 'runs';
+  if (typeof api.speech.cached !== 'string') {
+    assert.deepEqual(api.speech.cached, official.speech.fox, 'with a compile cache');
+  }
+}
+
 // WebKit on hosted macOS has closed the page mid-suite with no page error or
 // failed check (run 38261996089). A suite that loses its page or browser, and
 // only that, runs once more on a fresh browser; a failed check still fails at
@@ -1166,6 +1457,7 @@ async function retryingLostPage(name, checks) {
 
 try {
   if (suite === 'text-audio') await retryingLostPage('text-audio', textAudioChecks);
+  if (suite === 'speech') await retryingLostPage('speech', speechChecks);
   if (suite === 'all' || suite === 'api') await retryingLostPage('api', apiChecks);
   if ((suite === 'all' || suite === 'api') && browserName === 'chromium' && delegate === 'CPU') {
     await retryingLostPage('ios-user-agent', iosUserAgentCpuCheck);
@@ -1180,12 +1472,14 @@ try {
   console.error(error);
   process.exitCode = 1;
 } finally {
+  // Steps that share a browser's folder, such as the default suite and
+  // text-audio in Chromium, each keep their own failure files and report.
   for (const browser of browsers) {
     for (const context of browser.contexts()) {
       for (const page of context.pages()) {
         try {
-          fs.writeFileSync(path.join(evidence, 'failure-page.html'), await page.content());
-          fs.writeFileSync(path.join(evidence, 'capture-diagnostics.json'), JSON.stringify(await page.evaluate(() => ({
+          fs.writeFileSync(path.join(evidence, `failure-page-${suite}.html`), await page.content());
+          fs.writeFileSync(path.join(evidence, `capture-diagnostics-${suite}.json`), JSON.stringify(await page.evaluate(() => ({
             capture:window.testCaptureDiagnostics,
             video: (() => {const v=document.querySelector('video'); return v ? {
               width:v.videoWidth,height:v.videoHeight,readyState:v.readyState,frames:v.getAttribute('data-processed-frames'),
@@ -1196,12 +1490,12 @@ try {
               stats:globalThis.mediapipeVision?.stats(),
             }: null;})(),
           })),null,2));
-          await page.screenshot({path: path.join(evidence, 'failure.png')});
+          await page.screenshot({path: path.join(evidence, `failure-${suite}.png`)});
         } catch (_) {}
       }
     }
     await browser.close();
   }
-  fs.writeFileSync(path.join(evidence, 'report.json'), JSON.stringify(report, null, 2));
-  fs.writeFileSync(path.join(evidence, 'browser-log.json'), JSON.stringify(logs, null, 2));
+  fs.writeFileSync(path.join(evidence, `report-${suite}.json`), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(evidence, `browser-log-${suite}.json`), JSON.stringify(logs, null, 2));
 }

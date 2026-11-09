@@ -148,7 +148,7 @@ Future<Map<String, Object>> validateEmbedding() async {
   }
   timings.sort();
   return {
-    'runtime': 'mediapipe==1.0.0', 'delegate': 'cpu',
+    'runtime': reference['runtime'] as String, 'delegate': 'cpu',
     'proofreader': proofreading,
     'summarizer': summarization,
     'classic_text': classic, 'coexisting_tasks': 9,

@@ -7,8 +7,9 @@ name: Android devices (Firebase Test Lab)
 # (the phones are arm64, like that Mac), on physical phones covering the three
 # Android GPU families: Mali (Pixel 8a), Adreno (Galaxy S24) and PowerVR
 # (Galaxy A12). The Pixel 8a and Galaxy S24 also run Decision Maker, Universal
-# Embedder and Semantic Retriever, downloading their models (Laya 678 MB,
-# EmbeddingGemma 2 388 MB) on first use; the Galaxy A12 (4 GB) took 29 of its
+# Embedder, Semantic Retriever, Audio Transcriber and Text to Speech,
+# downloading their models (Laya 678 MB, EmbeddingGemma 2 388 MB, Parakeet
+# 615 MB, Phonon 87 MB) on first use; the Galaxy A12 (4 GB) took 29 of its
 # 30 minutes for the other tasks, so they would take it past Test Lab's 45.
 # The oldest Android the packages support (Pixel 3, API 28) and a 32-bit
 # phone (Galaxy A10) run too; `all` runs all five, about 95 minutes for the
@@ -48,12 +49,13 @@ jobs:
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os
           devices = [
-              # extra_tasks: Decision Maker and the retrieval tasks, on the phones
-              # with the memory and the time for them (see the top of this file).
+              # extra_tasks: Decision Maker, the retrieval tasks and the speech
+              # tasks, on the phones with the memory and the time for them (see
+              # the top of this file).
               {'model': 'akita', 'version': '35', 'name': 'Pixel 8a Mali', 'gpu_skip': '',
-               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker'},
+               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker,audio_transcriber,text_to_speech'},
               {'model': 'e1q', 'version': '34', 'name': 'Galaxy S24 Adreno', 'gpu_skip': '',
-               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker'},
+               'extra_tasks': 'universal_embedder,semantic_retriever,decision_maker,audio_transcriber,text_to_speech'},
               {'model': 'a12', 'version': '31', 'name': 'Galaxy A12 PowerVR',
                'gpu_skip': '', 'extra_tasks': ''},
           ]
@@ -66,11 +68,13 @@ jobs:
           named = [
               # Decision Maker passed on the Pixel 3 (run 38553588539), but its
               # 678 MB download took 42 of Test Lab's 45 minutes there (6 on the
-              # Pixel 8a), so the phone runs the retrieval tasks without it.
+              # Pixel 8a), so the phone runs the retrieval tasks without it, and
+              # without the speech tasks' 702 MB.
               {'model': 'blueline', 'version': '28', 'name': 'Pixel 3 Adreno API 28',
                'gpu_skip': '',
                'extra_tasks': 'universal_embedder,semantic_retriever'},
-              # 32-bit Android offers no vision GPU yet.
+              # 32-bit Android offers no vision GPU yet, and refuses the speech
+              # tasks (largeModelNeeds64Bit), so it lists none of them.
               {'model': 'a10', 'version': '29', 'name': 'Galaxy A10 32-bit', 'gpu_skip': '',
                'extra_tasks': '', 'abi': 'armeabi-v7a', 'gpu': 'skip',
                'tasks': 'audio_classifier,face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,language_detector,object_detector,pose_landmarker,text_classifier,text_embedder'},
@@ -179,14 +183,19 @@ jobs:
           expected = os.environ['TASKS'].split(',')
           assert len(tasks) == len(expected), (tasks, expected)
           # bundle_models names each model by its SHA-256; every model the
-          # manifest lists. Decision Maker's and the retrieval tasks' are too
-          # large to bundle: the phone downloads them on first use.
+          # manifest lists. Decision Maker's, the retrieval tasks' and the
+          # speech tasks' are too large to bundle: the phone downloads them on
+          # first use.
           with open('gallery/assets/mediapipe/manifest.json') as manifest:
               models = [entry['file'] for entry in json.load(manifest)['models']]
           assert models, 'no bundled models'
+          speech = {'66c5a74cf6c2c1d2b990901f6cece5bb53e3214dbceafa0989900a6f0eeb3504',
+                    'b33a9a0d65acec36762db38a2bff6d899f4aab34b196bb56d89fab5665eabebe'}
+          assert not speech & set(models), 'Parakeet or Phonon bundled'
           references = (['embedding_gemma.json', 'proofreader.json', 'summarizer.json']
                         if 'text_summarizer' in expected else [])
-          # One library per family, with the text and audio stream adapters.
+          # One library per family, with the text and audio stream adapters;
+          # the speech tasks are in the audio one.
           libraries = ['libflutter.so', 'libmediapipe_tasks_vision.so', 'libmediapipe_tasks_text.so',
                        'libmediapipe_tasks_audio.so', 'libmediapipe_text_stream.so',
                        'libmediapipe_audio_stream.so']
@@ -205,8 +214,8 @@ jobs:
           PY
       # One device, no shards or flaky retries: one execution from the daily budget.
       # 45m is the most Test Lab gives a physical device: the Galaxy A12 took 29
-      # minutes for its 18 tasks, and the phones that also run Decision Maker
-      # and the retrieval tasks download 1.07 GB of models.
+      # minutes for its 18 tasks, and the phones that also run Decision Maker,
+      # the retrieval tasks and the speech tasks download 1.77 GB of models.
       # Over quota, Test Lab rejects the matrix before any test starts: the step
       # stays red, since no test passed, and its rows say quota-exceeded instead
       # of failure. It is never retried, since a retry spends more of that quota.
@@ -261,8 +270,9 @@ jobs:
           tasks: ${{ steps.tasks.outputs.all }}
           outcome: ${{ steps.testlab.outputs.not_run || steps.testlab.outcome }}
           tier: device
-      # Vision tasks only: the text, audio, Decision Maker and retrieval tasks
-      # run on the CPU alone on Android, and matrix.json marks their GPU unsupported.
+      # Vision tasks only: the text, audio, speech, Decision Maker and retrieval
+      # tasks run on the CPU alone on Android, and matrix.json marks their GPU
+      # unsupported.
       - name: Record device GPU task coverage
         if: always() && matrix.gpu != 'skip'
         uses: ./.github/actions/record-coverage

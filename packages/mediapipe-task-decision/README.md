@@ -14,10 +14,10 @@ generating text. Every call runs Google's official MediaPipe pipeline.
 | Decision Maker | `DecisionMaker` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The runtimes are Google's MediaPipe 1.2.0: its per-family decision C
-library (its nightly build of October 18, 2026), which this package's build
+library (its release build of November 2, 2026), which this package's build
 hook downloads and checks against its SHA-256 on Android 9+, iOS 15+, macOS
 14+, Linux and Windows, on the CPU; and `@mediapipe/tasks-decision`
-1.2.0-rc.20261018 in browsers, on the GPU delegate. Google's
+1.2.2 in browsers, on the GPU delegate. Google's
 browser runtime fails every evaluation on the CPU delegate and on browsers
 without a hardware WebGPU adapter, so `queryDecisionMakerCapabilities()` offers
 browsers only the GPU, and only on such an adapter; there it answers as the

@@ -17,6 +17,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'src/classifier_settings.dart';
+import 'src/delegate.dart';
 import 'src/exceptions.dart';
 import 'src/host_io.dart';
 import 'src/value_types.dart';
@@ -37,7 +38,9 @@ final class MpBaseOptions extends Struct {
   @Int32()
   external int fileDescriptor;
 
-  /// The `MpDelegate` the graph runs on: 0 is the CPU, 1 the GPU.
+  /// The `MpDelegate` the graph runs on: 1 is the CPU, 2 the GPU, and 0
+  /// the task's default. Google renumbered them in 1.2.1, when 0 stopped
+  /// being the CPU.
   @Int32()
   external int delegate;
 
@@ -187,34 +190,44 @@ final class MpEmbeddingResult extends Struct {
   external bool hasTimestampMs;
 }
 
-/// Fills Google's base options for the CPU, the only delegate the C API
-/// families run on, with the model at [modelPath] or in [modelBytes], and the
+/// Fills Google's base options for [delegate], the CPU unless a task has
+/// proved its GPU path, with the model at [modelPath] or in [modelBytes] (or
+/// none, for a task such as Semantic Retriever that loads no model), and the
 /// host as Flutter on this OS, with [mpHostVersion], which Google's usage log
-/// records (it records neither while the environment is unknown). Bytes and
-/// strings are copied into [arena], which may free them once the task exists:
+/// records (it records neither while the environment is unknown), and the app
+/// as [mpAppId] and [mpAppVersion], where there are any. Bytes and strings are
+/// copied into [arena], which may free them once the task exists:
 /// Google copies them when it creates the task.
 void fillBaseOptions(
   MpBaseOptions target,
   Arena arena, {
   String? modelPath,
   Uint8List? modelBytes,
+  Delegate delegate = Delegate.cpu,
 }) {
   target
     ..fileDescriptor = -1
-    ..delegate = 0
+    // MP_DELEGATE_GPU or MP_DELEGATE_CPU.
+    ..delegate = delegate == Delegate.gpu ? 2 : 1
     // MP_HOST_ENVIRONMENT_FLUTTER.
     ..hostEnvironment = 5
     ..hostSystem = mpHostSystem
     ..hostVersion = mpHostVersion.toNativeUtf8(allocator: arena).cast();
+  final appId = mpAppId;
+  if (appId != null) target.appId = appId.toNativeUtf8(allocator: arena).cast();
+  final appVersion = mpAppVersion;
+  if (appVersion != null) {
+    target.appVersion = appVersion.toNativeUtf8(allocator: arena).cast();
+  }
   if (modelBytes != null) {
     final buffer = arena<Uint8>(modelBytes.length);
     buffer.asTypedList(modelBytes.length).setAll(0, modelBytes);
     target
       ..modelAssetBuffer = buffer.cast()
       ..modelAssetBufferCount = modelBytes.length;
-  } else {
+  } else if (modelPath != null) {
     target.modelAssetPath = nativeModelPath(
-      modelPath!,
+      modelPath,
     ).toNativeUtf8(allocator: arena).cast();
   }
 }

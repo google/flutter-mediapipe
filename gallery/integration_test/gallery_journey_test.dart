@@ -18,7 +18,9 @@ import 'package:mediapipe_gallery/live_page.dart';
 import 'package:mediapipe_gallery/main.dart';
 import 'package:mediapipe_gallery/retrieval_page.dart';
 import 'package:mediapipe_gallery/segment_page.dart';
+import 'package:mediapipe_gallery/speech_page.dart';
 import 'package:mediapipe_gallery/text_page.dart';
+import 'package:mediapipe_gallery/transcriber_page.dart';
 import 'package:mediapipe_gallery/ui/components.dart';
 import 'package:mediapipe_gallery/ui/design.dart';
 import 'package:mediapipe_gallery/universal_embedder_page.dart';
@@ -35,8 +37,8 @@ const _gpuSkipTasks = String.fromEnvironment('SDK_GPU_SKIP_TASKS');
 /// Runs every page exposed by this build through the same shell and sidebar a
 /// user opens: each camera page live on every delegate it offers, switched
 /// while running, then a still image on each, then the bundled video clip
-/// frame by frame; Image Embedder's two images, and the segmenter, text and
-/// audio pages on theirs. The picker supplies bundled image bytes without a
+/// frame by frame; Image Embedder's two images, and the segmenter, text,
+/// audio and speech pages on theirs. The picker supplies bundled image bytes without a
 /// device file dialog; decoding, task creation, inference and rendering stay
 /// real.
 void main() {
@@ -169,6 +171,10 @@ void main() {
                   ? UniversalEmbedderPage
                   : task.demo == GalleryDemo.retrieve
                   ? RetrievalPage
+                  : task.demo == GalleryDemo.transcribe
+                  ? TranscriberPage
+                  : task.demo == GalleryDemo.speak
+                  ? SpeechPage
                   : AudioPage,
             )
             .evaluate()
@@ -502,6 +508,59 @@ void main() {
             reason: '${task.id}: ${screenText(tester)}',
           );
           checks.add('${task.id}:cpu:search');
+          break;
+        case GalleryDemo.transcribe:
+          // The 16 kHz clip, as Google's Python API writes it out, on each
+          // delegate.
+          final choices = offered(task).length > 1;
+          for (final delegate in delegatesFor(task)) {
+            if (choices) await tapDelegate(tester, delegate);
+            await tester.tap(find.byKey(const ValueKey('transcriber-run')));
+            await tester.pump();
+            // The first run downloads Google's 615 MB model.
+            await _until(
+              tester,
+              () =>
+                  find.byKey(transcriptKey).evaluate().isNotEmpty ||
+                  find.text('Error').evaluate().isNotEmpty,
+              attempts: 2400,
+            );
+            expect(
+              find.text('Error'),
+              findsNothing,
+              reason: '${task.id}: ${screenText(tester)}',
+            );
+            expect(
+              tester.widget<Text>(find.byKey(transcriptKey)).data,
+              "Send a text to Mike, I'll be home late tomorrow.",
+              reason: '${task.id}: ${screenText(tester)}',
+            );
+            checks.add('${task.id}:${delegate.name}:transcribe');
+          }
+          break;
+        case GalleryDemo.speak:
+          // The fox sentence in the default voice: nine timed words.
+          await tester.tap(find.byKey(const ValueKey('speech-run')));
+          await tester.pump();
+          // The first run downloads Google's 87 MB model.
+          await _until(
+            tester,
+            () =>
+                find.byKey(speechSummaryKey).evaluate().isNotEmpty ||
+                find.text('Error').evaluate().isNotEmpty,
+            attempts: 2400,
+          );
+          expect(
+            find.text('Error'),
+            findsNothing,
+            reason: '${task.id}: ${screenText(tester)}',
+          );
+          expect(
+            tester.widget<Text>(find.byKey(speechSummaryKey)).data,
+            endsWith(', 9 words'),
+            reason: '${task.id}: ${screenText(tester)}',
+          );
+          checks.add('${task.id}:cpu:speak');
           break;
         case GalleryDemo.audio:
           checks.add('${task.id}:cpu:run');

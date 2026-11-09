@@ -1,5 +1,5 @@
 name: MediaPipeGenerativeTextBindings
-description: MediaPipe 1.2.0 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
+description: MediaPipe 1.2.2 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
 silence-enum-warning: true # sizeof(enum)==4 is checked by tool/abi_check.cc.
 # The Proofreader and the Summarizer bind Google's text library. The classic
 # text tasks keep the bindings adapted from Google's wheel.
@@ -52,7 +52,7 @@ type-map:
 preamble: |
   // Copyright 2026 The MediaPipe Authors.
   // Licensed under the Apache License, Version 2.0.
-  // Generated from Google's unmodified MediaPipe 1.2.0 headers; see
+  // Generated from Google's unmodified MediaPipe 1.2.2 headers; see
   // packages/mediapipe-core/native/README.md.
 ffi-native:
   asset-id: package:mediapipe_text/mediapipe.dylib

@@ -28,6 +28,9 @@ def main():
     parser.add_argument('--bundle', type=Path, default=Path('gallery/build/web'))
     parser.add_argument('--api-bundle', type=Path, default=Path('gallery/build/web-api'))
     parser.add_argument('--text-audio-bundle', type=Path, default=Path('gallery/build/web-text-audio'))
+    parser.add_argument('--speech-bundle', type=Path, default=Path('gallery/build/web-speech'))
+    # The speech models tool/download_models.dart keeps, for the speech probe.
+    parser.add_argument('--speech-models', type=Path, default=Path('packages/mediapipe-task-audio/models'))
     # Google's runtimes as `dart run mediapipe_core:web_runtime` writes them, for
     # the browser tests' direct comparisons (--official-runtime=/runtime/).
     parser.add_argument('--runtime', type=Path, default=Path('gallery/build/web-runtime'))
@@ -36,7 +39,9 @@ def main():
     empty.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(empty.resolve())))
     server.mounts = {'/flutter-mediapipe/': args.bundle.resolve(), '/api-probe/': args.api_bundle.resolve(),
-                     '/text-audio-probe/': args.text_audio_bundle.resolve(), '/runtime/': args.runtime.resolve()}
+                     '/text-audio-probe/': args.text_audio_bundle.resolve(),
+                     '/speech-probe/': args.speech_bundle.resolve(), '/speech-models/': args.speech_models.resolve(),
+                     '/runtime/': args.runtime.resolve()}
     server.serve_forever()
 
 

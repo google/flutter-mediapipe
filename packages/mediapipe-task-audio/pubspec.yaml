@@ -1,5 +1,5 @@
 name: mediapipe_audio
-description: "Google's MediaPipe Audio Classifier for Flutter on Android, iOS, macOS, Linux, Windows and the web, with Google's pinned YAMNet model."
+description: "Google's MediaPipe Audio Classifier (every platform and the web), Audio Transcriber and Text to Speech for Flutter, with Google's pinned models."
 version: 0.1.3
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-audio
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
@@ -31,8 +31,8 @@ dependencies:
   hooks: ^2.2.0
   mediapipe_core: ^0.1.3
   meta: ^1.18.0
-  # Compiles the audio stream bridge (native/audio_stream_bridge.c), as the
-  # text package compiles its own.
+  # Compiles the audio stream bridge (native/audio_stream_bridge.c) and the
+  # Text to Speech cancel guard, as the text package compiles its own.
   native_toolchain_c: ^0.19.3
   web: ^1.1.1
 

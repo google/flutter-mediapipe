@@ -65,8 +65,13 @@ from warmed inference. The report includes all samples, median and p95.
 ## Official reference provenance
 
 `fixtures/options-reference.json.gz` is lossless JSON generated through the
-official Python API of Google's macOS arm64 reference wheel (core's
-`referenceWheels`, `mediapipe-nightly` 1.1.0rc20260925). The generator verifies
+official Python API of Google's macOS arm64 1.2.2 wheel (core's
+`releaseReferenceWheels`, `mediapipe` 1.2.2). From the 1.1.0 wheel it changed
+the over-capacity error's source line, the Summarizer's over-budget errors,
+which now give the reason, and the Summarizer's text for some long inputs. The
+Summarizer's long key points differ between runs of one wheel after their first
+98 characters, so regenerating changes them and the
+runner compares only the first 80. The generator verifies
 the wheel's library and all model hashes. It leaves the existing package
 fixtures unchanged. The segmentation input and mask come from the vision
 package's attributed official fixtures.

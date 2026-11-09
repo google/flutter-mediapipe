@@ -18,7 +18,7 @@ pipeline.
 The runtimes are Google's MediaPipe 1.2.0: its per-family retrieval C
 library, which this package's build hook downloads and checks against its
 SHA-256 on Android 9+, iOS 15+, macOS 14+, Linux and Windows, on the CPU; and
-`@mediapipe/tasks-retrieval` 1.2.0-rc.20261018 in browsers, on the GPU delegate. Google's
+`@mediapipe/tasks-retrieval` 1.2.2 in browsers, on the GPU delegate. Google's
 browser Universal Embedder creates a WebGPU device for itself and has no CPU
 path, so the capability queries offer browsers only the GPU, and only on a
 hardware WebGPU adapter; there both tasks answer as the native library does,

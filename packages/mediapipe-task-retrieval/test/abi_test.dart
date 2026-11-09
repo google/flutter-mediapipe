@@ -22,7 +22,17 @@ final _sizes =
             as Map<String, Object?>)['structSizes']!
         as Map<String, Object?>;
 
+/// The structs Google changed after that wheel: their sizes in Google's
+/// 1.2.2 headers, as its `mediapipe` 1.2.2 ctypes declare them (clang
+/// agrees). `MpUniversalEmbedderPart` has no ctypes; clang's.
+const _since122 = {
+  'MpUniversalEmbedderOptions': 112,
+  'MpSemanticRetrieverOptions': 128,
+  'MpUniversalEmbedderPart': 24,
+};
+
 void main() {
+  final expected = {..._sizes, ..._since122};
   final dart = <String, int>{
     'MpUniversalEmbedderOptions': sizeOf<mp.MpUniversalEmbedderOptions>(),
     'MpBaseOptions': sizeOf<mp.MpBaseOptions>(),
@@ -35,8 +45,9 @@ void main() {
     'MpImagePart': sizeOf<mp.MpImagePart>(),
     'MpAudioPart': sizeOf<mp.MpAudioPart>(),
     'MpTaskPart': sizeOf<mp.MpTaskPart>(),
+    'MpUniversalEmbedderPart': sizeOf<mp.MpUniversalEmbedderPart>(),
   };
-  for (final MapEntry(key: name, value: size) in _sizes.entries) {
+  for (final MapEntry(key: name, value: size) in expected.entries) {
     test('$name is laid out as Google\'s Python declares it', () {
       expect(dart[name], size, reason: name);
     });
@@ -70,8 +81,16 @@ void main() {
       },
     );
   });
+  test('the base options lead the retriever options, as in 1.2.2', () {
+    // Google's header: base_options first, then the database path.
+    expect(sizeOf<mp.MpBaseOptions>(), 72);
+    expect(
+      sizeOf<mp.MpSemanticRetrieverOptions>() - sizeOf<mp.MpBaseOptions>(),
+      56,
+    );
+  });
   test('every bound struct is checked', () {
-    expect(dart.keys.toSet(), _sizes.keys.toSet());
+    expect(dart.keys.toSet(), expected.keys.toSet());
   });
 }
 

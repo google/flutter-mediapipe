@@ -8,7 +8,7 @@ import 'package:ffi/ffi.dart';
 import 'package:mediapipe_core/mediapipe_core.dart';
 import 'package:mediapipe_core/native_structs.dart';
 import 'package:mediapipe_core/platform_interface.dart'
-    show ClassifierSettings, mpHostSystem, mpHostVersion;
+    show ClassifierSettings, mpAppId, mpAppVersion, mpHostSystem, mpHostVersion;
 import 'package:test/test.dart';
 
 void main() {
@@ -125,16 +125,27 @@ void main() {
       ]);
       expect(fromBytes.modelAssetPath, nullptr);
       expect(fromBytes.fileDescriptor, -1);
-      expect(fromBytes.delegate, 0);
+      // MP_DELEGATE_CPU since 1.2.1.
+      expect(fromBytes.delegate, 1);
       expect(fromBytes.hostEnvironment, 5);
       expect(fromBytes.hostSystem, mpHostSystem);
       expect(nativeString(fromBytes.hostVersion), mpHostVersion);
+      // This test's host is not an app on Android or iOS.
+      expect(mpAppId, isNull);
+      expect(mpAppVersion, isNull);
+      expect(fromBytes.appId, nullptr);
+      expect(fromBytes.appVersion, nullptr);
 
       final fromPath = arena<MpBaseOptions>().ref;
       fillBaseOptions(fromPath, arena, modelPath: 'models/x.task');
       expect(nativeString(fromPath.modelAssetPath), 'models/x.task');
       expect(fromPath.modelAssetBuffer, nullptr);
       expect(fromPath.modelAssetBufferCount, 0);
+
+      final onGpu = arena<MpBaseOptions>().ref;
+      fillBaseOptions(onGpu, arena, delegate: Delegate.gpu);
+      // MP_DELEGATE_GPU since 1.2.1.
+      expect(onGpu.delegate, 2);
     });
   });
 

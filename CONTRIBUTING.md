@@ -45,8 +45,9 @@ python3 -B tool/check_archives.py    # an app builds from the archives' files
 python3 -B packages/mediapipe-core/tool/test_bundled_models.py
 ```
 
-`make test` leaves out Decision's and Retrieval's models (678 MB and 388 MB),
-so their reference tests skip; run `make models_all` first to include them.
+`make test` leaves out Decision's and Retrieval's models (678 MB and 388 MB)
+and the speech models (Parakeet 615 MB, Phonon 87 MB), so their reference
+tests skip; run `make models_all` first to include them.
 CI runs them with cached models.
 
 The last two build fresh apps from the packages as pub.dev would ship them.

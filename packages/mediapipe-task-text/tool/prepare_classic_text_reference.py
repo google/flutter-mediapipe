@@ -11,7 +11,7 @@ from pathlib import Path
 import platform
 import subprocess
 
-from generate_classic_text_reference import PACKAGE
+from generate_classic_text_reference import PACKAGE, WHEELS
 from official_wheels import host_runtime, pinned_venv
 from tool_helpers import digest
 
@@ -29,7 +29,7 @@ def reference_file():
     receipt = json.loads((root / 'provenance.json').read_text(encoding='utf-8'))
     current = json.loads(reference.read_text(encoding='utf-8'))
     baseline = json.loads(BASELINE.read_text(encoding='utf-8'))
-    runtime = host_runtime()
+    runtime = host_runtime(WHEELS)
     if (receipt.get('source') != 'official-python-api'
             or receipt.get('runtime') != 'mediapipe==' + runtime['version']
             or receipt.get('delegate') != 'CPU'
@@ -82,7 +82,7 @@ def main():
     parser.add_argument('--python-package-root', type=Path, help='Extracted official wheel')
     parser.add_argument('--output-dir', type=Path, default=REPO / 'build/classic-text-reference')
     args = parser.parse_args()
-    runtime = host_runtime()
+    runtime = host_runtime(WHEELS)
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
     receipt = output / 'provenance.json'

@@ -22,8 +22,13 @@ def use_header_embedding_layout(family):
     """
     from mediapipe.tasks.python.components.containers import embedding_result_c as module
     old = module.MpEmbeddingResultC
-    # A future wheel that fixes its ctypes makes this unnecessary; fail loudly.
-    assert [name for name, _ in old._fields_] == [
+    fields = [name for name, _ in old._fields_]
+    # Google's 1.2.2 wheel declares the header's layout itself.
+    if fields == ['embeddings', 'embeddings_count', 'timestamp_ms', 'has_timestamp_ms']:
+        assert ctypes.sizeof(old) == 32, ctypes.sizeof(old)
+        return
+    # Any other layout is one this fix was not written for; fail loudly.
+    assert fields == [
         'embeddings', 'embeddings_count', 'has_timestamp_ms', 'timestamp_ms'], old._fields_
 
     class MpEmbeddingResultC(ctypes.Structure):

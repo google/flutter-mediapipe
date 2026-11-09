@@ -230,7 +230,25 @@ const taskSettings = <String, List<TaskSetting>>{
     CountSetting('limit', 'Results', initial: 3, min: 1, max: 6),
     ShareSetting('minSimilarity', 'Min Similarity', initial: 0),
   ],
+  // Interim results feed the clip a second at a time, as a stream, so the
+  // hypotheses Google revises show before the final text.
+  'audio_transcriber': [
+    SwitchSetting('enableInterimResults', 'Interim Results'),
+  ],
+  // Phonon's speed, one of a few of the (0, 4] Google accepts.
+  'text_to_speech': [
+    ChoiceSetting(
+      'speakingRate',
+      'Speaking Rate',
+      options: speakingRates,
+      initial: 1,
+    ),
+  ],
 };
+
+/// The Speaking Rate choices, as `speakingRate` values.
+const speakingRateValues = [0.75, 1.0, 1.5, 2.0];
+const speakingRates = ['0.75x', '1x', '1.5x', '2x'];
 
 /// The current value of every setting of one task.
 final class TaskSettingValues {

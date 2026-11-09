@@ -1,5 +1,6 @@
 /// Flutter's registration of Google's browser runtime behind the Audio
-/// Classifier. Not for applications: import `mediapipe_audio.dart`.
+/// Classifier, Audio Transcriber and Text to Speech. Not for applications:
+/// import `mediapipe_audio.dart`.
 library;
 
 import 'dart:convert';
@@ -9,13 +10,27 @@ import 'dart:typed_data';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:mediapipe_audio/platform_interface.dart';
+import 'package:mediapipe_core/platform_interface.dart'
+    show taskPlatformGpuReader;
 import 'package:mediapipe_core/web_task_bridge.dart';
+import 'package:web/web.dart' as web;
+
+import 'src/web_speech.dart';
 
 /// Flutter registration for Google's official browser audio runtime.
 abstract final class MediaPipeAudioWeb {
-  /// Installs the browser backend before the first Audio Classifier.
+  /// Installs the browser backends before the first audio task.
   static void registerWith(Registrar registrar) {
+    taskPlatformGpuReader ??= readWebGpuAdapter;
+    // An iPad asks for desktop sites with a Mac's user agent, and only its
+    // touch points give it away.
+    final navigator = web.window.navigator;
+    browserOnMac =
+        navigator.userAgent.contains('Macintosh') &&
+        navigator.maxTouchPoints <= 1;
     audioTaskBackendFactory = _WorkerAudioTask.create;
+    audioTranscriberOpener = openWebAudioTranscriber;
+    textToSpeechOpener = openWebTextToSpeech;
   }
 }
 

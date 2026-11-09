@@ -1,15 +1,13 @@
 # Per-family runtimes
 
 Status on 2026-10-19: every family, on Android, iOS, macOS, Linux and
-Windows, pins Google's MediaPipe 1.2.0 nightly build of October 18, 2026
+Windows, pins Google's MediaPipe 1.2.2 release build of November 2, 2026
 (see [Google's builds](#googles-builds)), which Google publishes at
-`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/20261018/mediapipe_tasks_c_20261018.zip`.
+`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/1.2.2/mediapipe_tasks_c_1.2.2.zip`.
 The hooks read each pinned file from that archive with HTTP range requests,
-falling back to the mirror pre-release `per-family-v1.2.0-nightly.20261018` on
-`hugocornellier/mediapipe_flutter_native` (not posted yet), beside the
-earlier builds in `per-family-v1.1.1-dev.20261009` and
-`per-family-v1.1.0-dev.20261005`, and CI and Firebase Test Lab run them (see [Validated](#validated) and
-[Before the release](#before-the-release)). Paths are from the repository root.
+its only source, and CI and Firebase Test Lab run them (see
+[Validated](#validated) and [Before the release](#before-the-release)). Paths
+are from the repository root.
 
 ## What changed
 
@@ -70,16 +68,14 @@ downloads one library and not the 483 MB archive. Each request gets three
 attempts on a connection error, a timeout or HTTP 408, 429, 500, 502, 503 or
 504, with a random backoff of up to 1 s × 2^attempt (at most 30 s) or the
 host's `Retry-After`, and a dropped download resumes from its last byte.
-Another status, a host that ignores ranges or a digest mismatch moves to the
-mirror at once.
+Another status, a host that ignores ranges or a digest mismatch fails the
+download at once.
 
-`familyRuntimeBaseUrl` points at the mirror pre-release. Google gives several
-targets' libraries the same file name (four different
-`libmediapipe_tasks_vision.so`), so each mirror asset is named
-`<sha256>-<Google's file name>`; the hook checks its SHA-256 and size and
-saves it under Google's name. `hooks.user_defines.mediapipe_core.asset_source`
-replaces both hosts with a directory holding each file under its SHA-256,
-for offline builds. That setting covers every pinned download, so the
+`hooks.user_defines.mediapipe_core.asset_source` replaces Google's host with a
+directory holding each file under its SHA-256, for offline builds; Google gives
+several targets' libraries the same file name (four different
+`libmediapipe_tasks_vision.so`), and the hook saves each under Google's name
+once it has checked its SHA-256 and size. That setting covers every pinned download, so the
 directory must also hold the models an app bundles. The gallery builder takes
 `--asset-source`.
 
@@ -275,12 +271,12 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
 every library's SHA-256 and size, computed as the hooks check them, Google's
 headers, `BUILD_INFO` and notices, and the sentences that name the pinned
 build. It stops, writing nothing, if the C API or the MediaPipe version
-changed. It does not post the mirror release: a build this project adopts
-gets one, keeping the plain archive URL. Runs that only compare a nightly
-with the pinned build pass `--generation`, which pins the archive URL to the
-generation it hashed (`...zip?generation=<x-goog-generation>`): Google's
-bucket keeps that generation when the name is uploaded again, and the hooks
-read it with the same range requests, so no mirror is needed.
+changed. A build this project adopts keeps the plain archive URL. Runs that
+only compare a nightly with the pinned build pass `--generation`, which pins
+the archive URL to the generation it hashed
+(`...zip?generation=<x-goog-generation>`): Google's bucket keeps that
+generation when the name is uploaded again, and the hooks read it with the
+same range requests.
 `tool/test_pin_nightly.py` tests the rewriting offline.
 
 The October 8 phone rebuilds added Google's usage-logging client
@@ -335,7 +331,15 @@ Google's URL above; the October 18 `BUILD_INFO` is in
   `MP_HOST_ENVIRONMENT_FLUTTER_WEB` (6), the value for Google's JavaScript
   runtime.
 - **Android uploader.** The `Failed to get JNIEnv` message is gone from the
-  Android libraries; an upload from an app has not been captured yet.
+  Android libraries; an upload from an app has not been captured yet. From the
+  nightly of October 21, and in 1.2.2, the uploader sends through Java again
+  and needs the `JavaVM` that the library's `JNI_OnLoad` stores, which
+  `dlopen` does not run, so an app that loads the library through FFI uploads
+  nothing unless it runs that `JNI_OnLoad` itself. Core's `runJniOnLoad`
+  (`lib/src/jni_on_load.dart`) does, once per library and process, before the
+  family's first task; each family calls it with a symbol it already resolves.
+  Checked with 1.2.2 in a debug build on an API 31 emulator, uploads
+  captured locally.
 - **Text-only EmbeddingGemma 2.** The decision library runs it (checked on
   macOS arm64).
 - iOS framework zips still hold only the binary and `Info.plist`.
@@ -357,8 +361,21 @@ log, from `MpBaseOptions.host_environment` and `host_system`. Core's
   (`macOS 27.0 / Dart 3.13.4 / Flutter 3.47.5`), as Google asked on
   2026-10-13; the upload carries it as given (checked on macOS). Flutter's
   version comes from the define the Flutter tool sets for `FlutterVersion`.
-- `app_id` and `app_version` stay empty: set or not, they appear nowhere in
-  the upload.
+- `app_id` and `app_version` are `mpAppId` and `mpAppVersion`, as Google's
+  native SDKs report them: the bundle ID and `CFBundleShortVersionString` on
+  iOS, the package name and `versionCode` on Android, unset elsewhere. Android
+  reads them through `package:jni`, which `path_provider_android` already brings
+  in, and iOS through CoreFoundation, so both work on any isolate.
+  Every task's options take them, but only eight tasks copy them into their
+  uploads: Audio Transcriber, Decision Maker, Interactive Segmenter, Semantic
+  Retriever, Text Proofreader, Text Summarizer, Text to Speech and Universal
+  Embedder. The other fourteen upload them empty: most drop them when their
+  C++ `Create` copies the base options. Checked with 1.2.2 by capturing every
+  task's uploads on macOS with the fields set, and a Flutter app's on the iOS
+  Simulator and the Android emulator, where an app uploads only because core
+  runs each library's `JNI_OnLoad` (see the Android uploader above).
+- With 1.2.2 native uploads carry the library version (`mediapipe_version`
+  `1.2.2`, captured on macOS, the iOS Simulator and the Android emulator).
 - In browsers core's worker loader (`assets/verified_runtime.js`) sets
   `globalThis.__HOST_ENVIRONMENT__ = 'FLUTTER_WEB'` before Google's bundle
   loads; Google's JavaScript runtime reads it from 1.2.0-rc.20261017 on, and
@@ -399,8 +416,13 @@ part of official releases.
   required-reason APIs they call (`stat`, `fstat`, `NSUserDefaults`, and
   `statfs` in retrieval), for apps to declare.
 - Whether 1.1.1's Metal output is intended.
-- Let the Semantic Retriever take base options, or copy its embedder's
-  host fields into its own usage uploads; Google is looking into it.
+- The Android uploader needs a JVM again from the nightly of October 21 on, so
+  an app that loads the library through FFI uploads nothing unless it runs the
+  library's `JNI_OnLoad`, which core now does. Is that intended, and would
+  Google rather the library find the JVM itself?
+- The classic tasks build their `TaskRunnerOptions` without `app_id` and
+  `app_version`, so their uploads leave them empty; after 1.2.2 Google's
+  source added them to Face Detector only (`b8a1bad05e`).
 - A license comment on the five umbrella headers, and the Apache text
   corrected in `audio_classifier.h`; Google will fix it.
 - WebKit still embeds every text as zeros with EmbeddingGemma 2 in the

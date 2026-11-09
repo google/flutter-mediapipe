@@ -24,7 +24,6 @@ function Future<void> bundleFamilyRuntime(BuildInput input, BuildOutputBuilder o
 function Future<File> downloadVerified(DownloadAsset asset, File destination, {Client? client, String? source})
 getter String get familyRuntimeArchiveUrl
 getter String get familyRuntimeAssetName
-getter String get familyRuntimeBaseUrl
 getter int get familyRuntimeMinimumAndroidApi
 getter String get familyRuntimeVersion
 getter Map<String, Map<String, FamilyRuntime>> get familyRuntimes

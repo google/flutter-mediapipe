@@ -11,12 +11,13 @@ Future<void> main(List<String> args) => build(args, (input, output) async {
   final code = input.config.code;
   await bundleFamilyRuntime(input, output, family: 'audio');
   // The stream bridge only copies Google's audio stream results inside its
-  // callback; it does not link or modify MediaPipe.
+  // callback, and the guard only forwards Text to Speech cancels to Google's
+  // functions, which it is given; neither links or modifies MediaPipe.
   final windows = code.targetOS == OS.windows;
   await CBuilder.library(
     name: 'mediapipe_audio_stream',
     assetName: 'audio_stream_bridge.dylib',
-    sources: ['native/audio_stream_bridge.c'],
+    sources: ['native/audio_stream_bridge.c', 'native/text_to_speech_guard.c'],
     includes: ['native'],
     flags: windows ? ['/W4', '/WX'] : ['-Wall', '-Wextra', '-Werror'],
   ).run(input: input, output: output);

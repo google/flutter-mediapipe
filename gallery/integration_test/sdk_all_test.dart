@@ -14,6 +14,7 @@ import 'sdk_landmark_tasks_test.dart' as landmarks;
 import 'sdk_modern_text_test.dart' as modern_text;
 import 'sdk_segmenter_test.dart' as segmenter;
 import 'sdk_text_audio_test.dart' as text_audio;
+import 'speech_test.dart' as speech;
 import 'telemetry_probe_test.dart' as telemetry;
 
 // Every phone suite in one app launch: on Firebase Test Lab, where each
@@ -27,8 +28,8 @@ import 'telemetry_probe_test.dart' as telemetry;
 // EmbeddingGemma, Proofreader and Summarizer join with SDK_MODERN_TEXT, which
 // the Test Lab build sets: one phone execution covers every suite, while the
 // CI emulator runs them as a launch of their own, since the generative models
-// take minutes on an emulated CPU. Decision Maker and the retrieval tasks run
-// when the build bundles them, and skip otherwise. TELEMETRY_PROBE, also set
+// take minutes on an emulated CPU. Decision Maker, the retrieval tasks and
+// the speech tasks run when the build bundles them, and skip otherwise. TELEMETRY_PROBE, also set
 // by the Test Lab build, first watches the sockets Google's usage logger opens
 // when tasks close, before any other suite has run.
 void main() {
@@ -49,6 +50,7 @@ void main() {
   group('text and audio', text_audio.main);
   group('decision maker', decision.main);
   group('retrieval', retrieval.main);
+  group('speech', speech.main);
   if (const bool.fromEnvironment('SDK_MODERN_TEXT')) {
     group('modern text', modern_text.main);
   }

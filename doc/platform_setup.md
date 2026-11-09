@@ -55,7 +55,9 @@ instead.
   required-reason APIs Google's libraries call; see
   [privacy and licenses](privacy_and_licenses.md#app-store-privacy-manifest).
 - On the iOS Simulator only the CPU is offered: Google's MediaPipe aborts on
-  the simulator's GPU path. Devices keep Metal.
+  the simulator's GPU path. Devices keep Metal where a task offers it. The
+  nine vision tasks and Audio Transcriber that offer it were tested on an
+  iPhone 15 Pro (iOS 27) with Google's 1.2.2 library; iPads were not tested.
 - Downloaded models live in the app's Application Support folder, excluded
   from iCloud backup.
 

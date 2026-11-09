@@ -1,5 +1,9 @@
 import 'package:mediapipe_audio/mediapipe_audio.dart'
-    show AudioModels, audioClassifierCapabilitiesForPlatform;
+    show
+        AudioModels,
+        audioClassifierCapabilitiesForPlatform,
+        audioTranscriberCapabilitiesForPlatform,
+        textToSpeechCapabilitiesForPlatform;
 import 'package:mediapipe_decision/mediapipe_decision.dart'
     show DecisionModels, decisionMakerCapabilitiesForPlatform;
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart'
@@ -50,6 +54,12 @@ enum GalleryDemo {
 
   /// Documents indexed on the device and searched by meaning.
   retrieve,
+
+  /// A speech clip written out as text.
+  transcribe,
+
+  /// Typed text spoken in one of the model's voices.
+  speak,
 }
 
 /// The home page's sections, in MediaPipe Studio's order, then the families
@@ -400,6 +410,30 @@ final _catalog = <GalleryTask>[
     model: AudioModels.yamnet,
     sample: 'speech_16000_hz_mono.wav',
     capabilities: _audio,
+  ),
+  // The audio package's speech tasks, on Google's per-family audio library.
+  // Their models are downloaded on first use.
+  GalleryTask(
+    id: 'audio_transcriber',
+    category: GalleryCategory.audio,
+    demo: GalleryDemo.transcribe,
+    downloadsModel: true,
+    title: 'Audio Transcriber',
+    summary: 'Speech in a clip, written out as text.',
+    model: AudioModels.parakeetTdtV3,
+    sample: 'speech_16000_hz_mono.wav',
+    capabilities: audioTranscriberCapabilitiesForPlatform,
+  ),
+  GalleryTask(
+    id: 'text_to_speech',
+    category: GalleryCategory.audio,
+    demo: GalleryDemo.speak,
+    downloadsModel: true,
+    title: 'Text to Speech',
+    summary: 'Typed text spoken in one of the model\'s voices.',
+    model: AudioModels.phonon,
+    sample: '',
+    capabilities: textToSpeechCapabilitiesForPlatform,
   ),
   // The text package's classic tasks, on the shared runtime: macOS
   // arm64 CPU, where the gallery bundles their models.

@@ -4,6 +4,9 @@ import 'package:test/test.dart';
 import 'package:mediapipe_core/platform_interface.dart'
     show largeModelNeeds64Bit;
 
+// Named so tool/ci/nightly_pin.py moves it alone.
+const _webRuntimeVersion = '1.2.2';
+
 /// Where core's runtime serves the text tasks (every task on CPU), and where
 /// the registered Android and browser backends do.
 const _runtime = [
@@ -72,7 +75,7 @@ void main() {
         expect(result.supportedDelegates, {Delegate.cpu}, reason: name);
         expect(
           result.runtimeVersion,
-          '1.2.0',
+          '1.2.2',
           reason: '$name on ${platform.target}',
         );
         expect(
@@ -106,7 +109,7 @@ void main() {
         for (final MapEntry(key: name, value: claim) in every.entries) {
           final result = claim(platform);
           expect(result.supportedDelegates, {Delegate.cpu}, reason: name);
-          expect(result.runtimeVersion, '1.2.0');
+          expect(result.runtimeVersion, '1.2.2');
         }
       }
     },
@@ -123,7 +126,7 @@ void main() {
     ]) {
       final result = every[name]!(_web);
       expect(result.supportedDelegates, {Delegate.cpu}, reason: name);
-      expect(result.runtimeVersion, '1.2.0-rc.20261018');
+      expect(result.runtimeVersion, _webRuntimeVersion);
     }
     for (final name in ['proofreader', 'summarizer']) {
       final result = every[name]!(_web);

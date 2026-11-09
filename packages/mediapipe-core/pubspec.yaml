@@ -29,6 +29,8 @@ dependencies:
   ffi: ^2.1.4
   hooks: ^2.2.0
   http: ^1.6.0
+  jni: ^1.1.0
+  jni_flutter: ^1.0.3
   meta: ^1.18.0
   path_provider: ^2.1.5
   web: ^1.1.1

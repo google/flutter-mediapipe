@@ -1,0 +1,22 @@
+{
+  "runtime": "mediapipe==1.2.2",
+  "source": "official Python AudioTranscriber and TextToSpeech create, macOS arm64 wheel",
+  "paths": "{path} is the model path the task was given: /nonexistent/<file> when missing, else <file> in directory/ or file/ of a temporary folder",
+  "not_a_model": "not a model",
+  "cases": {
+    "transcriber": {
+      "missing": {"file": "parakeet.litertlm", "kind": "missing", "status": 5, "message": "open() failed: {path}: No such file or directory"},
+      "missing-pinned-name": {"file": "parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm", "kind": "missing", "status": 3, "message": "lm_resources must not be null (model_path: {path})."},
+      "directory": {"file": "parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm", "kind": "directory", "status": 3, "message": "lm_resources must not be null (model_path: {path})."},
+      "not-a-model": {"file": "parakeet_tdt_0.6b_v3_5s_i8_stateful.litertlm", "kind": "file", "status": 3, "message": "Invalid magic number or failed to read: not a mo"}
+    },
+    "text_to_speech": {
+      "missing": {"file": "phonon.litertlm", "kind": "missing", "status": 5, "message": "\"{path}/tokenizer.model\": No such file or directory Error #2"},
+      "missing-kokoro": {"file": "kokoro_int8_gpu_fp16.litertlm", "kind": "missing", "status": 5, "message": "ERROR: [third_party/odml/litert_lm/omni/text2speech/kokoro.cc:275]\n└ File not found or unreadable: {path}"},
+      "missing-pocket-tts": {"file": "pocket_tts_en_int8.litertlm", "kind": "missing", "status": 5, "message": "\"{path}/tokenizer.model\": No such file or directory Error #2"},
+      "directory": {"file": "phonon_int8.litertlm", "kind": "directory", "status": 5, "message": "\"{path}/tokenizer.model\": No such file or directory Error #2"},
+      "directory-kokoro": {"file": "kokoro_int8_gpu_fp16.litertlm", "kind": "directory", "status": 2, "message": "ERROR: [third_party/odml/litert_lm/omni/text2speech/kokoro.cc:275]\n└ RET_CHECK failure (third_party/odml/litert_lm/support/util/memory_mapped_file_posix.cc:134) data != ((void *)-1) (0xffffffffffffffff vs. 0xffffffffffffffff) Failed to map, error: Invalid argument"},
+      "not-a-model": {"file": "phonon_int8.litertlm", "kind": "file", "status": 3, "message": "Invalid magic number or failed to read: not a mo"}
+    }
+  }
+}

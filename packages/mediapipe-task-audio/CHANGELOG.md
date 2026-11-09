@@ -1,3 +1,46 @@
+## 0.2.0
+
+- Audio Transcriber: speech to text on Google's 1.2.2 native library, with
+  `AudioModels.parakeetTdtV3` (Parakeet TDT 0.6B v3), whole clips or blocks
+  ending in `finishStream()`, optional interim results, and segment
+  timestamps.
+- Text to Speech: `synthesize` and `synthesizeStream` with
+  `AudioModels.phonon` (five US English voices), speaking rate, voice
+  and locale per call, and word timestamps.
+- Text to Speech `cancel()`, like Google's: a cancelled `synthesize` call
+  fails with status 1, a cancelled stream closes cleanly, and cancelling a
+  `synthesizeStream` subscription stops Google's stream at once (in
+  browsers, between its chunks).
+- `TextToSpeechOptions.defaultLocale` is null by default, so Google infers the
+  locale from the voice, as its Web, Android and iOS tasks do, and a Kokoro
+  voice in another language needs no locale (Google refuses it in `en-US`).
+- Text to Speech also speaks US English with Kyutai's PocketTTS
+  (`AudioModels.pocketTtsEn`, CC BY 4.0) on the CPU.
+- Text to Speech also pins hexgrad's Kokoro 82M (`AudioModels.kokoro`,
+  Apache 2.0) in eight languages: the file Google's guide uses with the GPU
+  delegate, whose speech may be noisier on the CPU.
+- Both run on the CPU on 64-bit Android, iOS, macOS, Linux and Windows, and
+  in browsers on `@mediapipe/tasks-audio` 1.2.2, each on a web worker; 32-bit
+  Android reports them unavailable.
+- Audio Transcriber also offers the GPU delegate where a test saw the GPU do
+  the work: macOS, which CI checks on macOS 15, Chromium on a Mac's Apple
+  WebGPU adapter, which CI checks on macOS 15, and WebKit on that adapter,
+  checked on a developer's Mac. iPhones and iPads are offered Metal too,
+  tested on one iPhone 15 Pro (iOS 27): the same transcript as the CPU, about
+  1.7x faster per clip, but about 578 MB of GPU memory and about 4.6 s to
+  create (0.6 s on the CPU). iPads and older iPhones were not tested. Other
+  browsers and other adapters get the CPU, and a reason. Text to Speech offers
+  the GPU on macOS 15 and later for Kokoro (`AudioModels.kokoro`).
+- On Linux, Text to Speech checks first that the model path is a file and
+  throws a `TaskException` (NOT_FOUND, 5) for every path that is not: there
+  Google's library ends the process for a missing Phonon or PocketTTS file and
+  for a directory with Phonon's file name, and returns 2 for a directory with
+  Kokoro's file name.
+- `AudioTranscriberOptions.sampleRateHz` of 0 means 16000, as in Google's
+  API, and a negative rate throws an `ArgumentError`.
+- Google's 1.2.2 native library replaces 1.2.0, and `@mediapipe/tasks-audio`
+  1.2.2 replaces 1.2.0-rc.20261018 in browsers.
+
 ## 0.1.4
 
 - No changes to this package. It is released with `mediapipe_core` 0.1.4 so that all the packages keep one version.

@@ -65,9 +65,9 @@ and platform plugins need and apps do not.
 Every native runtime and model pin names a primary URL, optional published
 mirrors, and one SHA-256. Core tries URLs in order and checks the digest before
 publishing a file. It reports every failed location when none matches. Each
-native library's primary URL names its file inside Google's nightly archive,
-which core reads with HTTP range requests, and its mirror is a copy in a
-GitHub pre-release. Model pins name no mirrors.
+native library's URL names its file inside Google's release archive on
+`storage.googleapis.com`, which core reads with HTTP range requests. No library
+or model pin names a mirror.
 
 Each request gets three attempts on a connection error, a timeout or HTTP
 408, 429, 500, 502, 503 or 504, waiting a random backoff or the host's

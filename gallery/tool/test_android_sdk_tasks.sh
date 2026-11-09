@@ -2,8 +2,8 @@
 # Runs the official Android SDK task tests on an emulator, CPU only: Face and
 # Hand Landmarker; Pose, Gesture and Holistic; Face and Object Detector and
 # Image Classifier; Image Embedder; Image Segmenter; the text and audio tasks;
-# Decision Maker and the retrieval tasks; then every live tile and the gallery
-# journey through the sidebar. They run as
+# Decision Maker, the retrieval tasks and the speech tasks; then every live
+# tile and the gallery journey through the sidebar. They run as
 # sdk_all_test.dart, one app launch as on Test Lab: each extra install and
 # launch was another chance for a hosted emulator to lose its Dart Development
 # Service or die outright.
@@ -48,9 +48,9 @@ run_suite() {
 }
 for attempt in 1 2; do
   # The suites take about 11 minutes with the Gradle build, the gallery
-  # journey's Proofreader and Summarizer pages included, and Decision Maker
-  # and the retrieval tasks add their downloads (678 MB and 388 MB) and a few
-  # minutes of emulated inference. On hosted emulators flutter test sometimes
+  # journey's Proofreader and Summarizer pages included, and Decision Maker,
+  # the retrieval tasks and the speech tasks add their downloads (678 MB,
+  # 388 MB, and 615 MB and 87 MB) and a few minutes of emulated inference. On hosted emulators flutter test sometimes
   # installs the app and then hears nothing more, so a run still going at 30
   # minutes has stalled.
   status=0

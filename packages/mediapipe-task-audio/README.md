@@ -6,12 +6,18 @@ web. Google's pinned YAMNet model is bundled with your app at build time.
 
 [MediaPipe]: https://developers.google.com/edge/mediapipe/solutions
 
+Google's **Audio Transcriber** (speech to text, with Parakeet TDT 0.6B v3) and
+**Text to Speech** (Phonon's five voices, whole or streamed, with word
+timings) run on 64-bit Android, iOS, macOS, Linux, Windows and the web; see
+[Speech](#speech).
+
 ## Platforms
 
 The task runs Google's runtime on each platform, on the CPU: its MediaPipe
-1.2.0 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64 and
+1.2.2 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64 and
 Windows x64, which this package's hook bundles, and
-`@mediapipe/tasks-audio` 1.2.0-rc.20261018 in browsers.
+`@mediapipe/tasks-audio` 1.2.2 in browsers. The library is built for macOS 14
+and tested on macOS 15.
 
 No platform needs a setting. See
 [platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md)
@@ -192,6 +198,182 @@ Future<void> listen(Stream<Float32List> blocks) async {
   signal. Record at the model's rate (16 kHz for YAMNet) to avoid the
   difference.
 
+## Speech
+
+`AudioTranscriber` turns speech into text and `TextToSpeech` turns text into
+speech, on Google's 1.2.2 native library and, in browsers, on its 1.2.2
+JavaScript runtime in a web worker. 32-bit Android cannot hold their models:
+there `create` throws a `RuntimeUnavailableException`, and
+`queryAudioTranscriberCapabilities()` and `queryTextToSpeechCapabilities()` say
+why.
+
+Both run on the CPU. Google's library can accept the GPU delegate and stay on
+the CPU with the same answer, so this package offers it only where a test saw
+the GPU do the work. That is `AudioTranscriber` on:
+
+- macOS arm64 (Metal). CI's package and gallery tests check it on macOS 15,
+  the only version CI runs. It passed once on macOS 14 before GitHub retired
+  those runners, and no test runs on macOS 14 now.
+- Chromium on a Mac's Apple adapter (WebGPU), which CI's browser job checks
+  on macOS 15, and WebKit on that adapter, checked only on a developer's Mac.
+  CI has no WebKit job on a Mac.
+- iPhones and iPads (Metal), for an app that asks for `Delegate.gpu`; the CPU
+  stays the default. It was tested on one iPhone 15 Pro (iOS 27): the same
+  transcript as the CPU, about 1.7x faster per clip, but it holds about
+  578 MB of GPU memory and takes about 4.6 s to create (0.6 s on the CPU).
+  iPads and older iPhones were not tested, so test on your target devices.
+  CI has no iPhone.
+
+`TextToSpeech` is offered the GPU only on macOS 15 and later on arm64 (Metal) for
+Kokoro (`AudioModels.kokoro`, 295 MB, Apache 2.0). CI's package tests check it
+on macOS 15: Kokoro holds memory on Metal, and its speech is as long as on the
+CPU, with each 100 ms window at nearly the same level. Kokoro has never run on
+macOS 14, so there it gets the CPU, and a reason. Google runs only Kokoro's
+vocoder on the GPU; its acoustic model, Phonon and PocketTTS run on the CPU. So
+`create` takes the GPU delegate only for a model whose bundle marks a section
+for the GPU, and throws a `RuntimeUnavailableException` for any other, such as
+Phonon. A Kokoro file from elsewhere keeps Google's filename, which the task
+reads to tell the models apart.
+
+`AudioModels.kokoro` is `kokoro_int8_gpu_fp16.litertlm`, the file Google's
+guide uses with the GPU delegate. Its model card warns that on the CPU
+delegate, or with no GPU accelerator, its vocoder runs on the CPU and the
+speech, though intelligible, may be noisier, and names
+`kokoro_int8_fp16.litertlm` (the same voices, with more memory) for CPU-only
+devices. This package offers Kokoro the GPU delegate only on macOS 15 and
+later on arm64, so elsewhere it runs on the CPU. That file is not pinned: a
+`modelPath` to a copy of it loads it.
+
+Elsewhere, including Android, Linux, Windows, the iOS simulator, Firefox,
+browsers on other adapters and browsers on iPhones and iPads, the GPU delegate
+throws a `RuntimeUnavailableException` that says why. Firefox had no adapter where it
+was tried, so it has no proof either way.
+
+Their models are large (Parakeet
+615 MB, CC BY 4.0; Phonon 87 MB; Kokoro 295 MB), so an app usually downloads
+them on first use (`ModelStore.allowDownloads = true`) rather than bundling
+them; listing `parakeet_tdt_v3`, `phonon` or `kokoro` under the hook's `models`
+bundles them instead.
+
+`AudioModels.pocketTtsEn` is Kyutai's PocketTTS English (163 MB, CC BY 4.0,
+so an app that ships it credits Kyutai), as Google's LiteRT community
+converted it. It speaks US English at 24 kHz in `alba` by default, with word
+timestamps, on the CPU only. The speech tests compare its voices, two voices'
+utterances, a faster rate and a streamed paragraph with Google's Python
+(`test/fixtures/official_pocket_tts_reference.json`, from the macOS 1.2.2 wheel
+and regenerated on each desktop CI runner), within Phonon's tolerances.
+Browsers are not tested with it. Google's page says it has only the eight
+`en-US` voices, but Google's 1.2.2 runtime also lists the multilingual bundle's
+six others (`estelle`, `juergen`, `lola`, `rafael`, `giovanni`, `daan`) for
+it, and speaks something for them, so choose an `en-US` one. Listing
+`pocket_tts_en` under the hook's `models` bundles it.
+
+In a browser, a pinned `model:` is verified and kept in Cache Storage, then
+passes through the page's memory as bytes. For Parakeet, a `modelPath` URL
+avoids that copy: Google's runtime reads the file itself, so the URL's server
+must allow the page's origin. CI's browser job runs both models on the CPU in
+Chromium, Firefox and WebKit on Linux and in Chromium on macOS 15, where
+Parakeet also runs on the GPU (WebGPU); every browser job checks that Phonon
+refuses the GPU delegate. On a developer's 48 GB Mac they also ran in Firefox
+and WebKit. Phones' browsers are untested, and may not have the
+memory for Parakeet.
+
+```dart
+import 'dart:typed_data';
+
+import 'package:mediapipe_audio/mediapipe_audio.dart';
+
+Future<String> transcribeClip(Uint8List wavBytes) async {
+  final clip = decodeWav(wavBytes);
+  final transcriber = await AudioTranscriber.create(
+    AudioTranscriberOptions(
+      model: AudioModels.parakeetTdtV3,
+      sampleRateHz: clip.sampleRate.round(),
+    ),
+  );
+  try {
+    return (await transcriber.transcribe(clip)).text;
+  } finally {
+    await transcriber.dispose();
+  }
+}
+
+Future<Float32List> speak(String text) async {
+  final tts = await TextToSpeech.create(
+    TextToSpeechOptions(model: AudioModels.phonon),
+  );
+  try {
+    final speech = await tts.synthesize(text, voiceId: 'freya');
+    for (final word in speech.wordTimestamps) {
+      print('${word.word} at ${word.startSeconds} s');
+    }
+    return speech.samples; // mono, at speech.sampleRateHz (24 kHz)
+  } finally {
+    await tts.dispose();
+  }
+}
+```
+
+- To transcribe live audio, pass blocks with `endOfStream: false`, which keep
+  what is short of a segment for the next call, then call `finishStream()`.
+  `enableInterimResults: true` also returns the segment in progress.
+- `listVoices()` names the model's voices: Phonon has `freya`, `claire`,
+  `lukas`, `sofia` and `lucas`. Google's guide says Phonon speaks US English
+  only, though Google's 1.2.2 runtime, and so `listVoices()`, labels `claire`
+  fr-FR, `lukas` de-DE, `sofia` es-ES and `lucas` pt-BR. For other languages,
+  use Kokoro (`AudioModels.kokoro`).
+- `defaultLocale` is null by default: Google infers the locale from the voice,
+  as on its Web, Android and iOS tasks (its Python defaults to en-US).
+- `synthesizeStream(text)` yields a chunk per clause as soon as it is ready,
+  so playback can start early; cancelling the subscription cancels Google's
+  stream at once, abandoning the chunk in progress. `WordTimestamp.start` and
+  `end` are UTF-16 indices into the text, so `text.substring(start, end)` is
+  the word; Google reports UTF-8 byte offsets, which the package converts.
+- `cancel()` cancels every synthesis accepted and not yet finished, like
+  Google's `cancel`: a cancelled `synthesize` call fails with a
+  `TaskException` of status 1 (`Synthesis cancelled.`), and a cancelled
+  stream closes without an error after the chunks it already yielded. Calls
+  made after it run as usual; with nothing in flight, or once disposed, it
+  does nothing.
+- Calls on one task run one at a time, in call order, on a worker isolate.
+
+### Limitations
+
+- The multilingual PocketTTS bundle (`pocket_tts_int8`, about 760 MB) isn't
+  tested yet. It can be loaded with `modelPath`; nothing checks that it works.
+- Sending text in pieces (Google's `pushText` and `finishInput`) isn't
+  supported: each call sends its whole text.
+- Google's `computeWordTimestamps`, which aligns words with audio you supply,
+  isn't supported.
+- The `TINY_GEMMA` model architecture is not yet available: Google's 1.2.2 C
+  library has only `auto` and `omni`, so the package offers those two.
+- Google cannot interrupt its text analysis of a clause, which comes before
+  that clause's audio, so a cancel during one very long clause lands only
+  when the analysis ends. In CI, for a clause of about 4,800 characters, a
+  cancel sent a tenth of the way into the analysis took about 1.2 s to land
+  on macOS and Linux, and 1.7 s on Windows. Outside such a clause, a cancel
+  landed within 40 ms there.
+- In browsers, Google's `synthesize` does not let a cancel in until it ends,
+  so a cancelled `synthesize` call, like one queued right behind it, still
+  runs to its end before it fails with status 1. A stream reads a cancel
+  between its chunks, so it may send the chunk in progress first. CI tests
+  this in Chromium, Firefox and WebKit.
+- `transcribe` needs `AudioData.sampleRate` to equal the options'
+  `sampleRateHz`, and throws an `ArgumentError` otherwise: create the task at
+  the audio's rate, or resample the audio first.
+- Phones' browsers are untested.
+- The GPU delegate is offered only where listed above; everywhere else it
+  isn't supported.
+- A model path that is missing, a directory or not a model makes `create`
+  throw a `TaskException` with Google's own status and message, which depend
+  on the platform and the file name: for the transcriber's missing file, `5`
+  (NOT_FOUND) on macOS and Linux and `2` on Windows. On Linux, Google's Text
+  to Speech ends the process instead for a missing Phonon or PocketTTS file
+  and for a directory with Phonon's file name, so on Linux the package checks
+  first that a Text to Speech model path is a file, and throws `5` with its
+  own message for every path that is not. That differs from Google's `2` for
+  a directory with Kokoro's file name.
+
 ## Validation
 
 The tests compare every chunk of three official MediaPipe sample clips (speech
@@ -219,3 +401,36 @@ score of every window). Browser CI compares the emulated stream with Google's
 JavaScript on the same page; the iOS simulator, the Android emulator and
 Firebase Test Lab's phones run the stream on Google's mobile libraries against
 the same device's clips results.
+
+The speech tests compare both tasks with Google's own Python
+(`test/fixtures/official_speech_reference.json`, from the macOS 1.2.2 wheel,
+Google's first release with these tasks in Python; the package loads the same
+release's audio library): the transcript and segment timestamps of
+both speech clips, whole and in one-second blocks with and without interim
+results, and of three copies of a clip with a second of silence between them,
+past the transcriber's 5 s window, twice on one task; and for Text to Speech
+the voices, four utterances (Unicode text included, and French and German
+text in the voices Google's runtime labels fr-FR and de-DE), a faster speaking
+rate and a streamed
+paragraph, each with the same sample count, rate and word timings, and the
+peak and 100 ms RMS envelope within 0.002. On the Mac, where the Kokoro model
+is downloaded, they compare Kokoro on the CPU the same way with
+`test/fixtures/official_kokoro_reference.json`, made by
+`tool/generate_speech_reference.py --kokoro-output` with the pinned 1.2.2
+macOS arm64 wheel: Google's voice list, an English sentence in the default
+voice and a French one in `ff_siwis`, and a task whose default voice is
+`ff_siwis` speaking its own locale unless the options give another (Google
+refuses `en-US` for it). `tool/prepare_speech_reference.py` regenerates the
+references with the pinned wheel on each desktop CI runner (speech.yaml),
+Kokoro's on the Mac alone. For a model path that is missing, a directory or a
+file that is not a model, the tests expect Google's status and message from
+`test/fixtures/official_speech_error_reference.json`, made by
+`tool/generate_speech_error_reference.py` with the macOS arm64 wheel and
+regenerated on each desktop runner with the references above, and by
+`tool/test_text_audio.py`. On Linux, where Google ends the process for a
+missing Phonon or PocketTTS file and a directory with Phonon's file name, they
+expect the package's NOT_FOUND for every Text to Speech path that is not a
+file, Kokoro's included (Google returns `5` for its missing file and `2` for
+a directory with its name). They
+also check stream cancellation, disposal, option checks, capabilities and the
+C struct layouts against Google's headers.

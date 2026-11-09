@@ -553,6 +553,58 @@
         "cpu": "required",
         "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
       }
+    },
+    "audio_transcriber": {
+      "web": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Audio Transcriber's work here, and hosted runners have no Android GPU"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "pending: a test on an iPhone that the GPU does the work"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Audio Transcriber's work here, and hosted runners have no GPU"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Audio Transcriber's work here, and hosted runners have no GPU"
+      }
+    },
+    "text_to_speech": {
+      "web": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Text to Speech's work in a browser"
+      },
+      "android": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Text to Speech's work here, and hosted runners have no Android GPU"
+      },
+      "ios": {
+        "cpu": "required",
+        "gpu": "unsupported: no test on an iPhone has proved the GPU does Text to Speech's work"
+      },
+      "macos": {
+        "cpu": "required",
+        "gpu": "required"
+      },
+      "linux": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Text to Speech's work here, and hosted runners have no GPU"
+      },
+      "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Text to Speech's work here, and hosted runners have no GPU"
+      }
     }
   }
 }

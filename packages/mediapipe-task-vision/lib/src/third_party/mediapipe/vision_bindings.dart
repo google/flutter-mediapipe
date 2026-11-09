@@ -1,6 +1,6 @@
 // Copyright 2026 The MediaPipe Authors.
 // Licensed under the Apache License, Version 2.0.
-// Generated from Google's unmodified MediaPipe 1.2.0 headers; see
+// Generated from Google's unmodified MediaPipe 1.2.2 headers; see
 // packages/mediapipe-core/native/README.md.
 
 // AUTO GENERATED FILE, DO NOT EDIT.
@@ -1652,19 +1652,21 @@ final class MpClassifierOptions extends ffi.Struct {
 }
 
 enum MpDelegate {
-  MP_DELEGATE_CPU(0),
-  MP_DELEGATE_GPU(1),
-  MP_DELEGATE_EDGETPU_NNAPI(2),
-  MP_DELEGATE_NPU(4);
+  MP_DELEGATE_DEFAULT(0),
+  MP_DELEGATE_CPU(1),
+  MP_DELEGATE_GPU(2),
+  MP_DELEGATE_EDGETPU_NNAPI(3),
+  MP_DELEGATE_NPU(5);
 
   final int value;
   const MpDelegate(this.value);
 
   static MpDelegate fromValue(int value) => switch (value) {
-    0 => MP_DELEGATE_CPU,
-    1 => MP_DELEGATE_GPU,
-    2 => MP_DELEGATE_EDGETPU_NNAPI,
-    4 => MP_DELEGATE_NPU,
+    0 => MP_DELEGATE_DEFAULT,
+    1 => MP_DELEGATE_CPU,
+    2 => MP_DELEGATE_GPU,
+    3 => MP_DELEGATE_EDGETPU_NNAPI,
+    5 => MP_DELEGATE_NPU,
     _ => throw ArgumentError('Unknown value for MpDelegate: $value'),
   };
 }

@@ -74,9 +74,9 @@ void main() {
         ),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
-      final prediction = result.predictions.first;
-      expect(prediction.languageCode, 'de');
-      expect(prediction.probability, closeTo(0.0011, 0.0001));
+      // Google's 1.2.2 drops every language below about 0.3, and only `en`
+      // clears it here.
+      expect(result.predictions, isEmpty);
       executor.close();
     });
 

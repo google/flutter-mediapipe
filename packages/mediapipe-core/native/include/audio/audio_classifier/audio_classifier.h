@@ -2,7 +2,7 @@
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
-You may not obtain a copy of the License at
+You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
@@ -38,7 +38,7 @@ typedef struct MpAudioClassifierInternal* MpAudioClassifierPtr;
 
 // The C representation of a list of audio classification results.
 // The caller must call `MpAudioClassifierCloseResult` to free the memory.
-typedef struct {
+typedef struct MpAudioClassifierResult {
   struct MpClassificationResult* results;
   int results_count;
 } MpAudioClassifierResult;

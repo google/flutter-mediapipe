@@ -3,7 +3,7 @@
 `include/` holds Google's MediaPipe Tasks C API headers, unmodified, as
 Google ships them with the per-family libraries the hooks bundle
 (`lib/src/native_assets/family_runtimes.dart`). `BUILD_INFO` names the build
-they come from: MediaPipe 1.2.0, Google's nightly of 2026-10-18. They are licensed under
+they come from: MediaPipe 1.2.2, Google's release of 2026-11-02. They are licensed under
 Apache 2.0 like the rest of this repository.
 
 Google ships one header tree per family. `include/` merges the five; a header

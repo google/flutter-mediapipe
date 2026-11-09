@@ -10,6 +10,8 @@ import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'catalog.dart';
 import 'decision_page.dart';
 import 'retrieval_page.dart';
+import 'speech_page.dart';
+import 'transcriber_page.dart';
 import 'universal_embedder_page.dart';
 import 'fish_game_page.dart';
 import 'embed_page.dart';
@@ -45,6 +47,8 @@ const _taskOrder = [
   'image_segmenter',
   'interactive_segmenter',
   'audio_classifier',
+  'audio_transcriber',
+  'text_to_speech',
   'language_detector',
   'text_classifier',
   'text_embedder',
@@ -305,6 +309,16 @@ class _GalleryShellState extends State<_GalleryShell> {
         task: task,
         onOpenMenu: openMenu,
         microphone: widget.microphone,
+      ),
+      GalleryDemo.transcribe => TranscriberPage(
+        task: task,
+        platform: widget.platform,
+        onOpenMenu: openMenu,
+      ),
+      GalleryDemo.speak => SpeechPage(
+        task: task,
+        platform: widget.platform,
+        onOpenMenu: openMenu,
       ),
       GalleryDemo.none => throw StateError('${task.id} has no demo'),
     };

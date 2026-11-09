@@ -1,3 +1,12 @@
+## 0.2.0
+
+- Google's MediaPipe 1.2.2 native release (build of November 2, 2026)
+  replaces 1.2.0 on Android, iOS, macOS, Linux and Windows, and
+  `@mediapipe/tasks-*` 1.2.2 replaces 1.2.0-rc.20261018 in browsers.
+- Google's 1.2.2 Language Detector returns only languages above about 0.3,
+  where 1.1.0 returned all 111, whatever `scoreThreshold` says.
+  The tests compare with Google's 1.2.2 wheel.
+
 ## 0.1.4
 
 - Error messages and the README no longer refer to removed notes.

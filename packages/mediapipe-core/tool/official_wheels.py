@@ -32,10 +32,11 @@ def _strings(source):
     return ''.join(re.findall(r"'([^']*)'", source))
 
 
-def reference_wheel(target):
-    """Core's `referenceWheels` row for `macos/arm64`, `linux/x64` or
-    `windows/x64`."""
+def reference_wheel(target, table='referenceWheels'):
+    """Core's `referenceWheels` row, or the `table` named, for `macos/arm64`,
+    `linux/x64` or `windows/x64`."""
     source = REFERENCE_WHEELS.read_text(encoding='utf-8')
+    source = source[source.index(f'const {table} ='):]
     row = re.search(r"'" + re.escape(target) + r"': \((.*?)\n  \),", source, re.S).group(1)
     return {
         'version': re.search(r"version: '([^']+)'", row).group(1),
@@ -48,14 +49,15 @@ def reference_wheel(target):
 
 MACOS = reference_wheel('macos/arm64')
 
-def host_runtime():
-    """The pinned official runtime for this host, or SystemExit where none is."""
+def host_runtime(table='referenceWheels'):
+    """The pinned official runtime for this host in core's `table`, or
+    SystemExit where none is."""
     host = (platform.system(), platform.machine())
     target = {('Darwin', 'arm64'): 'macos/arm64', ('Linux', 'x86_64'): 'linux/x64',
               ('Windows', 'AMD64'): 'windows/x64'}.get(host)
     if target is None:
         raise SystemExit(f'No official wheel is pinned for {host[0]} {host[1]}.')
-    return reference_wheel(target)
+    return reference_wheel(target, table)
 
 
 def venv_python(environment):
