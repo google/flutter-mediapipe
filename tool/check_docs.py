@@ -14,7 +14,8 @@ must be a key of that family's `byName`.
 Each complete sample is also a file under samples/, named by a
 `<!-- sample: samples/... -->` line right above the block, and the file must
 equal the block byte for byte. Every Dart file under samples/ (apps/ aside)
-must appear in a doc.
+must appear in a doc, and samples/README.md must be what
+tool/samples_index.py writes.
 """
 import argparse
 import functools
@@ -176,6 +177,10 @@ def main():
         for problem in unknown_models(doc):
             failures.append(f'{doc}: {problem}')
     failures += sample_mismatches(args.docs)
+    import samples_index  # Here, since samples_index imports this module.
+    if (SAMPLES / 'README.md').read_text() != samples_index.render():
+        failures.append('samples/README.md is stale: run '
+                        'python3 -B tool/samples_index.py')
     with tempfile.TemporaryDirectory(prefix='mediapipe-doc-') as tmp:
         app = Path(tmp) / 'doc_snippets'
         app.mkdir()
