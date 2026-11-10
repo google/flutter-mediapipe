@@ -1,3 +1,12 @@
+## 0.2.1
+
+- The README has a Batches section with a sample for
+  `evaluateBooleanBatch`, `evaluateChoiceBatch` and `evaluateScoreBatch`.
+- `evaluateBooleanBatch`'s doc comment says that Google's engine reads
+  `sharedPrefix` before each text, joined with a newline, so the texts leave
+  it out.
+- The README names MediaPipe 1.2.2 as the native runtime.
+
 ## 0.2.0
 
 - Google's MediaPipe 1.2.2 native release (build of November 2, 2026)

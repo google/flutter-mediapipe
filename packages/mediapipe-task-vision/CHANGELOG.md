@@ -1,3 +1,21 @@
+## 0.2.1
+
+- The README's video and live stream samples are complete functions. The live
+  stream sample gives a frame that arrives in the same millisecond as the one
+  before it the next millisecond, since a repeated timestamp throws.
+- The README's GPU sample takes the delegate from the capability query and
+  falls back to the CPU when the GPU it was offered is refused, as on Linux
+  with only a software renderer.
+- The README has a browser sample that draws face landmarks over a playing
+  `<video>` with `BrowserOverlay` and `VisionImage.fromBrowserFrame`.
+- Two new guides: [video and live stream samples](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/video_and_live_stream.md)
+  for each of the ten camera tasks, and
+  [options and extra outputs](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/options_and_outputs.md):
+  capability queries, regions of interest, RGB input, transformation
+  matrices, masks, quantized embeddings and the tuning options.
+- The README's link to the object detection sample app points to
+  `samples/apps/object_detection`, where the app moved.
+
 ## 0.2.0
 
 - Google's MediaPipe 1.2.2 native release (build of November 2, 2026)
