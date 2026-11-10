@@ -119,6 +119,7 @@ input when you create the task.
 
 ### Image
 
+<!-- sample: samples/vision/object_detector/guide/create_image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -133,6 +134,7 @@ Future<ObjectDetector> createImageDetector() => ObjectDetector.create(
 
 ### Video
 
+<!-- sample: samples/vision/object_detector/guide/create_video.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -152,6 +154,7 @@ a result listener. Listen before you send the first frame. An error arrives
 on the same stream as a `TaskException`; it ends the stream, and the task
 must be created again.
 
+<!-- sample: samples/vision/object_detector/guide/create_live_stream.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -201,6 +204,7 @@ A photo on the device's file system can be passed by path; in browsers the
 path is a URL. Encoded bytes, such as those from an image picker, can be
 decoded with `dart:ui` into RGBA pixels:
 
+<!-- sample: samples/vision/object_detector/guide/input_image.dart -->
 ```dart
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -232,6 +236,7 @@ a plugin that gives you each frame's pixels and its presentation time; the
 sample uses the repository's `video_frames` plugin, which runs each
 platform's own decoder. Then wrap each frame:
 
+<!-- sample: samples/vision/object_detector/guide/input_video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -253,6 +258,7 @@ platforms; `camera_desktop` adds macOS, Linux and Windows. Wrap each frame in
 `VisionImage.deferred`, so its pixels are converted only if the detector
 runs it, rather than for the frames it drops:
 
+<!-- sample: samples/vision/object_detector/guide/input_live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -294,6 +300,7 @@ Depending on the running mode, call the matching method to run inference.
 
 ### Image
 
+<!-- sample: samples/vision/object_detector/guide/run_image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -305,6 +312,7 @@ Future<ObjectDetectorResult> detectImage(
 
 ### Video
 
+<!-- sample: samples/vision/object_detector/guide/run_video.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -322,6 +330,7 @@ Future<ObjectDetectorResult> detectVideoFrame(
 
 ### Live stream
 
+<!-- sample: samples/vision/object_detector/guide/run_live_stream.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -367,6 +376,7 @@ each with a `boundingBox` in the input's pixels and its `categories`, highest
 score first. The result also reports `imageWidth`, `imageHeight` and, in
 video and live stream modes, `timestampMilliseconds`.
 
+<!-- sample: samples/vision/object_detector/guide/results.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

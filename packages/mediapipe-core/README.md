@@ -72,6 +72,7 @@ names it accepts.
 
 Now create a task with the bundled model:
 
+<!-- sample: samples/vision/face_landmarker/count_faces.dart -->
 ```dart
 import 'dart:typed_data';
 

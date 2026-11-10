@@ -65,6 +65,7 @@ network permission, as
 [platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md)
 describes.
 
+<!-- sample: samples/audio/audio_classifier/clip.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -102,6 +103,7 @@ use your own model, pass `modelPath` or `modelBytes` instead of `model`.
 
 Query support before offering the task:
 
+<!-- sample: samples/audio/audio_classifier/capabilities.dart -->
 ```dart
 import 'package:mediapipe_audio/mediapipe_audio.dart';
 
@@ -123,6 +125,7 @@ to `classifyAsync` as it arrives. Google frames the blocks into the model's
 windows as one continuous signal, so a window may span several blocks and a
 block may complete several windows.
 
+<!-- sample: samples/audio/audio_classifier/stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -278,6 +281,7 @@ refuses the GPU delegate. On a developer's 48 GB Mac they also ran in Firefox
 and WebKit. Phones' browsers are untested, and may not have the
 memory for Parakeet.
 
+<!-- sample: samples/audio/audio_transcriber/clip.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -323,6 +327,7 @@ returns the segment in progress, marked `isFinal: false` and restated from
 the segment's start each time, which later audio may revise. The blocks
 below are 16 kHz, the options' default `sampleRateHz`.
 
+<!-- sample: samples/audio/audio_transcriber/stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -362,6 +367,7 @@ Future<void> transcribeLive(Stream<Float32List> blocks) async {
 slower than the rest. Call it before the first clip arrives, while the app
 has time to spare.
 
+<!-- sample: samples/audio/audio_transcriber/prewarm.dart -->
 ```dart
 import 'package:mediapipe_audio/mediapipe_audio.dart';
 
@@ -399,6 +405,7 @@ timestamps of the words whose audio starts in it, often none. Cancelling the
 subscription cancels Google's stream at once, abandoning the chunk in
 progress.
 
+<!-- sample: samples/audio/text_to_speech/stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -465,6 +472,7 @@ Future<void> speakAsReady(
 The sample below picks a voice for a locale from `listVoices()` and stops
 when `stop` completes, as a Stop button would, by calling `cancel()`.
 
+<!-- sample: samples/audio/text_to_speech/utterance.dart -->
 ```dart
 import 'dart:typed_data';
 

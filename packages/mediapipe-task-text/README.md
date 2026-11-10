@@ -47,6 +47,7 @@ import core yourself.
 
 ## Quick start
 
+<!-- sample: samples/text/text_classifier/classify.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -99,6 +100,7 @@ Results own their data and stay valid after the task is disposed.
 `LanguageDetector` returns language codes with probabilities, most likely
 first.
 
+<!-- sample: samples/text/language_detector/detect.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -124,6 +126,7 @@ Encoder; the static `TextEmbedder.cosineSimilarity` compares two, including
 quantized ones, computed in Dart so every platform gives the same answer. The
 higher the value, the closer the meaning.
 
+<!-- sample: samples/text/text_embedder/embed.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -162,6 +165,7 @@ Future<double> compareSentences(String first, String second) async {
 
 Query support before offering a task or delegate:
 
+<!-- sample: samples/text/text_summarizer/capabilities.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -176,6 +180,7 @@ describes declared support; it does not load a model. Every task has a query,
 and the Text Embedder's takes a model, because EmbeddingGemma needs 64-bit
 Android where the classic embedders also run on 32-bit Android:
 
+<!-- sample: samples/text/common/capabilities.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -209,6 +214,7 @@ inference and postprocessing. It returns 768-value vectors on every platform,
 with Google's prompt formatting on each runtime;
 `queryTextEmbedderCapabilities(TextModels.embeddingGemma)` reports it.
 
+<!-- sample: samples/text/text_embedder/semantic_similarity.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -239,6 +245,7 @@ search query and its documents. `questionAnswering`, `factChecking` and
 (`TextRole.query`, the default, or `TextRole.document`). A document can carry
 a `title`:
 
+<!-- sample: samples/text/text_embedder/question_answering.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -284,6 +291,7 @@ never truncated or chunked. The model is 183.8 MB and under the
 `TextProofreader` runs Google's pipeline, including tokenization, generation
 and the ordered corrections from Google's diff.
 
+<!-- sample: samples/text/text_proofreader/proofread.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -317,6 +325,7 @@ corrections, each `same`, `insertion` or `deletion` in native order.
 `TextSummarizer` runs Google's pipeline in either official mode,
 `TextSummarizerMode.keypoints` (the default) or `.tldr`, fixed at creation.
 
+<!-- sample: samples/text/text_summarizer/summarize.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -342,6 +351,7 @@ Google's output is kept as is, bullet markers and whitespace included. In
 keypoints mode the model writes each point on its own line, starting with
 `* `:
 
+<!-- sample: samples/text/text_summarizer/key_points.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 

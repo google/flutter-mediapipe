@@ -163,6 +163,7 @@ response is discarded.
 Core uses Flutter's `path_provider` for application support rather than
 asking every family to supply a directory, so the storage policy stays shared.
 
+<!-- sample: samples/core/model_store/prefetch.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -180,6 +181,7 @@ bundles stays available: the next lookup copies it into the cache again.
 `find` looks a model up without the network and returns null when the store
 holds no copy and the app bundles none.
 
+<!-- sample: samples/core/model_store/clear.dart -->
 ```dart
 import 'package:mediapipe_audio/mediapipe_audio.dart';
 
@@ -215,6 +217,7 @@ Workers verify those same file digests from any configured root before
 loading the bundle and WASM through Blob URLs. Then, before creating the
 first task:
 
+<!-- sample: samples/core/web_runtime/self_hosted.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

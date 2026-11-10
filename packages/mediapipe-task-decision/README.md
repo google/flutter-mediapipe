@@ -48,6 +48,7 @@ import core yourself.
 
 ## Quick start
 
+<!-- sample: samples/decision/decision_maker/single.dart -->
 ```dart
 import 'package:mediapipe_decision/mediapipe_decision.dart';
 
@@ -132,6 +133,7 @@ one call returns a result per text, in the same order. `sharedPrefix` is
 text that comes before every one of them, on a line of its own, such as a
 header all the texts share; leave it out of the texts themselves.
 
+<!-- sample: samples/decision/decision_maker/batch.dart -->
 ```dart
 import 'package:mediapipe_decision/mediapipe_decision.dart';
 

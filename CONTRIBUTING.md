@@ -38,7 +38,7 @@ From the repository root, run what applies to your change:
 make analyze                   # dart analyze, every package and example
 make check_format
 make test                      # downloads the test models, runs every package's tests
-python3 -B tool/check_docs.py  # README samples compile (web too), links resolve
+python3 -B tool/check_docs.py  # README samples compile (web too), match samples/, links resolve
 python3 -B tool/check_repository.py  # family lists, shared pins and the README copy agree
 python3 -B packages/mediapipe-core/tool/publish_check.py   # pub dry run
 python3 -B tool/check_archives.py    # an app builds from the archives' files

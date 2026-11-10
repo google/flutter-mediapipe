@@ -44,6 +44,7 @@ import core yourself.
 
 ## Quick start
 
+<!-- sample: samples/retrieval/semantic_retriever/text.dart -->
 ```dart
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';
 
@@ -111,6 +112,7 @@ Texts and images share one embedding space, so a photo can be compared with
 a caption. `embedImage` takes the encoded bytes of a JPEG or PNG, as read
 from an asset, a file picker or a download.
 
+<!-- sample: samples/retrieval/universal_embedder/image.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -146,6 +148,7 @@ scores about 0.60 and its cat photo 0.53, close to the retriever's default
 A Semantic Retriever indexes images the same way, and `retrieveContent`
 finds the records nearest a query made of parts, here a photo.
 
+<!-- sample: samples/retrieval/semantic_retriever/image.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -195,6 +198,7 @@ takes mono samples in -1 to 1 at 16 kHz, the rate of the clips the package's
 tests compare with Google's Python. Google's audio embeddings vary slightly
 from call to call, so a score can move by a few thousandths.
 
+<!-- sample: samples/retrieval/universal_embedder/audio.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -226,6 +230,7 @@ A record can hold several parts. `insertAudio` indexes a sound on its own,
 and `insertContent` indexes text, image and audio parts together as one
 record; `retrieveContent` takes a query made of parts too, here a recording.
 
+<!-- sample: samples/retrieval/semantic_retriever/audio_and_content.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -285,6 +290,7 @@ Metadata narrows a search and removes records in groups. `minSimilarity`
 drops the weaker matches, `metadataFilter` keeps only records carrying every
 pair it names, and `deleteWithMetadataFilter` removes those records.
 
+<!-- sample: samples/retrieval/semantic_retriever/manage_records.dart -->
 ```dart
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';
 
@@ -343,6 +349,7 @@ SQLite file, in a directory the app can write to, that keeps the index
 instead, so a retriever created on the same file later finds every record. Browsers keep the index in memory only,
 and creating a retriever with a `databasePath` fails there.
 
+<!-- sample: samples/retrieval/semantic_retriever/persistent_database.dart -->
 ```dart
 import 'package:mediapipe_retrieval/mediapipe_retrieval.dart';
 

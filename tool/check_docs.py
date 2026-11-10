@@ -10,6 +10,11 @@ a sample importing either fails outright. Blocks without imports are
 fragments and are skipped. Relative Markdown links must point at files that
 exist in the repository. Every name under `hooks.user_defines.<family>.models`
 must be a key of that family's `byName`.
+
+Each complete sample is also a file under samples/, named by a
+`<!-- sample: samples/... -->` line right above the block, and the file must
+equal the block byte for byte. Every Dart file under samples/ (apps/ aside)
+must appear in a doc.
 """
 import argparse
 import functools
@@ -34,6 +39,8 @@ DOCS = [
 ]
 BLOCK = re.compile(r'^```dart\n(.*?)^```', re.S | re.M)
 LINK = re.compile(r'\]\(([^)\s]+)\)')
+SAMPLE = re.compile(r'<!-- sample: (samples/[\w/]+\.dart) -->')
+SAMPLES = REPO / 'samples'
 REPOSITORY = re.compile(
     r'https://github\.com/google/flutter-mediapipe/(?:blob|tree)/main/'
     r'([^?\s]+)')
@@ -48,6 +55,50 @@ def snippets(doc):
         code = match.group(1)
         if re.search(r'^import ', code, re.M):
             yield text.count('\n', 0, match.start()) + 2, code
+
+
+def sample_blocks(doc):
+    """`(line, path, code)` for each complete sample; `path` is the
+    samples/ file the line above the block names, or None."""
+    text = (REPO / doc).read_text()
+    for match in BLOCK.finditer(text):
+        code = match.group(1)
+        if re.search(r'^import ', code, re.M):
+            above = text[:match.start()].rstrip('\n').rpartition('\n')[2]
+            link = SAMPLE.fullmatch(above)
+            yield (text.count('\n', 0, match.start()) + 2,
+                   link and link.group(1), code)
+
+
+def sample_files():
+    """The Dart files under samples/, apps/ and tool output aside."""
+    found = []
+    for path in SAMPLES.rglob('*.dart'):
+        parts = path.relative_to(SAMPLES).parts
+        if parts[0] not in ('apps', 'build') and not any(
+                part.startswith('.') for part in parts):
+            found.append(path.relative_to(REPO).as_posix())
+    return sorted(found)
+
+
+def sample_mismatches(docs):
+    """Blocks without their samples/ file or that differ from it, and, when
+    every doc is checked, samples/ files no doc shows."""
+    shown = set()
+    for doc in docs:
+        for line, path, code in sample_blocks(doc):
+            if path is None:
+                yield (f'{doc}:{line}: no <!-- sample: samples/... --> line '
+                       'right above the block')
+            elif not (REPO / path).is_file():
+                yield f'{doc}:{line}: {path} is missing'
+            elif (REPO / path).read_bytes() != code.encode():
+                yield f'{doc}:{line}: block differs from {path}'
+            shown.add(path)
+    if set(docs) >= set(DOCS):
+        for path in sample_files():
+            if path not in shown:
+                yield f'{path} is in no doc'
 
 
 def broken_links(doc):
@@ -124,6 +175,7 @@ def main():
             failures.append(f'{doc}: broken link {target}')
         for problem in unknown_models(doc):
             failures.append(f'{doc}: {problem}')
+    failures += sample_mismatches(args.docs)
     with tempfile.TemporaryDirectory(prefix='mediapipe-doc-') as tmp:
         app = Path(tmp) / 'doc_snippets'
         app.mkdir()

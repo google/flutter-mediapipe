@@ -26,6 +26,7 @@ Every task has a query that says which delegates this package offers on the
 current platform, and why the others are unavailable. It describes declared
 support; it does not load a model.
 
+<!-- sample: samples/vision/common/capabilities.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -62,6 +63,7 @@ The Image Classifier and the Image Embedder can look at part of an image. A
 image, and `classify`, `embed` and their video and live stream forms all take
 one.
 
+<!-- sample: samples/vision/image_classifier/region_of_interest.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -93,6 +95,7 @@ as many image decoders return them), `rgba` (four) or `bgra` (four, in the
 order Apple cameras supply). Rows default to the width times the channel
 count; pass `bytesPerRow` when a camera pads them.
 
+<!-- sample: samples/vision/face_detector/rgb_pixels.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -128,6 +131,7 @@ for each face, the transform from Google's canonical face model to the face
 it found: a 4 by 4 `Matrix`. `at(row, column)` reads one element, and `data`
 holds the values column by column.
 
+<!-- sample: samples/vision/face_landmarker/transformation_matrixes.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -162,6 +166,7 @@ foreground mask for each pose it found, in `segmentationMasks`. Each
 `ConfidenceMask` holds one confidence in `[0, 1]` per pixel, indexed
 `y * width + x`.
 
+<!-- sample: samples/vision/pose_landmarker/segmentation_masks.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -190,6 +195,7 @@ The Holistic Landmarker finds one person. `outputPoseSegmentationMask` adds
 that person's mask, and `outputFaceBlendshapes` the 52 expression scores of
 their face. Either is null when the part it comes from was not found.
 
+<!-- sample: samples/vision/holistic_landmarker/mask_and_blendshapes.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -224,6 +230,7 @@ The Image Segmenter returns confidence masks by default: one per category,
 in the order of `labels`. Request `outputCategoryMask` as well, or instead, as
 the README's sample does, for the winning category per pixel.
 
+<!-- sample: samples/vision/image_segmenter/confidence_masks.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -256,6 +263,7 @@ With `quantize`, the Image Embedder returns each vector as bytes in
 in `floatEmbedding`. `ImageEmbedder.cosineSimilarity` compares two of the
 same kind.
 
+<!-- sample: samples/vision/image_embedder/quantized.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

@@ -93,6 +93,7 @@ again whenever the list changes. It downloads each model once, checks it
 against its pinned SHA-256 and writes it into `assets/mediapipe/`, so nothing
 is downloaded at run time. `VisionModels.byName` lists the accepted names.
 
+<!-- sample: samples/vision/face_landmarker/image.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -136,6 +137,7 @@ assets, as in the sample below.
 To use your own model instead, pass exactly one of `modelPath` (a native file
 path, or a URL in browsers) or `modelBytes`, for example from a Flutter asset:
 
+<!-- sample: samples/vision/face_landmarker/model_from_asset.dart -->
 ```dart
 import 'package:flutter/services.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
@@ -227,6 +229,7 @@ interest, RGB input and every task's capability query, see the
 
 A box in pixels and six keypoints (eyes, ears, nose, mouth) per face.
 
+<!-- sample: samples/vision/face_detector/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -252,6 +255,7 @@ Future<void> findFaces(VisionImage image) async {
 478 landmarks per face (see the quick start), and optionally 52 blendshape
 scores that describe the expression.
 
+<!-- sample: samples/vision/face_landmarker/expressions_image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -280,6 +284,7 @@ Future<void> readExpression(VisionImage image) async {
 
 21 landmarks per hand, normalized to the image, with which hand it is.
 
+<!-- sample: samples/vision/hand_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -305,6 +310,7 @@ Future<void> findHands(VisionImage image) async {
 Google's canned gestures (`Thumb_Up`, `Victory`, `Open_Palm` and more) for
 each hand, with the same hand landmarks as Hand Landmarker.
 
+<!-- sample: samples/vision/gesture_recognizer/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -329,6 +335,7 @@ Future<void> recognizeGestures(VisionImage image) async {
 33 body landmarks per pose, plus world coordinates in meters. Set
 `outputSegmentationMasks: true` for a mask of each person.
 
+<!-- sample: samples/vision/pose_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -352,6 +359,7 @@ Future<void> findPoses(VisionImage image) async {
 
 Face, pose and both hands from one task and one pass over the image.
 
+<!-- sample: samples/vision/holistic_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -377,6 +385,7 @@ Labeled boxes in pixels from EfficientDet-Lite0. `maxResults` and
 `scoreThreshold` trim the list; `categoryAllowlist` keeps only the labels
 you name.
 
+<!-- sample: samples/vision/object_detector/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -410,6 +419,7 @@ and its
 
 The most likely categories for the whole image, from EfficientNet-Lite0.
 
+<!-- sample: samples/vision/image_classifier/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -433,6 +443,7 @@ Future<void> classifyPhoto(VisionImage image) async {
 A feature vector per image. Compare two with cosine similarity: values near
 1 mean similar content.
 
+<!-- sample: samples/vision/image_embedder/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -458,6 +469,7 @@ Future<double> compareImages(VisionImage first, VisionImage second) async {
 A category for every pixel (DeepLab v3 knows 21, such as person, cat and
 car), or one confidence mask per category.
 
+<!-- sample: samples/vision/image_segmenter/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -497,6 +509,7 @@ Exclude stroke draws nothing on a browser's GPU; send a short scribble
 there. Not available on Windows, where Google's library takes about 25
 seconds a stroke.
 
+<!-- sample: samples/vision/interactive_segmenter/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -531,6 +544,7 @@ frame's result. Use it for frames that do not run away from you, such as a
 decoded video file. Create the task in video mode, then submit frames with
 **strictly increasing millisecond timestamps**:
 
+<!-- sample: samples/vision/face_landmarker/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -590,6 +604,7 @@ it, so a task slower than the camera drops frames instead of falling behind.
 `droppedFrames` counts them. Tracking and smoothing are the same as in video
 mode, and a frame that runs gets the result video mode would give it.
 
+<!-- sample: samples/vision/face_landmarker/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -663,6 +678,7 @@ pubspec and keeps the code where only its web build imports it. Frames are
 stamped with the page's clock, moved one millisecond on when two would share a
 value, as above.
 
+<!-- sample: samples/vision/common/browser_overlay.dart -->
 ```dart
 import 'dart:async';
 import 'dart:js_interop';
@@ -746,6 +762,7 @@ on the GPU where this package offers it and on the CPU elsewhere, including
 a machine that refuses the GPU it was offered, such as Linux with only a
 software renderer:
 
+<!-- sample: samples/vision/face_landmarker/gpu.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

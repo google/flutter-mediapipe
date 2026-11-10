@@ -45,6 +45,7 @@ A box in pixels and a score per face, in every frame.
 
 ### Video
 
+<!-- sample: samples/vision/face_detector/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -85,6 +86,7 @@ Future<void> findFacesInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/face_detector/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -135,6 +137,7 @@ Future<void> findFacesLive(Stream<Frame> frames) async {
 
 ### Video
 
+<!-- sample: samples/vision/face_landmarker/expressions_video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -175,6 +178,7 @@ Future<void> readExpressionsInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/face_landmarker/expressions_live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -225,6 +229,7 @@ Future<void> readExpressionsLive(Stream<Frame> frames) async {
 
 ### Video
 
+<!-- sample: samples/vision/hand_landmarker/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -266,6 +271,7 @@ Future<void> findHandsInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/hand_landmarker/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -317,6 +323,7 @@ Google's canned gesture for each hand in the frame.
 
 ### Video
 
+<!-- sample: samples/vision/gesture_recognizer/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -357,6 +364,7 @@ Future<void> recognizeGesturesInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/gesture_recognizer/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -407,6 +415,7 @@ Future<void> recognizeGesturesLive(Stream<Frame> frames) async {
 
 ### Video
 
+<!-- sample: samples/vision/pose_landmarker/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -446,6 +455,7 @@ Future<void> findPosesInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/pose_landmarker/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -495,6 +505,7 @@ Face, pose and both hands of one person, from one pass over each frame.
 
 ### Video
 
+<!-- sample: samples/vision/holistic_landmarker/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -536,6 +547,7 @@ Future<void> trackPersonInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/holistic_landmarker/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -587,6 +599,7 @@ Labeled boxes in pixels, at most five a frame, with a score of at least 0.4.
 
 ### Video
 
+<!-- sample: samples/vision/object_detector/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -629,6 +642,7 @@ Future<void> detectObjectsInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/object_detector/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -681,6 +695,7 @@ The three most likely categories for each whole frame.
 
 ### Video
 
+<!-- sample: samples/vision/image_classifier/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -722,6 +737,7 @@ Future<void> classifyFramesInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/image_classifier/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -774,6 +790,7 @@ changes: values near 1 mean similar content.
 
 ### Video
 
+<!-- sample: samples/vision/image_embedder/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -817,6 +834,7 @@ Future<void> compareFramesInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/image_embedder/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -870,6 +888,7 @@ A category for every pixel; here, the one at the center of each frame.
 
 ### Video
 
+<!-- sample: samples/vision/image_segmenter/video.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -915,6 +934,7 @@ Future<void> segmentSceneInVideo(Stream<Frame> frames) async {
 
 ### Live stream
 
+<!-- sample: samples/vision/image_segmenter/live_stream.dart -->
 ```dart
 import 'dart:typed_data';
 
