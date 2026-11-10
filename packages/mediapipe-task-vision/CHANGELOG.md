@@ -15,6 +15,12 @@
   matrices, masks, quantized embeddings and the tuning options.
 - The README's link to the object detection sample app points to
   `samples/apps/object_detection`, where the app moved.
+- In WebKit browsers, a task whose create fails is created once more in a
+  fresh worker with its own copy of the model bytes. On macOS WebKit,
+  Google's web runtime sometimes fails to create a sound task, for example
+  with "Unable to initialize TagMaps for node"; a model that is really bad
+  fails both times. Each retry logs a `MEDIAPIPE_WEBKIT_CREATE_RETRY`
+  warning in the console.
 
 ## 0.2.0
 
