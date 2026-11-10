@@ -75,37 +75,59 @@
       }
     });
   }
+  // WebKit only (macOS 15, WebKit 26.6): a sound create sometimes fails in a
+  // fresh worker with an error the task's graph cannot raise, such as "Unable
+  // to initialize TagMaps for node" or "Module._imageConverter is not a
+  // function". Its JavaScriptCore crashes the same way under Google's own
+  // JavaScript, so it is retried once in another fresh worker. A model that
+  // is really bad fails both times.
+  const ua = globalThis.navigator?.userAgent ?? '';
+  const webKit = /AppleWebKit\//.test(ua) && !/Chrome\/|Chromium\/|Edg\//.test(ua);
+  async function createOnce(options) {
+    const worker = takeWorker(options.runtimeBaseUrl);
+    const id = next++;
+    const state = {id, worker, runtimeBaseUrl: options.runtimeBaseUrl,
+      pending: new Map(), next: 0, dead: false,
+      overlayActive: false, overlayOptions: {connections: true, points: false}};
+    workers.set(id, state);
+    totalCreated++;
+    worker.onmessage = ({data}) => {
+      const pending = state.pending.get(data.id);
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      state.pending.delete(data.id);
+      if (data.overlayFailed) state.overlayActive = false;
+      if (data.error) pending.reject(new Error(data.error));
+      else pending.resolve(data.result);
+    };
+    worker.onerror = event => {
+      event.preventDefault();
+      fail(state, new Error(event.message || 'MediaPipe worker failed'));
+    };
+    worker.onmessageerror = () => fail(state, new Error('Invalid MediaPipe worker response'));
+    try {
+      await request(state, 'create', options);
+      // After this task's warm-up rather than during it.
+      if (switching) prepareSpare(options.runtimeBaseUrl, 3000);
+      return id;
+    } catch (error) {
+      fail(state, error);
+      throw error;
+    }
+  }
   globalThis.mediapipeVision = {
     async create(options) {
-      const worker = takeWorker(options.runtimeBaseUrl);
-      const id = next++;
-      const state = {id, worker, runtimeBaseUrl: options.runtimeBaseUrl,
-        pending: new Map(), next: 0, dead: false,
-        overlayActive: false, overlayOptions: {connections: true, points: false}};
-      workers.set(id, state);
-      totalCreated++;
-      worker.onmessage = ({data}) => {
-        const pending = state.pending.get(data.id);
-        if (!pending) return;
-        clearTimeout(pending.timer);
-        state.pending.delete(data.id);
-        if (data.overlayFailed) state.overlayActive = false;
-        if (data.error) pending.reject(new Error(data.error));
-        else pending.resolve(data.result);
-      };
-      worker.onerror = event => {
-        event.preventDefault();
-        fail(state, new Error(event.message || 'MediaPipe worker failed'));
-      };
-      worker.onmessageerror = () => fail(state, new Error('Invalid MediaPipe worker response'));
+      if (!webKit) return createOnce(options);
+      // The first try transfers the bytes to its worker, so the second
+      // gets its own copy.
+      const again = options.modelBytes ? {...options, modelBytes: options.modelBytes.slice()} : options;
       try {
-        await request(state, 'create', options);
-        // After this task's warm-up rather than during it.
-        if (switching) prepareSpare(options.runtimeBaseUrl, 3000);
-        return id;
+        return await createOnce(options);
       } catch (error) {
-        fail(state, error);
-        throw error;
+        console.warn(`MEDIAPIPE_WEBKIT_CREATE_RETRY ${options.task}: ${error?.message ?? error}`);
+        const id = await createOnce(again);
+        console.warn(`MEDIAPIPE_WEBKIT_CREATE_RETRY_RECOVERED ${options.task}`);
+        return id;
       }
     },
     detect(id, input) {
