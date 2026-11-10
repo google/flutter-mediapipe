@@ -2,4 +2,4 @@
 # them at the checkout's copy.
 dependency_overrides:
   mediapipe_core:
-    path: ../../packages/mediapipe-core
+    path: ../../../packages/mediapipe-core

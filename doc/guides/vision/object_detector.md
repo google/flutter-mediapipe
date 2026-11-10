@@ -5,7 +5,7 @@ of multiple classes of objects, for example locating the dogs in an image.
 These instructions show you how to use the Object Detector in Flutter, with
 one Dart API on Android, iOS, macOS, Linux, Windows and the web. The code
 sample described in these instructions is in
-[`samples/object_detection`](../../../samples/object_detection/).
+[`samples/apps/object_detection`](../../../samples/apps/object_detection/).
 
 For more information about the capabilities, models and configuration options
 of this task, see Google's
@@ -31,28 +31,28 @@ adds the package from pub.dev instead; see [Setup](#setup).
 
 ```sh
 git clone https://github.com/google/flutter-mediapipe.git
-cd flutter-mediapipe/samples/object_detection
+cd flutter-mediapipe/samples/apps/object_detection
 flutter pub get
 dart run mediapipe_core:bundle_models
 flutter run -d <device>
 ```
 
-See the sample's [README](../../../samples/object_detection/README.md) for
+See the sample's [README](../../../samples/apps/object_detection/README.md) for
 the requirements of each platform.
 
 ### Key components
 
 The following files contain the code that matters for object detection:
 
-- [`detector_helper.dart`](../../../samples/object_detection/lib/detector_helper.dart)
+- [`detector_helper.dart`](../../../samples/apps/object_detection/lib/detector_helper.dart)
   creates the object detector, chooses the delegate and runs it in each
   running mode. It is the counterpart of Google's `ObjectDetectorHelper.kt`.
-- [`main.dart`](../../../samples/object_detection/lib/main.dart) builds the
+- [`main.dart`](../../../samples/apps/object_detection/lib/main.dart) builds the
   app: the Camera and Gallery tabs over the settings panel.
-- [`overlay.dart`](../../../samples/object_detection/lib/overlay.dart)
+- [`overlay.dart`](../../../samples/apps/object_detection/lib/overlay.dart)
   draws the detection results, like Google's `OverlayView.kt`.
-- [`camera_page.dart`](../../../samples/object_detection/lib/camera_page.dart)
-  and [`gallery_page.dart`](../../../samples/object_detection/lib/gallery_page.dart)
+- [`camera_page.dart`](../../../samples/apps/object_detection/lib/camera_page.dart)
+  and [`gallery_page.dart`](../../../samples/apps/object_detection/lib/gallery_page.dart)
   feed camera frames, photos and video frames to the helper.
 
 ## Setup
@@ -278,14 +278,14 @@ Keep what the producer reads valid until the detector has run the frame: in
 browsers, close the detector before you stop the camera. In browsers, the
 sample's producer reads the `<video>` element with `createImageBitmap` and
 returns `VisionImage.fromBrowserFrame`; see
-[`camera_source_web.dart`](../../../samples/object_detection/lib/camera/camera_source_web.dart).
+[`camera_source_web.dart`](../../../samples/apps/object_detection/lib/camera/camera_source_web.dart).
 For Android's YUV frames, see
-[`camera_source_native.dart`](../../../samples/object_detection/lib/camera/camera_source_native.dart).
+[`camera_source_native.dart`](../../../samples/apps/object_detection/lib/camera/camera_source_native.dart).
 
 > **Note:** Phone cameras deliver frames in the sensor's orientation. Pass
 > the frame's clockwise rotation as `rotationDegrees` when you run the task,
 > and turn the drawn results the same way as the preview. The sample's
-> [`geometry.dart`](../../../samples/object_detection/lib/camera/geometry.dart)
+> [`geometry.dart`](../../../samples/apps/object_detection/lib/camera/geometry.dart)
 > computes both.
 
 ## Run the task
@@ -357,7 +357,7 @@ Note the following:
 
 In the example code, the `detectImage`, `detectVideoFrame` and
 `detectLivestreamFrame` methods of
-[`ObjectDetectorHelper`](../../../samples/object_detection/lib/detector_helper.dart)
+[`ObjectDetectorHelper`](../../../samples/apps/object_detection/lib/detector_helper.dart)
 run the task in each mode.
 
 ## Handle and display results
@@ -403,7 +403,7 @@ clamp it if your drawing needs it inside.
 
 To draw the results, map each box from the input's pixels onto your widget.
 The sample's
-[`DetectionPainter`](../../../samples/object_detection/lib/overlay.dart)
+[`DetectionPainter`](../../../samples/apps/object_detection/lib/overlay.dart)
 does this with a `CustomPainter`, including the rotation of camera frames
 and the mirroring of front cameras.
 

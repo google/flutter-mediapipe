@@ -3,13 +3,14 @@ name: Samples
 permissions:
   contents: read
 
-# The samples build against the packages by path, so a package change can
-# break them as much as a change to the samples.
+# The sample app builds against the packages by path, so a package change can
+# break it as much as a change to the app. samples/'s doc samples are checked
+# by builder.yaml.
 on:
   push:
     branches: [main]
     paths:
-      - samples/**
+      - samples/apps/object_detection/**
       - packages/mediapipe-core/**
       - packages/mediapipe-task-vision/**
       - gallery/packages/video_frames/**
@@ -17,7 +18,7 @@ on:
       - .github/workflows/samples.yaml
   pull_request:
     paths:
-      - samples/**
+      - samples/apps/object_detection/**
       - packages/mediapipe-core/**
       - packages/mediapipe-task-vision/**
       - gallery/packages/video_frames/**
@@ -62,7 +63,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: samples/object_detection
+        working-directory: samples/apps/object_detection
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - if: matrix.target == 'android'

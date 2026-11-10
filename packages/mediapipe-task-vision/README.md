@@ -404,7 +404,7 @@ Future<void> detectObjects(VisionImage image) async {
 For a complete app with a live camera, photos and videos, see the
 [Object Detector guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/object_detector.md)
 and its
-[sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/object_detection).
+[sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/apps/object_detection).
 
 ### Image Classifier
 

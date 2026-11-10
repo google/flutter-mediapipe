@@ -6,7 +6,7 @@ import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:object_detection/detector_helper.dart';
 
 // Runs Google's detector on the host, with the model bundle_models wrote.
-const _dog = '../../gallery/samples/dog.jpg';
+const _dog = '../../../gallery/samples/dog.jpg';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
