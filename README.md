@@ -148,6 +148,10 @@ supported delegates and why any other is unavailable.
 - [Object detection guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/object_detector.md), with a
   [sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/object_detection/) for every platform, following
   Google's Android guide and sample.
+- [Video and live stream samples](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/video_and_live_stream.md) for every
+  camera-capable vision task.
+- [Vision options and extra outputs](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/options_and_outputs.md):
+  regions of interest, RGB input, masks, matrices and every capability query.
 - [Platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md): permissions, entitlements, minimum
   OS versions, offline builds and browser hosting.
 - [Privacy and licenses](https://github.com/google/flutter-mediapipe/blob/main/doc/privacy_and_licenses.md): what is downloaded, from

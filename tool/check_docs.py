@@ -28,6 +28,8 @@ DOCS = [
     'README.md', 'MIGRATION.md', 'CONTRIBUTING.md',
     'doc/mediapipe_core.md', 'doc/platform_setup.md', 'doc/privacy_and_licenses.md',
     'doc/guides/vision/object_detector.md',
+    'doc/guides/vision/video_and_live_stream.md',
+    'doc/guides/vision/options_and_outputs.md',
     *(f'packages/{folder}/README.md' for folder in package_folders()),
 ]
 BLOCK = re.compile(r'^```dart\n(.*?)^```', re.S | re.M)

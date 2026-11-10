@@ -172,7 +172,34 @@ Future<bool> canSummarize() async {
 ```
 
 The result also carries the reason for every unavailable delegate. It
-describes declared support; it does not load a model.
+describes declared support; it does not load a model. Every task has a query,
+and the Text Embedder's takes a model, because EmbeddingGemma needs 64-bit
+Android where the classic embedders also run on 32-bit Android:
+
+```dart
+import 'package:mediapipe_text/mediapipe_text.dart';
+
+Future<void> reportTextSupport() async {
+  final queries = <String, Future<TaskCapabilities> Function()>{
+    'Text Classifier': queryTextClassifierCapabilities,
+    'Language Detector': queryLanguageDetectorCapabilities,
+    'Text Embedder': queryTextEmbedderCapabilities,
+    'EmbeddingGemma': () =>
+        queryTextEmbedderCapabilities(TextModels.embeddingGemma),
+    'Proofreader': queryTextProofreaderCapabilities,
+    'Summarizer': queryTextSummarizerCapabilities,
+  };
+  for (final MapEntry(key: task, value: query) in queries.entries) {
+    final support = await query();
+    final delegates = support.supportedDelegates.map((d) => d.name);
+    print('$task: ${delegates.join(', ')}');
+    for (final MapEntry(key: delegate, value: reason)
+        in support.unavailableReasons.entries) {
+      print('  no ${delegate.name}: $reason');
+    }
+  }
+}
+```
 
 ## EmbeddingGemma 300M
 
@@ -205,9 +232,48 @@ Future<double> similarity(String a, String b) async {
 }
 ```
 
-All eight official formatting modes are supported, including retrieval
-documents with titles and query/document roles; omitting `formatContext` passes
-none to Google's API. `l2Normalize` and `quantize` (both off by default) go to
+All eight official formatting modes are supported; omitting `formatContext`
+passes none to Google's API. `retrievalQuery` and `retrievalDocument` format a
+search query and its documents. `questionAnswering`, `factChecking` and
+`codeRetrieval` format either side of a pair, chosen by `role`
+(`TextRole.query`, the default, or `TextRole.document`). A document can carry
+a `title`:
+
+```dart
+import 'package:mediapipe_text/mediapipe_text.dart';
+
+Future<void> bestAnswer(String question, Map<String, String> answers) async {
+  final task = await TextEmbedder.create(
+    TextEmbedderOptions(model: TextModels.embeddingGemma),
+  );
+  try {
+    final query = await task.embed(
+      question,
+      formatContext: TextFormatContext(
+        taskType: EmbeddingType.questionAnswering,
+      ),
+    );
+    for (final MapEntry(key: title, value: answer) in answers.entries) {
+      final document = await task.embed(
+        answer,
+        formatContext: TextFormatContext(
+          taskType: EmbeddingType.questionAnswering,
+          role: TextRole.document,
+          title: title,
+        ),
+      );
+      final score = TextEmbedder.cosineSimilarity(
+        query.embeddings.single,
+        document.embeddings.single,
+      );
+      print('$title: ${score.toStringAsFixed(2)}');
+    }
+  } finally {
+    await task.dispose();
+  }
+}
+```
+ `l2Normalize` and `quantize` (both off by default) go to
 Google's postprocessor, and quantized results keep Google's signed-int8 bytes.
 The model's 512-token limit includes formatting and special tokens; input is
 never truncated or chunked. The model is 183.8 MB and under the
@@ -231,7 +297,9 @@ Future<void> proofread() async {
     for (final edit in result.corrections) {
       print('${edit.type.name}: ${edit.text}');
     }
-    await for (final update in task.proofreadStream('I recieved your mesage.')) {
+    await for (final update in task.proofreadStream(
+      'I recieved your mesage.',
+    )) {
       if (update.chunk != null) print(update.chunk);
       if (update.done) print(update.corrections);
     }
@@ -270,7 +338,30 @@ Future<void> summarize(String article) async {
 }
 ```
 
-Google's output is kept as is, bullet markers and whitespace included.
+Google's output is kept as is, bullet markers and whitespace included. In
+keypoints mode the model writes each point on its own line, starting with
+`* `:
+
+```dart
+import 'package:mediapipe_text/mediapipe_text.dart';
+
+Future<void> listKeyPoints(String article) async {
+  final task = await TextSummarizer.create(
+    TextSummarizerOptions(
+      model: TextModels.summarizer,
+      mode: TextSummarizerMode.keypoints,
+    ),
+  );
+  try {
+    final summary = (await task.summarize(article)).summary ?? '';
+    for (final line in summary.split('\n')) {
+      if (line.startsWith('* ')) print(line.substring(2));
+    }
+  } finally {
+    await task.dispose();
+  }
+}
+```
 
 ### Streaming, token budgets and cancellation
 
