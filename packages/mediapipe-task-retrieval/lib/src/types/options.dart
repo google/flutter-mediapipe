@@ -99,8 +99,9 @@ final class SemanticRetrieverOptions {
   /// [embeddingDimension] defaults to Google's 768, the EmbeddingGemma 2
   /// models' size; [chunkSize] and [chunkOverlap] to Google's 512 and 100
   /// characters. [databasePath] names a SQLite file for the index on Android,
-  /// iOS, macOS, Linux and Windows, and null keeps it in memory; browsers
-  /// keep it in memory only.
+  /// iOS, macOS, Linux and Windows, and null keeps it in memory. Browsers
+  /// keep it in memory only: there, `SemanticRetriever.create` throws when
+  /// [databasePath] is set.
   SemanticRetrieverOptions({
     required this.embedder,
     this.databasePath,

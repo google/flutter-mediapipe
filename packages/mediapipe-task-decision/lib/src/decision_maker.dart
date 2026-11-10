@@ -106,7 +106,8 @@ final class DecisionMaker {
   );
 
   /// [evaluateBoolean] for each of [texts] in one call, which Google's
-  /// engine batches; [sharedPrefix] is text every input starts with.
+  /// engine batches. Google's engine reads [sharedPrefix] before each of
+  /// [texts], joined to it with a newline, so leave it out of [texts].
   Future<List<BooleanResult>> evaluateBooleanBatch(
     List<String> texts,
     BooleanQuestion question, {
