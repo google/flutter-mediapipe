@@ -301,21 +301,6 @@ Future<String> transcribeClip(Uint8List wavBytes) async {
     await transcriber.dispose();
   }
 }
-
-Future<Float32List> speak(String text) async {
-  final tts = await TextToSpeech.create(
-    TextToSpeechOptions(model: AudioModels.phonon),
-  );
-  try {
-    final speech = await tts.synthesize(text, voiceId: 'freya');
-    for (final word in speech.wordTimestamps) {
-      print('${word.word} at ${word.startSeconds} s');
-    }
-    return speech.samples; // mono, at speech.sampleRateHz (24 kHz)
-  } finally {
-    await tts.dispose();
-  }
-}
 ```
 
 To transcribe live audio, such as a microphone's, pass each block to

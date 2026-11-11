@@ -35,7 +35,6 @@ const cases = {
   language_detector: {title: 'Language Detector', text: true, row: /^fr (0\.[5-9]|1\.0)/},
   text_classifier: {title: 'Text Classifier', text: true, row: /^positive (0\.[5-9]|1\.0)/},
   text_embedder: {title: 'Text Embedder', text: true, compare: true, result: /^Cosine similarity -?\d+\.\d+$/},
-  embedding_gemma: {title: 'EmbeddingGemma', text: true, compare: true, result: /^Cosine similarity -?\d+\.\d+$/},
   // What Google's Python API answers the page's sample with Laya: a refund,
   // about shipping, and unhappy (1.28 of 0 to 4).
   decision_maker: {title: 'Decision Maker', decision: [
@@ -129,9 +128,11 @@ try {
   const manifest = await manifestResponse.json();
   // Proofreader and Summarizer are not yet available on the web, so a web build
   // bundles them for the text probe's comparison only; the gallery shows their
-  // cards, not tiles. EmbeddingGemma is a tile.
+  // cards, not tiles. EmbeddingGemma is no tile either: it is a model the Text
+  // Embedder page offers, chosen and run in that page's visit.
   const probeOnly = new Set(['text_proofreader', 'text_summarizer']);
-  for (const id of manifest.tasks.filter(id => !probeOnly.has(id))) {
+  const pageless = new Set([...probeOnly, 'embedding_gemma']);
+  for (const id of manifest.tasks.filter(id => !pageless.has(id))) {
     assert.ok(cases[id], `new bundled task ${id} needs a gallery journey`);
   }
   // Flutter renders sidebar links as <a> without an href, which has no link
@@ -195,7 +196,7 @@ try {
   // tour of every task passes them by.
   const namedOnly = new Set(['audio_transcriber', 'text_to_speech']);
   const expected = manifest.tasks.filter(id =>
-    !probeOnly.has(id) && !refused.has(id) && (only ? only.has(id) : !namedOnly.has(id)));
+    !pageless.has(id) && !refused.has(id) && (only ? only.has(id) : !namedOnly.has(id)));
   assert.ok(expected.length + refused.size > 0, 'empty release task list');
   for (const id of refused) {
     if (!manifest.tasks.includes(id)) continue;
@@ -292,6 +293,23 @@ try {
         .waitFor({timeout: 120000});
       await page.getByText(/Done in \d+\.\d ms/).waitFor();
       report.checks.push(`${id}:cpu:run`);
+      if (id === 'text_embedder' && manifest.tasks.includes('embedding_gemma')) {
+        // EmbeddingGemma, the guide's other model: choosing it compares the
+        // two texts again, with its Task Type and the Gemma terms on the page.
+        enter(`${id}:embedding_gemma`);
+        assert.equal(await page.getByRole('button', {name: /Task Type/}).count(), 0);
+        assert.equal(await page.getByText(/Gemma Terms of Use/).count(), 0);
+        await page.getByRole('button', {name: /Universal Sentence Encoder/}).click();
+        await page.getByRole('menuitem', {name: /^EmbeddingGemma 300M/}).click();
+        // The page is busy from the frame of the choice, so the time that
+        // returns is the new model's.
+        await page.getByRole('button', {name: /EmbeddingGemma 300M/}).waitFor();
+        await page.getByText(/Done in \d+\.\d ms/).waitFor({timeout: 300000});
+        await page.getByText(spec.result).waitFor();
+        await page.getByRole('button', {name: /Task Type/}).waitFor();
+        await page.getByText(/Gemma Terms of Use/).first().waitFor();
+        report.checks.push(`${id}:cpu:embedding_gemma`);
+      }
     } else if (spec.universal) {
       // The first comparison fetches Google's 388 MB model from Hugging Face.
       enter(`${id}:compare`);

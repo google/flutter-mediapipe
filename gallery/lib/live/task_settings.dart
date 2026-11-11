@@ -184,26 +184,25 @@ const taskSettings = <String, List<TaskSetting>>{
     CountSetting('maxResults', 'Max Results', initial: 3),
     ShareSetting('scoreThreshold', 'Score Threshold', initial: 0),
   ],
+  // Task Type shows only while EmbeddingGemma is the model: Google's embedder
+  // formats its prompt for the chosen use, in the order of the task types in
+  // Google's Text Embedder guide. The retrieval, question, fact and code uses
+  // pair a query with a document: the first text is the query and the second
+  // the document.
   'text_embedder': [
-    SwitchSetting('l2Normalize', 'L2 Normalize'),
-    SwitchSetting('quantize', 'Quantize'),
-  ],
-  // Google's embedder formats EmbeddingGemma's prompt for the chosen use.
-  // The retrieval, question, fact and code uses pair a query with a
-  // document: the first text is the query and the second the document.
-  'embedding_gemma': [
     ChoiceSetting(
       'taskType',
       'Task Type',
       options: [
-        'Semantic Similarity',
         'Retrieval',
+        'Semantic Similarity',
+        'Classification',
+        'Clustering',
         'Question Answering',
         'Fact Checking',
         'Code Retrieval',
-        'Classification',
-        'Clustering',
       ],
+      initial: 1,
     ),
     SwitchSetting('l2Normalize', 'L2 Normalize'),
     SwitchSetting('quantize', 'Quantize'),

@@ -166,12 +166,11 @@ final class GalleryTask {
 
   /// Whether the model is one of Google's Gemma models, which come under the
   /// Gemma Terms of Use rather than Apache 2.0, so the gallery passes the
-  /// terms on wherever it runs one.
-  bool get gemmaModel => const {
-    'embedding_gemma',
-    'text_proofreader',
-    'text_summarizer',
-  }.contains(runtimeId);
+  /// terms on wherever it runs one. Text Embedder's EmbeddingGemma is a model
+  /// choice on its page, which passes the terms on itself
+  /// ([offersEmbeddingGemma]).
+  bool get gemmaModel =>
+      const {'text_proofreader', 'text_summarizer'}.contains(runtimeId);
 
   /// Sample input shipped for the demo.
   final String sample;
@@ -194,13 +193,16 @@ Delegate preferredDelegate(Iterable<Delegate> supported) =>
 TaskCapabilities _text(TaskPlatform platform) =>
     textClassifierCapabilitiesForPlatform(platform);
 
-/// EmbeddingGemma's support, from the embedder's table for that model: the
-/// CPU wherever the classic embedders run.
-TaskCapabilities _embeddingGemma(TaskPlatform platform) =>
+/// Whether Text Embedder offers EmbeddingGemma as a model: the build bundled
+/// it, which `assets/manifest.json` lists as `embedding_gemma`, and the
+/// embedder's table for that model supports [platform], the CPU wherever the
+/// classic embedders run.
+bool offersEmbeddingGemma(TaskPlatform platform, Set<String> bundled) =>
+    bundled.contains('embedding_gemma') &&
     textEmbedderCapabilitiesForPlatform(
       platform,
       model: TextModels.embeddingGemma,
-    );
+    ).isSupported;
 
 /// Audio Classifier's support, from its own capability table.
 TaskCapabilities _audio(TaskPlatform platform) =>
@@ -466,16 +468,6 @@ final _catalog = <GalleryTask>[
     model: TextModels.universalSentenceEncoder,
     sample: '',
     capabilities: _text,
-  ),
-  GalleryTask(
-    id: 'embedding_gemma',
-    category: GalleryCategory.text,
-    demo: GalleryDemo.text,
-    title: 'EmbeddingGemma',
-    summary: 'Two texts as Gemma vectors, formatted for a chosen use.',
-    model: TextModels.embeddingGemma,
-    sample: '',
-    capabilities: _embeddingGemma,
   ),
   GalleryTask(
     id: 'text_proofreader',

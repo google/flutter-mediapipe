@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mediapipe_decision/mediapipe_decision.dart'
     show DecisionModels, DownloadAsset;
+import 'package:mediapipe_text/mediapipe_text.dart' show TextModels;
 
 /// One of Google's official models for a task, as MediaPipe Studio offers
 /// them. The gallery bundles each task's standard model; these download when
@@ -47,6 +48,7 @@ final class TaskModel {
 const standardModelNames = <String, String>{
   'image_embedder': 'MobileNet-V3 (Small)',
   'image_segmenter': 'DeepLab V3',
+  'text_embedder': 'Universal Sentence Encoder',
 };
 
 /// Alternatives to each task's bundled model, keyed by the catalog's runtime
@@ -152,15 +154,18 @@ const taskModels = <String, List<TaskModel>>{
       775706,
     ),
   ],
-  'text_embedder': [
-    TaskModel(
-      'BERT Embedder',
-      'text_embedder/bert_embedder/float32/1/bert_embedder.tflite',
-      '02ae6279faf86c2cd4ff18f61876c878bcc0b572b472f0678897a184c4ac7ef6',
-      26142232,
-    ),
-  ],
+  // The two models Google's Text Embedder guide lists: the bundled Universal
+  // Sentence Encoder, and EmbeddingGemma where the build bundles it too, so
+  // choosing it downloads nothing (`offersEmbeddingGemma` in the catalog).
+  'text_embedder': [embeddingGemmaModel],
 };
+
+/// EmbeddingGemma, as Google's Text Embedder guide names it.
+const embeddingGemmaModel = TaskModel.pinned(
+  'EmbeddingGemma 300M',
+  TextModels.embeddingGemma,
+  183816181,
+);
 
 final _downloaded = <String, Uint8List>{};
 

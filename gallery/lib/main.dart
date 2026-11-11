@@ -283,7 +283,13 @@ class _GalleryShellState extends State<_GalleryShell> {
         platform: widget.platform,
         onOpenMenu: openMenu,
       ),
-      GalleryDemo.text => TextPage(task: task, onOpenMenu: openMenu),
+      GalleryDemo.text => TextPage(
+        task: task,
+        embeddingGemma:
+            task.runtimeId == 'text_embedder' &&
+            offersEmbeddingGemma(widget.platform, widget.assets.bundledTasks),
+        onOpenMenu: openMenu,
+      ),
       GalleryDemo.decision => DecisionPage(
         task: task,
         platform: widget.platform,

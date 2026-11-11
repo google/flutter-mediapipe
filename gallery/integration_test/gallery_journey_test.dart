@@ -23,6 +23,7 @@ import 'package:mediapipe_gallery/text_page.dart';
 import 'package:mediapipe_gallery/transcriber_page.dart';
 import 'package:mediapipe_gallery/ui/components.dart';
 import 'package:mediapipe_gallery/ui/design.dart';
+import 'package:mediapipe_gallery/ui/workspace.dart';
 import 'package:mediapipe_gallery/universal_embedder_page.dart';
 
 import 'support/delegate_control.dart';
@@ -352,6 +353,10 @@ void main() {
           );
           if (compare) {
             expect(find.text('Cosine similarity'), findsOneWidget);
+            if (offersEmbeddingGemma(platform, assets.bundledTasks)) {
+              await _compareWithEmbeddingGemma(tester);
+              checks.add('${task.id}:cpu:embedding_gemma');
+            }
           } else if (generative) {
             final written = tester.widget<SelectableText>(
               find.byKey(generatedTextKey),
@@ -833,8 +838,46 @@ const _textCategories = <String, String>{
   'text_classifier': 'positive',
 };
 
-/// The embedders compare two texts.
-const _comparingTasks = {'text_embedder', 'embedding_gemma'};
+/// The embedder compares two texts.
+const _comparingTasks = {'text_embedder'};
+
+/// Chooses EmbeddingGemma on the Text Embedder page, which compares the two
+/// texts again with it. Its Task Type and the Gemma terms show only then.
+Future<void> _compareWithEmbeddingGemma(WidgetTester tester) async {
+  expect(find.byType(GemmaNotice), findsNothing);
+  final select = find.byKey(const ValueKey('model-select'));
+  // Phones keep settings in a bottom sheet, opened for the choice.
+  final sheet =
+      select.evaluate().isEmpty &&
+      find.byTooltip('Settings').evaluate().isNotEmpty;
+  if (sheet) {
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+  }
+  expect(find.text('Universal Sentence Encoder'), findsOneWidget);
+  expect(find.text('Task Type'), findsNothing);
+  await tester.ensureVisible(select);
+  await tester.tap(select);
+  await settle(tester);
+  await tester.tap(find.textContaining('EmbeddingGemma 300M').last);
+  await settle(tester);
+  expect(find.text('Task Type'), findsOneWidget);
+  expect(find.text('Semantic Similarity'), findsOneWidget);
+  if (sheet) {
+    Navigator.of(tester.element(select)).pop();
+    await settle(tester);
+  }
+  // The page is busy from the frame of the choice, so this is the new run;
+  // the model is 184 MB, and the wait allows for an emulated CPU.
+  await _until(
+    tester,
+    () => find.textContaining('Done in').evaluate().isNotEmpty,
+    attempts: 1200,
+  );
+  expect(find.text('Error'), findsNothing, reason: screenText(tester));
+  expect(find.text('Cosine similarity'), findsOneWidget);
+  expect(find.byType(GemmaNotice), findsOneWidget);
+}
 
 /// What Decision Maker answers the page's sample, as Google's Python API does
 /// with Laya: a refund, about shipping, and unhappy (1.28 of 0 to 4). The

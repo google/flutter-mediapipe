@@ -57,7 +57,6 @@ const _packages = {
   'language_detector': 'mediapipe_text',
   'text_classifier': 'mediapipe_text',
   'text_embedder': 'mediapipe_text',
-  'embedding_gemma': 'mediapipe_text',
   'text_proofreader': 'mediapipe_text',
   'text_summarizer': 'mediapipe_text',
   'decision_maker': 'mediapipe_decision',
