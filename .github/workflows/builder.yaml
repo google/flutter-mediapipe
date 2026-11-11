@@ -40,11 +40,19 @@ jobs:
       # together across the packages (tool/check_repository.py).
       - name: Check family lists and shared pins
         run: python3 -B tool/check_repository.py
-      # Every Dart sample in the docs must analyze cleanly and build for the
-      # web, its links must resolve and its model names exist
-      # (tool/check_docs.py).
+      # Every Dart sample in the docs must analyze cleanly, build for the web
+      # and equal its samples/ file, its links must resolve and its model names
+      # exist (tool/check_docs.py).
       - name: Check the docs' samples, links and model names
         run: python3 -B tool/check_docs.py
+      # samples/ holds each doc sample as a file, byte for byte; check_docs.py
+      # compares them, and here they analyze and are formatted as one package.
+      - name: Check samples/
+        working-directory: samples
+        run: |
+          flutter pub get
+          flutter analyze --fatal-infos
+          dart format --output=none --set-exit-if-changed audio core decision retrieval text vision
       # What pub.dev would receive: every package, copied outside the
       # repository, must pass `flutter pub publish --dry-run` with zero
       # warnings. Nothing is published

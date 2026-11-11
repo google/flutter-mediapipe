@@ -1,3 +1,14 @@
+## 0.2.1
+
+- The README has samples for image and audio embeddings, an index that mixes
+  text, image and audio records, metadata filters, `minSimilarity`, deleting
+  records and an index kept in a database file. The samples dispose the
+  embedder when the retriever fails to create, and take the delegate from
+  the capability query, so they run on the GPU in browsers.
+- `SemanticRetrieverOptions.databasePath`'s doc comment says that in browsers
+  `SemanticRetriever.create` throws when it is set.
+- The README names MediaPipe 1.2.2 as the native runtime.
+
 ## 0.2.0
 
 - Google's MediaPipe 1.2.2 native release (build of November 2, 2026)

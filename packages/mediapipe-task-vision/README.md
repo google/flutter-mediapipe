@@ -93,6 +93,7 @@ again whenever the list changes. It downloads each model once, checks it
 against its pinned SHA-256 and writes it into `assets/mediapipe/`, so nothing
 is downloaded at run time. `VisionModels.byName` lists the accepted names.
 
+<!-- sample: samples/vision/face_landmarker/image.dart -->
 ```dart
 import 'dart:typed_data';
 
@@ -127,7 +128,7 @@ camera buffers before creating a `VisionImage`. On native platforms,
 `VisionImage.fromFile('/absolute/path/photo.jpg')` lets MediaPipe decode a
 file. On web, `fromFile` takes a browser-accessible URL. A Flutter asset key
 is **not** a native file path or browser URL: use `rootBundle.load` for model
-assets, as above.
+assets, as in the sample below.
 
 ### Models
 
@@ -136,6 +137,7 @@ assets, as above.
 To use your own model instead, pass exactly one of `modelPath` (a native file
 path, or a URL in browsers) or `modelBytes`, for example from a Flutter asset:
 
+<!-- sample: samples/vision/face_landmarker/model_from_asset.dart -->
 ```dart
 import 'package:flutter/services.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
@@ -218,10 +220,16 @@ once and reuse it for every image or frame.
 [Image Segmenter](#image-segmenter) ·
 [Interactive Segmenter](#interactive-segmenter)
 
+The samples use each task's defaults. For the options that add to a result,
+such as masks, blendshapes and transformation matrices, for regions of
+interest, RGB input and every task's capability query, see the
+[options and extra outputs guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/options_and_outputs.md).
+
 ### Face Detector
 
 A box in pixels and six keypoints (eyes, ears, nose, mouth) per face.
 
+<!-- sample: samples/vision/face_detector/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -247,6 +255,7 @@ Future<void> findFaces(VisionImage image) async {
 478 landmarks per face (see the quick start), and optionally 52 blendshape
 scores that describe the expression.
 
+<!-- sample: samples/vision/face_landmarker/expressions_image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -275,6 +284,7 @@ Future<void> readExpression(VisionImage image) async {
 
 21 landmarks per hand, normalized to the image, with which hand it is.
 
+<!-- sample: samples/vision/hand_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -300,6 +310,7 @@ Future<void> findHands(VisionImage image) async {
 Google's canned gestures (`Thumb_Up`, `Victory`, `Open_Palm` and more) for
 each hand, with the same hand landmarks as Hand Landmarker.
 
+<!-- sample: samples/vision/gesture_recognizer/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -324,6 +335,7 @@ Future<void> recognizeGestures(VisionImage image) async {
 33 body landmarks per pose, plus world coordinates in meters. Set
 `outputSegmentationMasks: true` for a mask of each person.
 
+<!-- sample: samples/vision/pose_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -347,6 +359,7 @@ Future<void> findPoses(VisionImage image) async {
 
 Face, pose and both hands from one task and one pass over the image.
 
+<!-- sample: samples/vision/holistic_landmarker/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -372,6 +385,7 @@ Labeled boxes in pixels from EfficientDet-Lite0. `maxResults` and
 `scoreThreshold` trim the list; `categoryAllowlist` keeps only the labels
 you name.
 
+<!-- sample: samples/vision/object_detector/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -399,12 +413,13 @@ Future<void> detectObjects(VisionImage image) async {
 For a complete app with a live camera, photos and videos, see the
 [Object Detector guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/object_detector.md)
 and its
-[sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/object_detection).
+[sample app](https://github.com/google/flutter-mediapipe/tree/main/samples/apps/object_detection).
 
 ### Image Classifier
 
 The most likely categories for the whole image, from EfficientNet-Lite0.
 
+<!-- sample: samples/vision/image_classifier/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -428,6 +443,7 @@ Future<void> classifyPhoto(VisionImage image) async {
 A feature vector per image. Compare two with cosine similarity: values near
 1 mean similar content.
 
+<!-- sample: samples/vision/image_embedder/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -453,6 +469,7 @@ Future<double> compareImages(VisionImage first, VisionImage second) async {
 A category for every pixel (DeepLab v3 knows 21, such as person, cat and
 car), or one confidence mask per category.
 
+<!-- sample: samples/vision/image_segmenter/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -492,6 +509,7 @@ Exclude stroke draws nothing on a browser's GPU; send a short scribble
 there. Not available on Windows, where Google's library takes about 25
 seconds a stroke.
 
+<!-- sample: samples/vision/interactive_segmenter/image.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
@@ -526,36 +544,45 @@ frame's result. Use it for frames that do not run away from you, such as a
 decoded video file. Create the task in video mode, then submit frames with
 **strictly increasing millisecond timestamps**:
 
+<!-- sample: samples/vision/face_landmarker/video.dart -->
 ```dart
-final task = await FaceLandmarker.create(
-  FaceLandmarkerOptions(
-    model: VisionModels.faceLandmarker,
-    runningMode: RunningMode.video,
-  ),
-);
-try {
-  for (final frame in decodedFrames) {
-    final result = await task.detectForVideo(
-      VisionImage.fromPixels(
-        pixels: frame.rgba,
-        width: frame.width,
-        height: frame.height,
-        format: VisionPixelFormat.rgba,
-      ),
-      timestampMilliseconds: frame.presentationMilliseconds,
-    );
-    print(result.faceLandmarks.length);
+import 'dart:typed_data';
+
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+typedef Frame = ({Uint8List rgba, int width, int height, int milliseconds});
+
+Future<void> countFacesInVideo(Stream<Frame> decodedFrames) async {
+  final task = await FaceLandmarker.create(
+    FaceLandmarkerOptions(
+      model: VisionModels.faceLandmarker,
+      runningMode: RunningMode.video,
+    ),
+  );
+  try {
+    await for (final frame in decodedFrames) {
+      final result = await task.detectForVideo(
+        VisionImage.fromPixels(
+          pixels: frame.rgba,
+          width: frame.width,
+          height: frame.height,
+          format: VisionPixelFormat.rgba,
+        ),
+        timestampMilliseconds: frame.milliseconds,
+      );
+      print('${frame.milliseconds} ms: ${result.faceLandmarks.length} faces');
+    }
+  } finally {
+    await task.dispose();
   }
-} finally {
-  await task.dispose();
 }
 ```
 
-Here `decodedFrames` comes from your video decoder; the package does not
-decode video. Keep a task alive across frames; do not recreate it for each
-image. Pass the file's rotation as `rotationDegrees` so results come out in
-display orientation, and since timestamps cannot go back, start a new task to
-play a file again.
+Here `decodedFrames` comes from your video decoder, each frame with its
+presentation time in milliseconds; the package does not decode video. Keep a
+task alive across frames; do not recreate it for each image. Pass the file's
+rotation as `rotationDegrees` so results come out in display orientation, and
+since timestamps cannot go back, start a new task to play a file again.
 
 The [gallery](https://github.com/google/flutter-mediapipe/tree/main/gallery)'s
 video file mode is a worked example for every camera task on all six
@@ -565,7 +592,8 @@ plugin decodes frame by frame with each platform's own decoder
 (AVFoundation, MediaCodec, Media Foundation, GStreamer and a browser's
 `<video>` element), and
 [`video_file_controller.dart`](https://github.com/google/flutter-mediapipe/blob/main/gallery/lib/live/video_file_controller.dart)
-runs the loop above.
+runs the loop above. For a complete video sample for every camera task, see
+the [video and live stream guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/video_and_live_stream.md).
 
 ## Live cameras
 
@@ -576,37 +604,55 @@ it, so a task slower than the camera drops frames instead of falling behind.
 `droppedFrames` counts them. Tracking and smoothing are the same as in video
 mode, and a frame that runs gets the result video mode would give it.
 
+<!-- sample: samples/vision/face_landmarker/live_stream.dart -->
 ```dart
-final task = await FaceLandmarker.create(
-  FaceLandmarkerOptions(
-    model: VisionModels.faceLandmarker,
-    runningMode: RunningMode.liveStream,
-  ),
-);
-// Listen before the first frame, as Google requires a result listener.
-final results = task.results.listen((result) {
-  print('${result.timestampMilliseconds}: ${result.faceLandmarks.length}');
-});
-cameraFrames.listen((frame) {
-  task.detectAsync(
-    VisionImage.fromPixels(
-      pixels: frame.rgba,
-      width: frame.width,
-      height: frame.height,
-      format: VisionPixelFormat.rgba,
+import 'dart:typed_data';
+
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+typedef CameraFrame = ({Uint8List rgba, int width, int height});
+
+Future<void> countFacesLive(Stream<CameraFrame> cameraFrames) async {
+  final task = await FaceLandmarker.create(
+    FaceLandmarkerOptions(
+      model: VisionModels.faceLandmarker,
+      runningMode: RunningMode.liveStream,
     ),
-    // Stamp each frame when it arrives.
-    timestampMilliseconds: clock.elapsedMilliseconds,
   );
-});
-// Later: runs the frame in flight and the waiting one, then closes results.
-await task.dispose();
-await results.cancel();
+  // Listen before the first frame, as Google requires a result listener.
+  final results = task.results.listen((result) {
+    print('${result.timestampMilliseconds}: ${result.faceLandmarks.length}');
+  });
+  final clock = Stopwatch()..start();
+  var last = -1;
+  try {
+    await for (final frame in cameraFrames) {
+      // Stamp each frame when it arrives, but never twice with one value.
+      final now = clock.elapsedMilliseconds;
+      last = now > last ? now : last + 1;
+      task.detectAsync(
+        VisionImage.fromPixels(
+          pixels: frame.rgba,
+          width: frame.width,
+          height: frame.height,
+          format: VisionPixelFormat.rgba,
+        ),
+        timestampMilliseconds: last,
+      );
+    }
+  } finally {
+    // Runs the frame in flight and the waiting one, then closes results.
+    await task.dispose();
+    await results.cancel();
+  }
+}
 ```
 
-Here `cameraFrames` and `clock` come from your camera pipeline. The checks
-throw from `detectAsync` itself, and a frame's timestamp is reserved even if
-the frame is then dropped. When building a frame costs time, as converting a
+Here `cameraFrames` comes from your camera pipeline, and the task runs until
+that stream ends. Two frames can arrive in the same millisecond, and a repeated
+timestamp throws, so the sample gives the later one the next millisecond
+instead. The checks throw from `detectAsync` itself, and a frame's timestamp
+is reserved even if the frame is then dropped. When building a frame costs time, as converting a
 YUV camera image to RGBA does, submit `VisionImage.deferred(() => convert(frame))`
 instead: the task calls it when it starts the frame, so a dropped frame is
 never converted. Hold on to what the producer reads until then. A dropped frame never leaves the calling isolate:
@@ -622,23 +668,131 @@ it after inference, or when it drops the frame.
 `BrowserOverlay.attach(task, canvas)` lets the task's worker draw landmarks
 and boxes into a canvas. Both exist on every platform and throw
 `RuntimeUnavailableException` off the web, so one code path compiles
-everywhere. The package does not open a camera for your app. The
+everywhere.
+
+The sample below draws face landmarks on a canvas laid over a playing
+`<video>`, such as one showing a camera's `getUserMedia` stream. It names the
+page's video and canvas through [`package:web`](https://pub.dev/packages/web),
+so it compiles for browsers only: an app that uses it adds `web` to its
+pubspec and keeps the code where only its web build imports it. Frames are
+stamped with the page's clock, moved one millisecond on when two would share a
+value, as above.
+
+<!-- sample: samples/vision/common/browser_overlay.dart -->
+```dart
+import 'dart:async';
+import 'dart:js_interop';
+
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+import 'package:web/web.dart' as web;
+
+/// Draws the faces in [video] into [canvas], from the task's worker, until
+/// [stop] completes.
+Future<void> drawFacesLive(
+  web.HTMLVideoElement video,
+  web.HTMLCanvasElement canvas, {
+  required Future<void> stop,
+}) async {
+  final task = await FaceLandmarker.create(
+    FaceLandmarkerOptions(
+      model: VisionModels.faceLandmarker,
+      runningMode: RunningMode.liveStream,
+    ),
+  );
+  final BrowserOverlay overlay;
+  try {
+    // The canvas belongs to the worker from now on.
+    overlay = await BrowserOverlay.attach(task, canvas);
+  } catch (_) {
+    await task.dispose();
+    rethrow;
+  }
+  overlay.configure(connections: true, points: false);
+  // Listen before the first frame, as Google requires a result listener.
+  final results = task.results.listen((result) {
+    final faces = result.faceLandmarks.length;
+    final drawn = overlay.active ? 'drawn' : 'not drawn';
+    print('${result.timestampMilliseconds}: $faces faces, $drawn');
+  });
+  var stopped = false;
+  unawaited(stop.then((_) => stopped = true));
+  var last = -1;
+  try {
+    while (!stopped) {
+      final bitmap = await web.window.createImageBitmap(video).toDart;
+      final now = web.window.performance.now().floor();
+      last = now > last ? now : last + 1;
+      // The task closes the bitmap once it has run or dropped the frame.
+      task.detectAsync(
+        VisionImage.fromBrowserFrame(
+          bitmap,
+          width: bitmap.width,
+          height: bitmap.height,
+        ),
+        timestampMilliseconds: last,
+      );
+      final painted = Completer<void>();
+      web.window.requestAnimationFrame(((num _) => painted.complete()).toJS);
+      await painted.future;
+    }
+  } finally {
+    // Runs the frame in flight and the waiting one, still drawn, then
+    // closes results and ends the drawing.
+    await task.dispose();
+    await results.cancel();
+  }
+}
+```
+
+`attach` throws in a browser that cannot hand a canvas to a worker, and
+`active` turns false if the worker's drawing fails later; either way, paint
+the results from Dart instead. The package does not open a camera for your
+app. The
 [gallery](https://github.com/google/flutter-mediapipe/tree/main/gallery)'s
 camera mode runs every camera-capable task in live stream mode, with
-rotation, mirroring, delegate switching and overlays.
+rotation, mirroring, delegate switching and overlays. For a complete live
+stream sample for every camera task, see the
+[video and live stream guide](https://github.com/google/flutter-mediapipe/blob/main/doc/guides/vision/video_and_live_stream.md).
 
 ## CPU and GPU
 
 CPU is the default. For a task with a supported GPU path, request it when
-creating the task:
+creating the task. Here the capability query decides, so the same code runs
+on the GPU where this package offers it and on the CPU elsewhere, including
+a machine that refuses the GPU it was offered, such as Linux with only a
+software renderer:
 
+<!-- sample: samples/vision/face_landmarker/gpu.dart -->
 ```dart
-final task = await FaceLandmarker.create(
-  FaceLandmarkerOptions(
-    model: VisionModels.faceLandmarker,
-    delegate: Delegate.gpu,
-  ),
-);
+import 'package:mediapipe_vision/mediapipe_vision.dart';
+
+Future<void> countFacesFast(VisionImage image) async {
+  final support = await queryFaceLandmarkerCapabilities();
+  var delegate = support.supportedDelegates.contains(Delegate.gpu)
+      ? Delegate.gpu
+      : Delegate.cpu;
+  Future<FaceLandmarker> create() => FaceLandmarker.create(
+    FaceLandmarkerOptions(
+      model: VisionModels.faceLandmarker,
+      delegate: delegate,
+    ),
+  );
+  FaceLandmarker task;
+  try {
+    task = await create();
+  } on TaskException catch (error) {
+    if (!error.gpuUnavailable) rethrow;
+    delegate = Delegate.cpu;
+    task = await create();
+  }
+  try {
+    final result = await task.detect(image);
+    final faces = result.faceLandmarks.length;
+    print('Faces found on the ${delegate.name}: $faces');
+  } finally {
+    await task.dispose();
+  }
+}
 ```
 
 The delegate is fixed for a task's lifetime. Await `dispose()` and create a

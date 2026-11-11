@@ -66,9 +66,10 @@ final class TextToSpeech {
     return _runner.synthesize(text, voiceId, locale);
   }
 
-  /// [text] spoken chunk by chunk, each as soon as its clause is
-  /// synthesized, so playback can start before the rest is ready. Word
-  /// timestamps index into [text] and are timed from the stream's start.
+  /// [text] spoken in short chunks, each as soon as it is synthesized (80
+  /// to 320 ms of audio each with Phonon), so playback can start before
+  /// the rest is ready. Word timestamps index into [text] and are timed
+  /// from the stream's start.
   ///
   /// One subscription. Cancelling it cancels Google's stream at once, from
   /// the calling isolate, so a chunk in progress is abandoned; in a browser

@@ -47,6 +47,26 @@ fs.mkdirSync(evidence, {recursive: true});
 // A first load that still runs out gets the suite's one retry; nothing later does.
 const firstLoadTimeout = Number(argumentsMap['first-load-timeout']) || undefined;
 class SlowFirstLoad extends Error {}
+// A page whose WebKit engine stopped answering: on macos-15 three API passes
+// in 122 never came back from Google's own tasks, and a job ran into its
+// 60 minute timeout. It gets the suite's one retry, as a lost page does. The
+// slowest of these phases seen whole took 92 s (Chromium GPU, software WebGL).
+class StalledPage extends Error {}
+
+// [page.evaluate] of [fn] that gives up after [ms].
+async function evaluateWithin(page, ms, what, fn, arg) {
+  let timer;
+  const stalled = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new StalledPage(`${what} did not answer in ${ms / 1000} s`)), ms);
+  });
+  const evaluated = page.evaluate(fn, arg);
+  evaluated.catch(() => {});
+  try {
+    return await Promise.race([evaluated, stalled]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 const report = {browser: browserName, delegate, suite, task: taskName, checks: [], retries: [],
   physical_webcam_tested: false, software_webgl: browserName === 'chromium' && process.platform === 'linux'};
 const logs = [];
@@ -99,7 +119,11 @@ async function launch(deviceCount = 2, useFile = true) {
 
 function observe(page) {
   page.on('crash', () => logs.push({type: 'crash', text: 'page crashed'}));
-  page.on('console', msg => logs.push({type: msg.type(), text: msg.text()}));
+  page.on('console', msg => {
+    logs.push({type: msg.type(), text: msg.text()});
+    // The vision bridge's retry of a create WebKit failed (bridge.js).
+    if (msg.text().startsWith('MEDIAPIPE_WEBKIT_CREATE_RETRY')) console.log(msg.text());
+  });
   page.on('pageerror', error => logs.push({type: 'pageerror', text: error.stack}));
   page.on('response', response => {
     if (response.status() >= 400) logs.push({type: 'http', status: response.status(), url: response.url()});
@@ -277,7 +301,7 @@ async function apiChecks() {
   const api = await page.evaluate(() => window.mediapipeApiTestReport);
   fs.writeFileSync(path.join(evidence, 'api-report.json'), JSON.stringify(api, null, 2));
   assert.equal(api.status, 'passed', JSON.stringify(api));
-  const direct = await page.evaluate(async delegate => {
+  const direct = await evaluateWithin(page, 180000, 'Official Face Landmarker', async delegate => {
     const {bundle: {FaceLandmarker}, files} = await window.officialTasks('vision');
     const task = await FaceLandmarker.createFromOptions(files, {
       baseOptions: {delegate, modelAssetPath: await window.bundledModelUrl('face_landmarker.task')},
@@ -308,7 +332,7 @@ async function apiChecks() {
   }
   // Hand Landmarker through the Dart API versus Google's JavaScript on the
   // same image, runtime and delegate.
-  const hand = await page.evaluate(async delegate => {
+  const hand = await evaluateWithin(page, 180000, 'Official Hand Landmarker', async delegate => {
     const {bundle: {HandLandmarker}, files} = await window.officialTasks('vision');
     const task = await HandLandmarker.createFromOptions(files, {
       baseOptions: {delegate, modelAssetPath: await window.bundledModelUrl('hand_landmarker.task')},
@@ -341,7 +365,7 @@ async function apiChecks() {
   // Pose, Gesture and Holistic the same way: a fresh official task, run once
   // on the sample the Dart probe used. Holistic's IMAGE mode keeps state, so
   // only first calls are comparable.
-  const landmarkTasks = await page.evaluate(async delegate => {
+  const landmarkTasks = await evaluateWithin(page, 180000, 'Official Pose, Gesture and Holistic', async delegate => {
     const {bundle: vision, files} = await window.officialTasks('vision');
     const points = list => (list ?? []).map(p => [p.x, p.y, p.z]);
     const run = async (type, model, sample, options, method, parts) => {
@@ -388,7 +412,7 @@ async function apiChecks() {
   }
   // Face Detector, Object Detector and Image Classifier the same way. Google's
   // boxes are float pixels; the Dart API truncates them, as its C API does.
-  const detectionTasks = await page.evaluate(async delegate => {
+  const detectionTasks = await evaluateWithin(page, 180000, 'Official detection and classification', async delegate => {
     const {bundle: vision, files} = await window.officialTasks('vision');
     const response = await fetch(new URL('assets/assets/samples/portrait.jpg', document.baseURI));
     const bitmap = await createImageBitmap(await response.blob());
@@ -1443,14 +1467,22 @@ async function retryingLostPage(name, checks) {
     await checks();
   } catch (error) {
     const slow = error instanceof SlowFirstLoad;
-    if (!slow && !isLostPage(error)) throw error;
+    if (!slow && !(error instanceof StalledPage) && !isLostPage(error)) throw error;
     const reason = error.message.split('\n')[0];
     report.retries.push({suite: name, error: reason, crashed: logs.some(entry => entry.type === 'crash')});
-    console.log(`::warning title=${browserName} ${slow ? 'loaded slowly' : 'lost the page'}::${name} checks: ${reason}. ` +
+    const lost = slow ? 'loaded slowly' : error instanceof StalledPage ? 'stalled' : 'lost the page';
+    console.log(`::warning title=${browserName} ${lost}::${name} checks: ${reason}. ` +
       'Running them once more on a fresh browser.');
+    // One line per retry, for counting across runs.
+    const marker = slow ? 'MEDIAPIPE_SLOW_FIRST_LOAD_RETRY'
+      : error instanceof StalledPage ? 'MEDIAPIPE_STALLED_PAGE_RETRY' : 'MEDIAPIPE_LOST_PAGE_RETRY';
+    console.log(`${marker} ${browserName} ${name}: ${reason}`);
     saveSystemLog(evidence, name);
     report.checks.length = passed;
-    for (const browser of browsers.splice(0)) await browser.close().catch(() => {});
+    // A stalled page's browser may not answer its close either.
+    for (const browser of browsers.splice(0)) {
+      await Promise.race([browser.close().catch(() => {}), new Promise(resolve => setTimeout(resolve, 30000))]);
+    }
     await checks();
   }
 }
@@ -1464,6 +1496,11 @@ try {
   }
   if (suite === 'all' || suite === 'camera') await retryingLostPage('camera', cameraChecks);
   assert.equal(logs.filter(entry => entry.type === 'pageerror').length, 0, JSON.stringify(logs));
+  // The invalid-model checks fail twice by design; a recovered retry was WebKit's.
+  report.webkit_create_retries = {
+    retried: logs.filter(entry => entry.text?.startsWith('MEDIAPIPE_WEBKIT_CREATE_RETRY ')).length,
+    recovered: logs.filter(entry => entry.text?.startsWith('MEDIAPIPE_WEBKIT_CREATE_RETRY_RECOVERED ')).length,
+  };
   report.status = 'passed';
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {

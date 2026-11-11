@@ -25,6 +25,7 @@ final classifier = TextClassifier(
 
 Now creation is asynchronous, and the model can be a pinned official one:
 
+<!-- sample: samples/text/text_classifier/top_category.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 

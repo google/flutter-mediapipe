@@ -12,7 +12,7 @@ hook uses to bundle its own:
 
 | Platform | Runtime |
 | --- | --- |
-| Android 9+ (arm64-v8a, x86_64; armeabi-v7a on the CPU, without the large models), iOS 15+ (device, arm64 simulator), macOS 14+ arm64, Linux x64, Windows x64 | Google's MediaPipe 1.2.0 C library for each family (`MediaPipeTasksVisionC`, `libmediapipe_tasks_text`, and so on), bundled by that family's hook |
+| Android 9+ (arm64-v8a, x86_64; armeabi-v7a on the CPU, without the large models), iOS 15+ (device, arm64 simulator), macOS 14+ arm64, Linux x64, Windows x64 | Google's MediaPipe 1.2.2 C library for each family (`MediaPipeTasksVisionC`, `libmediapipe_tasks_text`, and so on), bundled by that family's hook |
 | Web | Google's JavaScript runtime, through each family's web plugin |
 
 An app ships only the libraries of the families it depends on, and needs no
@@ -163,6 +163,7 @@ response is discarded.
 Core uses Flutter's `path_provider` for application support rather than
 asking every family to supply a directory, so the storage policy stays shared.
 
+<!-- sample: samples/core/model_store/prefetch.dart -->
 ```dart
 import 'package:mediapipe_text/mediapipe_text.dart';
 
@@ -171,6 +172,26 @@ Future<void> prepareModels() async {
   await store.prefetch(TextModels.bertClassifier);
   final source = await store.get(TextModels.bertClassifier);
   print(source.path); // A file on native platforms; `bytes` in browsers.
+}
+```
+
+`clear` deletes every model the store holds, waiting for downloads in
+progress, as a "Remove downloaded models" setting would. A model the app
+bundles stays available: the next lookup copies it into the cache again.
+`find` looks a model up without the network and returns null when the store
+holds no copy and the app bundles none.
+
+<!-- sample: samples/core/model_store/clear.dart -->
+```dart
+import 'package:mediapipe_audio/mediapipe_audio.dart';
+
+Future<void> removeDownloadedModels() async {
+  final store = ModelStore();
+  final before = await store.find(AudioModels.yamnet);
+  print('Before: ${before == null ? 'not on this device' : 'ready'}');
+  await store.clear();
+  final after = await store.find(AudioModels.yamnet);
+  print('After: ${after == null ? 'not on this device' : 'ready'}');
 }
 ```
 
@@ -196,6 +217,7 @@ Workers verify those same file digests from any configured root before
 loading the bundle and WASM through Blob URLs. Then, before creating the
 first task:
 
+<!-- sample: samples/core/web_runtime/self_hosted.dart -->
 ```dart
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

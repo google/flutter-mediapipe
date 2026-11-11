@@ -1,3 +1,18 @@
+## 0.2.1
+
+- The README links to two new vision guides: video and live stream samples
+  for every camera task, and the options and extra outputs. Its link to the
+  object detection sample app points to `samples/apps/object_detection`,
+  where the app moved; the old folder keeps a README that links there.
+- [The core guide](https://github.com/google/flutter-mediapipe/blob/main/doc/mediapipe_core.md)
+  names MediaPipe 1.2.2 as the native runtime and has a sample for
+  `ModelStore.find` and `ModelStore.clear`.
+- Every complete Dart sample in the docs is also a file under `samples/` in
+  the repository, named in a comment above its block, and
+  `tool/check_docs.py` fails when a block and its file differ by a byte.
+  `samples/README.md`, written by `tool/samples_index.py`, lists them by
+  package, task and mode.
+
 ## 0.2.0
 
 - Google's MediaPipe 1.2.2 native release (build of November 2, 2026)

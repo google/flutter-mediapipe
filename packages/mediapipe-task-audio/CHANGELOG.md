@@ -1,3 +1,13 @@
+## 0.2.1
+
+- The README has complete samples for live transcription with interim
+  results, `prewarm()`, streamed speech with word timestamps and a stop, and
+  choosing a voice for a locale with `listVoices()` and `cancel()`. It also
+  describes `modelArchitecture`, `prompt`, `cacheDirectory`,
+  `defaultVoiceId`, `speakingRate` and `targetBucket`.
+- `synthesizeStream`'s doc comment and the README say that it yields short
+  chunks (80 to 320 ms of audio each with Phonon) rather than one per clause.
+
 ## 0.2.0
 
 - Audio Transcriber: speech to text on Google's 1.2.2 native library, with

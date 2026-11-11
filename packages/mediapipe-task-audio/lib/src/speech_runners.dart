@@ -38,7 +38,7 @@ abstract interface class TextToSpeechRunner {
     String? locale,
   );
 
-  /// [text] chunk by chunk, each as its clause is synthesized. Cancelling
+  /// [text] in short chunks, each as soon as it is synthesized. Cancelling
   /// the subscription cancels Google's stream at once, a read in progress
   /// included, and in browsers between chunks.
   Stream<TextToSpeechResult> synthesizeStream(

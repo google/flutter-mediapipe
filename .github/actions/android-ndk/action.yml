@@ -13,7 +13,7 @@ runs:
       run: |
         # Fail loudly if an app stops taking Flutter's default, since the
         # version below would then not be the one Gradle installs.
-        for app in gallery/android/app/build.gradle.kts samples/object_detection/android/app/build.gradle.kts; do
+        for app in gallery/android/app/build.gradle.kts samples/apps/object_detection/android/app/build.gradle.kts; do
           grep -q 'ndkVersion = flutter.ndkVersion' "$GITHUB_WORKSPACE/$app" ||
             { echo "$app does not use flutter.ndkVersion." >&2; exit 1; }
         done

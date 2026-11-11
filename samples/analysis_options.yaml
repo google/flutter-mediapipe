@@ -1,0 +1,7 @@
+# The docs' samples print their results.
+analyzer:
+  errors:
+    avoid_print: ignore
+  exclude:
+    - apps/**
+    - build/**

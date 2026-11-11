@@ -1,3 +1,12 @@
+## 0.2.1
+
+- The README has a sample that queries every text task's capabilities (the
+  Text Embedder's query takes a model), a question answering sample with
+  query and document roles and a title, and a key points summary.
+- Removes a repeated `@immutable` annotation from `LanguagePrediction`,
+  `ProofreadingCorrection`, `TextSummarizerResult` and
+  `TextSummarizerUpdate`.
+
 ## 0.2.0
 
 - Google's MediaPipe 1.2.2 native release (build of November 2, 2026)

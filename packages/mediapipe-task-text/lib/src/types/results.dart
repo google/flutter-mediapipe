@@ -52,7 +52,6 @@ final class TextEmbedderResult {
 
 /// One language and its probability.
 @immutable
-@immutable
 final class LanguagePrediction {
   /// Keeps Google's output unchanged.
   const LanguagePrediction({
@@ -106,7 +105,6 @@ enum ProofreadingCorrectionType {
 }
 
 /// One correction segment, in Google's order.
-@immutable
 @immutable
 final class ProofreadingCorrection {
   /// Keeps Google's segment without coalescing or recomputing the diff.
@@ -177,7 +175,6 @@ final class TextProofreaderUpdate {
 
 /// A completed summary.
 @immutable
-@immutable
 final class TextSummarizerResult {
   /// Keeps Google's text, whitespace and bullet markers included.
   const TextSummarizerResult({required this.summary});
@@ -190,7 +187,6 @@ final class TextSummarizerResult {
 }
 
 /// One streamed summary update.
-@immutable
 @immutable
 final class TextSummarizerUpdate {
   /// Keeps the new text and Google's completion flag.
