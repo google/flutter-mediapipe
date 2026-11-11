@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart' show Delegate;
 
 import '../live/speed_history.dart';

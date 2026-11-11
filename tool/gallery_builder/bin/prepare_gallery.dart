@@ -329,6 +329,8 @@ dependencies:
   record: ^7.1.1
   url_launcher: ^6.3.2
   lucide_icons_flutter: ^3.1.20
+  # Material widgets as a package; Flutter 3.50 deprecates the SDK's copy.
+  material_ui: ^1.11.0
 $camera
 
 # The families depend on mediapipe_core from pub.dev; the gallery builds

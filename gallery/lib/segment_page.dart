@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
 import 'catalog.dart';

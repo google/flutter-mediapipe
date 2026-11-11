@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The gallery design's tokens: its colors, radii and type sizes.
 @immutable

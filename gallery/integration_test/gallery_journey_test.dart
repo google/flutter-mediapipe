@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:video_frames/video_frames.dart';
 import 'package:mediapipe_gallery/audio/microphone.dart';
@@ -56,6 +59,34 @@ void main() {
     await tester.runAsync(() => _videoFiles(assets));
   });
 
+  // The pages that download their model on first use get it here, each
+  // model within a limit sized for it, so a slow download fails as a slow
+  // download and the page run below times the pages alone.
+  testWidgets('first-use models download within their own limits', (
+    tester,
+  ) async {
+    final setup = await tester.runAsync(
+      () async => (
+        await GalleryAssets.unpack(),
+        (await queryObjectDetectorCapabilities()).platform,
+      ),
+    );
+    expect(setup, isNotNull);
+    final (assets, platform) = setup!;
+    final models = {
+      for (final task in _journeyTasks(platform, assets.bundledTasks))
+        if (task.downloadsModel) task.model.sha256: task.model,
+    };
+    if (models.isEmpty) {
+      markTestSkipped('No page in this build downloads its model.');
+      return;
+    }
+    for (final model in models.values) {
+      await tester.runAsync(() => _download(model));
+    }
+    // Each download carries its own limit, so the test as a whole has none.
+  }, timeout: Timeout.none);
+
   testWidgets('every sidebar task opens and runs its bundled sample', (
     tester,
   ) async {
@@ -71,14 +102,7 @@ void main() {
     );
     expect(setup, isNotNull);
     final (assets, platform) = setup!;
-    final tasks =
-        supportedTasks(
-          platform,
-          assets.bundledTasks,
-        ).where((task) => task.hasOwnPage).toList()..sort((a, b) {
-          final category = a.category.index.compareTo(b.category.index);
-          return category != 0 ? category : a.title.compareTo(b.title);
-        });
+    final tasks = _journeyTasks(platform, assets.bundledTasks);
     expect(tasks, isNotEmpty);
 
     Uint8List? imageBytes;
@@ -86,7 +110,9 @@ void main() {
     await tester.pumpWidget(
       GalleryApp(
         stillImagePicker: () async {
-          expect(imageBytes, isNotNull);
+          // The picker runs inside a tap the test is still awaiting, so a
+          // guarded expect() would conflict with it on Flutter 3.50.
+          expectSync(imageBytes, isNotNull);
           return XFile.fromData(
             imageBytes!,
             name: imageName!,
@@ -390,7 +416,8 @@ void main() {
             final ask = find.text('Ask');
             await tester.ensureVisible(ask);
             await tester.tap(ask);
-            // The first question downloads Google's 678 MB model.
+            // The first question loads Google's 678 MB model, which the
+            // first-use test downloaded.
             await _until(
               tester,
               () =>
@@ -412,8 +439,8 @@ void main() {
           // The model steers the fish: Google's wording gets every sentence
           // the game writes right, so each decision matches the scene.
           await tester.tap(find.byKey(const ValueKey('fish-play')));
-          // The first game downloads Google's 165 MB EmbeddingGemma 2, which
-          // takes about 9 minutes at the slowest speed seen, 0.31 MB/s.
+          // The first game loads Google's 165 MB EmbeddingGemma 2, which the
+          // first-use test downloaded.
           await _until(
             tester,
             () =>
@@ -442,7 +469,8 @@ void main() {
           // against 0.55 in its Python API).
           await tester.tap(find.byKey(const ValueKey('universal-compare')));
           await tester.pump();
-          // The first comparison downloads Google's 388 MB model.
+          // The first comparison loads Google's 388 MB model, which the
+          // first-use test downloaded.
           await _until(
             tester,
             () =>
@@ -493,7 +521,8 @@ void main() {
           // API ranks the dog document first (0.82), the cat second.
           await tester.tap(find.byKey(const ValueKey('retrieval-search')));
           await tester.pump();
-          // The first search downloads Google's 388 MB model.
+          // The first search loads Google's 388 MB model, which the
+          // first-use test downloaded.
           await _until(
             tester,
             () =>
@@ -522,7 +551,8 @@ void main() {
             if (choices) await tapDelegate(tester, delegate);
             await tester.tap(find.byKey(const ValueKey('transcriber-run')));
             await tester.pump();
-            // The first run downloads Google's 615 MB model.
+            // The first run loads Google's 615 MB model, which the first-use
+            // test downloaded.
             await _until(
               tester,
               () =>
@@ -547,7 +577,8 @@ void main() {
           // The fox sentence in the default voice: nine timed words.
           await tester.tap(find.byKey(const ValueKey('speech-run')));
           await tester.pump();
-          // The first run downloads Google's 87 MB model.
+          // The first run loads Google's 87 MB model, which the first-use
+          // test downloaded.
           await _until(
             tester,
             () =>
@@ -742,6 +773,59 @@ void main() {
     // ignore: avoid_print
     print('GALLERY_JOURNEY_CHECKS ${checks.join(',')}');
   }, timeout: const Timeout(Duration(minutes: 20)));
+}
+
+/// The pages the journey visits on [platform], in the order it visits them:
+/// the home page's sections, each in title order.
+List<GalleryTask> _journeyTasks(TaskPlatform platform, Set<String> bundled) =>
+    supportedTasks(platform, bundled).where((task) => task.hasOwnPage).toList()
+      ..sort((a, b) {
+        final category = a.category.index.compareTo(b.category.index);
+        return category != 0 ? category : a.title.compareTo(b.title);
+      });
+
+/// The slowest model download seen in CI, in bytes per second (0.31 MB/s).
+const _slowestDownload = 310 * 1000;
+
+/// Gets [model] onto the device as its page does, unless it is there
+/// already, within the time its size takes at [_slowestDownload] plus two
+/// minutes for connecting and verifying. A size the server does not give
+/// counts as 1 GB. The limit is on the wait for the download the page uses,
+/// not on a download of its own.
+Future<void> _download(DownloadAsset model) async {
+  final name = Uri.parse(model.url).pathSegments.last;
+  final size = await _sizeOf(Uri.parse(model.url));
+  final limit = Duration(
+    seconds: 120 + (size ?? 1000 * 1000 * 1000) ~/ _slowestDownload,
+  );
+  final clock = Stopwatch()..start();
+  await GalleryAssets.downloadedModelPath(model).timeout(
+    limit,
+    onTimeout: () => throw TimeoutException(
+      '$name was not on the device within ${limit.inSeconds} s',
+      limit,
+    ),
+  );
+  // ignore: avoid_print
+  print(
+    'GALLERY_JOURNEY_MODEL $name: ready in ${clock.elapsed.inSeconds} s, '
+    'limit ${limit.inSeconds} s, size ${size ?? 'unknown'} bytes',
+  );
+}
+
+/// The size in bytes the server gives for [url], or null when it gives none.
+Future<int?> _sizeOf(Uri url) async {
+  try {
+    final response = await http.head(url).timeout(const Duration(seconds: 30));
+    // A HEAD answer has no body, so its `contentLength` is 0 and the size is
+    // only in the header. A redirect's header gives the redirect's own body,
+    // so only the final 200 counts.
+    final size = int.tryParse(response.headers['content-length'] ?? '');
+    return response.statusCode == 200 && size != null && size > 0 ? size : null;
+  } on Object {
+    // The download itself reports a server it cannot reach.
+    return null;
+  }
 }
 
 /// The audio page's windows: each entry's position in the list, newest

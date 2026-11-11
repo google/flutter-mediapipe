@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:mediapipe_gallery/live/mask_overlay.dart';
 import 'package:mediapipe_gallery/live/task_models.dart';

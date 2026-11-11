@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_gallery/ui/components.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 

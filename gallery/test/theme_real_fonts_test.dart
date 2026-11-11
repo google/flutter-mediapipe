@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:camera_platform_interface/camera_platform_interface.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_gallery/catalog.dart';
 import 'package:mediapipe_gallery/main.dart';
 import 'package:mediapipe_gallery/ui/design.dart';

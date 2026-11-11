@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_gallery/ui/design.dart';
 
 /// WCAG 2.1's contrast ratio.

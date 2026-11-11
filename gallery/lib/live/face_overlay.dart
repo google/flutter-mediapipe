@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' show PointMode;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
 import '../gallery_theme.dart';
