@@ -86,7 +86,7 @@ void main() {
   });
 
   test('FFI sizes and field offsets match the official Python ABI', () {
-    final abi = reference['abi'];
+    final abi = referenceAbi(reference);
     expect(
       sizeOf<mp.MpTextSummarizerOptions>(),
       abi['_MpTextSummarizerOptionsC']['size'],

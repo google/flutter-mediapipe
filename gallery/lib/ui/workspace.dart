@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/link.dart';
 
 import '../catalog.dart';
@@ -314,10 +314,19 @@ class GalleryPageBody extends StatelessWidget {
 /// The row atop a task page: the page's own switch, if it has one, Info, and
 /// [TaskPackageLink] beside the switch, or under it when the row lacks the room.
 class TaskToolbar extends StatelessWidget {
-  const TaskToolbar({super.key, required this.task, this.leading});
+  const TaskToolbar({
+    super.key,
+    required this.task,
+    this.leading,
+    this.gemmaTerms = false,
+  });
 
   final GalleryTask task;
   final Widget? leading;
+
+  /// Whether the page offers a Gemma model beside its own, so Info passes on
+  /// the Gemma terms as it does for a task whose own model is one.
+  final bool gemmaTerms;
 
   /// The narrowest row that holds the widest switch, the link and Info at full
   /// size.
@@ -343,7 +352,8 @@ class TaskToolbar extends StatelessWidget {
             icon: LucideIcons.info,
             label: phone || constraints.maxWidth < 450 ? null : 'Info',
             tooltip: 'About this task',
-            onPressed: () => showTaskInfo(context, task),
+            onPressed: () =>
+                showTaskInfo(context, task, gemmaTerms: gemmaTerms),
           );
           final below = lead != null && constraints.maxWidth < _roomForLink;
           return Column(
@@ -410,8 +420,13 @@ class TaskPackageLink extends StatelessWidget {
 }
 
 /// The Info button's dialog: what the task does, the model it runs, and
-/// Google's guide to it.
-Future<void> showTaskInfo(BuildContext context, GalleryTask task) {
+/// Google's guide to it, with the Gemma terms when the task's model is a
+/// Gemma model or, with [gemmaTerms], its page offers one.
+Future<void> showTaskInfo(
+  BuildContext context,
+  GalleryTask task, {
+  bool gemmaTerms = false,
+}) {
   final c = GalleryColors.of(context);
   final family = task.category.title.toLowerCase();
   final guide =
@@ -453,7 +468,7 @@ Future<void> showTaskInfo(BuildContext context, GalleryTask task) {
                 ),
               ),
             ),
-            if (task.gemmaModel) ...[
+            if (task.gemmaModel || gemmaTerms) ...[
               const SizedBox(height: 18),
               const Eyebrow('Terms'),
               const SizedBox(height: 6),

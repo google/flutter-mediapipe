@@ -1,5 +1,5 @@
-/// Google's word timestamps give UTF-8 byte offsets on every runtime; Dart
-/// strings index by UTF-16 code unit.
+/// Google's word timestamps give UTF-8 byte offsets on its native runtimes;
+/// Dart strings index by UTF-16 code unit.
 library;
 
 import 'dart:typed_data';

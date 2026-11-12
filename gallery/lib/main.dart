@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 
 import 'catalog.dart';
@@ -283,7 +283,13 @@ class _GalleryShellState extends State<_GalleryShell> {
         platform: widget.platform,
         onOpenMenu: openMenu,
       ),
-      GalleryDemo.text => TextPage(task: task, onOpenMenu: openMenu),
+      GalleryDemo.text => TextPage(
+        task: task,
+        embeddingGemma:
+            task.runtimeId == 'text_embedder' &&
+            offersEmbeddingGemma(widget.platform, widget.assets.bundledTasks),
+        onOpenMenu: openMenu,
+      ),
       GalleryDemo.decision => DecisionPage(
         task: task,
         platform: widget.platform,

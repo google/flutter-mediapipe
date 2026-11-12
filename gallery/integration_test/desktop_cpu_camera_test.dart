@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:camera_platform_interface/camera_platform_interface.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:mediapipe_gallery/live/live_camera_controller.dart';
 import 'package:mediapipe_gallery/live/live_camera_view.dart';
@@ -50,9 +50,12 @@ void main() {
         await tester.pumpWidget(const GalleryApp());
         final tileTitle = await scrollToGalleryTile(tester, subject.tile);
         expect(tileTitle, findsOneWidget);
-        // Linux offers GPU for face and hand, and the page opens on it; this
-        // test selects CPU. Windows has no GPU path.
-        final gpuOffered = Platform.isLinux ? findsOneWidget : findsNothing;
+        // Linux offers GPU for face, and the page opens on it; this test
+        // selects CPU. Hand has no Linux GPU since Google's 1.2.3 library,
+        // and Windows has no GPU path.
+        final gpuOffered = Platform.isLinux && subject.task == 'face'
+            ? findsOneWidget
+            : findsNothing;
         final tile = find.byKey(ValueKey('gallery-card-${subject.tile}'));
         expect(
           find.descendant(of: tile, matching: find.text('GPU')),

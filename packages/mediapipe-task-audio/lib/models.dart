@@ -29,7 +29,7 @@ abstract final class AudioModels {
   /// Gradium's Phonon 31M voices for Text to Speech, as Google's LiteRT
   /// community converted them (int8; five voices at 24 kHz, `freya` by
   /// default): 87 MB, Apache 2.0. Google's guide says Phonon speaks US
-  /// English only. Its 1.2.2 runtime labels four of the voices with other
+  /// English only. Its 1.2.3 runtime labels four of the voices with other
   /// locales (`claire` fr-FR, `lukas` de-DE, `sofia` es-ES, `lucas` pt-BR);
   /// for other languages, use [kokoro].
   static const phonon = DownloadAsset(

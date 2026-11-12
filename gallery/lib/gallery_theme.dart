@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The colors task overlays draw with over the camera and images.
 abstract final class GalleryTheme {

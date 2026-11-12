@@ -101,6 +101,9 @@ jobs:
           linux-profile: ${{ matrix.target == 'linux' && 'gallery' || 'none' }}
       - if: matrix.target == 'android'
         uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - if: matrix.target == 'android'
+        uses: ./.github/actions/gradle-plugin-repositories
       - name: Prepare target release version
         env:
           RELEASE_VERSION: ${{ inputs.version || github.event.release.tag_name || '' }}

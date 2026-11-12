@@ -489,7 +489,7 @@ final class _NativeTextToSpeech
         ..defaultLocale = _optional(settings.defaultLocale, arena)
         ..speakingRate = settings.speakingRate
         ..targetBucket = settings.targetBucket
-        ..cacheDirectory = _optional(settings.cacheDirectory, arena);
+        ..cacheDir = _optional(settings.cacheDirectory, arena);
       final output = arena<Pointer<Void>>();
       _checked((error) => tts.create(native, output, error));
       _handle = output.value;

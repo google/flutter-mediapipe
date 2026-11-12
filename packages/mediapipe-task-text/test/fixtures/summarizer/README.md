@@ -12,3 +12,9 @@ the wrapper adds no prompts, truncation, formatting or postprocessing.
 
 The model is a separate verified download: `dart tool/download_models.dart summarizer`.
 The comparing test is `test/text_summarizer_test.dart`.
+
+The recorded layouts are the reference wheel's. Google's 1.2.3 libraries, which
+the package loads, added `npu_dispatch_library_dir` to the base options, so
+every field after them moved by 8 bytes; the tests take those structs from
+`test/support/modern_text_reference.dart` (`referenceAbi`), as 1.2.3's ctypes
+declare them.

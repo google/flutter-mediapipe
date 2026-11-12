@@ -14,9 +14,9 @@ timings) run on 64-bit Android, iOS, macOS, Linux, Windows and the web; see
 ## Platforms
 
 The task runs Google's runtime on each platform, on the CPU: its MediaPipe
-1.2.2 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64 and
+1.2.3 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64 and
 Windows x64, which this package's hook bundles, and
-`@mediapipe/tasks-audio` 1.2.2 in browsers. The library is built for macOS 14
+`@mediapipe/tasks-audio` 1.2.3 in browsers. The library is built for macOS 14
 and tested on macOS 15.
 
 No platform needs a setting. See
@@ -204,7 +204,7 @@ Future<void> listen(Stream<Float32List> blocks) async {
 ## Speech
 
 `AudioTranscriber` turns speech into text and `TextToSpeech` turns text into
-speech, on Google's 1.2.2 native library and, in browsers, on its 1.2.2
+speech, on Google's 1.2.3 native library and, in browsers, on its 1.2.3
 JavaScript runtime in a web worker. 32-bit Android cannot hold their models:
 there `create` throws a `RuntimeUnavailableException`, and
 `queryAudioTranscriberCapabilities()` and `queryTextToSpeechCapabilities()` say
@@ -263,10 +263,10 @@ so an app that ships it credits Kyutai), as Google's LiteRT community
 converted it. It speaks US English at 24 kHz in `alba` by default, with word
 timestamps, on the CPU only. The speech tests compare its voices, two voices'
 utterances, a faster rate and a streamed paragraph with Google's Python
-(`test/fixtures/official_pocket_tts_reference.json`, from the macOS 1.2.2 wheel
+(`test/fixtures/official_pocket_tts_reference.json`, from the macOS 1.2.3 wheel
 and regenerated on each desktop CI runner), within Phonon's tolerances.
 Browsers are not tested with it. Google's page says it has only the eight
-`en-US` voices, but Google's 1.2.2 runtime also lists the multilingual bundle's
+`en-US` voices, but Google's 1.2.3 runtime also lists the multilingual bundle's
 six others (`estelle`, `juergen`, `lola`, `rafael`, `giovanni`, `daan`) for
 it, and speaks something for them, so choose an `en-US` one. Listing
 `pocket_tts_en` under the hook's `models` bundles it.
@@ -299,21 +299,6 @@ Future<String> transcribeClip(Uint8List wavBytes) async {
     return (await transcriber.transcribe(clip)).text;
   } finally {
     await transcriber.dispose();
-  }
-}
-
-Future<Float32List> speak(String text) async {
-  final tts = await TextToSpeech.create(
-    TextToSpeechOptions(model: AudioModels.phonon),
-  );
-  try {
-    final speech = await tts.synthesize(text, voiceId: 'freya');
-    for (final word in speech.wordTimestamps) {
-      print('${word.word} at ${word.startSeconds} s');
-    }
-    return speech.samples; // mono, at speech.sampleRateHz (24 kHz)
-  } finally {
-    await tts.dispose();
   }
 }
 ```
@@ -445,14 +430,15 @@ Future<void> speakAsReady(
 
 - `listVoices()` names the model's voices: Phonon has `freya`, `claire`,
   `lukas`, `sofia` and `lucas`. Google's guide says Phonon speaks US English
-  only, though Google's 1.2.2 runtime, and so `listVoices()`, labels `claire`
+  only, though Google's 1.2.3 runtime, and so `listVoices()`, labels `claire`
   fr-FR, `lukas` de-DE, `sofia` es-ES and `lucas` pt-BR. For other languages,
   use Kokoro (`AudioModels.kokoro`).
 - `defaultLocale` is null by default: Google infers the locale from the voice,
   as on its Web, Android and iOS tasks (its Python defaults to en-US).
 - `WordTimestamp.start` and `end` are UTF-16 indices into the text, so
-  `text.substring(start, end)` is the word, as above; Google reports UTF-8
-  byte offsets, which the package converts.
+  `text.substring(start, end)` is the word, as above; Google's native
+  runtimes report UTF-8 byte offsets, which the package converts, and its
+  browser runtime reports UTF-16 indices.
 - `cancel()` cancels every synthesis accepted and not yet finished, like
   Google's `cancel`: a cancelled `synthesize` call fails with a
   `TaskException` of status 1 (`Synthesis cancelled.`), and a cancelled
@@ -520,7 +506,7 @@ Future<Float32List?> speakInLocale(
   supported: each call sends its whole text.
 - Google's `computeWordTimestamps`, which aligns words with audio you supply,
   isn't supported.
-- The `TINY_GEMMA` model architecture is not yet available: Google's 1.2.2 C
+- The `TINY_GEMMA` model architecture is not yet available: Google's 1.2.3 C
   library has only `auto` and `omni`, so the package offers those two.
 - Google cannot interrupt its text analysis of a clause, which comes before
   that clause's audio, so a cancel during one very long clause lands only
@@ -578,9 +564,8 @@ Firebase Test Lab's phones run the stream on Google's mobile libraries against
 the same device's clips results.
 
 The speech tests compare both tasks with Google's own Python
-(`test/fixtures/official_speech_reference.json`, from the macOS 1.2.2 wheel,
-Google's first release with these tasks in Python; the package loads the same
-release's audio library): the transcript and segment timestamps of
+(`test/fixtures/official_speech_reference.json`, from the macOS 1.2.3 wheel;
+the package loads the same release's audio library): the transcript and segment timestamps of
 both speech clips, whole and in one-second blocks with and without interim
 results, and of three copies of a clip with a second of silence between them,
 past the transcriber's 5 s window, twice on one task; and for Text to Speech
@@ -591,7 +576,7 @@ paragraph, each with the same sample count, rate and word timings, and the
 peak and 100 ms RMS envelope within 0.002. On the Mac, where the Kokoro model
 is downloaded, they compare Kokoro on the CPU the same way with
 `test/fixtures/official_kokoro_reference.json`, made by
-`tool/generate_speech_reference.py --kokoro-output` with the pinned 1.2.2
+`tool/generate_speech_reference.py --kokoro-output` with the pinned 1.2.3
 macOS arm64 wheel: Google's voice list, an English sentence in the default
 voice and a French one in `ff_siwis`, and a task whose default voice is
 `ff_siwis` speaking its own locale unless the options give another (Google

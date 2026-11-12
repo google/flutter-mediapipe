@@ -36,13 +36,12 @@ browsers they name Flutter Web as the host environment.
 On Android and iOS the packages also give Google's libraries the app's ID and
 version, as Google's native SDKs do: the package name and `versionCode` on
 Android, the bundle ID and `CFBundleShortVersionString` on iOS. Every task
-accepts these fields, but with the pinned 1.2.2 libraries only eight tasks
-include them in their uploads: Audio Transcriber, Decision Maker, Interactive
-Segmenter, Semantic Retriever, Text Proofreader, Text Summarizer, Text to
-Speech and Universal Embedder. The other tasks' uploads leave both fields
-empty. On Android the uploads leave the app only because the packages run
-each library's `JNI_OnLoad` (see the table below). The packages set neither
-on macOS, Linux, Windows or in browsers.
+accepts these fields, and with the pinned 1.2.3 libraries every task includes
+them in its uploads (checked with the fields set on macOS, the iOS Simulator
+and an Android emulator); with 1.2.2 only eight tasks did. On Android the
+uploads leave the app only because the packages run each library's
+`JNI_OnLoad` (see the table below). The packages set neither on macOS, Linux,
+Windows or in browsers.
 
 Google's NOTICE opens with its MediaPipe Tasks privacy notice, which makes
 the app's developer responsible for getting users' informed consent where the
@@ -50,9 +49,9 @@ law requires it. The packages cannot turn the logging off.
 
 | Where | What the packages bundle | Usage logging |
 | --- | --- | --- |
-| macOS, Linux, Windows | Google's per-family 1.2.2 libraries | An uploader to `https://play.googleapis.com/log` in every library. Observed with Google's October 18 build on all three, every family: one request per task close, which Google accepts (HTTP 200). Captured again with 1.2.2 on macOS only, every task, with the uploads kept from Google. On macOS the User-Agent carries the process name. On Windows a close waits for its upload |
-| iOS | Google's per-family 1.2.2 libraries | The same uploader. Observed with the October 18 build on the iOS Simulator (every family) and on an iPhone: one request per task close, which Google accepts, with the app's bundle ID and version, the iOS version and the device model in the User-Agent. Captured again with 1.2.2 on the Simulator only, with the same User-Agent on every upload, whichever task sent it |
-| Android | Google's per-family 1.2.2 libraries | The same uploader, which since Google's nightly of October 21 goes through Java and needs the `JavaVM` that each library's `JNI_OnLoad` stores. Flutter loads the library with `dlopen`, which does not run it, so the packages run it themselves, once per library, before the family's first task. Observed with 1.2.2 in a debug build on an API 31 emulator: one request per task close leaves the app, Interactive Segmenter's with the app's ID and version, and none without that call. Observed again with 1.2.2 in a debug build on a Pixel 8a (Android 15): each of eight task closes opened one connection to Google and sent about 1 to 1.3 KB, with no JNI errors in the log. The October 18 build did upload, opening its own connection: on an emulator, where Google accepts one request per task close, and on physical phones from Android 9 to 15, 64-bit and 32-bit, where each task close opens one connection to Google of the same size and waits for it, up to about 2.5 s on the oldest phone |
+| macOS, Linux, Windows | Google's per-family 1.2.3 libraries | An uploader to `https://play.googleapis.com/log` in every library. Observed with Google's October 18 build on all three, every family: one request per task close, which Google accepts (HTTP 200). Captured again with 1.2.2 and 1.2.3 on macOS only, every task, with the uploads kept from Google. On macOS the User-Agent carries the process name. On Windows a close waits for its upload |
+| iOS | Google's per-family 1.2.3 libraries | The same uploader. Observed with the October 18 build on the iOS Simulator (every family) and on an iPhone: one request per task close, which Google accepts, with the app's bundle ID and version, the iOS version and the device model in the User-Agent. Captured again with 1.2.2 on the Simulator only, with the same User-Agent on every upload, whichever task sent it. Captured with 1.2.3 on the Simulator, every task: the User-Agent is now the system's default (the executable name, `CFBundleVersion` and the CFNetwork and Darwin versions), without the bundle ID |
+| Android | Google's per-family 1.2.3 libraries | The same uploader, which since Google's nightly of October 21 goes through Java and needs the `JavaVM` that each library's `JNI_OnLoad` stores. Flutter loads the library with `dlopen`, which does not run it, so the packages run it themselves, once per library, before the family's first task. Observed with 1.2.2 in a debug build on an API 31 emulator: one request per task close leaves the app, Interactive Segmenter's with the app's ID and version, and none without that call. Observed with 1.2.3 on the same emulator: every task's uploads carry the app's ID and version, and none leave without that call. Observed again with 1.2.2 in a debug build on a Pixel 8a (Android 15): each of eight task closes opened one connection to Google and sent about 1 to 1.3 KB, with no JNI errors in the log. The October 18 build did upload, opening its own connection: on an emulator, where Google accepts one request per task close, and on physical phones from Android 9 to 15, 64-bit and 32-bit, where each task close opens one connection to Google of the same size and waits for it, up to about 2.5 s on the oldest phone |
 | Browsers | Google's JavaScript runtimes | Requests from the page to `https://odml.pa.googleapis.com/v1/log` when a task closes and every 60 seconds while one is open. Observed with the October 18 build in Chromium and WebKit, every family, which Google accepts |
 
 With the October 18 build every family uploaded, Decision Maker included:

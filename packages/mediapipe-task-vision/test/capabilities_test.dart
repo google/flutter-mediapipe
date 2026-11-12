@@ -29,12 +29,13 @@ void main() {
           version: version,
         );
     const both = {Delegate.cpu, Delegate.gpu};
-    // Google's Linux library runs the GPU; its Windows library has none.
+    // Google's Linux library since 1.2.3 needs a LiteRT GPU plugin it does
+    // not ship for the palm detector; its Windows library has no GPU.
     expect(
       handLandmarkerCapabilitiesForPlatform(
         platform('linux', 'x64'),
       ).supportedDelegates,
-      both,
+      {Delegate.cpu},
     );
     expect(
       handLandmarkerCapabilitiesForPlatform(
@@ -60,20 +61,21 @@ void main() {
       platform('ios', 'arm64', '15.0'),
     );
     expect(ios.supportedDelegates, both);
-    expect(ios.runtimeVersion, '1.2.2');
-    // Android runs Google's vision library: GPU on arm64 phones, and CPU on
-    // the x86_64 emulator images.
+    expect(ios.runtimeVersion, '1.2.3');
+    // Android runs Google's vision library on the CPU: since 1.2.3 it needs
+    // the same LiteRT GPU plugin for the palm detector on arm64 phones, and
+    // the x86_64 emulator images have no GPU path.
     expect(
       handLandmarkerCapabilitiesForPlatform(
         platform('android', 'arm64'),
       ).supportedDelegates,
-      both,
+      {Delegate.cpu},
     );
     final emulator = handLandmarkerCapabilitiesForPlatform(
       platform('android', 'x64'),
     );
     expect(emulator.supportedDelegates, {Delegate.cpu});
-    expect(emulator.runtimeVersion, '1.2.2');
+    expect(emulator.runtimeVersion, '1.2.3');
     // The web needs its registered adapter, absent here.
     final web = handLandmarkerCapabilitiesForPlatform(
       platform('web', 'unknown'),
@@ -91,7 +93,7 @@ void main() {
     final result = interactiveSegmenterCapabilitiesForPlatform(mac);
     expect(result.supportedDelegates, {Delegate.cpu});
     expect(result.unavailableReasons[Delegate.gpu], contains('GLSL 330'));
-    expect(result.runtimeVersion, '1.2.2');
+    expect(result.runtimeVersion, '1.2.3');
   });
 
   test("MagicTouch stays off Google's Windows library, with the reason", () {
@@ -138,7 +140,7 @@ void main() {
       ).unavailableReasons[Delegate.gpu],
       contains('face blendshapes model'),
     );
-    expect(objectDetectorCapabilitiesForPlatform(mac).runtimeVersion, '1.2.2');
+    expect(objectDetectorCapabilitiesForPlatform(mac).runtimeVersion, '1.2.3');
   });
 
   test('Face Landmarker offers GPU on Linux x64, not Windows', () {
@@ -150,8 +152,8 @@ void main() {
     expect(on('windows').unavailableReasons[Delegate.gpu], isNotNull);
   });
 
-  test("Linux and Windows report Google's 1.2.2 libraries", () {
-    for (final (os, version) in [('linux', '1.2.2'), ('windows', '1.2.2')]) {
+  test("Linux and Windows report Google's 1.2.3 libraries", () {
+    for (final (os, version) in [('linux', '1.2.3'), ('windows', '1.2.3')]) {
       final platform = TaskPlatform(operatingSystem: os, architecture: 'x64');
       for (final result in [
         faceLandmarkerCapabilitiesForPlatform(platform),
@@ -209,8 +211,11 @@ void main() {
     );
     // macOS offers no GPU for now.
     for (final (claim, onLinux) in [
-      (poseLandmarkerCapabilitiesForPlatform, true),
-      (gestureRecognizerCapabilitiesForPlatform, true),
+      // Google's 1.2.3 Linux library lacks the LiteRT GPU plugin their hand
+      // detector and pose landmarks model now need.
+      (handLandmarkerCapabilitiesForPlatform, false),
+      (poseLandmarkerCapabilitiesForPlatform, false),
+      (gestureRecognizerCapabilitiesForPlatform, false),
       (imageClassifierCapabilitiesForPlatform, true),
       (imageSegmenterCapabilitiesForPlatform, true),
       // Google's Linux runtime aborts the embedder on GPU.
@@ -237,6 +242,19 @@ void main() {
       ).unavailableReasons[Delegate.gpu],
       allOf(contains('LiteRT GPU plugin'), isNot(contains('Linux x64,'))),
     );
+    for (final claim in [
+      handLandmarkerCapabilitiesForPlatform,
+      poseLandmarkerCapabilitiesForPlatform,
+      gestureRecognizerCapabilitiesForPlatform,
+    ]) {
+      expect(
+        claim(linux).unavailableReasons[Delegate.gpu],
+        allOf(
+          contains('libLiteRtGpuAccelerator.so'),
+          isNot(contains('Linux x64,')),
+        ),
+      );
+    }
   });
 
   test('Image Segmenter offers only CPU on every Android GPU', () {
@@ -306,11 +324,14 @@ void main() {
       'object detector': objectDetectorCapabilitiesForPlatform,
     };
     // Withdrawn on every Android GPU, phones included: Google's library lacks
-    // Face Detector's LiteRT GPU plugin, cannot open Holistic's face
-    // blendshapes model on the GPU, and aborts reading Image Segmenter's GPU
-    // mask.
+    // the LiteRT GPU plugin Face Detector's GPU and, since 1.2.3, the Hand,
+    // Gesture and Pose graphs need, cannot open Holistic's face blendshapes
+    // model on the GPU, and aborts reading Image Segmenter's GPU mask.
     const phoneCpuOnly = {
       'face detector',
+      'hand landmarker',
+      'pose landmarker',
+      'gesture recognizer',
       'holistic landmarker',
       'image segmenter',
     };
@@ -334,10 +355,12 @@ void main() {
     }
   });
 
-  test("Android phones offer Face Detector's and Holistic's CPU only", () {
+  test("Android phones offer the CPU only where Google's GPU graph fails", () {
     // Google's Android library lacks the LiteRT GPU plugin Face Detector's GPU
-    // needs, and cannot open Holistic's face blendshapes model on the GPU. Face
-    // Landmarker and the other tasks keep the GPU.
+    // needs, and since 1.2.3 the Hand, Gesture and Pose graphs too (a Pixel
+    // 8a fails to open their GPU graphs), and cannot open Holistic's face
+    // blendshapes model on the GPU. Face Landmarker and the other tasks keep
+    // the GPU.
     for (final gpu in [
       'Mali-G715 (ARM)',
       'Adreno (TM) 750 (Qualcomm)',
@@ -351,6 +374,12 @@ void main() {
       );
       for (final (claim, gap) in [
         (faceDetectorCapabilitiesForPlatform, 'LiteRT GPU plugin'),
+        (handLandmarkerCapabilitiesForPlatform, 'libLiteRtGpuAccelerator.so'),
+        (poseLandmarkerCapabilitiesForPlatform, 'libLiteRtGpuAccelerator.so'),
+        (
+          gestureRecognizerCapabilitiesForPlatform,
+          'libLiteRtGpuAccelerator.so',
+        ),
         (holisticLandmarkerCapabilitiesForPlatform, 'face blendshapes model'),
       ]) {
         final capabilities = claim(phone);
@@ -374,6 +403,9 @@ void main() {
     );
     for (final claim in [
       faceDetectorCapabilitiesForPlatform,
+      handLandmarkerCapabilitiesForPlatform,
+      poseLandmarkerCapabilitiesForPlatform,
+      gestureRecognizerCapabilitiesForPlatform,
       holisticLandmarkerCapabilitiesForPlatform,
     ]) {
       expect(

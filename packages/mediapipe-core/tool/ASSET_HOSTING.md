@@ -55,7 +55,8 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
   each `FamilyRuntime.asset` is the member of Google's archive
   (`familyRuntimeArchiveUrl`,
   `storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/20261018/mediapipe_tasks_c_20261018.zip`),
-  read with range requests. Since 0.2.0 it names Google's 1.2.2 release, the
+  read with range requests. Since 0.2.0 it names a Google release (1.2.2, then
+  1.2.3 since 0.3.0), the
   hooks' only source: the project's own copy of the libraries, a fallback for
   the nightlies, is gone.
 - **Retries, backoff and resume for every native download** (#89).

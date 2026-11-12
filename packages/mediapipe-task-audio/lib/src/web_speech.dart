@@ -12,9 +12,9 @@ import 'package:mediapipe_core/web_task_bridge.dart';
 
 import 'speech_runners.dart';
 import 'speech_types.dart';
-import 'utf16_indices.dart';
 
-/// Opens Google's Audio Transcriber on a worker.
+/// Opens Google's Audio Transcriber on a worker. Google's 1.2.3 browser
+/// runtime has no cache directory option, so `cacheDirectory` is not sent.
 Future<AudioTranscriberRunner> openWebAudioTranscriber(
   AudioTranscriberOptions options,
 ) async => _WebTranscriber(
@@ -23,11 +23,11 @@ Future<AudioTranscriberRunner> openWebAudioTranscriber(
     'enableInterimResults': options.enableInterimResults,
     'modelArchitecture': options.modelArchitecture.name.toUpperCase(),
     'prompt': _optional(options.prompt),
-    'cacheDir': _optional(options.cacheDirectory),
   }),
 );
 
-/// Opens Google's Text to Speech on a worker.
+/// Opens Google's Text to Speech on a worker. Google's 1.2.3 browser runtime
+/// has no cache directory option, so `cacheDirectory` is not sent.
 Future<TextToSpeechRunner> openWebTextToSpeech(
   TextToSpeechOptions options,
 ) async => _WebTextToSpeech(
@@ -36,7 +36,6 @@ Future<TextToSpeechRunner> openWebTextToSpeech(
     'defaultLocale': _optional(options.defaultLocale),
     'speakingRate': options.speakingRate,
     'targetBucket': options.targetBucket,
-    'cacheDirectory': _optional(options.cacheDirectory),
   }),
 );
 
@@ -146,7 +145,7 @@ final class _WebTextToSpeech implements TextToSpeechRunner {
     if (reply.has('cancelled') || _cancels != cancels) {
       throw const TaskException('Synthesis cancelled.', statusCode: 1);
     }
-    return _audio(reply, utf16Indices(text));
+    return _audio(reply, text.length);
   }
 
   @override
@@ -155,10 +154,9 @@ final class _WebTextToSpeech implements TextToSpeechRunner {
     String? voiceId,
     String? locale,
   ) {
-    final indices = utf16Indices(text);
     return _worker
         .stream(_input('synthesizeStream', text, voiceId, locale))
-        .map((chunk) => _audio(chunk, indices));
+        .map((chunk) => _audio(chunk, text.length));
   }
 
   /// The worker reads a cancel only when it yields: between a stream's
@@ -182,7 +180,10 @@ final class _WebTextToSpeech implements TextToSpeechRunner {
         ..['voiceId'] = _optional(voiceId)?.toJS
         ..['locale'] = _optional(locale)?.toJS;
 
-  TextToSpeechResult _audio(JSObject reply, Int32List indices) {
+  /// Google's 1.2.3 browser runtime gives UTF-16 indices, as its
+  /// WordTimestamp documents, where 1.2.2 gave UTF-8 byte offsets; they
+  /// are kept within the [length] of the text.
+  TextToSpeechResult _audio(JSObject reply, int length) {
     final result =
         jsonDecode(reply.getProperty<JSString>('json'.toJS).toDart)
             as Map<String, Object?>;
@@ -196,16 +197,8 @@ final class _WebTextToSpeech implements TextToSpeechRunner {
         for (final word in words.cast<Map<String, Object?>>())
           WordTimestamp(
             word: word['word']! as String,
-            start:
-                indices[(word['startChar']! as num).toInt().clamp(
-                  0,
-                  indices.length - 1,
-                )],
-            end:
-                indices[(word['endChar']! as num).toInt().clamp(
-                  0,
-                  indices.length - 1,
-                )],
+            start: (word['startChar']! as num).toInt().clamp(0, length),
+            end: (word['endChar']! as num).toInt().clamp(0, length),
             startSeconds: (word['startSec']! as num).toDouble(),
             endSeconds: (word['endSec']! as num).toDouble(),
           ),

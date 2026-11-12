@@ -16,6 +16,7 @@ on:
       - tool/check_archives.py
       - .github/actions/setup/**
       - .github/actions/android-ndk/**
+      - .github/actions/gradle-plugin-repositories/**
       - .github/workflows/archives.yaml
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - tool/check_archives.py
       - .github/actions/setup/**
       - .github/actions/android-ndk/**
+      - .github/actions/gradle-plugin-repositories/**
       - .github/workflows/archives.yaml
   workflow_dispatch:
 
@@ -63,6 +65,9 @@ jobs:
       # Gradle's own NDK and CMake downloads give up on one corrupt archive.
       - if: matrix.target == 'android'
         uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - if: matrix.target == 'android'
+        uses: ./.github/actions/gradle-plugin-repositories
       - name: Build a fresh app from the archives
         run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} -B tool/check_archives.py ${{ matrix.target }} --scratch build/archives
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

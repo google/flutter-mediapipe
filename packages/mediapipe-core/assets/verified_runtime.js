@@ -37,7 +37,7 @@ export async function loadVerifiedRuntime(pinUrl, baseUrl, family) {
   try {
     const bundle = await import(await verified(`${family.toLowerCase()}_bundle.mjs`));
     // With `true` the resolver returns the module build (no SIMD probe in
-    // 1.2.2, which ships no no-SIMD build); it fetches nothing given a
+    // 1.2.3, which ships no no-SIMD build); it fetches nothing given a
     // relative root.
     const paths = await bundle.FilesetResolver[`for${family}Tasks`]('wasm', true);
     const name = path => `wasm/${path.split('/').pop()}`;

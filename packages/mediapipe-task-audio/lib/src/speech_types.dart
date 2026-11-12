@@ -63,8 +63,8 @@ final class AudioTranscriberOptions extends TaskOptions {
   /// Python documents as turning the disk cache off; Parakeet wrote no cache
   /// with it on a Mac, on the CPU or the GPU, but Google's Text to Speech
   /// does with Kokoro, so pass `':nocache'`, as Google's guides say, to be
-  /// sure caching is off. In a browser it is a path in the runtime's virtual
-  /// file system, which goes with the page.
+  /// sure caching is off. Browsers ignore it: Google's 1.2.3 browser runtime
+  /// has no cache directory option.
   final String? cacheDirectory;
 }
 
@@ -177,8 +177,8 @@ final class TextToSpeechOptions extends TaskOptions {
   /// about 34 MB of XNNPACK and GPU program and weight caches on the GPU.
   /// Phonon wrote none. Google's Python documents null as turning the disk
   /// cache off, which it does not do for Kokoro; pass `':nocache'` to turn
-  /// caching off, as Google's guide says. In a browser it is a path in the
-  /// runtime's virtual file system, which goes with the page.
+  /// caching off, as Google's guide says. Browsers ignore it: Google's 1.2.3
+  /// browser runtime has no cache directory option.
   final String? cacheDirectory;
 }
 
@@ -230,8 +230,9 @@ final class WordTimestamp {
   final String word;
 
   /// Where the word starts in the input string, as a UTF-16 index, so
-  /// `text.substring(start, end)` is the word. Google reports UTF-8 byte
-  /// offsets; this package converts them.
+  /// `text.substring(start, end)` is the word. Google's native runtimes
+  /// report UTF-8 byte offsets, which this package converts; its browser
+  /// runtime reports UTF-16 indices.
   final int start;
 
   /// Where the word ends in the input string, exclusive.

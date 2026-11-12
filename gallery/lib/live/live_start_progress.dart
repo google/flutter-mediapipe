@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// How far a camera demo's start has got. The model, runtime and camera load
 /// at once; [step] names the first unfinished one.

@@ -354,7 +354,8 @@ void main() {
           ..host_version = Pointer.fromAddress(18)
           ..ca_bundle_path = Pointer.fromAddress(19)
           ..app_id = Pointer.fromAddress(20)
-          ..app_version = Pointer.fromAddress(21);
+          ..app_version = Pointer.fromAddress(21)
+          ..npu_dispatch_library_dir = Pointer.fromAddress(22);
         final data = ByteData.sublistView(
           base.cast<Uint8>().asTypedList(sizeOf<mp.MpBaseOptions>()),
         );

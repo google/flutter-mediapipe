@@ -1,3 +1,24 @@
+## 0.3.0
+
+- Upgrade every mediapipe package to 0.3.0 together. MediaPipe 1.2.3
+  changes the layout of the native option structs, so this package now
+  requires `mediapipe_core` ^0.3.0.
+- Runs Google's MediaPipe 1.2.3 instead of 1.2.2, with new SHA-256 pins
+  for its native libraries.
+- Text to Speech word indices in the browser stay correct UTF-16 indices
+  on Google's 1.2.3 web runtime, which changed their unit from UTF-8 bytes
+  to UTF-16 indices.
+- Accepts Flutter 3.44 and newer, down from 3.47. The package accepts the
+  dependency versions Flutter 3.44 resolves, from `hooks` 2.0.0,
+  `code_assets` 1.1.0 and `native_toolchain_c` 0.19.0. iOS and macOS
+  builds with Xcode 27 need Flutter 3.47 or later.
+- CI tests the package on Flutter 3.50.0, the latest stable release,
+  instead of 3.47.9.
+- The README's Audio Transcriber sample for a clip only transcribes: it no
+  longer ends with a `speak()` function, which is Text to Speech code, as
+  Google's Audio Transcriber guide shows it. The Speech section keeps its
+  own Text to Speech samples.
+
 ## 0.2.1
 
 - The README has complete samples for live transcription with interim

@@ -25,9 +25,10 @@ the [Interactive Segmenter guide](https://github.com/google/flutter-mediapipe/bl
 
 ## Installation
 
-The package needs Flutter 3.47 or newer, with the latest stable release
-recommended, and the usual toolchain for your target platform. Add the package
-from pub.dev, from your app's root:
+The package needs Flutter 3.44 or newer, with the latest stable release
+recommended, and the usual toolchain for your target platform. iOS and macOS
+builds with Xcode 27 need Flutter 3.47 or later. Add the package from pub.dev,
+from your app's root:
 
 ```sh
 flutter pub add mediapipe_vision
@@ -812,8 +813,14 @@ before offering a GPU toggle.
 | Linux x64 | Official library | OpenGL ES for supported tasks; EGL and a GPU driver required |
 | Windows x64 | Official library | Not available |
 
+On Android and Linux, Hand Landmarker, Gesture Recognizer and Pose Landmarker
+(like Face Detector) run on the CPU only with Google's 1.2.3 library, because
+their GPU path needs a LiteRT GPU plugin that Google's library does not ship.
+Their capability queries offer the CPU only, and asking for the GPU throws
+`RuntimeUnavailableException` before the task is created.
+
 GPU on iPhone is offered and was tested on an iPhone 15 Pro (iOS 27) with
-Google's 1.2.2 library; iPads were not tested. That holds for every task with
+Google's 1.2.3 library; iPads were not tested. That holds for every task with
 an iOS GPU path: Face Detector, Face Landmarker, Hand Landmarker, Gesture
 Recognizer, Pose Landmarker, Object Detector, Image Classifier, Image Embedder
 and Image Segmenter.

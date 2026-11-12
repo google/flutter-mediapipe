@@ -1,5 +1,5 @@
 name: MediaPipeVisionBindings
-description: MediaPipe 1.2.2 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
+description: MediaPipe 1.2.3 C API. Regenerate with dart ../mediapipe-core/tool/generate_bindings.dart.
 silence-enum-warning: true # sizeof(enum)==4 is checked by tool/abi_check.cc.
 # Every vision task binds Google's one vision library.
 output: lib/src/third_party/mediapipe/vision_bindings.dart
@@ -61,7 +61,7 @@ macros:
 preamble: |
   // Copyright 2026 The MediaPipe Authors.
   // Licensed under the Apache License, Version 2.0.
-  // Generated from Google's unmodified MediaPipe 1.2.2 headers; see
+  // Generated from Google's unmodified MediaPipe 1.2.3 headers; see
   // packages/mediapipe-core/native/README.md.
 ffi-native:
   asset-id: package:mediapipe_vision/mediapipe.dylib

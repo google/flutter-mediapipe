@@ -78,6 +78,9 @@ jobs:
       # Gradle's own NDK and CMake downloads give up on one corrupt archive.
       - if: matrix.target == 'android'
         uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - if: matrix.target == 'android'
+        uses: ./.github/actions/gradle-plugin-repositories
       - run: flutter pub get
       - name: Bundle the model
         run: dart run mediapipe_core:bundle_models

@@ -1,7 +1,7 @@
 {
   "package": "@mediapipe/tasks-audio",
-  "version": "1.2.2",
-  "integrity": "8kv9v6+bGb+cbonbB/oU7xPKY7/eWp1bxD5FKhiApHbj0yGXlgVOq9PvjFMFwISs28nYlMUL/fcCsyLsmzyGdQ==",
+  "version": "1.2.3",
+  "integrity": "GAJ/6BcnX8RDCwJgug76vBBKr3qEu1PbfRB8rB1bemHhEbUu8ikNMLJU84ZAnnBuA/1iaJwRE7I3wjeJuHRPSQ==",
   "files": [
     "audio_bundle.mjs",
     "wasm/audio_wasm_internal.js",
@@ -10,10 +10,10 @@
     "wasm/audio_wasm_module_internal.wasm"
   ],
   "sha384": {
-    "audio_bundle.mjs": "53I+ac3xcBEvc6igsXJTJ2AAJ1nA2Uf8vlGPJzIimZBPTSFTsqkV0IEQDWUROdm3",
-    "wasm/audio_wasm_internal.js": "jj8QhpX/RiJt6Vx5pFYmjbtp/Vrfj+zAvMVYR0i7CKjkx6PMLz2kc8LG78wLrAn1",
-    "wasm/audio_wasm_internal.wasm": "ZfhnWyNd9vtW4rLQATnNBpMgyMnztQlnrhWHnXtN0vXURS2tFw7rzZReRhLQHLji",
-    "wasm/audio_wasm_module_internal.js": "mKpKFWpoA9j1jUtG0qQkyAj1sUk1eR5bXIhTrzJDFGtPgM/BraY1D/Z7XvrSzHDd",
-    "wasm/audio_wasm_module_internal.wasm": "F/Z59wTRwFRf9FOccPaRn6Aib/d3ZQashPJbZRYfbkSW5dz09ulpSzqqSzB7Ivd2"
+    "audio_bundle.mjs": "HT+Pr3v+vM4n9FQ3nkv3DGM4hYAOeC7zVpSfK8Yknli5Ho9s4oobmXtthHRCj15b",
+    "wasm/audio_wasm_internal.js": "o/OKlFNZ3JniJbI2ECrx6T1rJteTvWwOUaDFNX6Ot9mqj3DGEDNLmZ3eMkk2EhVm",
+    "wasm/audio_wasm_internal.wasm": "c6OgQHO5+W0jCwNZMWDZi4LIayuxest2Se/D6/AYZnPzIOUuY/ux8trR+v1PvOVt",
+    "wasm/audio_wasm_module_internal.js": "c/HxE0Qx+OuuU1+f3WdjRvNJ3mZRsBvGDm/8yhjakGzY6jWkBSrSd6KH9iXTAHSO",
+    "wasm/audio_wasm_module_internal.wasm": "Jt3LNsh4BcgR820wh2XQ5VE+4poFJz9cUkyw3CkFn7XlHZsBHm1ha0HOZ5Ufn14R"
   }
 }

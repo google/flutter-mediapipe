@@ -1,3 +1,33 @@
+## 0.3.0
+
+- Upgrade every mediapipe package to 0.3.0 together. MediaPipe 1.2.3
+  changes the layout of the native option structs, so this package now
+  requires `mediapipe_core` ^0.3.0.
+- Runs Google's MediaPipe 1.2.3 instead of 1.2.2, with new SHA-256 pins
+  for its native libraries.
+- On Linux, Hand Landmarker, Gesture Recognizer and Pose Landmarker now
+  run on the CPU only. Google's 1.2.3 Linux library runs part of their
+  graphs on LiteRT, whose GPU plugin (libLiteRtGpuAccelerator.so) it does
+  not ship, so their GPU graphs fail to open; 1.2.2 ran them on the GPU.
+  Asking for the GPU there fails with a clear reason, as it already does
+  for Face Detector.
+- On Android, Hand Landmarker, Gesture Recognizer and Pose Landmarker now
+  run on the CPU only as well: Google's 1.2.3 Android library needs the
+  same missing GPU plugin, so their GPU graphs failed to open on a Pixel
+  8a, where 1.2.2 ran all three on the GPU. Asking for the GPU there fails
+  with a clear reason, and the gallery opens them on the CPU.
+- Accepts Flutter 3.44 and newer, down from 3.47. The package accepts the
+  dependency versions Flutter 3.44 resolves, from `hooks` 2.0.0,
+  `code_assets` 1.1.0 and, for development, `ffigen` 21.0.0. iOS and macOS
+  builds with Xcode 27 need Flutter 3.47 or later.
+- CI tests the package on Flutter 3.50.0, the latest stable release,
+  instead of 3.47.9.
+- The object detection sample app builds on Flutter 3.44.0, 3.47.9 and
+  3.50.0: its Android project uses the Android Gradle plugin 9.3.3, Gradle
+  9.5.0 and Kotlin 2.4.20, and it takes its Material widgets from
+  `material_ui` 1.2.0 or later, since Flutter 3.50 deprecates the SDK's
+  copy.
+
 ## 0.2.1
 
 - The README's video and live stream samples are complete functions. The live

@@ -185,7 +185,7 @@ void main() {
         ),
       );
       try {
-        // Google's 1.2.2 wheel: it drops every language below about 0.3, so
+        // Google's 1.2 wheels: they drop every language below about 0.3, so
         // maxResults 3 gives one each.
         for (final (text, expected) in [
           ('Hello, world!', [('en', 0.994802)]),

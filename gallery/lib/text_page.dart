@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';
 
 import 'catalog.dart';
@@ -18,13 +18,23 @@ const generatedTextKey = ValueKey('generated_text');
 
 /// A text task on typed input, laid out as the live demos are: the input and
 /// its results beside the same settings panel, with MediaPipe Studio's
-/// settings and model selection. The classic tasks and EmbeddingGemma score
-/// or compare the input; the Proofreader and Summarizer write text, streamed
-/// as Google generates it.
+/// settings and model selection. The classic tasks score or compare the
+/// input, Text Embedder with either model Google's guide lists for it:
+/// Universal Sentence Encoder or EmbeddingGemma. The Proofreader and
+/// Summarizer write text, streamed as Google generates it.
 class TextPage extends StatefulWidget {
-  const TextPage({super.key, required this.task, this.onOpenMenu});
+  const TextPage({
+    super.key,
+    required this.task,
+    this.embeddingGemma = false,
+    this.onOpenMenu,
+  });
 
   final GalleryTask task;
+
+  /// Whether Text Embedder offers EmbeddingGemma as a model, which is where
+  /// the build bundles it (`offersEmbeddingGemma`).
+  final bool embeddingGemma;
   final VoidCallback? onOpenMenu;
 
   @override
@@ -36,13 +46,13 @@ typedef _Row = ({String label, double score});
 
 /// EmbeddingGemma's uses, in the order the Task Type setting lists them.
 const _gemmaTypes = [
-  EmbeddingType.semanticSimilarity,
   EmbeddingType.retrievalQuery,
+  EmbeddingType.semanticSimilarity,
+  EmbeddingType.classification,
+  EmbeddingType.clustering,
   EmbeddingType.questionAnswering,
   EmbeddingType.factChecking,
   EmbeddingType.codeRetrieval,
-  EmbeddingType.classification,
-  EmbeddingType.clustering,
 ];
 
 /// The uses that pair a query with a document: the first text is the query
@@ -59,7 +69,10 @@ class _TextPageState extends State<TextPage>
   late final String _id = widget.task.runtimeId;
   late final TaskSettingValues _values = TaskSettingValues(_id);
   late final List<TaskSetting> _settings = taskSettings[_id] ?? const [];
-  late final List<TaskModel> _models = taskModels[_id] ?? const [];
+  late final List<TaskModel> _models = [
+    for (final model in taskModels[_id] ?? const <TaskModel>[])
+      if (model != embeddingGemmaModel || widget.embeddingGemma) model,
+  ];
   late final _first = TextEditingController(text: _samples[_id]!.$1);
   late final _second = TextEditingController(text: _samples[_id]!.$2);
 
@@ -85,10 +98,6 @@ class _TextPageState extends State<TextPage>
       'The weather is lovely today.',
       "It's a beautiful sunny day.",
     ),
-    'embedding_gemma': (
-      'The weather is lovely today.',
-      "It's a beautiful sunny day.",
-    ),
     'text_proofreader': (
       'Our team have finished the first version of the app. We was testing '
           'it yesterday when we notice a small problem. The report explain '
@@ -107,8 +116,11 @@ class _TextPageState extends State<TextPage>
     ),
   };
 
-  bool get _embedder => _id == 'text_embedder' || _id == 'embedding_gemma';
+  bool get _embedder => _id == 'text_embedder';
   bool get _generative => _id == 'text_proofreader' || _id == 'text_summarizer';
+
+  /// Whether Text Embedder runs EmbeddingGemma rather than a classic model.
+  bool get _gemma => model == embeddingGemmaModel;
 
   @override
   void dispose() {
@@ -169,14 +181,11 @@ class _TextPageState extends State<TextPage>
               : TextSummarizerMode.keypoints,
         ),
       ),
-      'embedding_gemma' => await TextEmbedder.create(
+      'text_embedder' when _gemma => await TextEmbedder.create(
         TextEmbedderOptions(
-          modelBytes: bytes,
           // A file on native platforms; in browsers its URL, which Google's
           // runtime fetches itself, so 184 MB never passes through Dart.
-          modelPath: bytes == null
-              ? await GalleryAssets.modelPath(widget.task.model)
-              : null,
+          modelPath: await GalleryAssets.modelPath(TextModels.embeddingGemma),
           l2Normalize: _values.on('l2Normalize'),
           quantize: _values.on('quantize'),
         ),
@@ -193,9 +202,9 @@ class _TextPageState extends State<TextPage>
   }
 
   /// How EmbeddingGemma formats each text for the chosen use; the classic
-  /// embedder takes none.
+  /// embedders take none.
   (TextFormatContext?, TextFormatContext?) _formats() {
-    if (_id != 'embedding_gemma') return (null, null);
+    if (!_gemma) return (null, null);
     final type = _gemmaTypes[_values.choice('taskType')];
     final pair = _pairTypes.contains(type);
     return (
@@ -281,6 +290,9 @@ class _TextPageState extends State<TextPage>
 
   /// Rebuilds the task on the next run with the changed settings or model.
   Future<void> _reset() async {
+    // Busy from the frame of the change, so the last result never shows as
+    // the new settings' or the new model's.
+    setState(() => _busy = true);
     await _close();
     if (mounted) await _run();
   }
@@ -295,10 +307,27 @@ class _TextPageState extends State<TextPage>
   @override
   void modelChanged() => unawaited(_reset());
 
+  /// EmbeddingGemma is bundled and opened by its path, so choosing it
+  /// downloads nothing and holds no bytes; the others load as on every page.
+  Future<void> _chooseModel(TaskModel? chosen) async {
+    if (chosen != embeddingGemmaModel) return chooseModel(chosen);
+    setState(() {
+      model = chosen;
+      uploaded = null;
+      modelBytes = null;
+      modelStatus = null;
+    });
+    modelChanged();
+  }
+
   Widget _panel() => ListenableBuilder(
     listenable: revision,
     builder: (context, _) => TaskSettingsPanel(
-      settings: _settings,
+      settings: [
+        for (final setting in _settings)
+          // EmbeddingGemma's alone: the classic embedders take no task type.
+          if (setting.key != 'taskType' || _gemma) setting,
+      ],
       values: _values,
       delegates: const [Delegate.cpu],
       delegate: Delegate.cpu,
@@ -309,10 +338,11 @@ class _TextPageState extends State<TextPage>
       model: model,
       uploaded: uploaded,
       modelStatus: modelStatus,
-      onModel: chooseModel,
+      onModel: _chooseModel,
       // Google's generative tasks read a `.litertlm` file, not bytes.
       onUpload: _generative ? null : uploadModel,
       bundledModel: widget.task.modelFile,
+      standardModel: standardModelNames[_id] ?? 'Standard',
     ),
   );
 
@@ -408,7 +438,7 @@ class _TextPageState extends State<TextPage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task),
+        TaskToolbar(task: widget.task, gemmaTerms: widget.embeddingGemma),
         SurfaceCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,7 +490,7 @@ class _TextPageState extends State<TextPage>
             ],
             empty: 'Run the task to see its results.',
           ),
-        if (widget.task.gemmaModel) ...[
+        if (widget.task.gemmaModel || _gemma) ...[
           const SizedBox(height: 22),
           const GemmaNotice(),
         ],

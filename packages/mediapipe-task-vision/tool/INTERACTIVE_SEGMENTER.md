@@ -5,9 +5,9 @@ current image-and-strokes API, not the legacy one-point ROI wrapper. The
 complete official model bundle and native inference graph are preserved. It
 runs through Google's own runtime on each platform:
 
-- **Android, iOS, macOS arm64 (14+), Linux x64:** Google's 1.2.2 vision
+- **Android, iOS, macOS arm64 (14+), Linux x64:** Google's 1.2.3 vision
   library, which the vision package's hook bundles.
-- **Web:** `@mediapipe/tasks-vision` 1.2.2.
+- **Web:** `@mediapipe/tasks-vision` 1.2.3.
 
 Browsers run it on CPU or WebGL 2, every other platform on the CPU. Google's
 Windows library exports the stateful API as well and its masks agree with the
@@ -185,7 +185,9 @@ mobile SDKs run the task on the CPU. On macOS, Google's
 `HeatmapFromStrokesCalculatorGl` requests GLSL 330 in a macOS OpenGL 2.1
 context and fails to compile its shader, in both the 1.0.0 and 1.0.1 runtimes.
 This was reproduced using the official Python API with valid RGBA input outside
-the sandbox. Linux's GPU path aborts.
+the sandbox. Google's 1.2.3 macOS wheel creates a GPU segmenter, but it answers
+with a 4-channel 8-bit image instead of a confidence mask. Linux's GPU path
+aborts.
 Enabling Metal for the face tasks does not repair this separate stroke graph.
 There is no silent CPU fallback and no modified substitute pipeline.
 
@@ -211,7 +213,7 @@ The saved macOS validation and CPU baseline, in git history at `3e217ac` under
 consumer report and editor screenshot.
 
 - `dart test test/interactive_segmenter_test.dart` compares every mask pixel in
-  20 cases with Google's Python API (the 1.1.0 wheel) at maximum absolute
+  20 cases with Google's Python API (the 1.2.3 wheel) at maximum absolute
   error 1e-6: clicks, partial strokes, multiple selections, exclusion, lasso
   as an outline, open, and as two corners, an unfinished Exclude, an Exclude
   drag finished and in progress, an unfinished lasso, a lasso with an
@@ -239,8 +241,11 @@ consumer report and editor screenshot.
   stroke with Google's JavaScript on the same delegate, CPU and WebGL, and
   checks the box rule on Google's own output.
 
-`generate_interactive_segmenter_reference.py` runs Google's wheel pinned for
-the host (core's `tool/official_wheels.py`); `--python-package-root` takes the
-fully extracted pinned wheel instead. Ordinary consumer/test inference never
+`generate_interactive_segmenter_reference.py` runs Google's 1.2.3 wheel pinned
+for the host (core's `releaseReferenceWheels`, through `tool/official_wheels.py`),
+not the 1.1.0 wheel the other vision references come from: 1.2.3's masks
+differ from 1.1.0's by up to the whole confidence range, for lassos and the
+blank image most of all. `--python-package-root` takes the fully extracted
+pinned wheel instead. Ordinary consumer/test inference never
 loads Python. Fixture attribution and ABI provenance are in
 [the reference notes](../test/fixtures/interactive_segmentation/README.md).

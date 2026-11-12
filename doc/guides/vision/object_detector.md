@@ -58,8 +58,8 @@ The following files contain the code that matters for object detection:
 ## Setup
 
 This section describes the key steps for setting up a Flutter project to use
-the Object Detector. It needs Flutter 3.47 or newer; the latest stable release
-is recommended.
+the Object Detector. It needs Flutter 3.44 or newer; the latest stable release
+is recommended. iOS and macOS builds with Xcode 27 need Flutter 3.47 or later.
 
 ### Dependencies
 

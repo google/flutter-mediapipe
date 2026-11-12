@@ -33,7 +33,7 @@ Future<void> main(List<String> args) async {
   final payload = gzip.decode(await reference.readAsBytes());
   final golden = jsonDecode(utf8.decode(payload)) as Json;
   cases = (golden['cases'] as List).cast<Json>();
-  // Google's macOS 1.2.2 wheel, the release the family libraries come from.
+  // Google's macOS 1.2.3 wheel, the release the family libraries come from.
   final runtime = releaseReferenceWheel('macos/arm64')!.version;
   report.addAll({
     'started_utc': DateTime.now().toUtc().toIso8601String(),

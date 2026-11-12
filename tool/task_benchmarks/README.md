@@ -65,8 +65,10 @@ from warmed inference. The report includes all samples, median and p95.
 ## Official reference provenance
 
 `fixtures/options-reference.json.gz` is lossless JSON generated through the
-official Python API of Google's macOS arm64 1.2.2 wheel (core's
-`releaseReferenceWheels`, `mediapipe` 1.2.2). From the 1.1.0 wheel it changed
+official Python API of Google's macOS arm64 1.2.3 wheel (core's
+`releaseReferenceWheels`, `mediapipe` 1.2.3). From 1.2.2 it changed only the
+Summarizer's long key points past their first 98 characters, which change
+between runs anyway. From the 1.1.0 wheel, 1.2.2 changed
 the over-capacity error's source line, the Summarizer's over-budget errors,
 which now give the reason, and the Summarizer's text for some long inputs. The
 Summarizer's long key points differ between runs of one wheel after their first

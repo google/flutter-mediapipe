@@ -1,10 +1,10 @@
 """Test the text and audio packages against Google's library on this host.
 
-Installs Google's pinned official wheels for this host (1.2.2 for the text
-tasks, whose Language Detector changed in it; 1.1.0 for audio), generates the text and
+Installs Google's pinned official wheels for this host (1.2.3 for the text
+tasks, whose Language Detector changed in 1.2.2; 1.1.0 for audio), generates the text and
 audio references with them, downloads the pinned models, and runs both
 packages' Dart suites against those same-host references (with what Google's
-speech tasks do with a path that is no model, from the 1.2.2 wheel, for the
+speech tasks do with a path that is no model, from the 1.2.3 wheel, for the
 audio suite's speech tests that need no model), after the audio
 stream bridge's AddressSanitizer test outside Windows. CI runs it on the
 Linux x64 and Windows x64 desktop runners; it runs on macOS arm64 as well.

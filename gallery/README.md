@@ -64,8 +64,8 @@ without owning an Android device.
 
 For Windows x64 and Linux x64, prepare with `--target windows/x64` or
 `--target linux/x64`, then run `flutter run -d windows --release` or
-`flutter run -d linux --release`. Linux offers GPU for the live Face and Hand
-Landmarker demos; Windows and the Pose demo use CPU only.
+`flutter run -d linux --release`. Linux offers GPU for the live Face
+Landmarker demo; Windows and the Hand and Pose demos use CPU only.
 Each family's hook bundles Google's checksum-pinned library for that family.
 `camera_desktop` provides native
 Media Foundation capture on Windows and GStreamer/V4L2 capture on Linux.
@@ -87,7 +87,10 @@ Three gates, in order:
    `--modern-text-reference` or the text package's checked-in fixtures.
    **Proofreader and Summarizer are not yet available in the web gallery**,
    matching the MediaPipe Tasks Web SDK, so the web build bundles EmbeddingGemma
-   alone and shows the other two as cards that say so. Decision Maker and its
+   alone and shows the other two as cards that say so. EmbeddingGemma has no
+   tile of its own: it is the second model of the Text Embedder page, as in
+   Google's Text Embedder guide, offered where a build bundles it and the
+   package's capability query supports it. Decision Maker and its
    game, Hungry Fish, bundle no model: Laya (678 MB) and EmbeddingGemma 2
    (165 MB) download on first use, verified into the model cache natively and
    fetched by Google's runtime in browsers, which show the two only on a
@@ -108,13 +111,14 @@ editor wherever its runtime runs.
 
 ## Gemma models
 
-EmbeddingGemma 300M (the EmbeddingGemma page), the Proofreader and the
-Summarizer are Gemma models, under the
+EmbeddingGemma 300M (a model of the Text Embedder page), the Proofreader and
+the Summarizer are Gemma models, under the
 [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and its
 [Prohibited Use Policy](https://ai.google.dev/gemma/prohibited_use_policy)
 rather than Apache 2.0. The gallery passes the terms on as the terms ask:
-each of these pages, and its Info dialog, says that Gemma is provided under
-and subject to them and links to both. Anyone redistributing a gallery build
+the Proofreader and Summarizer pages, the Text Embedder page while
+EmbeddingGemma is chosen, and their Info dialogs say that Gemma is provided
+under and subject to them and link to both. Anyone redistributing a gallery build
 takes on the same terms. The EmbeddingGemma 2 models the gallery downloads
 for Hungry Fish (on Decision Maker) and the Universal Embedder are Apache
 2.0, per their model cards.
@@ -141,9 +145,9 @@ decoder: AVFoundation on iOS and macOS, MediaCodec on Android, Media
 Foundation on Windows, GStreamer on Linux, and in browsers a `<video>` element
 stepped one frame at a time. The vision package decodes nothing.
 Switching back to **Camera** reopens the live stream task. Interactive Segmenter is image-only and uses its own editor.
-Windows exposes CPU only. Face and Hand Landmarker also expose GPU on Linux,
-iPhones (tested on an iPhone 15 Pro, iOS 27, with Google's 1.2.2 library),
-Android phones and web.
+Windows exposes CPU only. Face and Hand Landmarker also expose GPU on
+iPhones (tested on an iPhone 15 Pro, iOS 27, with Google's 1.2.2 library)
+and web, and Face Landmarker on Android phones and Linux.
 Web uses browser-native capture and transferable bitmaps while sharing these
 controls and the same overlay painter. Web GPU requires worker WebGL 2 support.
 

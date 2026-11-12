@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:mediapipe_core/src/native_assets/reference_wheels.dart';
 
-/// Google's pinned official wheel on this host, from core's 1.2.2 table: its
+/// Google's pinned official wheel on this host, from core's 1.2.3 table: its
 /// Language Detector drops low-probability languages since 1.1.0.
 ({String runtime, String library, String wheel})? officialTextRuntime() {
   final wheel = releaseReferenceWheel(

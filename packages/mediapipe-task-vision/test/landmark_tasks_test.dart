@@ -35,10 +35,17 @@ final _selectedTasks =
 // Each selected task's GPU output is compared with the official wheel's GPU
 // output for the cases that reference holds: on Linux, same-host ones
 // (MEDIAPIPE_GPU_REFERENCE_DIR, from tool/prepare_gpu_reference.py
-// --landmark-tasks or --hand). macOS runs none ([macosGpuWithdrawn]); its
-// checked-in physical-Mac hand references stay for when the GPU returns.
+// --landmark-tasks or --hand), while the package offers the Linux GPU, which
+// it withdraws since 1.2.3 (the refusal test below). macOS runs none
+// ([macosGpuWithdrawn]); its checked-in physical-Mac hand references stay for
+// when the GPU returns.
+final _linuxGpuGap = handLandmarkerCapabilitiesForPlatform(
+  const TaskPlatform(operatingSystem: 'linux', architecture: 'x64'),
+).unavailableReasons[Delegate.gpu];
 final _gpuSkip = Platform.isMacOS
     ? macosGpuWithdrawn
+    : Platform.isLinux && _linuxGpuGap != null
+    ? _linuxGpuGap
     : Platform.isLinux &&
           Platform.environment['MEDIAPIPE_GPU_REFERENCE_DIR'] != null
     ? null
@@ -219,6 +226,47 @@ void main() {
       });
     }
   }, skip: _gpuSkip);
+  test("Linux refuses Hand, Gesture and Pose GPU with its reason", () async {
+    // Since 1.2.3 Google's Linux library runs their hand detector and pose
+    // landmarks model on LiteRT without the GPU plugin LiteRT needs, so the
+    // package withdraws the GPU and refuses it before Google's graph exists.
+    for (final (capabilities, create) in [
+      (
+        await queryHandLandmarkerCapabilities(),
+        () => HandLandmarker.create(
+          HandLandmarkerOptions(
+            delegate: Delegate.gpu,
+            modelPath: _models['hand']!.$1,
+          ),
+        ),
+      ),
+      (
+        await queryGestureRecognizerCapabilities(),
+        () => GestureRecognizer.create(
+          GestureRecognizerOptions(
+            delegate: Delegate.gpu,
+            modelPath: _models['gesture']!.$1,
+          ),
+        ),
+      ),
+      (
+        await queryPoseLandmarkerCapabilities(),
+        () => PoseLandmarker.create(
+          PoseLandmarkerOptions(
+            delegate: Delegate.gpu,
+            modelPath: _models['pose']!.$1,
+          ),
+        ),
+      ),
+    ]) {
+      expect(capabilities.supportedDelegates, {Delegate.cpu});
+      expect(
+        capabilities.unavailableReasons[Delegate.gpu],
+        contains('libLiteRtGpuAccelerator.so'),
+      );
+      await expectLater(create(), throwsA(isA<RuntimeUnavailableException>()));
+    }
+  }, skip: Platform.isLinux ? false : 'Linux only');
   test(
     'invalid model tracking and classification options fail before native calls',
     () {

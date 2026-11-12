@@ -5,6 +5,7 @@ final class MpBaseOptions extends Struct
   Pointer<Char> get hostVersion
   Pointer<Char> get modelAssetBuffer
   Pointer<Char> get modelAssetPath
+  Pointer<Char> get npuDispatchLibraryDir
   int get delegate
   int get fileDescriptor
   int get hostEnvironment
@@ -22,6 +23,7 @@ final class MpBaseOptions extends Struct
   set modelAssetBuffer(Pointer<Char> value)
   set modelAssetBufferCount(int value)
   set modelAssetPath(Pointer<Char> value)
+  set npuDispatchLibraryDir(Pointer<Char> value)
 final class MpCategory extends Struct
   Pointer<Char> get categoryName
   Pointer<Char> get displayName

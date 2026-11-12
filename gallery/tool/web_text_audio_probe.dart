@@ -13,8 +13,8 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mediapipe_audio/mediapipe_audio.dart';
 import 'package:mediapipe_gallery/audio/microphone.dart';
 import 'package:mediapipe_text/mediapipe_text.dart';

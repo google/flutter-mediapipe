@@ -47,14 +47,15 @@ run_suite() {
   return "$rc"
 }
 for attempt in 1 2; do
-  # The suites take about 11 minutes with the Gradle build, the gallery
+  # The suites take about 17 minutes with the Gradle build, the gallery
   # journey's Proofreader and Summarizer pages included, and Decision Maker,
-  # the retrieval tasks and the speech tasks add their downloads (678 MB,
-  # 388 MB, and 615 MB and 87 MB) and a few minutes of emulated inference. On hosted emulators flutter test sometimes
-  # installs the app and then hears nothing more, so a run still going at 30
-  # minutes has stalled.
+  # the retrieval tasks, the speech tasks and Hungry Fish add their downloads
+  # (678 MB, 388 MB, 615 MB and 87 MB, and 165 MB), about 8 minutes at the
+  # usual 4 MB/s and 23 at the 1.4 MB/s an emulator has seen. On hosted
+  # emulators flutter test sometimes installs the app and then hears nothing
+  # more, so a run still going at 60 minutes has stalled.
   status=0
-  run_suite 1800 integration_test/sdk_all_test.dart --dart-define=SDK_GPU=skip || status=$?
+  run_suite 3600 integration_test/sdk_all_test.dart --dart-define=SDK_GPU=skip || status=$?
   [ "$status" = 0 ] && break
   # A run that started no test reached no verdict, so the suites run once more
   # (tool/ci/retry_unstarted_suite.py). Once a test has started, a failure or a

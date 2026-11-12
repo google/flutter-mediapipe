@@ -18,6 +18,8 @@ limitations under the License.
 
 #include <stdint.h>
 
+#include "components/containers/category.h"
+#include "components/containers/keypoint.h"
 #include "components/containers/rect.h"
 
 #ifdef __cplusplus

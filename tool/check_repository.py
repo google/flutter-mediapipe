@@ -39,6 +39,10 @@ ALIGNMENT_ORACLES = ['gallery/integration_test/support/alignment_oracle.dart',
 # Where the docs name the Flutter version CI runs.
 FLUTTER_DOCS = ['README.md', 'gallery/tool/WEB_FACE.md']
 
+# The one workflow that runs the pubspecs' minimum Flutter instead of the
+# pinned stable one.
+FLOOR_WORKFLOW = 'workflows/flutter-floor.yaml'
+
 # The root README's copy, which pub.dev shows as mediapipe_core's page.
 CORE_README = 'packages/mediapipe-core/README.md'
 
@@ -174,6 +178,8 @@ def flutter_versions(problems):
     ci = {}
     github = REPO / '.github'
     for source in sorted([*github.glob('workflows/*.y*ml'), *github.glob('actions/*/action.yml')]):
+        if source == github / FLOOR_WORKFLOW:
+            continue
         for version in re.findall(r"flutter-version: '([^']+)'", source.read_text()):
             ci.setdefault(version, []).append(str(source.relative_to(github)))
     if len(ci) != 1:
@@ -184,6 +190,12 @@ def flutter_versions(problems):
         for found in re.findall(r'Flutter[ -]\**(\d+\.\d+\.\d+)', read(doc)):
             if found != version:
                 problems.append(f'{doc}: Flutter {found}, CI runs {version}')
+    # The floor job runs the oldest Flutter the pubspecs accept.
+    floor = re.search(r"^  flutter: '>=(\S+)'$", read(f'packages/{CORE}/pubspec.yaml'), re.M).group(1)
+    pinned = re.findall(r"flutter-version: '([^']+)'", (github / FLOOR_WORKFLOW).read_text())
+    if not pinned or set(pinned) != {floor}:
+        problems.append(f'.github/{FLOOR_WORKFLOW}: Flutter {pinned}, the pubspecs '
+                        f'accept Flutter {floor} and later')
 
 
 def shared_models(problems):

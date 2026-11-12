@@ -21,7 +21,7 @@ assets are self-hosted.
 
 ## Local release verification
 
-Requirements: Flutter 3.47.9, Python 3.12, Node 22 and ffmpeg. From the root:
+Requirements: Flutter 3.50.0, Python 3.12, Node 22 and ffmpeg. From the root:
 
 ```sh
 dart run tool/gallery_builder/bin/prepare_gallery.dart --target web

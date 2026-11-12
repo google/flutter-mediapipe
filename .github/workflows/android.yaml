@@ -43,7 +43,7 @@ jobs:
   sdk-tasks:
     name: Every phone suite / official Android SDK on an x64 emulator
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/free-runner-disk
@@ -103,6 +103,8 @@ jobs:
       # builds and gave up on one corrupt archive (2026-10-22), so install
       # them here, retried.
       - uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - uses: ./.github/actions/gradle-plugin-repositories
       - name: Free disk before the emulator
         run: df -h /
       - name: Official references, pixel formats, rotation, VIDEO, camera and every live tile
@@ -284,6 +286,8 @@ jobs:
       # As in the job above: Gradle's own NDK and CMake downloads give up on
       # one corrupt archive.
       - uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - uses: ./.github/actions/gradle-plugin-repositories
       - name: Free disk before the emulator
         run: df -h /
       # 90 minutes lets a slow runner finish: the suite takes about 74 at

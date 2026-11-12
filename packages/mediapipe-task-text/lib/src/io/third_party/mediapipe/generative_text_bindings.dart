@@ -1,6 +1,6 @@
 // Copyright 2026 The MediaPipe Authors.
 // Licensed under the Apache License, Version 2.0.
-// Generated from Google's unmodified MediaPipe 1.2.2 headers; see
+// Generated from Google's unmodified MediaPipe 1.2.3 headers; see
 // packages/mediapipe-core/native/README.md.
 
 // AUTO GENERATED FILE, DO NOT EDIT.

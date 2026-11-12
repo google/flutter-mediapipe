@@ -185,7 +185,8 @@ def main():
                              "checkout whose hand model is present")
     parser.add_argument("--landmark-tasks", action="store_true",
                         help="Also generate Hand, Gesture and Pose Landmarker "
-                             "references (Holistic has no GPU path)")
+                             "references (Holistic has no GPU path; Linux offers "
+                             "none of them since 1.2.3)")
     parser.add_argument("--image-tasks", action="store_true",
                         help="Also generate Image Classifier and Embedder references")
     parser.add_argument("--segmenter-tasks", action="store_true",
@@ -206,8 +207,9 @@ def main():
              + (SEGMENTER_FILES if "segmenter" in groups else ()))
     # The tasks the package offers on this GPU: no Holistic on either (its
     # blendshapes model does not open on GPU), no embedder or Face Detector on
-    # Linux (aborts; no LiteRT GPU plugin), and Pose without masks (Metal fails;
-    # OpenGL ES returns 8-bit RGBA masks).
+    # Linux (aborts; no LiteRT GPU plugin), nor Hand, Gesture or Pose there
+    # since 1.2.3 (their detectors need the same plugin), and Pose without
+    # masks (Metal fails; OpenGL ES returns 8-bit RGBA masks).
     from cpu_reference import host_target as _host
     on_metal = _host() == "macos/arm64"
     generator_arguments = {

@@ -195,9 +195,13 @@ jobs:
           force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
           # Without a display the default EGL platform fails.
           EGL_PLATFORM: surfaceless
+        # No --landmark-tasks: since 1.2.3 Google's Linux library runs the
+        # hand detector and pose landmarks model on LiteRT without its GPU
+        # plugin, so Hand, Gesture and Pose offer the CPU only here (Face
+        # Detector's gap).
         run: >-
           python3 -B packages/mediapipe-task-vision/tool/prepare_gpu_reference.py --test
-          --landmark-tasks --object-detector --image-tasks --segmenter-tasks
+          --object-detector --image-tasks --segmenter-tasks
       - name: Record linux GPU task coverage (linux-gpu)
         if: always()
         uses: ./.github/actions/record-coverage
@@ -205,7 +209,7 @@ jobs:
           suite: linux-gpu
           platform: linux
           delegate: gpu
-          tasks: face_landmarker,gesture_recognizer,hand_landmarker,image_classifier,image_segmenter,object_detector,pose_landmarker
+          tasks: face_landmarker,image_classifier,image_segmenter,object_detector
           outcome: ${{ steps.linux_gpu.outcome }}
       - name: Without the rename, the refused GPU is reported and not replaced
         working-directory: build/gpu-face-tests
@@ -213,9 +217,10 @@ jobs:
           MEDIAPIPE_EXPECT_GPU_REFUSAL: '1'
           EGL_PLATFORM: surfaceless
         run: dart test test/face_landmarker_test.dart --name 'a refused GPU is reported' --reporter expanded
-      - name: Prepare the Linux gallery with the face and hand tasks
+      # Face only: Hand Landmarker offers the CPU only on Linux since 1.2.3.
+      - name: Prepare the Linux gallery with the face task
         run: |
-          dart run tool/gallery_builder/bin/prepare_gallery.dart --target linux/x64 --tasks face_landmarker,hand_landmarker
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target linux/x64 --tasks face_landmarker
           cd gallery && flutter pub get
       # The gallery runs under Xvfb with EGL's default platform, as on a
       # desktop: Flutter renders with OpenGL while MediaPipe's GPU task runs
@@ -225,21 +230,17 @@ jobs:
         env:
           force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
         run: |
-          for task in face hand; do
-            xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
-              integration_test/desktop_gpu_camera_test.dart \
-              --dart-define=GALLERY_LIVE_TASK=$task \
-              --dart-define=GALLERY_GPU_EXPECT=works --reporter expanded
-          done
+          xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+            integration_test/desktop_gpu_camera_test.dart \
+            --dart-define=GALLERY_LIVE_TASK=face \
+            --dart-define=GALLERY_GPU_EXPECT=works --reporter expanded
       - name: Gallery falls back to CPU visibly when the GPU is refused
         working-directory: gallery
         run: |
-          for task in face hand; do
-            xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
-              integration_test/desktop_gpu_camera_test.dart \
-              --dart-define=GALLERY_LIVE_TASK=$task \
-              --dart-define=GALLERY_GPU_EXPECT=refused --reporter expanded
-          done
+          xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+            integration_test/desktop_gpu_camera_test.dart \
+            --dart-define=GALLERY_LIVE_TASK=face \
+            --dart-define=GALLERY_GPU_EXPECT=refused --reporter expanded
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
