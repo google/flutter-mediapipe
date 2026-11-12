@@ -1,6 +1,6 @@
 name: mediapipe_decision
 description: "Google's MediaPipe Decision Maker for Flutter: yes-or-no, choice and score questions about a text, answered with calibrated probabilities."
-version: 0.2.1
+version: 0.3.0
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-decision
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:

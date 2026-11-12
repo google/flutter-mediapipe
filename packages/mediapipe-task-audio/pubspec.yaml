@@ -1,6 +1,6 @@
 name: mediapipe_audio
 description: "Google's MediaPipe Audio Classifier (every platform and the web), Audio Transcriber and Text to Speech for Flutter, with Google's pinned models."
-version: 0.2.1
+version: 0.3.0
 repository: https://github.com/google/flutter-mediapipe/tree/main/packages/mediapipe-task-audio
 issue_tracker: https://github.com/google/flutter-mediapipe/issues
 topics:
