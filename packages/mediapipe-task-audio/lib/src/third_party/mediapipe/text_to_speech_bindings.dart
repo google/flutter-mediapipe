@@ -1,6 +1,6 @@
 // Copyright 2026 The MediaPipe Authors. Licensed under Apache 2.0.
-// Adapted from mediapipe==1.2.2 Python ctypes
-// audio/text_to_speech.py and the 1.2.2 header
+// Adapted from mediapipe==1.2.3 Python ctypes
+// audio/text_to_speech.py and the 1.2.3 header
 // audio/text_to_speech/text_to_speech.h; the structs every family shares
 // are core's native_structs.dart. Every status-returning function takes a
 // trailing error-message argument, freed with MpTextToSpeechFreeError.
@@ -18,7 +18,7 @@ const mpCancelled = 1;
 /// kMpOutOfRange: the stream has no more chunks.
 const mpOutOfRange = 11;
 
-/// 104 bytes.
+/// 112 bytes.
 final class MpTextToSpeechOptions extends Struct {
   external MpBaseOptions baseOptions;
 
@@ -37,7 +37,7 @@ final class MpTextToSpeechOptions extends Struct {
   external int targetBucket;
 
   /// Nullable.
-  external Pointer<Char> cacheDirectory;
+  external Pointer<Char> cacheDir;
 }
 
 /// 16 bytes.

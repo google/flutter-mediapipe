@@ -74,7 +74,7 @@ void main() {
         ),
       );
       final LanguageDetectorResult result = executor.detect('Hello, world!');
-      // Google's 1.2.2 drops every language below about 0.3, and only `en`
+      // Google's 1.2 releases drop every language below about 0.3, and only `en`
       // clears it here.
       expect(result.predictions, isEmpty);
       executor.close();

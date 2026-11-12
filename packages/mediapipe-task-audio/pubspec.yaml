@@ -29,7 +29,7 @@ dependencies:
   code_assets: ^2.1.0
   ffi: ^2.1.4
   hooks: ^2.2.0
-  mediapipe_core: ^0.2.1
+  mediapipe_core: ^0.3.0
   meta: ^1.18.0
   # Compiles the audio stream bridge (native/audio_stream_bridge.c) and the
   # Text to Speech cancel guard, as the text package compiles its own.

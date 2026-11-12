@@ -18,7 +18,7 @@ it. This moves what a bump moves together:
     python3 -B packages/mediapipe-core/tool/pin_nightly.py --nightly 20261018
     python3 -B packages/mediapipe-core/tool/pin_nightly.py --nightly newest \
         --generation --report build/pin.json
-    python3 -B packages/mediapipe-core/tool/pin_nightly.py --release 1.2.2 --adopt
+    python3 -B packages/mediapipe-core/tool/pin_nightly.py --release 1.2.3 --adopt
 
 `newest` is the newest complete build: its `BUILD_INFO` names its date and
 every family, and its archive holds every file the pins name, with each

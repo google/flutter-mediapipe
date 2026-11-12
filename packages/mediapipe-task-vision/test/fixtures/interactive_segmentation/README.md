@@ -12,8 +12,12 @@ The report records uncompressed hashes, dimensions, exact complete stroke
 histories and native/API/model provenance. The models are never modified.
 
 Regenerate with `tool/generate_interactive_segmenter_reference.py` using a
-Python environment containing Google's 1.1.0 release candidate wheel (`mediapipe-nightly` 1.1.0rc20260925 for macOS arm64, core's `referenceWheels`). The generator refuses a different
-native library or model hash.
+Python environment containing Google's `mediapipe` 1.2.3 wheel for macOS arm64
+(core's `releaseReferenceWheels`). The generator refuses a different native
+library or model hash. The other vision references come from Google's 1.1.0
+release candidate (core's `referenceWheels`), but 1.2.3's masks differ from
+its by up to the whole confidence range, for lassos and the blank image most
+of all, so these come from the release the package loads.
 It can also import an extracted wheel using `--python-package-root`.
 
 Coverage includes file and raw inputs, repeated requests, partial strokes,
@@ -40,6 +44,8 @@ Flutter performance benchmarks.
 
 An empty stroke list fails inside Google's decoder graph and leaves it in an
 error state until the image is reset. The Dart API must reject this input before
-native calls. GPU initialization in the official macOS wheel fails because the
-stroke calculator requests GLSL 330 in its OpenGL 2.1 context. CPU is the only
-qualified backend for this runtime; do not silently fall back from GPU.
+native calls. GPU initialization in Google's 1.1.0 macOS wheel failed because
+the stroke calculator requests GLSL 330 in its OpenGL 2.1 context; the 1.2.3
+wheel creates a GPU segmenter, but it answers with a 4-channel 8-bit image
+instead of a confidence mask. CPU is the only qualified backend for this
+runtime; do not silently fall back from GPU.

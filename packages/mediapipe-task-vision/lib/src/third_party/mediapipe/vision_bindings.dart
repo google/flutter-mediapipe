@@ -1,6 +1,6 @@
 // Copyright 2026 The MediaPipe Authors.
 // Licensed under the Apache License, Version 2.0.
-// Generated from Google's unmodified MediaPipe 1.2.2 headers; see
+// Generated from Google's unmodified MediaPipe 1.2.3 headers; see
 // packages/mediapipe-core/native/README.md.
 
 // AUTO GENERATED FILE, DO NOT EDIT.
@@ -1480,6 +1480,8 @@ final class MpBaseOptions extends ffi.Struct {
 
   external ffi.Pointer<ffi.Char> app_version;
 
+  external ffi.Pointer<ffi.Char> npu_dispatch_library_dir;
+
   static ffi.Pointer<MpBaseOptions> $allocate(
     ffi.Allocator $allocator, {
     required ffi.Pointer<ffi.Char> model_asset_buffer,
@@ -1493,6 +1495,7 @@ final class MpBaseOptions extends ffi.Struct {
     required ffi.Pointer<ffi.Char> ca_bundle_path,
     required ffi.Pointer<ffi.Char> app_id,
     required ffi.Pointer<ffi.Char> app_version,
+    required ffi.Pointer<ffi.Char> npu_dispatch_library_dir,
   }) => $allocator<MpBaseOptions>()
     ..ref.model_asset_buffer = model_asset_buffer
     ..ref.model_asset_buffer_count = model_asset_buffer_count
@@ -1504,7 +1507,8 @@ final class MpBaseOptions extends ffi.Struct {
     ..ref.host_version = host_version
     ..ref.ca_bundle_path = ca_bundle_path
     ..ref.app_id = app_id
-    ..ref.app_version = app_version;
+    ..ref.app_version = app_version
+    ..ref.npu_dispatch_library_dir = npu_dispatch_library_dir;
 }
 
 enum MpBrushMode {

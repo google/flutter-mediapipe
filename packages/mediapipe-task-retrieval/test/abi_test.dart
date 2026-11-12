@@ -23,16 +23,17 @@ final _sizes =
         as Map<String, Object?>;
 
 /// The structs Google changed after that wheel: their sizes in Google's
-/// 1.2.2 headers, as its `mediapipe` 1.2.2 ctypes declare them (clang
-/// agrees). `MpUniversalEmbedderPart` has no ctypes; clang's.
-const _since122 = {
-  'MpUniversalEmbedderOptions': 112,
-  'MpSemanticRetrieverOptions': 128,
+/// 1.2.3 headers, as its `mediapipe` 1.2.3 ctypes declare them (clang
+/// agrees). 1.2.3 added the base options' NPU dispatch folder.
+const _since123 = {
+  'MpUniversalEmbedderOptions': 120,
+  'MpBaseOptions': 80,
+  'MpSemanticRetrieverOptions': 136,
   'MpUniversalEmbedderPart': 24,
 };
 
 void main() {
-  final expected = {..._sizes, ..._since122};
+  final expected = {..._sizes, ..._since123};
   final dart = <String, int>{
     'MpUniversalEmbedderOptions': sizeOf<mp.MpUniversalEmbedderOptions>(),
     'MpBaseOptions': sizeOf<mp.MpBaseOptions>(),
@@ -81,9 +82,9 @@ void main() {
       },
     );
   });
-  test('the base options lead the retriever options, as in 1.2.2', () {
+  test('the base options lead the retriever options, as in 1.2.3', () {
     // Google's header: base_options first, then the database path.
-    expect(sizeOf<mp.MpBaseOptions>(), 72);
+    expect(sizeOf<mp.MpBaseOptions>(), 80);
     expect(
       sizeOf<mp.MpSemanticRetrieverOptions>() - sizeOf<mp.MpBaseOptions>(),
       56,

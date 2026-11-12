@@ -15,6 +15,7 @@ sys.path.insert(0, str(PACKAGE.parent / 'mediapipe-core/tool'))
 from consumer_packages import (  # noqa: E402
     consumer_environment, copy_package, core_hook_defines, family_runtime)
 from model_pins import model_pins  # noqa: E402
+from official_wheels import pinned_venv, reference_wheel  # noqa: E402
 from tool_helpers import digest, run  # noqa: E402
 
 
@@ -87,8 +88,12 @@ def main():
     if args.interactive_segmenter:
         if target != 'linux':
             raise SystemExit('The stateful Interactive Segmenter is validated on Linux only.')
-        # Rewrites the checked-in fixtures with this host's wheel, as above.
-        run([oracle['python'], '-u', '-X', 'faulthandler', '-B',
+        # Rewrites the checked-in fixtures with this host's wheel, as above:
+        # Google's 1.2 release wheel, as the generator requires.
+        python = pinned_venv(root / 'python-release',
+                             reference_wheel(target + '/x64', 'releaseReferenceWheels'),
+                             log=root / 'pip-release.log')
+        run([python, '-u', '-X', 'faulthandler', '-B',
              PACKAGE / 'tool/generate_interactive_segmenter_reference.py'],
             REPO, root / 'interactive_segmenter-reference.log')
     comparisons = oracle['comparisons']

@@ -1,9 +1,9 @@
 # Per-family runtimes
 
 Status on 2026-10-19: every family, on Android, iOS, macOS, Linux and
-Windows, pins Google's MediaPipe 1.2.2 release build of November 2, 2026
+Windows, pins Google's MediaPipe 1.2.3 release build of November 11, 2026
 (see [Google's builds](#googles-builds)), which Google publishes at
-`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/1.2.2/mediapipe_tasks_c_1.2.2.zip`.
+`https://storage.googleapis.com/mediapipe-assets/prebuilts/mediapipe_tasks_c/1.2.3/mediapipe_tasks_c_1.2.3.zip`.
 The hooks read each pinned file from that archive with HTTP range requests,
 its only source, and CI and Firebase Test Lab run them (see
 [Validated](#validated) and [Before the release](#before-the-release)). Paths

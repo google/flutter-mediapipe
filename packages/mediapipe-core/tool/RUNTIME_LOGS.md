@@ -31,7 +31,7 @@ Warnings and info lines never arrive.
 
 ## Google's log callback
 
-Since Google's October 9, 2026 build (1.1.1), and in the 1.2.2 build the hooks pin, every
+Since Google's October 9, 2026 build (1.1.1), and in the 1.2.3 build the hooks pin, every
 per-family library exports a C log callback, declared in `core/mp_logging.h`
 under `packages/mediapipe-core/native/include`:
 

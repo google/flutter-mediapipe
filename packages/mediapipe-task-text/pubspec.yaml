@@ -31,7 +31,7 @@ dependencies:
   ffi: ^2.1.4
   hooks: ^2.2.0
   native_toolchain_c: ^0.19.3
-  mediapipe_core: ^0.2.1
+  mediapipe_core: ^0.3.0
   meta: ^1.18.0
 
 dev_dependencies:

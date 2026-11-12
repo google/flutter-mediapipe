@@ -62,7 +62,7 @@ const _secondsDelta = 1e-3;
 const _metalProof = 32 * 1024 * 1024;
 
 /// The family library and the reference wheel's single library are separate
-/// builds of Google's 1.2.2 release, so the audio gets a small bound: each
+/// builds of Google's 1.2.3 release, so the audio gets a small bound: each
 /// 100 ms window's RMS and the peak may move by this much.
 const _levelDelta = 2e-3;
 
@@ -987,7 +987,7 @@ void main() {
     });
 
     // Google's page says the English bundle "includes only English voices",
-    // these eight with alba the default, but its 1.2.2 runtime, Python's too,
+    // these eight with alba the default, but its 1.2.3 runtime, Python's too,
     // also lists the multilingual bundle's six others for it.
     test('lists Google\'s voices', skip: missingPocketTts, () async {
       final voices = await task.listVoices();
@@ -1391,11 +1391,11 @@ void main() {
     expect(at(text), text.length);
   });
 
-  test('struct layouts match the 1.2.2 C headers', () {
-    expect(sizeOf<asr.MpAudioTranscriberOptions>(), 104);
+  test('struct layouts match the 1.2.3 C headers', () {
+    expect(sizeOf<asr.MpAudioTranscriberOptions>(), 112);
     expect(sizeOf<asr.MpTranscriptionSegment>(), 32);
     expect(sizeOf<asr.MpAudioTranscriberResult>(), 16);
-    expect(sizeOf<tts.MpTextToSpeechOptions>(), 104);
+    expect(sizeOf<tts.MpTextToSpeechOptions>(), 112);
     expect(sizeOf<tts.MpTextToSpeechSynthesisOptions>(), 16);
     expect(sizeOf<tts.MpTextToSpeechVoiceInfo>(), 32);
     expect(sizeOf<tts.MpTextToSpeechVoiceList>(), 16);
@@ -1490,8 +1490,9 @@ AudioData _joined(
 /// end ([durationMs]) in order, and are the [whole] input's segments; each
 /// interim segment is replaced by a final one from the same time; and in
 /// blocks ([streamed]) segments are finalized before the stream finishes.
-/// Google's segments repeat words at the window seams ("home late", then
-/// "home late tomorrow."), so the text is the reference's, word for word.
+/// Google's segments repeat words at the window seams ("Send a text to",
+/// then "text Mike. I'll be home"), so the text is the reference's, word for
+/// word.
 void _expectWindowed(
   List<List<Map<String, Object>>> calls,
   List<Map<String, Object>> finish, {

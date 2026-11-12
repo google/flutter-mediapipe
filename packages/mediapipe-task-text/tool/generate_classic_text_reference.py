@@ -16,7 +16,7 @@ from tool_helpers import reference_json  # noqa: E402
 from model_pins import model_sha256  # noqa: E402
 
 PACKAGE = Path(__file__).resolve().parents[1]
-# Core's table of Google's 1.2.2 wheels: its Language Detector drops
+# Core's table of Google's 1.2 release wheels: their Language Detector drops
 # low-probability languages that the 1.1.0 wheel reported.
 WHEELS = 'releaseReferenceWheels'
 MODELS = {
@@ -93,6 +93,10 @@ def main():
     ]
     embeddings = {}
     def result_json(result, task_name):
+        if task_name == 'language':
+            # Google's 1.2.3 wheel names them `languages`, keeping
+            # `detections` as a deprecated alias; the fixture keeps its name.
+            return {'detections': [dataclasses.asdict(d) for d in result.detections]}
         if task_name != 'embedder':
             return dataclasses.asdict(result)
         return {'timestamp_ms': result.timestamp_ms, 'embeddings': [

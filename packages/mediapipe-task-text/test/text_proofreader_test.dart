@@ -109,7 +109,7 @@ void main() {
   );
 
   test('proofreader FFI sizes and field offsets match official Python ABI', () {
-    final abi = reference['abi'];
+    final abi = referenceAbi(reference);
     expect(
       sizeOf<mp.MpTextProofreaderOptions>(),
       abi['_MpTextProofreaderOptionsC']['size'],

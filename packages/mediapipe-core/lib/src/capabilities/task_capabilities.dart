@@ -147,14 +147,14 @@ RuntimeUnavailableException pluginNotRegistered(String package) =>
     );
 
 /// The official MediaPipe release behind the tasks on [platform]: Google's
-/// 1.2.2 per-family libraries (its release build of November 2, 2026) on
+/// 1.2.3 per-family libraries (its release build of November 11, 2026) on
 /// Android, iOS, macOS, Linux and Windows, and in browsers the npm runtime
 /// each family's `assets/runtime.json` pins.
 String tasksRuntimeVersionOn(TaskPlatform platform) =>
-    platform.operatingSystem == 'web' ? _webRuntimeVersion : '1.2.2';
+    platform.operatingSystem == 'web' ? _webRuntimeVersion : '1.2.3';
 
 // Separate from the native version: tool/ci/nightly_pin.py moves it alone.
-const _webRuntimeVersion = '1.2.2';
+const _webRuntimeVersion = '1.2.3';
 
 /// Declared package support for one task on a platform: which [Delegate]s run
 /// there and why the others do not. This is not an inference self-test.

@@ -20,3 +20,9 @@ on Google's text library; fresh-consumer tests also verify simultaneous use.
 The model is downloaded separately by `dart tool/download_models.dart embedding_gemma`;
 it is not committed. Its terms are Google's
 [Gemma Terms](https://ai.google.dev/gemma/terms).
+
+The recorded layouts are the reference wheel's. Google's 1.2.3 libraries, which
+the package loads, added `npu_dispatch_library_dir` to the base options, so
+every field after them moved by 8 bytes; the tests take those structs from
+`test/support/modern_text_reference.dart` (`referenceAbi`), as 1.2.3's ctypes
+declare them.

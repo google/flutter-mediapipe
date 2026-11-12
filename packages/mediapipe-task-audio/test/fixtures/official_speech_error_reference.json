@@ -1,5 +1,5 @@
 {
-  "runtime": "mediapipe==1.2.2",
+  "runtime": "mediapipe==1.2.3",
   "source": "official Python AudioTranscriber and TextToSpeech create, macOS arm64 wheel",
   "paths": "{path} is the model path the task was given: /nonexistent/<file> when missing, else <file> in directory/ or file/ of a temporary folder",
   "not_a_model": "not a model",

@@ -316,7 +316,8 @@ Future<Map<String, Object?>> _speech(String model) async {
     await faster.dispose();
   }
 
-  // Google's compile cache, in the runtime's own virtual file system.
+  // A cache directory, which Google's 1.2.3 browser runtime has no option
+  // for: the package does not send it, and synthesis must still work.
   try {
     final cached = await TextToSpeech.create(
       TextToSpeechOptions(modelPath: model, cacheDirectory: '/speech-cache'),

@@ -58,7 +58,7 @@ void main() {
         TaskCapabilities.cpuOnTargets(
           platform: arm32,
           gpuUnavailableReason: 'CPU only.',
-          runtimeVersion: '1.2.2',
+          runtimeVersion: '1.2.3',
           targets: targets,
         );
     expect(tasksRuntimeTargets.keys, contains('android/arm'));

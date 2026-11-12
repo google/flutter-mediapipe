@@ -21,9 +21,9 @@ models are bundled with your app at build time.
 | Summarizer 200M | `TextSummarizer` | ✓ | ✓ | ✓ | ✓ | ✓ | |
 
 All text tasks run on the CPU. The runtimes are Google's: its MediaPipe
-1.2.2 text library on Android 9+, iOS 15+ (devices and the arm64 simulator),
+1.2.3 text library on Android 9+, iOS 15+ (devices and the arm64 simulator),
 macOS 14+, Linux and Windows, which this package's hook bundles, and
-`@mediapipe/tasks-text` 1.2.2 in browsers.
+`@mediapipe/tasks-text` 1.2.3 in browsers.
 
 Proofreader and Summarizer are not yet available on the web, matching the
 MediaPipe Tasks Web SDK. Their capability queries report this in browsers.
@@ -391,7 +391,7 @@ version and inputs: 26 cases for the classic tasks, 17 for EmbeddingGemma, 9
 for Proofreader and 10 for Summarizer. Generated text must match byte for
 byte, and Google's releases generate different text, so each platform is
 compared with Google's wheel of its own version: the checked-in macOS
-references (Google's 1.2.2 wheel for the classic tasks, its 1.1.0 wheel for
+references (Google's 1.2.3 wheel for the classic tasks, its 1.1.0 wheel for
 the others), references generated on the Linux and
 Windows runners (`tool/test_modern_text.py`) and for the gallery's emulator
 and simulator builds (`tool/prepare_modern_text_reference.py`), and Google's

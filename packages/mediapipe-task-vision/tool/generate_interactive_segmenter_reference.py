@@ -1,6 +1,9 @@
 """Generate masks and ABI facts through Google's unmodified Python API.
 
-It runs Google's wheel pinned for this host (core's tool/official_wheels.py).
+It runs Google's 1.2 release wheel pinned for this host (core's
+`releaseReferenceWheels`, through tool/official_wheels.py): Google's 1.2.3
+masks differ from those of the 1.1.0 wheel the other vision references come
+from, most of all for lassos and the blank image.
 The checked-in fixtures come from the macOS arm64 wheel. The Linux x64 desktop
 job regenerates them in place with the pinned Linux wheel, because CPU results
 drift between hosts. --python-package-root may point at an extracted,
@@ -18,9 +21,12 @@ import platform
 import sys
 import time
 
-from official_face_runtime import LIBRARY_NAME, LIBRARY_SHA256, RUNTIME, VERSION
-from model_pins import model_sha256  # core's tool/, which the import above adds
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'mediapipe-core/tool'))
+from official_wheels import host_runtime  # noqa: E402
+from model_pins import model_sha256  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
+
+WHEELS = 'releaseReferenceWheels'
 
 PACKAGE = Path(__file__).resolve().parents[1]
 # The model pin the package itself uses (VisionModels.interactiveSegmenter).
@@ -43,11 +49,12 @@ def main():
     from mediapipe.tasks.python.vision import interactive_segmenter as api
     from mediapipe.tasks.python.core.base_options_c import MpBaseOptionsC
 
-    assert mp.__version__ == VERSION, mp.__version__
+    runtime = host_runtime(WHEELS)
+    assert mp.__version__ == runtime['version'], mp.__version__
     host = (platform.system(), platform.machine().lower())
     if host not in (('Darwin', 'arm64'), ('Linux', 'x86_64'), ('Linux', 'amd64')):
         raise SystemExit('The stateful API is validated on macOS arm64 and Linux x64.')
-    library, library_sha256 = LIBRARY_NAME, LIBRARY_SHA256
+    library, library_sha256 = runtime['library'], runtime['library_sha256']
     library = Path(mp.__file__).parent / 'tasks/c' / library
     assert digest(library.read_bytes()) == library_sha256
     model = PACKAGE / 'models/interactive_segmentation.task'
@@ -111,7 +118,7 @@ def main():
         ('replaced-image', 'rgb', True, [dog]),
     ]
     images = {'file': source, 'rgb': raw, 'rgba': rgba, 'blank': blank}
-    report = {'runtime': RUNTIME, 'delegate': 'CPU',
+    report = {'runtime': 'mediapipe==' + runtime['version'], 'delegate': 'CPU',
               'library_sha256': library_sha256, 'model_sha256': MODEL_SHA256,
               'image': {'file': photo.name, 'sha256': digest(photo.read_bytes()),
                         'source': 'https://storage.googleapis.com/mediapipe-assets/cats_and_dogs.jpg'},

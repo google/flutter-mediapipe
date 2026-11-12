@@ -1380,9 +1380,14 @@ async function speechChecks() {
     transcriber.resampled = segments(await task.transcribe(await decode('speech_48000_hz_mono.wav')));
     task.close();
 
-    // Google's UTF-8 byte offsets as the UTF-16 indices the package gives.
-    const index = (text, byte) =>
-      new TextDecoder().decode(new TextEncoder().encode(text).slice(0, byte)).length;
+    // Google's 1.2.3 browser runtime gives UTF-16 indices, as the package
+    // does; 1.2.2 gave UTF-8 byte offsets. Each must slice out its word.
+    const index = (text, w) => {
+      if (text.slice(w.startChar, w.endChar) !== w.word) {
+        throw new Error(`official ${JSON.stringify(w)} does not slice ${JSON.stringify(text)}`);
+      }
+      return [w.startChar, w.endChar];
+    };
     const audio = async (text, result) => ({
       sha256: [...new Uint8Array(await crypto.subtle.digest('SHA-256',
         new Uint8Array(result.samples.buffer, result.samples.byteOffset, result.samples.byteLength)))]
@@ -1392,7 +1397,7 @@ async function speechChecks() {
       chunkIndex: result.chunkIndex ?? 0,
       isFinal: result.isFinal ?? true,
       words: (result.wordTimestamps ?? []).map(w =>
-        [w.word, index(text, w.startChar), index(text, w.endChar), w.startSec, w.endSec]),
+        [w.word, ...index(text, w), w.startSec, w.endSec]),
     });
     const tts = options => bundle.TextToSpeech.createFromOptions(files,
       {speakingRate: 1, targetBucket: 0,

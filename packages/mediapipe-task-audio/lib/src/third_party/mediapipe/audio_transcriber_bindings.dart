@@ -1,6 +1,6 @@
 // Copyright 2026 The MediaPipe Authors. Licensed under Apache 2.0.
-// Adapted from mediapipe==1.2.2 Python ctypes
-// audio/audio_transcriber.py and the 1.2.2 header
+// Adapted from mediapipe==1.2.3 Python ctypes
+// audio/audio_transcriber.py and the 1.2.3 header
 // audio/audio_transcriber/audio_transcriber.h; the structs every family
 // shares are core's native_structs.dart. Every status-returning function
 // takes a trailing error-message argument, freed with MpErrorFree.
@@ -12,7 +12,7 @@ import 'package:mediapipe_core/native_structs.dart';
 /// Google's audio library, which the audio hook bundles.
 const _asset = 'package:mediapipe_audio/mediapipe.dylib';
 
-/// 104 bytes.
+/// 112 bytes.
 final class MpAudioTranscriberOptions extends Struct {
   external MpBaseOptions baseOptions;
 

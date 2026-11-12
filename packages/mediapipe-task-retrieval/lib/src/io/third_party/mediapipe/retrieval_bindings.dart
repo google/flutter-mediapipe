@@ -1,5 +1,5 @@
 // Copyright 2026 The MediaPipe Authors. Licensed under Apache 2.0.
-// Adapted from MediaPipe 1.2.2's C headers
+// Adapted from MediaPipe 1.2.3's C headers
 // mediapipe/tasks/c/retrieval/universal_embedder/universal_embedder.h and
 // mediapipe/tasks/c/retrieval/semantic_retriever/semantic_retriever.h, which
 // Google's Python ctypes retrieval/universal_embedder.py and

@@ -182,10 +182,10 @@ void main() {
     }
   });
 
-  test('struct layouts match the official 1.0.1 ctypes', () {
-    expect(sizeOf<abi.MpBaseOptions>(), 72);
+  test('struct layouts match the official 1.2.3 ctypes', () {
+    expect(sizeOf<abi.MpBaseOptions>(), 80);
     expect(sizeOf<abi.MpClassifierOptions>(), 48);
-    expect(sizeOf<abi.MpAudioClassifierOptions>(), 136);
+    expect(sizeOf<abi.MpAudioClassifierOptions>(), 144);
     expect(sizeOf<abi.MpAudioData>(), 32);
     expect(sizeOf<abi.MpClassificationResult>(), 32);
     expect(sizeOf<abi.MpClassifications>(), 24);

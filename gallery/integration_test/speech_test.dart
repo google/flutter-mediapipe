@@ -24,25 +24,25 @@ const _transcript = "Send a text to Mike, I'll be home late tomorrow.";
 /// between copies, past the model's 5 s window (the reference's long-16k
 /// case): each final, with its start and end in milliseconds. Google repeats
 /// words at its window seams, and stamps segments on its 1.25 s window hops.
-/// Its Python gives the first answer on macOS and Windows and on some of
-/// GitHub's Linux runners, and on others the second, whose fourth segment
-/// alone differs, as the same-host reference of the package's Linux speech
-/// job records; the app must give one of them.
+/// Its 1.2.3 Python gives the first answer on macOS and the second, whose
+/// fourth and fifth segments differ, on GitHub's Linux runners, as the
+/// same-host reference of the package's Linux speech job records. On 1.2.2
+/// Linux runners gave either answer's 1.2.2 form. The app must give one.
 const _longAnswers = [
   [
     ("Send a text to Mike, I'll be home late", 0, 1250),
-    ('home late tomorrow.', 1250, 2500),
+    ('tomorrow.', 1250, 2500),
     ('Send a text to', 2500, 3750),
     ("text Mike. I'll be home", 3750, 5000),
-    ('be home late tomorrow.', 5000, 6250),
+    ('late tomorrow.', 5000, 6250),
     ('Send a text', 6250, 7500),
     ("to Mike, I'll be home late tomorrow.", 7500, 14817),
   ],
   [
     ("Send a text to Mike, I'll be home late", 0, 1250),
-    ('home late tomorrow.', 1250, 2500),
+    ('tomorrow.', 1250, 2500),
     ('Send a text to', 2500, 3750),
-    ("text to Mike. I'll be", 3750, 5000),
+    ("Mike. I'll be", 3750, 5000),
     ('be home late tomorrow.', 5000, 6250),
     ('Send a text', 6250, 7500),
     ("to Mike, I'll be home late tomorrow.", 7500, 14817),
@@ -54,15 +54,15 @@ const _longAnswers = [
 const _foxSamples = 74880;
 const _foxRate = 24000;
 const _foxWords = [
-  ('The', 0.18, 0.42),
-  ('quick', 0.42, 0.765),
-  ('brown', 0.765, 0.915),
-  ('fox', 0.915, 1.2),
-  ('jumps', 1.2, 1.425),
-  ('over', 1.425, 1.74),
-  ('the', 1.74, 1.83),
-  ('lazy', 1.83, 2.13),
-  ('dog.', 2.13, 2.295),
+  ('The', 0.18, 0.555),
+  ('quick', 0.555, 0.825),
+  ('brown', 0.825, 1.14),
+  ('fox', 1.14, 1.23),
+  ('jumps', 1.23, 1.44),
+  ('over', 1.44, 1.755),
+  ('the', 1.755, 1.92),
+  ('lazy', 1.92, 2.175),
+  ('dog.', 2.175, 2.295),
 ];
 
 /// The reference stream's text and the words its chunks time.

@@ -65,6 +65,8 @@ void setVisionBaseOptions(
       ? mp.MpHostSystem.MP_HOST_SYSTEM_ANDROID
       : mp.MpHostSystem.MP_HOST_SYSTEM_MAC;
   base.host_version = mpHostVersion.toNativeUtf8(allocator: arena).cast();
+  // No NPU dispatch library: Google's default.
+  base.npu_dispatch_library_dir = nullptr;
   final appId = mpAppId;
   if (appId != null) base.app_id = appId.toNativeUtf8(allocator: arena).cast();
   final appVersion = mpAppVersion;

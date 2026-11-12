@@ -77,7 +77,7 @@ void main() {
   });
 
   test("FFI layout matches the official Python ABI of this host's wheel", () {
-    final abi = reference['abi'] as Map<String, dynamic>;
+    final abi = referenceAbi(reference);
     expect(sizeOf<mp.MpBaseOptions>(), abi['MpBaseOptionsC']['size']);
     expect(sizeOf<mp.MpEmbedderOptions>(), abi['_MpEmbedderOptionsC']['size']);
     expect(

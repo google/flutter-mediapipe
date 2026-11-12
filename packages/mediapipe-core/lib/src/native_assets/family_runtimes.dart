@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:code_assets/code_assets.dart';
 import 'package:crypto/crypto.dart';
 import 'package:hooks/hooks.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../native_assets.dart';
 
@@ -17,10 +19,10 @@ import '../../native_assets.dart';
 const familyRuntimeAssetName = 'mediapipe.dylib';
 
 /// Google's MediaPipe build that names the mirror release holding the
-/// libraries: the 1.2.2 release build of November 2, 2026.
-const familyRuntimeVersion = '1.2.2';
+/// libraries: the 1.2.3 release build of November 11, 2026.
+const familyRuntimeVersion = '1.2.3';
 
-/// Google's archive of the November 2, 2026 build, where the hooks download
+/// Google's archive of the November 11, 2026 build, where the hooks download
 /// Google's libraries: each one is read from it with HTTP range requests,
 /// without the rest of the archive.
 ///
@@ -29,7 +31,7 @@ const familyRuntimeVersion = '1.2.2';
 /// SHA-256.
 const familyRuntimeArchiveUrl =
     'https://storage.googleapis.com/mediapipe-assets/prebuilts/'
-    'mediapipe_tasks_c/1.2.2/mediapipe_tasks_c_1.2.2.zip';
+    'mediapipe_tasks_c/1.2.3/mediapipe_tasks_c_1.2.3.zip';
 
 /// One of Google's files, exactly as Google ships it.
 final class FamilyRuntime {
@@ -60,218 +62,218 @@ final class FamilyRuntime {
 /// Android has 32-bit ARM too, which Flutter's release builds include, though
 /// no task claims it; browsers run Google's JavaScript runtime instead.
 ///
-/// Every file comes from Google's release build of November 2, 2026
-/// (MediaPipe 1.2.2), unmodified. iOS has one framework zip for devices and
+/// Every file comes from Google's release build of November 11, 2026
+/// (MediaPipe 1.2.3), unmodified. iOS has one framework zip for devices and
 /// one for the Simulator.
 const familyRuntimes = <String, Map<String, FamilyRuntime>>{
   'vision': {
     'macos/arm64': FamilyRuntime(
       'vision/darwin_arm64/libmediapipe_tasks_vision.dylib',
-      '73946d16db97575461b90eab08cffc542d93ef224786f89b8fa24e46ddf92d4c',
-      30745008,
+      'c4e8aa50a98a9b5d4a3f7883bf0bad2c1ca8bea66474ef3e14232fe8ee716c21',
+      29510000,
     ),
     'android/arm64': FamilyRuntime(
       'vision/android_arm64-v8a/libmediapipe_tasks_vision.so',
-      '0576d27b04b587fbf33d6ae2ecdb13271aca3aa0c062f02e8e003e4460ce1591',
-      16041120,
+      '14c3f4daee0000be9a5f77134a4925a4213c5019433197574e80d54d5c0ad253',
+      16230608,
     ),
     'android/arm': FamilyRuntime(
       'vision/android_armeabi-v7a/libmediapipe_tasks_vision.so',
-      'de6c5795ed8e684780f4923402fcc437a22457f1396a506d33a59e7ede76392c',
-      11409968,
+      'aba6ccb66e7727fe928789361166822afbaa58820e1e1bb8e5bf618216823cf5',
+      11561128,
     ),
     'android/x64': FamilyRuntime(
       'vision/android_x86_64/libmediapipe_tasks_vision.so',
-      'fe5bad377d07419c64017b2e9bdd06ee05dcd21c3a6164880eb7ee2f2ee55f37',
-      19747440,
+      '356c2825cabafee0603fcc75b20c63e560c702308223a96df61a4dcef4c2c408',
+      19969808,
     ),
     'ios/arm64': FamilyRuntime(
       'vision/ios_arm64/MediaPipeTasksVisionC.framework.zip',
-      '393c03da3bef7506201fe366b2f4d954c6ccc814f57d73683726b95ab76bed95',
-      9044032,
+      '154333f07ee233efe3966976b9abcd1dc61a997825b0d7851a97ae97181ac67e',
+      8841261,
     ),
     'ios-simulator/arm64': FamilyRuntime(
       'vision/ios_simulator/MediaPipeTasksVisionC.framework.zip',
-      '5a03157f7210ffc7063997e33b0cf0353d77cec91f7bdfe0b219b04871083d49',
-      19812658,
+      '7990f1bc49bba3f585813a7b59ed5ecd0611f36762f970856231d11de241e359',
+      19397705,
     ),
     'linux/x64': FamilyRuntime(
       'vision/linux_x86_64/libmediapipe_tasks_vision.so',
-      'b3b67a46755f9bdb1214809d3ef438ab9dfdb1b0003623c72fd0c34f3fdef32c',
-      34566656,
+      'e86556f45ee840bc0041bb1948059288dde36ef87a41b8f474735ea011c6c216',
+      34864320,
     ),
     'windows/x64': FamilyRuntime(
       'vision/windows_x86_64/mediapipe_tasks_vision.dll',
-      'f447909df12eb2fc7870a1f7b2ce0de64f492b65f328ea218b740a75cae97ce5',
-      29488128,
+      '30b54929f350e31ee2afcac5cbea250ff7004eac9b489006b9702f4f06b6256a',
+      29751296,
     ),
   },
   'text': {
     'macos/arm64': FamilyRuntime(
       'text/darwin_arm64/libmediapipe_tasks_text.dylib',
-      '4d8c6855a7467d8186c4c8d50907c60aac6f95b43fe322e597789b9bb6a0372f',
-      28369040,
+      '813546fd803762b602fa2e84f7962600e613054454140d0179e3866f899814cc',
+      27232848,
     ),
     'android/arm64': FamilyRuntime(
       'text/android_arm64-v8a/libmediapipe_tasks_text.so',
-      '27a61a341db494c4404070f5c97830a0d68b142645b2cc55acb72b5cc18b970f',
-      16551600,
+      '758a2821877d56428605444c2a8c9042cd92e15969f9ebaef265bb03b9392c3d',
+      16836240,
     ),
     'android/arm': FamilyRuntime(
       'text/android_armeabi-v7a/libmediapipe_tasks_text.so',
-      'a6bc21af8bbecbeb97e0adf4634a230f0de5424b21c5b02288c48311f509da0d',
-      11517416,
+      '9a13317c75faef917f26cbeaded3dadf69c438c6d77a49fe9ee43120102af570',
+      11755560,
     ),
     'android/x64': FamilyRuntime(
       'text/android_x86_64/libmediapipe_tasks_text.so',
-      'f2f82908a62e38c458bf623e9bfac197d1de0f647dbb87ac145d4e114a43f217',
-      20153680,
+      '4398ca6b671423ebdce892b7e9db647822898dbb5efba0e580c87964d732f54f',
+      20503952,
     ),
     'ios/arm64': FamilyRuntime(
       'text/ios_arm64/MediaPipeTasksTextC.framework.zip',
-      '0b2b4ff02b1fcd9380a56c5874c98ac55d1368a4baca3b1eebe2c51df79bd5fa',
-      8363481,
+      'cdd9eceb0d271efcb1bf595d4d5f2a296666e752fea4adfe7e55c060bdaf6b6e',
+      8177940,
     ),
     'ios-simulator/arm64': FamilyRuntime(
       'text/ios_simulator/MediaPipeTasksTextC.framework.zip',
-      'b7de6465b17df97a8631cc66a1a07b0228e8d0486e7b4e383c447f9542070203',
-      18157220,
+      'dde62195ce72d107368da6ccd13c05383220c84dee0517c8b3f6b703f930eca6',
+      17763862,
     ),
     'linux/x64': FamilyRuntime(
       'text/linux_x86_64/libmediapipe_tasks_text.so',
-      'f7403d856bbc6e719df0c5611f1e8a8e92dbdf16701e9ae7c31cd4b893269a18',
-      41561568,
+      '1e2e2929b8c8cdb4828a41093a3e7997522e44193dae24096007d4545ead78fd',
+      41813600,
     ),
     'windows/x64': FamilyRuntime(
       'text/windows_x86_64/mediapipe_tasks_text.dll',
-      'a86d0836c7290d76e52281c71adaea9ea3a1e6a8d71aaf7a0b0d91359f8ee5ee',
-      42351104,
+      '8c6157d9a76b3c57ef6af872789fbcc1baf9586eab86340d318ba8ec9a64859f',
+      29845504,
     ),
   },
   'audio': {
     'macos/arm64': FamilyRuntime(
       'audio/darwin_arm64/libmediapipe_tasks_audio.dylib',
-      'ed64b1fa1537d72b6a5273bf5fdc2b5b985b42c3a77c7c0002685502b35d3825',
-      26251120,
+      'ba65bf3521132ffa4a3800564f49a540750605ea1b9ca064f6dc82901dfdd859',
+      25478576,
     ),
     'android/arm64': FamilyRuntime(
       'audio/android_arm64-v8a/libmediapipe_tasks_audio.so',
-      '23e3c76ecdc841764cbbe887dff6e76c510959e97d7d3441bbe0bb68bce0d680',
-      15890080,
+      '41ab059471409cd1d358a0112bd7c7ce75a6344e5d89454eed612be3bfa30719',
+      16259600,
     ),
     'android/arm': FamilyRuntime(
       'audio/android_armeabi-v7a/libmediapipe_tasks_audio.so',
-      '8007fb5448109a7e4a874125f53f9fb254c7992162cf52b2e554e611f8adc8f5',
-      11163784,
+      '955080e180751d7a738bfd050f5bc4817de911f8648025b5b2b2253dc123de32',
+      11448616,
     ),
     'android/x64': FamilyRuntime(
       'audio/android_x86_64/libmediapipe_tasks_audio.so',
-      '63d6d144469f5d50a0190ec4be54e7362cb0f95fca25428ca9fdb500453838be',
-      19517176,
+      '193686ed9802ef66f06afb3476f0f5524a11a5fa07b2656a1003b175e078afba',
+      19952144,
     ),
     'ios/arm64': FamilyRuntime(
       'audio/ios_arm64/MediaPipeTasksAudioC.framework.zip',
-      '54e98bd406fabb5320c0728ce2bdfd110a6e271a10d6199aa231b261d7a1991a',
-      8274510,
+      '71c8dd83d9187bdec0e851c88d99547d2e450823542baa875c4a42efe8e58b9c',
+      8145085,
     ),
     'ios-simulator/arm64': FamilyRuntime(
       'audio/ios_simulator/MediaPipeTasksAudioC.framework.zip',
-      'a1dc3dd1ed0db1a6a73f6d23d494ea2b3e7796e793b484007b860c1c8de551b2',
-      17993408,
+      '69c2a9f4b42bb66a89f80b2993bf872d3fd77d1b0691a7a49ff48e4c9fb7a3d7',
+      17713264,
     ),
     'linux/x64': FamilyRuntime(
       'audio/linux_x86_64/libmediapipe_tasks_audio.so',
-      '81fd4c0be47d589005c9b2b0c7477115ec4bfd682505178d4b8810146c1b61df',
-      41752336,
+      'c735a9d2e3062450ed54dabe5acf6fbdf427e93bc5b4f6c9219ab50cfb0b7222',
+      42208240,
     ),
     'windows/x64': FamilyRuntime(
       'audio/windows_x86_64/mediapipe_tasks_audio.dll',
-      'e146a9c732229f521d836ed310024e766276be91b7529b260d0db8d1c0d88f00',
-      47221248,
+      'c88bede1400a75a8c2cff91f3a4d7247f969bcf376be14a5373c204c0aca7518',
+      47985152,
     ),
   },
   'retrieval': {
     'macos/arm64': FamilyRuntime(
       'retrieval/darwin_arm64/libmediapipe_tasks_retrieval.dylib',
-      '3e6b06b542cd32ecd629e929da56dfdc379424fbaba18f26ebf780f0347915de',
-      23291120,
+      '50e42122535d037ec8a939aa4f1b19cb79c1b87de0fe41fb5aed456e77b4aff8',
+      21924064,
     ),
     'android/arm64': FamilyRuntime(
       'retrieval/android_arm64-v8a/libmediapipe_tasks_retrieval.so',
-      'f244e6a9196cd875fe6022d0d94d3b409d1b1522623a4dd9900bc73213bd52b6',
-      14586672,
+      'e72d6915517b4b83ac3793946c71607cf70a25b41871961d556cef887c9a5b37',
+      14771088,
     ),
     'android/arm': FamilyRuntime(
       'retrieval/android_armeabi-v7a/libmediapipe_tasks_retrieval.so',
-      '990f962059634c7cde2f31080e49595233dc382192ebc8c314962523c0f05602',
-      10297192,
+      'd9106404d6367391bcefa06ee04041670463d88cc49523efd2b5ec0570ebedfa',
+      10447976,
     ),
     'android/x64': FamilyRuntime(
       'retrieval/android_x86_64/libmediapipe_tasks_retrieval.so',
-      '2f7e32853e3052875d67cd11f9cbb4a27964db798518a122c8a6896a3fc09400',
-      18150360,
+      'd45ee7d8fe53bc6ddd46cb23e03b7adc649240494084af32175275fb5edc9c0c',
+      18367504,
     ),
     'ios/arm64': FamilyRuntime(
       'retrieval/ios_arm64/MediaPipeTasksRetrievalC.framework.zip',
-      '880bd84b38cb6badcf92094028fca5fa581327ca9be347ee6f5f1ed78fdc8c18',
-      6874315,
+      'e8efb7f2864c6297c4295c1ac6839ad58d118ae164bce13c7345702aaeb00484',
+      6643132,
     ),
     'ios-simulator/arm64': FamilyRuntime(
       'retrieval/ios_simulator/MediaPipeTasksRetrievalC.framework.zip',
-      '65ae47ea7c5d9b3a124c14d5d9e0117c884847f45044b06e03975fc468274a95',
-      15342167,
+      '94012de2c90391806b10eef36519384e73ea03747ad89ec3f5fd826ea605824e',
+      14852570,
     ),
     'linux/x64': FamilyRuntime(
       'retrieval/linux_x86_64/libmediapipe_tasks_retrieval.so',
-      '35d6b01347e13e6f9f2abb6c6abfe8ae0f0eb18045f03f7632d9512e58280eb3',
-      32644448,
+      'c9169204fd423ec71aa18de4aadf69cf9dd59fef03d641d02cc84d9cf973679f',
+      32969280,
     ),
     'windows/x64': FamilyRuntime(
       'retrieval/windows_x86_64/mediapipe_tasks_retrieval.dll',
-      'e49233468f3bfe4dd5c53a33a7e36d5264bf6ccd930d5ae1338d284fb0a967d5',
-      27155456,
+      '8e9f054fcc11421243915ae3e54984f0d0e4322c6f9ddf0a418a3cacfa039016',
+      27446272,
     ),
   },
   'decision': {
     'macos/arm64': FamilyRuntime(
       'decision/darwin_arm64/libmediapipe_tasks_decision.dylib',
-      '6c5b8022d3188e663e663af28e4b5ab488bb10f6e8986f8d1f71c2c943b3af1d',
-      14905568,
+      'e7f01bded4cfcec19def6a1652c5e5ee6b1808558efa66a4549705e0dff8ce99',
+      13585312,
     ),
     'android/arm64': FamilyRuntime(
       'decision/android_arm64-v8a/libmediapipe_tasks_decision.so',
-      'ea0aae8db9654e291421a7e7b37664c36f3a78ca1fc0f89202687d4732dbd6b1',
-      12557784,
+      '572ef7a1582e080483dc67a48bfddc97f6af68e07b60ed50902b27a8920fe562',
+      12826512,
     ),
     'android/arm': FamilyRuntime(
       'decision/android_armeabi-v7a/libmediapipe_tasks_decision.so',
-      'dcb4521d0209078b9ce55c43e796431201d10882ba2ca756dbf82270725aca2d',
-      8805944,
+      '114f4cd111a7115c6130ae8c36dbf5d9914b906058c19013684002f0f5c66983',
+      9022760,
     ),
     'android/x64': FamilyRuntime(
       'decision/android_x86_64/libmediapipe_tasks_decision.so',
-      '32cffefd8a963ed756cdf4d5b115d3230f3684fc3dd7fa795128083b71b8e458',
-      15779704,
+      '83eda626906925175c0a1be4bbee9a4697dfe7c7a0943d3892438d1e7463074c',
+      16081104,
     ),
     'ios/arm64': FamilyRuntime(
       'decision/ios_arm64/MediaPipeTasksDecisionC.framework.zip',
-      '2a35c3d5b73d65a2d002c5e4a11a024aa7870b472e822512b6796477f55eaee8',
-      6281274,
+      '2ff7fe44cb922c90fa775206be2ee3df2ce3e4dc64ea8d3fc3ce99c09bda635b',
+      6069015,
     ),
     'ios-simulator/arm64': FamilyRuntime(
       'decision/ios_simulator/MediaPipeTasksDecisionC.framework.zip',
-      '8335a498357c9f8d4c4e069513d1ece4fc859bf489ef21f1a8a82f7873df9202',
-      13865616,
+      'b23708cb5f5253815acc2093b6d233766fbcf707a18d0c3e972f05e76d54320a',
+      13419997,
     ),
     'linux/x64': FamilyRuntime(
       'decision/linux_x86_64/libmediapipe_tasks_decision.so',
-      '0a8d12383450feb6b5bbdb594a661380ee11dcf216dea9cac243c93226837c8d',
-      36265776,
+      '025438d2c7c542c8b4676da407ca3b37cc2cc56b86cd185de08ecb188ce39c25',
+      36645552,
     ),
     'windows/x64': FamilyRuntime(
       'decision/windows_x86_64/mediapipe_tasks_decision.dll',
-      '3b8d737d9cc71cb97aca22916cdb9b1d8d568b61f778689a3ca55598a1d0593d',
-      39974400,
+      '09ec664895ee83cf96aaf1aa875ded66370f452d516da8666886c6094d9db665',
+      40359424,
     ),
   },
 };
@@ -323,6 +325,7 @@ Future<void> bundleFamilyRuntime(
   BuildOutputBuilder output, {
   required String family,
 }) async {
+  checkFamilyRelease(input.packageName, input.packageRoot);
   final code = input.config.code;
   requireDynamicLinking(code);
   final target = buildTarget(code);
@@ -364,6 +367,83 @@ Future<void> bundleFamilyRuntime(
     ),
   );
 }
+
+/// The oldest release of each task family that reads this core's libraries:
+/// 0.3.0 moved to MediaPipe 1.2.3, whose `MpBaseOptions` grew from 72 to 80
+/// bytes, so every task's options after it moved by 8.
+const _minimumFamilyRelease = (0, 3, 0);
+
+/// Stops the build when [packageRoot] is a pub.dev release of [package]
+/// older than [_minimumFamilyRelease], which would pass this core's
+/// libraries options laid out for MediaPipe 1.2.2.
+///
+/// Only hosted releases are checked, where the version names the code. A path
+/// or git checkout passes, as does a pubspec without a plain version.
+///
+/// The error names core's version from the pubspec in [coreRoot], by default
+/// where `package:mediapipe_core/` resolves in the running hook.
+void checkFamilyRelease(String package, Uri packageRoot, {Uri? coreRoot}) {
+  final segments = packageRoot.pathSegments.where((s) => s.isNotEmpty);
+  final found = _pubspecVersion(packageRoot);
+  if (found == null ||
+      segments.length < 3 ||
+      segments.elementAt(segments.length - 3) != 'hosted' ||
+      segments.last != '$package-$found') {
+    return;
+  }
+  final release = _release(found);
+  if (release == null || _compare(release, _minimumFamilyRelease) >= 0) {
+    return;
+  }
+  final (major, minor, patch) = _minimumFamilyRelease;
+  final minimum = '$major.$minor.$patch';
+  final core = switch (coreRoot ?? _coreLibrary()?.resolve('../')) {
+    final root? => _pubspecVersion(root),
+    null => null,
+  };
+  throw UnsupportedError(
+    '$package $found does not work with '
+    '${core == null ? 'this mediapipe_core' : 'mediapipe_core $core'}, which '
+    "bundles Google's MediaPipe $familyRuntimeVersion: the task options "
+    'changed layout there, and $package reads the new layout from $minimum. '
+    'Upgrade $package to $minimum or later (flutter pub upgrade $package).',
+  );
+}
+
+/// Where `package:mediapipe_core/` resolves in the running hook, or null.
+Uri? _coreLibrary() {
+  try {
+    return Isolate.resolvePackageUriSync(Uri.parse('package:mediapipe_core/'));
+  } on Object {
+    return null;
+  }
+}
+
+/// The `version:` of the pubspec in [root], or null.
+String? _pubspecVersion(Uri root) {
+  final pubspec = File.fromUri(root.resolve('pubspec.yaml'));
+  if (!pubspec.existsSync()) return null;
+  try {
+    final version = (loadYaml(pubspec.readAsStringSync()) as Map)['version'];
+    return version is String ? version : null;
+  } on Object {
+    return null;
+  }
+}
+
+/// [version]'s major, minor and patch, ignoring any pre-release or build
+/// suffix, or null when it is not a plain version.
+(int, int, int)? _release(String version) {
+  final match = RegExp(r'^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$').firstMatch(version);
+  if (match == null) return null;
+  return (int.parse(match[1]!), int.parse(match[2]!), int.parse(match[3]!));
+}
+
+int _compare((int, int, int) a, (int, int, int) b) => a.$1 != b.$1
+    ? a.$1.compareTo(b.$1)
+    : a.$2 != b.$2
+    ? a.$2.compareTo(b.$2)
+    : a.$3.compareTo(b.$3);
 
 /// The arm64 binary from Google's framework zip for an iOS device or the
 /// Simulator.

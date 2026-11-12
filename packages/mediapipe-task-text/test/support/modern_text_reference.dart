@@ -24,6 +24,62 @@ Map<String, dynamic> loadReference(String task) {
   return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
+/// The ctypes layouts recorded with [reference], with the structs Google
+/// changed after the reference wheel as its `mediapipe` 1.2.3 ctypes declare
+/// them (clang agrees: `tool/abi_check.cc`). 1.2.3 added the base options'
+/// NPU dispatch folder, which moves every field after them by 8 bytes.
+Map<String, dynamic> referenceAbi(Map<String, dynamic> reference) => {
+  ...reference['abi'] as Map<String, dynamic>,
+  ..._since123,
+};
+
+const _since123 = <String, Map<String, Object>>{
+  'MpBaseOptionsC': {
+    'size': 80,
+    'alignment': 8,
+    'offsets': {
+      'model_asset_buffer': 0,
+      'model_asset_buffer_count': 8,
+      'model_asset_path': 16,
+      'file_descriptor': 24,
+      'delegate': 28,
+      'host_environment': 32,
+      'host_system': 36,
+      'host_version': 40,
+      'ca_bundle_path': 48,
+      'app_id': 56,
+      'app_version': 64,
+      'npu_dispatch_library_dir': 72,
+    },
+  },
+  '_MpTextEmbedderOptionsC': {
+    'size': 88,
+    'alignment': 8,
+    'offsets': {'base_options': 0, 'embedder_options': 80},
+  },
+  '_MpTextProofreaderOptionsC': {
+    'size': 104,
+    'alignment': 8,
+    'offsets': {
+      'base_options': 0,
+      'max_num_tokens': 80,
+      'cache_dir': 88,
+      'min_log_severity': 96,
+    },
+  },
+  '_MpTextSummarizerOptionsC': {
+    'size': 104,
+    'alignment': 8,
+    'offsets': {
+      'base_options': 0,
+      'mode': 80,
+      'max_num_tokens': 84,
+      'cache_dir': 88,
+      'min_log_severity': 96,
+    },
+  },
+};
+
 /// A reference is Google's answer only when it came from the wheel the tests
 /// pin (core's `referenceWheels`), an older release than the libraries, so
 /// the comparisons check each answer against the runtime the task supports

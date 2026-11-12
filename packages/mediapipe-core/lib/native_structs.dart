@@ -64,6 +64,10 @@ final class MpBaseOptions extends Struct {
 
   /// The app's version, such as an Android version code, or null.
   external Pointer<Char> appVersion;
+
+  /// The folder holding the NPU dispatch library, or null for none.
+  /// Added in MediaPipe 1.2.3.
+  external Pointer<Char> npuDispatchLibraryDir;
 }
 
 /// `MpClassifierOptions`: the classifiers' result filtering.
@@ -212,7 +216,9 @@ void fillBaseOptions(
     // MP_HOST_ENVIRONMENT_FLUTTER.
     ..hostEnvironment = 5
     ..hostSystem = mpHostSystem
-    ..hostVersion = mpHostVersion.toNativeUtf8(allocator: arena).cast();
+    ..hostVersion = mpHostVersion.toNativeUtf8(allocator: arena).cast()
+    // No NPU dispatch library: Google's default.
+    ..npuDispatchLibraryDir = nullptr;
   final appId = mpAppId;
   if (appId != null) target.appId = appId.toNativeUtf8(allocator: arena).cast();
   final appVersion = mpAppVersion;

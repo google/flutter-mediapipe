@@ -1,7 +1,7 @@
 {
   "package": "@mediapipe/tasks-retrieval",
-  "version": "1.2.2",
-  "integrity": "TCNNeHE21DERFsZ+vLXOroct6IfI0hMDcH6eZOEQ8fD2lpOSv3xq/XU+VvyWTMo+I6cfJXkREnzlicE7cQYW0g==",
+  "version": "1.2.3",
+  "integrity": "lsSlcgSUFrgLMfqaKlcXF06mOFcteCmOjrBBteeOSVxwLodZ1jkzFD0pINHVHihZnq1XVBpyK/ckwIWtrF889A==",
   "files": [
     "retrieval_bundle.mjs",
     "wasm/retrieval_wasm_internal.js",
@@ -10,10 +10,10 @@
     "wasm/retrieval_wasm_module_internal.wasm"
   ],
   "sha384": {
-    "retrieval_bundle.mjs": "uygRKylH1MhwqBLaNI/TW+3Vg43w/cWftBCjC4VXBy9ufFB/pqUu4p2E05ComwGW",
-    "wasm/retrieval_wasm_internal.js": "qnx4SpVrvvCTWY4C/Q8itk/HKv5SBOlTlAEgPRD7UYtlQBaHBCcY5Uhe0DWSYync",
-    "wasm/retrieval_wasm_internal.wasm": "kgtmQf15Q3p+H4t06gJChOmdPgHsG9Sc/PpH6SRAr5W/zH0PkJv6jDuHrcoFDtxo",
-    "wasm/retrieval_wasm_module_internal.js": "Rulhxiu6B4Gd3RD1DJrhG+iyo/ZiQpon6mO9I9to81+RsMVkYo8EBqSHY2HPfmPw",
-    "wasm/retrieval_wasm_module_internal.wasm": "AcEiAVg1IpmmHNg4/+kcMdhqcpRdMYo33nWNz/lBJ5X5ec2y4qOtjuPRkn4g4LTq"
+    "retrieval_bundle.mjs": "7zEsCrb7tZRLEScOmP326C+D9ussklKyr4LJgJ9cuZoJ1Oc7pqu0dK9kjnQyWzKA",
+    "wasm/retrieval_wasm_internal.js": "x/4d6+CgXfNH7Xwv7n0ILLR747tP39+DSru4SzFqYtUpz2h+WlI+7mQYVz+U3Ycy",
+    "wasm/retrieval_wasm_internal.wasm": "/OVDsy9uYxO4D2Mqpw9DG7jWFk8UOIAAsyRQyqQj9lz827GlbYVwgIJEkAd13/sS",
+    "wasm/retrieval_wasm_module_internal.js": "T+3xVKgCm2Ki5y6Sd+Lh1pwaph3Es4wBW8usXXsFpavLSFziMEVLKvjgNIXg7ok0",
+    "wasm/retrieval_wasm_module_internal.wasm": "NNJqvBwYEKIkHVFxZXRxTM4mLCwtJ2DAICISG11vvU6Q6ipxWHO16WXKvNrk5950"
   }
 }

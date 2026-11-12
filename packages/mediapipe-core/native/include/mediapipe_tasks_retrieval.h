@@ -15,7 +15,7 @@
 // MediaPipe Tasks C API: retrieval domain.
 //
 // Generated file. DO NOT EDIT.
-// Source revision: 1012398461
+// Source revision: 1019408370
 //
 
 #ifndef MEDIAPIPE_TASKS_C_RETRIEVAL_H_

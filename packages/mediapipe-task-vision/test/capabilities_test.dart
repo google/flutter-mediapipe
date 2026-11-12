@@ -60,7 +60,7 @@ void main() {
       platform('ios', 'arm64', '15.0'),
     );
     expect(ios.supportedDelegates, both);
-    expect(ios.runtimeVersion, '1.2.2');
+    expect(ios.runtimeVersion, '1.2.3');
     // Android runs Google's vision library: GPU on arm64 phones, and CPU on
     // the x86_64 emulator images.
     expect(
@@ -73,7 +73,7 @@ void main() {
       platform('android', 'x64'),
     );
     expect(emulator.supportedDelegates, {Delegate.cpu});
-    expect(emulator.runtimeVersion, '1.2.2');
+    expect(emulator.runtimeVersion, '1.2.3');
     // The web needs its registered adapter, absent here.
     final web = handLandmarkerCapabilitiesForPlatform(
       platform('web', 'unknown'),
@@ -91,7 +91,7 @@ void main() {
     final result = interactiveSegmenterCapabilitiesForPlatform(mac);
     expect(result.supportedDelegates, {Delegate.cpu});
     expect(result.unavailableReasons[Delegate.gpu], contains('GLSL 330'));
-    expect(result.runtimeVersion, '1.2.2');
+    expect(result.runtimeVersion, '1.2.3');
   });
 
   test("MagicTouch stays off Google's Windows library, with the reason", () {
@@ -138,7 +138,7 @@ void main() {
       ).unavailableReasons[Delegate.gpu],
       contains('face blendshapes model'),
     );
-    expect(objectDetectorCapabilitiesForPlatform(mac).runtimeVersion, '1.2.2');
+    expect(objectDetectorCapabilitiesForPlatform(mac).runtimeVersion, '1.2.3');
   });
 
   test('Face Landmarker offers GPU on Linux x64, not Windows', () {
@@ -150,8 +150,8 @@ void main() {
     expect(on('windows').unavailableReasons[Delegate.gpu], isNotNull);
   });
 
-  test("Linux and Windows report Google's 1.2.2 libraries", () {
-    for (final (os, version) in [('linux', '1.2.2'), ('windows', '1.2.2')]) {
+  test("Linux and Windows report Google's 1.2.3 libraries", () {
+    for (final (os, version) in [('linux', '1.2.3'), ('windows', '1.2.3')]) {
       final platform = TaskPlatform(operatingSystem: os, architecture: 'x64');
       for (final result in [
         faceLandmarkerCapabilitiesForPlatform(platform),
