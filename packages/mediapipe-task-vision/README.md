@@ -25,9 +25,10 @@ the [Interactive Segmenter guide](https://github.com/google/flutter-mediapipe/bl
 
 ## Installation
 
-The package needs Flutter 3.47 or newer, with the latest stable release
-recommended, and the usual toolchain for your target platform. Add the package
-from pub.dev, from your app's root:
+The package needs Flutter 3.44 or newer, with the latest stable release
+recommended, and the usual toolchain for your target platform. iOS and macOS
+builds with Xcode 27 need Flutter 3.47 or later. Add the package from pub.dev,
+from your app's root:
 
 ```sh
 flutter pub add mediapipe_vision

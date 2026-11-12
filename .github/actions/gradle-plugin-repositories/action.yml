@@ -1,0 +1,23 @@
+name: Resolve Gradle plugins from Maven Central directly
+description: >-
+  Flutter's own Gradle build resolves its plugins from the plugin portal only,
+  which sends Kotlin's artifacts on to Maven Central by redirect; one run
+  failed when the redirect served none (2026-11-12). An init script makes
+  every Gradle build on the runner resolve plugins from Google's Maven and
+  Maven Central first.
+runs:
+  using: composite
+  steps:
+    - name: Resolve Gradle plugins from Maven Central directly
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle/init.d
+        cat > ~/.gradle/init.d/plugin-repositories.init.gradle.kts <<'SCRIPT'
+        beforeSettings {
+            pluginManagement.repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        SCRIPT

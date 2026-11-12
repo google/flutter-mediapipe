@@ -35,8 +35,9 @@ you do not add or import core yourself unless your own code imports
 
 ## Quick start
 
-The packages need Flutter 3.47 or newer; the latest stable release is
-recommended. Add a family from pub.dev, from your app's root:
+The packages need Flutter 3.44 or newer; the latest stable release is
+recommended. iOS and macOS builds with Xcode 27 need Flutter 3.47 or later.
+Add a family from pub.dev, from your app's root:
 
 ```sh
 flutter pub add mediapipe_vision

@@ -18,16 +18,16 @@ platforms:
 
 environment:
   sdk: ^3.12.0
-  flutter: '>=3.47.0'
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:
     sdk: flutter
   archive: ^4.2.0
-  code_assets: ^2.1.0
+  code_assets: '>=1.1.0 <3.0.0'
   crypto: ^3.0.6
   ffi: ^2.1.4
-  hooks: ^2.2.0
+  hooks: '>=2.0.0 <3.0.0'
   http: ^1.6.0
   jni: ^1.1.0
   jni_flutter: ^1.0.3

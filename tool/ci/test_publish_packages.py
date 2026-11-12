@@ -1,10 +1,12 @@
 """Unit tests for the release publisher:
 python3 -B -m unittest tool/ci/test_publish_packages.py
 """
+import functools
 import io
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -206,14 +208,30 @@ class PublishPackagesTest(unittest.TestCase):
 
         _, current = publish_packages.read_pubspec_versions()
         selected = ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']
-        with mock.patch.object(publish_packages, 'prepare', side_effect=fake_prepare), \
-                mock.patch.object(publish_packages, 'validate_staged', side_effect=fake_validate), \
-                mock.patch.object(publish_packages, 'commit_and_tag_release', side_effect=fake_commit_and_tag), \
-                mock.patch.object(publish_packages, 'is_version_published', side_effect=fake_is_published), \
-                mock.patch.object(publish_packages, 'fetch_oidc_token', return_value='jwt'), \
-                mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run), \
-                mock.patch.object(publish_packages, 'publish_package', side_effect=fake_publish):
-            publish_packages.run_publish(selected, f'refs/tags/v{current}', dry_run=False)
+        with tempfile.TemporaryDirectory() as tmp:
+            # The release bump rewrites the files it reads, so it runs on a
+            # copy of every package's version files, never on the checkout.
+            copy = Path(tmp)
+            for folder in publish_packages.package_folders():
+                (copy / 'packages' / folder).mkdir(parents=True)
+                for name in ('pubspec.yaml', 'CHANGELOG.md', 'README.md'):
+                    source = publish_packages.PACKAGES / folder / name
+                    if source.is_file():
+                        shutil.copy(source, copy / 'packages' / folder / name)
+            bump = functools.partial(publish_packages.prepare_release_version,
+                                     repo_root=copy, packages_dir=copy / 'packages')
+            verify = functools.partial(publish_packages.verify_versions_and_tag,
+                                       packages_dir=copy / 'packages')
+            with mock.patch.object(publish_packages, 'prepare_release_version', side_effect=bump), \
+                    mock.patch.object(publish_packages, 'verify_versions_and_tag', side_effect=verify), \
+                    mock.patch.object(publish_packages, 'prepare', side_effect=fake_prepare), \
+                    mock.patch.object(publish_packages, 'validate_staged', side_effect=fake_validate), \
+                    mock.patch.object(publish_packages, 'commit_and_tag_release', side_effect=fake_commit_and_tag), \
+                    mock.patch.object(publish_packages, 'is_version_published', side_effect=fake_is_published), \
+                    mock.patch.object(publish_packages, 'fetch_oidc_token', return_value='jwt'), \
+                    mock.patch.object(publish_packages.subprocess, 'run', side_effect=fake_run), \
+                    mock.patch.object(publish_packages, 'publish_package', side_effect=fake_publish):
+                publish_packages.run_publish(selected, f'refs/tags/v{current}', dry_run=False)
 
         self.assertEqual(events, [
             ('validate', ['mediapipe-core', 'mediapipe-task-audio', 'mediapipe-task-vision']),

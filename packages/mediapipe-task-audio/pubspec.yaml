@@ -19,21 +19,21 @@ platforms:
 
 environment:
   sdk: ^3.12.0
-  flutter: '>=3.47.0'
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  code_assets: ^2.1.0
+  code_assets: '>=1.1.0 <3.0.0'
   ffi: ^2.1.4
-  hooks: ^2.2.0
+  hooks: '>=2.0.0 <3.0.0'
   mediapipe_core: ^0.3.0
   meta: ^1.18.0
   # Compiles the audio stream bridge (native/audio_stream_bridge.c) and the
   # Text to Speech cancel guard, as the text package compiles its own.
-  native_toolchain_c: ^0.19.3
+  native_toolchain_c: '>=0.19.0 <0.20.0'
   web: ^1.1.1
 
 dev_dependencies:

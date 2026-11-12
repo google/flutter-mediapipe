@@ -1,0 +1,110 @@
+name: Minimum Flutter
+
+permissions:
+  contents: read
+
+# The pubspecs accept Flutter 3.44.0 and later; every other workflow runs the
+# pinned stable Flutter (.github/actions/setup). These jobs run the minimum
+# itself, with the versions pub resolves and with the lowest versions the
+# pubspecs allow, so a range or an API that needs a newer Flutter fails here.
+# tool/check_repository.py keeps the version below equal to the pubspecs'.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
+concurrency:
+  group: flutter-floor-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # One macOS job, so a run holds one runner of the small hosted macOS pool.
+  packages:
+    name: Minimum Flutter / packages and macOS build
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      MEDIAPIPE_CLASSIC_TEXT_REFERENCE_DIR: ${{ github.workspace }}/build/classic-text-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      # Python and Google's wheels for the text references; Flutter is below.
+      - uses: ./.github/actions/setup
+        with:
+          flutter: 'false'
+          official-wheel-cache: 'true'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+      - run: flutter --version
+      # Flutter 3.44 cannot build for iOS or macOS with Xcode 27; 3.47 is the
+      # first that can. The newest Xcode 26 on the image builds instead.
+      - name: Select Xcode 26
+        run: |
+          echo "Xcodes on the image: $(ls -d /Applications/Xcode*.app | tr '\n' ' ')"
+          xcode=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1)
+          [ -n "$xcode" ] || { echo 'No Xcode 26 on this image.' >&2; exit 1; }
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
+      - name: Analyze and test with the versions pub resolves
+        run: |
+          make get
+          make analyze
+          make models
+          # As main.yaml does: the text suite compares with Google's wheel on
+          # this runner, whose CPU output differs from the checked-in
+          # baseline's host in the sixth decimal.
+          python3 -B packages/mediapipe-task-text/tool/prepare_classic_text_reference.py
+          make test_only
+      - name: Build the object detection sample for macOS
+        working-directory: samples/apps/object_detection
+        run: |
+          flutter pub get
+          dart run mediapipe_core:bundle_models
+          flutter build macos --debug
+      # The lowest versions of everything, the test runner's dependencies
+      # included. test_core accepts frontend_server_client 3.2.0, which looks
+      # for the JIT frontend server that Dart 3 no longer ships, so the override
+      # keeps it at 4.0.0 or later; the packages do not depend on it.
+      - name: Analyze and test with the lowest versions the pubspecs allow
+        run: |
+          for package in packages/mediapipe-*/; do
+            (
+              cd "$package"
+              [ -f pubspec_overrides.yaml ] || echo 'dependency_overrides:' > pubspec_overrides.yaml
+              echo '  frontend_server_client: ^4.0.0' >> pubspec_overrides.yaml
+              flutter pub downgrade
+              dart analyze --fatal-infos
+            ) || exit $?
+          done
+          make test_only
+
+  android:
+    name: Minimum Flutter / Android debug build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: samples/apps/object_detection
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+      # Gradle's own NDK and CMake downloads give up on one corrupt archive.
+      - uses: ./.github/actions/android-ndk
+      # Gradle's plugin portal redirect to Maven Central served nothing once.
+      - uses: ./.github/actions/gradle-plugin-repositories
+      - run: flutter pub get
+      - name: Bundle the model
+        run: dart run mediapipe_core:bundle_models
+      - run: flutter build apk --debug

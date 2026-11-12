@@ -30,9 +30,10 @@ drawing code.
 
 ### Prerequisites
 
-- **Flutter 3.47 or newer** (the latest stable release is recommended), with
+- **Flutter 3.44 or newer** (the latest stable release is recommended), with
   the toolchain for the platform you build: Android SDK, Xcode, Visual Studio,
-  or the Linux desktop packages.
+  or the Linux desktop packages. iOS and macOS builds with Xcode 27 need
+  Flutter 3.47 or later.
 - A clone of this repository. The sample builds against the packages in the
   checkout, which can be ahead of pub.dev. Your own app adds `mediapipe_vision`
   from pub.dev; see its
