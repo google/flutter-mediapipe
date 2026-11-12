@@ -12,7 +12,9 @@ import 'support/mask_grids.dart';
 import 'support/official_landmark_references.dart';
 import 'support/official_mask_references.dart';
 import 'support/sdk_frames.dart';
+
 import 'package:mediapipe_gallery/bundled_model_assets.dart';
+
 import 'support/device_log.dart';
 
 /// As in sdk_hand_landmarker_test.dart: `required` fails when the SDK refuses
@@ -51,9 +53,11 @@ void main() {
           final frame = await loadSample(subject.sample);
           final references = <Delegate, _Parts>{};
           // The package withdraws Holistic's GPU where Google's runtime cannot
-          // open its face blendshapes model (iPhones included) and
-          // refuses it before Google's graph exists. A phone that must run the
-          // GPU may lose it only to that documented gap.
+          // open its face blendshapes model (iPhones included), and Pose's and
+          // Gesture's where Google's library lacks LiteRT's GPU plugin
+          // (Android phones, since 1.2.3), and refuses it before Google's
+          // graph exists. A phone that must run the GPU may lose it only to
+          // that documented gap.
           final capabilities = await subject.capabilities();
           final gpuDeclared = capabilities.supportedDelegates.contains(
             Delegate.gpu,
@@ -61,7 +65,7 @@ void main() {
           if (!gpuDeclared && _gpu == 'required') {
             expect(
               capabilities.unavailableReasons[Delegate.gpu],
-              contains('face blendshapes model'),
+              contains(subject.gpuGap),
             );
             await expectLater(
               subject.open(model, Delegate.gpu, RunningMode.image),
@@ -230,6 +234,66 @@ void main() {
       timeout: const Timeout(Duration(minutes: 2)),
     );
   }
+
+  testWidgets('Android refuses Hand, Gesture and Pose GPU with its reason', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      // Since 1.2.3 Google's Android library runs their hand detector and
+      // pose landmarks model on LiteRT without the GPU plugin LiteRT needs,
+      // so the package withdraws the GPU and refuses it before Google's graph
+      // exists.
+      // An emulator reports its SwiftShader gap instead, so the reason is read
+      // from a phone's claim.
+      const phone = TaskPlatform(
+        operatingSystem: 'android',
+        architecture: 'arm64',
+      );
+      for (final (claim, query, create) in [
+        (
+          handLandmarkerCapabilitiesForPlatform,
+          queryHandLandmarkerCapabilities,
+          () async => HandLandmarker.create(
+            HandLandmarkerOptions(
+              modelBytes: await loadBundledModel('hand_landmarker.task'),
+              delegate: Delegate.gpu,
+            ),
+          ),
+        ),
+        (
+          gestureRecognizerCapabilitiesForPlatform,
+          queryGestureRecognizerCapabilities,
+          () async => GestureRecognizer.create(
+            GestureRecognizerOptions(
+              modelBytes: await loadBundledModel('gesture_recognizer.task'),
+              delegate: Delegate.gpu,
+            ),
+          ),
+        ),
+        (
+          poseLandmarkerCapabilitiesForPlatform,
+          queryPoseLandmarkerCapabilities,
+          () async => PoseLandmarker.create(
+            PoseLandmarkerOptions(
+              modelBytes: await loadBundledModel('pose_landmarker_lite.task'),
+              delegate: Delegate.gpu,
+            ),
+          ),
+        ),
+      ]) {
+        expect(claim(phone).supportedDelegates, {Delegate.cpu});
+        expect(
+          claim(phone).unavailableReasons[Delegate.gpu],
+          contains('libLiteRtGpuAccelerator.so'),
+        );
+        expect((await query()).supportedDelegates, {Delegate.cpu});
+        await expectLater(
+          create(),
+          throwsA(isA<RuntimeUnavailableException>()),
+        );
+      }
+    });
+  }, skip: !Platform.isAndroid);
 }
 
 /// Image landmarks per named part: one subject's points, or empty.
@@ -259,6 +323,7 @@ final class _Subject {
     required this.capabilities,
     required this.open,
     required this.check,
+    required this.gpuGap,
     this.maskOf,
     this.statefulImages = false,
     this.gpuRotationMatchesCpu = true,
@@ -282,6 +347,9 @@ final class _Subject {
 
   /// The sample's expected subject: every part present with finite points.
   final void Function(_Result result) check;
+
+  /// Text the reason names where a phone has no GPU for this task.
+  final String gpuGap;
 
   /// A fresh CPU task's pose segmentation mask and pose landmarks for one
   /// image, or null for a task without masks. Holistic smooths masks across
@@ -354,6 +422,7 @@ final _subjects = <_Subject>[
       );
     },
     check: _expectParts(const {'pose': 33}),
+    gpuGap: 'libLiteRtGpuAccelerator.so',
     gpuRotationMatchesCpu: false,
     maskOf: (model, image, rotation) async {
       final task = await PoseLandmarker.create(
@@ -417,6 +486,7 @@ final _subjects = <_Subject>[
       _expectParts(const {'hand': 21})(result);
       expect(result.extra['gesture'], 'Thumb_Up');
     },
+    gpuGap: 'libLiteRtGpuAccelerator.so',
   ),
   _Subject(
     name: 'holistic',
@@ -461,6 +531,7 @@ final _subjects = <_Subject>[
       );
     },
     check: _expectParts(const {'pose': 33, 'left_hand': 21, 'right_hand': 21}),
+    gpuGap: 'face blendshapes model',
     statefulImages: true,
     maskOf: (model, image, rotation) async {
       final task = await HolisticLandmarker.create(

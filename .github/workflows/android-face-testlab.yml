@@ -253,15 +253,15 @@ jobs:
           grep -hE 'SDK_[A-Z_]+ \{' testlab-results/logcat > testlab-results/measurements.log || true
           # Not declared on Android, so their suites check the refusal or only
           # record the GPU: Interactive Segmenter's (browsers only), Face
-          # Detector's (no LiteRT GPU plugin), Holistic's (its face blendshapes
-          # model does not open) and Image Segmenter's (reading a GPU mask aborts
-          # the app).
+          # Detector's and, since 1.2.3, Hand, Gesture and Pose's (no LiteRT GPU
+          # plugin), Holistic's (its face blendshapes model does not open) and
+          # Image Segmenter's (reading a GPU mask aborts the app).
       - name: The GPU tasks this device ran
         if: always()
         id: gpu
         env:
           GPU_SKIP: ${{ matrix.gpu_skip }}
-        run: echo "tasks=$(python3 -c "import os; skip = set(os.environ['GPU_SKIP'].split(',')); print(','.join(t for t in 'face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker'.split(',') if t not in skip | {'interactive_segmenter', 'face_detector', 'holistic_landmarker', 'image_segmenter'}))")" >> "$GITHUB_OUTPUT"
+        run: echo "tasks=$(python3 -c "import os; skip = set(os.environ['GPU_SKIP'].split(',')); print(','.join(t for t in 'face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker'.split(',') if t not in skip | {'interactive_segmenter', 'face_detector', 'gesture_recognizer', 'hand_landmarker', 'holistic_landmarker', 'image_segmenter', 'pose_landmarker'}))")" >> "$GITHUB_OUTPUT"
       - name: Record device CPU task coverage
         if: always()
         uses: ./.github/actions/record-coverage

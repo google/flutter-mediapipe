@@ -434,7 +434,9 @@ part of official releases.
   did.
 - The Windows DLLs export TensorFlow Lite and LiteRT.
 - Ship LiteRT's GPU accelerator plugin with the Linux and Android libraries,
-  or link it in as on Apple: Face Detector's GPU cannot run without it.
+  or link it in as on Apple: Face Detector's GPU cannot run without it, nor,
+  since 1.2.3, Hand Landmarker's, Gesture Recognizer's or Pose Landmarker's
+  on Linux and Android.
 - OpenGL ES GPU category masks come back as float32 class values, not uint8.
 - On GitHub's virtual Mac, LiteRT cannot create a Metal residency set and
   Face Detector keeps about twice each frame.

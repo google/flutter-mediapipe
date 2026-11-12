@@ -64,8 +64,8 @@ without owning an Android device.
 
 For Windows x64 and Linux x64, prepare with `--target windows/x64` or
 `--target linux/x64`, then run `flutter run -d windows --release` or
-`flutter run -d linux --release`. Linux offers GPU for the live Face and Hand
-Landmarker demos; Windows and the Pose demo use CPU only.
+`flutter run -d linux --release`. Linux offers GPU for the live Face
+Landmarker demo; Windows and the Hand and Pose demos use CPU only.
 Each family's hook bundles Google's checksum-pinned library for that family.
 `camera_desktop` provides native
 Media Foundation capture on Windows and GStreamer/V4L2 capture on Linux.
@@ -145,9 +145,9 @@ decoder: AVFoundation on iOS and macOS, MediaCodec on Android, Media
 Foundation on Windows, GStreamer on Linux, and in browsers a `<video>` element
 stepped one frame at a time. The vision package decodes nothing.
 Switching back to **Camera** reopens the live stream task. Interactive Segmenter is image-only and uses its own editor.
-Windows exposes CPU only. Face and Hand Landmarker also expose GPU on Linux,
-iPhones (tested on an iPhone 15 Pro, iOS 27, with Google's 1.2.2 library),
-Android phones and web.
+Windows exposes CPU only. Face and Hand Landmarker also expose GPU on
+iPhones (tested on an iPhone 15 Pro, iOS 27, with Google's 1.2.2 library)
+and web, and Face Landmarker on Android phones and Linux.
 Web uses browser-native capture and transferable bitmaps while sharing these
 controls and the same overlay painter. Web GPU requires worker WebGL 2 support.
 

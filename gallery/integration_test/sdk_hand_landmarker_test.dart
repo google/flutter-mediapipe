@@ -15,7 +15,9 @@ import 'support/gallery_tiles.dart';
 import 'support/no_camera.dart';
 import 'support/official_landmark_references.dart';
 import 'support/sdk_frames.dart';
+
 import 'package:mediapipe_gallery/bundled_model_assets.dart';
+
 import 'support/device_log.dart';
 
 /// `required` fails when the SDK refuses the GPU, as on a phone; `optional`
@@ -57,9 +59,32 @@ void main() {
         final model = await loadBundledModel('hand_landmarker.task');
         final frame = await loadSample('thumb_up.jpg');
         final references = <Delegate, HandLandmarkerResult>{};
+        // The package withdraws Hand Landmarker's GPU where Google's library
+        // lacks LiteRT's GPU plugin (Android phones, since 1.2.3) and refuses
+        // it before Google's graph exists. A phone that must run the GPU may
+        // lose it only to that documented gap.
+        final capabilities = await queryHandLandmarkerCapabilities();
+        final gpuDeclared = capabilities.supportedDelegates.contains(
+          Delegate.gpu,
+        );
+        if (!gpuDeclared && _gpu == 'required') {
+          expect(
+            capabilities.unavailableReasons[Delegate.gpu],
+            contains('libLiteRtGpuAccelerator.so'),
+          );
+          await expectLater(
+            HandLandmarker.create(
+              HandLandmarkerOptions(modelBytes: model, delegate: Delegate.gpu),
+            ),
+            throwsA(isA<RuntimeUnavailableException>()),
+          );
+          _report('gpu_withdrawn', {
+            'reason': capabilities.unavailableReasons[Delegate.gpu],
+          });
+        }
         for (final delegate in [
           Delegate.cpu,
-          if (_gpu != 'skip') Delegate.gpu,
+          if (_gpu != 'skip' && gpuDeclared) Delegate.gpu,
         ]) {
           final HandLandmarker task;
           try {

@@ -50,9 +50,12 @@ void main() {
         await tester.pumpWidget(const GalleryApp());
         final tileTitle = await scrollToGalleryTile(tester, subject.tile);
         expect(tileTitle, findsOneWidget);
-        // Linux offers GPU for face and hand, and the page opens on it; this
-        // test selects CPU. Windows has no GPU path.
-        final gpuOffered = Platform.isLinux ? findsOneWidget : findsNothing;
+        // Linux offers GPU for face, and the page opens on it; this test
+        // selects CPU. Hand has no Linux GPU since Google's 1.2.3 library,
+        // and Windows has no GPU path.
+        final gpuOffered = Platform.isLinux && subject.task == 'face'
+            ? findsOneWidget
+            : findsNothing;
         final tile = find.byKey(ValueKey('gallery-card-${subject.tile}'));
         expect(
           find.descendant(of: tile, matching: find.text('GPU')),
