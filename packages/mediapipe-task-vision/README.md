@@ -820,7 +820,7 @@ Their capability queries offer the CPU only, and asking for the GPU throws
 `RuntimeUnavailableException` before the task is created.
 
 GPU on iPhone is offered and was tested on an iPhone 15 Pro (iOS 27) with
-Google's 1.2.2 library; iPads were not tested. That holds for every task with
+Google's 1.2.3 library; iPads were not tested. That holds for every task with
 an iOS GPU path: Face Detector, Face Landmarker, Hand Landmarker, Gesture
 Recognizer, Pose Landmarker, Object Detector, Image Classifier, Image Embedder
 and Image Segmenter.

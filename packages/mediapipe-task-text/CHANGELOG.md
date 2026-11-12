@@ -1,3 +1,18 @@
+## 0.3.0
+
+- Upgrade every mediapipe package to 0.3.0 together. MediaPipe 1.2.3
+  changes the layout of the native option structs, so this package now
+  requires `mediapipe_core` ^0.3.0.
+- Runs Google's MediaPipe 1.2.3 instead of 1.2.2, with new SHA-256 pins
+  for its native libraries.
+- Accepts Flutter 3.44 and newer, down from 3.47. The package accepts the
+  dependency versions Flutter 3.44 resolves, from `hooks` 2.0.0,
+  `code_assets` 1.1.0, `native_toolchain_c` 0.19.0 and, for development,
+  `ffigen` 21.0.0. iOS and macOS builds with Xcode 27 need Flutter 3.47 or
+  later.
+- CI tests the package on Flutter 3.50.0, the latest stable release,
+  instead of 3.47.9.
+
 ## 0.2.1
 
 - The README has a sample that queries every text task's capabilities (the
