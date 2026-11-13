@@ -264,7 +264,9 @@ class _TaskSettingsPanelState extends State<TaskSettingsPanel> {
                   value:
                       _dragging[setting.key] ??
                       widget.values.share(setting.key),
-                  divisions: 20,
+                  min: setting.min,
+                  max: setting.max,
+                  divisions: ((setting.max - setting.min) * 20).round(),
                   onChanged: enabled ? (value) => _slide(setting, value) : null,
                   onChangeEnd: enabled
                       ? (value) {

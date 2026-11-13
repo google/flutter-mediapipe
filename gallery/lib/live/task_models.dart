@@ -2,11 +2,12 @@ import 'package:crypto/crypto.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:mediapipe_decision/mediapipe_decision.dart'
     show DecisionModels, DownloadAsset;
 import 'package:mediapipe_text/mediapipe_text.dart' show TextModels;
 
-/// One of Google's official models for a task, as MediaPipe Studio offers
+/// One of Google's official models for a task, as the task's guide lists
 /// them. The gallery bundles each task's standard model; these download when
 /// chosen, from Google's pinned version 1, and must match [sha256].
 final class TaskModel {
@@ -40,14 +41,22 @@ final class TaskModel {
 
   Uri get url => Uri.parse(pin.url);
 
+  /// The model's file name, as the Info dialog shows it.
+  String get file => url.pathSegments.last;
+
   String get sha256 => pin.sha256;
 }
 
-/// The bundled model's name where Google's demo names it, keyed by the
-/// catalog's runtime id; other tasks call theirs "Standard".
+/// The bundled model's name as the task's guide lists it, keyed by the
+/// catalog's runtime id, for the tasks whose pages offer other models.
 const standardModelNames = <String, String>{
-  'image_embedder': 'MobileNet-V3 (Small)',
-  'image_segmenter': 'DeepLab V3',
+  'face_detector': 'BlazeFace (short-range)',
+  'image_classifier': 'EfficientNet-Lite0 (float 32)',
+  'image_embedder': 'MobileNet-V3 (small)',
+  'image_segmenter': 'DeepLab-V3',
+  'object_detector': 'EfficientDet-Lite0 (float 32)',
+  'pose_landmarker': 'Pose Landmarker (lite)',
+  'text_classifier': 'BERT-classifier',
   'text_embedder': 'Universal Sentence Encoder',
 };
 
@@ -56,32 +65,48 @@ const standardModelNames = <String, String>{
 const taskModels = <String, List<TaskModel>>{
   // Hungry Fish starts with EmbeddingGemma 2; Laya plays it as well.
   'decision_fish_game': [
-    TaskModel.pinned('Laya (256 tokens)', DecisionModels.layaS256, 678477844),
+    TaskModel.pinned('Laya (256-token)', DecisionModels.layaS256, 678477844),
   ],
   // Decision Maker downloads its model to a file rather than to memory: see
   // `GalleryAssets.downloadedModelPath`.
   'decision_maker': [
-    TaskModel.pinned('Laya (512 tokens)', DecisionModels.layaS512, 679395348),
+    TaskModel.pinned('Laya (512-token)', DecisionModels.layaS512, 679395348),
     TaskModel.pinned(
-      'GLiNER2.5-Decide (256 tokens)',
+      'GLiNER2.5-Decide (256-token)',
       DecisionModels.glinerS256,
       981216352,
     ),
     TaskModel.pinned(
-      'GLiNER2.5-Decide (512 tokens)',
+      'GLiNER2.5-Decide (512-token)',
       DecisionModels.glinerS512,
       1081879648,
     ),
   ],
+  'face_detector': [
+    TaskModel(
+      'BlazeFace (full-range)',
+      'face_detector/blaze_face_full_range/float16/1/'
+          'blaze_face_full_range.tflite',
+      '3698b18f063835bc609069ef052228fbe86d9c9a6dc8dcb7c7c2d69aed2b181b',
+      1083786,
+    ),
+    TaskModel(
+      'BlazeFace Sparse (full-range)',
+      'face_detector/blaze_face_full_range/float16/1/'
+          'blaze_face_full_range_sparse.tflite',
+      '2c3728e6da56f21e21a320433396fb06d40d9088f2247c05e5635a688d45dfe1',
+      676746,
+    ),
+  ],
   'pose_landmarker': [
     TaskModel(
-      'Pose Landmarker (Full)',
+      'Pose Landmarker (full)',
       'pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
       '5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1',
       9398198,
     ),
     TaskModel(
-      'Pose Landmarker (Heavy)',
+      'Pose Landmarker (heavy)',
       'pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task',
       '64437af838a65d18e5ba7a0d39b465540069bc8aae8308de3e318aad31fcbc7b',
       30664242,
@@ -89,13 +114,13 @@ const taskModels = <String, List<TaskModel>>{
   ],
   'object_detector': [
     TaskModel(
-      'EfficientDet-Lite2',
+      'EfficientDet-Lite2 (float 16)',
       'object_detector/efficientdet_lite2/float16/1/efficientdet_lite2.tflite',
       '5d4ebec1029bc9907aeadb9e7b4ac9cb1da6a19d01ad375210a9ae18ba173302',
       12138859,
     ),
     TaskModel(
-      'SSD MobileNetV2',
+      'SSDMobileNet-V2 (float 16)',
       'object_detector/ssd_mobilenet_v2/float16/1/ssd_mobilenet_v2.tflite',
       'ee21e12bfdc464100c6008c865ab8294f6a04162e6ed2e11986f1175b02cfab2',
       5918749,
@@ -103,7 +128,7 @@ const taskModels = <String, List<TaskModel>>{
   ],
   'image_classifier': [
     TaskModel(
-      'EfficientNet-Lite2',
+      'EfficientNet-Lite2 (float 32)',
       'image_classifier/efficientnet_lite2/float32/1/efficientnet_lite2.tflite',
       '94b6c84a5d6de20f932558de213b50e0338dcc06ab83d8d64b12128a476b4b83',
       24325765,
@@ -111,7 +136,7 @@ const taskModels = <String, List<TaskModel>>{
   ],
   'image_embedder': [
     TaskModel(
-      'MobileNet-V3 (Large)',
+      'MobileNet-V3 (large)',
       'image_embedder/mobilenet_v3_large/float32/1/mobilenet_v3_large.tflite',
       '11af3c560dfeed7737cb4c03c23bf52a8403020784192d4dea0b74862a12828d',
       10889458,
@@ -119,26 +144,26 @@ const taskModels = <String, List<TaskModel>>{
   ],
   'image_segmenter': [
     TaskModel(
-      'Selfie Segmenter',
+      'SelfieSegmenter (square)',
       'image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite',
       '191ac9529ae506ee0beefa6b2c945a172dab9d07d1e802a290a4e4038226658b',
       249537,
     ),
     TaskModel(
-      'Selfie Segmenter (Landscape)',
+      'SelfieSegmenter (landscape)',
       'image_segmenter/selfie_segmenter_landscape/float16/1/'
           'selfie_segmenter_landscape.tflite',
       '490e9ea734313e0de10fa0cd9e3c6133e36ea4db2b7a49bde9ef019f72796b8e',
       250177,
     ),
     TaskModel(
-      'Hair Segmenter',
+      'HairSegmenter',
       'image_segmenter/hair_segmenter/float32/1/hair_segmenter.tflite',
       '2628cf3ce5f695f604cbea2841e00befcaa3624bf80caf3664bef2656d59bf84',
       781618,
     ),
     TaskModel(
-      'Selfie Multiclass (256x256)',
+      'SelfieMulticlass (256 x 256)',
       'image_segmenter/selfie_multiclass_256x256/float32/1/'
           'selfie_multiclass_256x256.tflite',
       'c6748b1253a99067ef71f7e26ca71096cd449baefa8f101900ea23016507e0e0',
@@ -147,7 +172,7 @@ const taskModels = <String, List<TaskModel>>{
   ],
   'text_classifier': [
     TaskModel(
-      'Average Word Embedding',
+      'Average word embedding',
       'text_classifier/average_word_classifier/float32/1/'
           'average_word_classifier.tflite',
       '13bf6f7f35964f1e85d6cc762ee7b1952009b532b233baa5bdb4bf7441097f34',
@@ -170,11 +195,17 @@ const embeddingGemmaModel = TaskModel.pinned(
 final _downloaded = <String, Uint8List>{};
 
 /// Downloads [model] once per session and refuses bytes that do not match
-/// its pinned digest.
+/// its pinned digest. package:http, unlike [NetworkAssetBundle], whose
+/// `HttpClient` the web has not, downloads on every platform.
 Future<Uint8List> downloadModel(TaskModel model) async {
   if (_downloaded[model.sha256] case final bytes?) return bytes;
-  final data = await NetworkAssetBundle(model.url).load('');
-  final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  final response = await http.get(model.url);
+  if (response.statusCode != 200) {
+    throw StateError(
+      '${model.name} did not download: HTTP ${response.statusCode}.',
+    );
+  }
+  final bytes = response.bodyBytes;
   if (sha256.convert(bytes).toString() != model.sha256) {
     throw StateError('${model.name} did not match its pinned checksum.');
   }
@@ -195,6 +226,9 @@ mixin ModelSelectionState<T extends StatefulWidget> on State<T> {
 
   /// A download in progress, or what failed.
   String? modelStatus;
+
+  /// The chosen or uploaded model's file name, or null for the bundled one.
+  String? get modelFile => uploaded ?? model?.file;
 
   /// Rebuilds the task with [modelBytes], after every change.
   void modelChanged();
@@ -229,7 +263,7 @@ mixin ModelSelectionState<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// A model file of the user's own, as MediaPipe Studio's Upload.
+  /// A model file of the user's own.
   Future<void> uploadModel() async {
     try {
       final file = await openFile(

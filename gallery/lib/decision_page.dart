@@ -28,7 +28,7 @@ enum DecisionKind {
 }
 
 /// Decision Maker on typed input: a question about the text, answered with
-/// Google's calibrated probabilities, beside MediaPipe Studio's settings.
+/// Google's calibrated probabilities, beside the task's options.
 /// Google's 678 MB model downloads on first use: verified into the model
 /// cache on native platforms, and fetched by Google's runtime in browsers.
 class DecisionPage extends StatefulWidget {
@@ -221,7 +221,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
       onModel: _chooseModel,
       onUpload: null,
       bundledModel: widget.task.modelFile,
-      standardModel: 'Laya (256 tokens)',
+      standardModel: 'Laya (256-token)',
     ),
   );
 
@@ -343,6 +343,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
       children: [
         TaskToolbar(
           task: widget.task,
+          model: _model?.file,
           leading: Segmented<DecisionKind>(
             segments: [
               for (final kind in DecisionKind.values)

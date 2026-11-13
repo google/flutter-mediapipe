@@ -319,10 +319,15 @@ class TaskToolbar extends StatelessWidget {
     required this.task,
     this.leading,
     this.gemmaTerms = false,
+    this.model,
   });
 
   final GalleryTask task;
   final Widget? leading;
+
+  /// The file of the model the page runs, when the user chose one in place
+  /// of the task's own, so Info names the model in use.
+  final String? model;
 
   /// Whether the page offers a Gemma model beside its own, so Info passes on
   /// the Gemma terms as it does for a task whose own model is one.
@@ -352,8 +357,12 @@ class TaskToolbar extends StatelessWidget {
             icon: LucideIcons.info,
             label: phone || constraints.maxWidth < 450 ? null : 'Info',
             tooltip: 'About this task',
-            onPressed: () =>
-                showTaskInfo(context, task, gemmaTerms: gemmaTerms),
+            onPressed: () => showTaskInfo(
+              context,
+              task,
+              gemmaTerms: gemmaTerms,
+              model: model,
+            ),
           );
           final below = lead != null && constraints.maxWidth < _roomForLink;
           return Column(
@@ -419,18 +428,20 @@ class TaskPackageLink extends StatelessWidget {
   }
 }
 
-/// The Info button's dialog: what the task does, the model it runs, and
-/// Google's guide to it, with the Gemma terms when the task's model is a
-/// Gemma model or, with [gemmaTerms], its page offers one.
+/// The Info button's dialog: what the task does, the model it runs ([model]
+/// when the user chose another, the task's own otherwise), and Google's guide
+/// to it, with the Gemma terms when the task's model is a Gemma model or,
+/// with [gemmaTerms], its page offers one.
 Future<void> showTaskInfo(
   BuildContext context,
   GalleryTask task, {
   bool gemmaTerms = false,
+  String? model,
 }) {
   final c = GalleryColors.of(context);
   final family = task.category.title.toLowerCase();
   final guide =
-      'https://ai.google.dev/edge/mediapipe/solutions/$family/${task.runtimeId}';
+      'https://developers.google.com/edge/mediapipe/solutions/$family/${task.runtimeId}';
   final label = TextStyle(color: c.muted, fontSize: Sizes.sm);
   return showDialog<void>(
     context: context,
@@ -449,7 +460,7 @@ Future<void> showTaskInfo(
             const SizedBox(height: 18),
             const Eyebrow('Model'),
             const SizedBox(height: 6),
-            Text(task.modelFile, style: label),
+            Text(model ?? task.modelFile, style: label),
             const SizedBox(height: 18),
             const Eyebrow('Guide'),
             const SizedBox(height: 6),
