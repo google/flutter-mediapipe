@@ -438,7 +438,11 @@ class _TextPageState extends State<TextPage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task, gemmaTerms: widget.embeddingGemma),
+        TaskToolbar(
+          task: widget.task,
+          gemmaTerms: widget.embeddingGemma,
+          model: modelFile,
+        ),
         SurfaceCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

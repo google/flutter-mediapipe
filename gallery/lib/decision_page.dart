@@ -343,6 +343,7 @@ class _DecisionPageState extends State<DecisionPage> with RevisionedState {
       children: [
         TaskToolbar(
           task: widget.task,
+          model: _model?.file,
           leading: Segmented<DecisionKind>(
             segments: [
               for (final kind in DecisionKind.values)

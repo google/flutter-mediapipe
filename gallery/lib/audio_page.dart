@@ -361,6 +361,7 @@ class _AudioPageState extends State<AudioPage>
       children: [
         TaskToolbar(
           task: widget.task,
+          model: modelFile,
           leading: Segmented<bool>(
             key: const ValueKey('audio-source'),
             segments: const [

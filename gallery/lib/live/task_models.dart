@@ -40,6 +40,9 @@ final class TaskModel {
 
   Uri get url => Uri.parse(pin.url);
 
+  /// The model's file name, as the Info dialog shows it.
+  String get file => url.pathSegments.last;
+
   String get sha256 => pin.sha256;
 }
 
@@ -195,6 +198,9 @@ mixin ModelSelectionState<T extends StatefulWidget> on State<T> {
 
   /// A download in progress, or what failed.
   String? modelStatus;
+
+  /// The chosen or uploaded model's file name, or null for the bundled one.
+  String? get modelFile => uploaded ?? model?.file;
 
   /// Rebuilds the task with [modelBytes], after every change.
   void modelChanged();

@@ -355,7 +355,7 @@ class _FishGamePageState extends State<FishGamePage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task),
+        TaskToolbar(task: widget.task, model: _model?.file),
         SurfaceCard(
           padding: const EdgeInsets.all(12),
           child: Column(
