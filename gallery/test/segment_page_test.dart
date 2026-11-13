@@ -132,7 +132,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets("offers Google's three brushes, Include first", (tester) async {
+  testWidgets("offers Google's three brushes, Positive first", (tester) async {
     if (!await bundled()) {
       markTestSkipped('This build bundles no Interactive Segmenter.');
       return;
@@ -141,8 +141,8 @@ void main() {
     expect(backend.images, 1);
     final control = tester.widget<Segmented<BrushMode>>(brushes);
     expect(control.segments.map((s) => s.label), [
-      'Include',
-      'Exclude',
+      'Positive',
+      'Negative',
       'Lasso',
     ]);
     expect(control.selected, BrushMode.positive);

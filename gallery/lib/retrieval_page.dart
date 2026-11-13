@@ -180,7 +180,7 @@ class _RetrievalPageState extends State<RetrievalPage> with RevisionedState {
       onModel: (_) {},
       onUpload: null,
       bundledModel: widget.task.modelFile,
-      standardModel: 'EmbeddingGemma 2 (text and vision)',
+      standardModel: 'EmbeddingGemma 2 Text / Vision (440M)',
     ),
   );
 

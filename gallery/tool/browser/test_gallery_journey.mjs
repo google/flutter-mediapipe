@@ -17,7 +17,7 @@ fs.mkdirSync(evidence, {recursive: true});
 // The release manifest decides that; an unknown bundled task fails the test.
 const cases = {
   audio_transcriber: {title: 'Audio Transcriber', transcribe: "Send a text to Mike, I'll be home late tomorrow."},
-  text_to_speech: {title: 'Text to Speech', speak: /, 9 words$/},
+  text_to_speech: {title: 'Text-to-Speech', speak: /, 9 words$/},
   face_detector: {title: 'Face Detector', sample: 'portrait.jpg', result: /[1-9]\d* faces? detected/},
   face_landmarker: {title: 'Face Landmarker', sample: 'portrait.jpg', result: /[1-9]\d* faces? detected/},
   gesture_recognizer: {title: 'Gesture Recognizer', sample: 'thumb_up.jpg', result: /[1-9]\d* hands? recognized/},
@@ -495,7 +495,7 @@ try {
         const brush = name => page.getByRole('button', {name, exact: true});
         let before = await requests();
         enter(`${id}:${delegate}:exclude`);
-        await brush('Exclude').click();
+        await brush('Negative').click();
         await drag([at(0.4, 0.5), at(0.6, 0.5)]);
         await until('the Exclude stroke', async () =>
           await requests() > before && await summary('1 include · 1 exclude').count() === 1);
@@ -507,7 +507,7 @@ try {
         await until('the lasso', async () =>
           await requests() > before && await summary('1 include · 1 exclude · 1 lasso').count() === 1);
         report.checks.push(`${id}:${delegate}:lasso`);
-        await brush('Include').click();
+        await brush('Positive').click();
       }
       await page.screenshot({path: path.join(evidence, `${id}.png`)});
     }

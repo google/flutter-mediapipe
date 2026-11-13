@@ -1,5 +1,5 @@
-/// The settings a live demo exposes, as MediaPipe Studio shows them for the
-/// same task. Each key is the option's name in the task's Dart options class,
+/// The settings a demo exposes: options from the task's guide, and a few of
+/// the gallery's own for drawing results. Each key is the option's name in the task's Dart options class,
 /// and each default is the value the gallery used before settings existed.
 sealed class TaskSetting {
   const TaskSetting(this.key, this.label, {this.display = false});
@@ -8,7 +8,7 @@ sealed class TaskSetting {
   /// for a [display] setting.
   final String key;
 
-  /// The label Studio uses for it.
+  /// The label the settings panel shows for it.
   final String label;
 
   /// Whether the setting only changes how results are drawn, so changing it
@@ -186,15 +186,16 @@ const taskSettings = <String, List<TaskSetting>>{
   ],
   // Task Type shows only while EmbeddingGemma is the model: Google's embedder
   // formats its prompt for the chosen use, in the order of the task types in
-  // Google's Text Embedder guide. The retrieval, question, fact and code uses
-  // pair a query with a document: the first text is the query and the second
-  // the document.
+  // Google's Text Embedder guide. Retrieval (Document) formats both texts as
+  // documents; the retrieval query, question, fact and code uses pair a query
+  // with a document: the first text is the query and the second the document.
   'text_embedder': [
     ChoiceSetting(
       'taskType',
       'Task Type',
       options: [
-        'Retrieval',
+        'Retrieval (Document)',
+        'Retrieval (Query)',
         'Semantic Similarity',
         'Classification',
         'Clustering',
@@ -202,7 +203,7 @@ const taskSettings = <String, List<TaskSetting>>{
         'Fact Checking',
         'Code Retrieval',
       ],
-      initial: 1,
+      initial: 2,
     ),
     SwitchSetting('l2Normalize', 'L2 Normalize'),
     SwitchSetting('quantize', 'Quantize'),

@@ -81,11 +81,12 @@ Three gates, in order:
    actually obtain: the vision tasks `vision_tasks.dart` validates there, the
    text and audio tasks, and in browsers the tasks Google's JavaScript runtime
    serves. Every target bundles every task it can, `--tasks` narrows the
-   list. EmbeddingGemma, the Proofreader and the
+   list. EmbeddingGemma, Text Proofreader and Text
    Summarizer add 419 MB of models, so a native gallery is about 770 MB;
    their integration suite compares with Google's references from
    `--modern-text-reference` or the text package's checked-in fixtures.
-   **Proofreader and Summarizer are not yet available in the web gallery**,
+   **Text Proofreader and Text Summarizer are not yet available in the web
+   gallery**,
    matching the MediaPipe Tasks Web SDK, so the web build bundles EmbeddingGemma
    alone and shows the other two as cards that say so. EmbeddingGemma has no
    tile of its own: it is the second model of the Text Embedder page, as in
@@ -111,12 +112,12 @@ editor wherever its runtime runs.
 
 ## Gemma models
 
-EmbeddingGemma 300M (a model of the Text Embedder page), the Proofreader and
-the Summarizer are Gemma models, under the
+EmbeddingGemma 300M (a model of the Text Embedder page), Text Proofreader and
+Text Summarizer are Gemma models, under the
 [Gemma Terms of Use](https://ai.google.dev/gemma/terms) and its
 [Prohibited Use Policy](https://ai.google.dev/gemma/prohibited_use_policy)
 rather than Apache 2.0. The gallery passes the terms on as the terms ask:
-the Proofreader and Summarizer pages, the Text Embedder page while
+the Text Proofreader and Text Summarizer pages, the Text Embedder page while
 EmbeddingGemma is chosen, and their Info dialogs say that Gemma is provided
 under and subject to them and link to both. Anyone redistributing a gallery build
 takes on the same terms. The EmbeddingGemma 2 models the gallery downloads

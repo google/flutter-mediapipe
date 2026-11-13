@@ -105,7 +105,7 @@ void main() {
       const {'pose_landmarker'},
     ).firstWhere((task) => task.hasOwnPage);
     final heavy = taskModels['pose_landmarker']!.firstWhere(
-      (model) => model.name == 'Pose Landmarker (Heavy)',
+      (model) => model.name == 'Pose Landmarker (heavy)',
     );
     expect(heavy.file, 'pose_landmarker_heavy.task');
     expect(task.modelFile, isNot(heavy.file));

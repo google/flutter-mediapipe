@@ -18,7 +18,7 @@ import 'bundled_model_assets.dart';
 
 /// Audio Classifier on a clip, or on the microphone as Google's audio stream,
 /// laid out as the other demos are: the audio and its results beside the
-/// same settings panel, with MediaPipe Studio's settings and model selection.
+/// same settings panel, with the task's options and model selection.
 class AudioPage extends StatefulWidget {
   const AudioPage({
     super.key,

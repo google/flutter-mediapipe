@@ -62,14 +62,14 @@ enum GalleryDemo {
   speak,
 }
 
-/// The home page's sections, in MediaPipe Studio's order, then the families
-/// Google added in MediaPipe 1.1.0.
+/// The home page's sections, in the order of Google's MediaPipe Solutions
+/// guide (https://developers.google.com/edge/mediapipe/solutions).
 enum GalleryCategory {
-  vision('Vision', 'mediapipe_vision'),
   audio('Audio', 'mediapipe_audio'),
-  text('Text', 'mediapipe_text'),
   decision('Decision', 'mediapipe_decision'),
-  retrieval('Retrieval', 'mediapipe_retrieval');
+  retrieval('Retrieval', 'mediapipe_retrieval'),
+  text('Text', 'mediapipe_text'),
+  vision('Vision', 'mediapipe_vision');
 
   const GalleryCategory(this.title, this.package);
   final String title;
@@ -86,9 +86,9 @@ typedef PlannedTask = ({
   String runtimeId,
 });
 
-/// The audio, text, decision and retrieval tasks, listed as MediaPipe Studio
-/// lists them. A build prepared without one, or a platform whose runtime
-/// lacks it, shows its card in place of the tile.
+/// The audio, decision, retrieval and text tasks. A build prepared without
+/// one, or a platform whose runtime lacks it, shows its card in place of the
+/// tile.
 final plannedTasks = <PlannedTask>[
   for (final task in _catalog)
     if (task.category != GalleryCategory.vision)
@@ -320,7 +320,7 @@ final _catalog = <GalleryTask>[
   GalleryTask(
     id: 'object_detector',
     title: 'Object Detector',
-    summary: 'Labelled boxes over everyday objects.',
+    summary: 'Labeled boxes over everyday objects.',
     model: VisionModels.objectDetector,
     sample: 'group.jpeg',
     capabilities: objectDetectorCapabilitiesForPlatform,
@@ -354,7 +354,7 @@ final _catalog = <GalleryTask>[
   GalleryTask(
     id: 'gesture_recognizer',
     title: 'Gesture Recognizer',
-    summary: 'Hand landmarks plus a recognised gesture.',
+    summary: 'Hand landmarks plus a recognized gesture.',
     model: VisionModels.gestureRecognizer,
     sample: 'thumb_up.jpg',
     capabilities: gestureRecognizerCapabilitiesForPlatform,
@@ -431,7 +431,7 @@ final _catalog = <GalleryTask>[
     category: GalleryCategory.audio,
     demo: GalleryDemo.speak,
     downloadsModel: true,
-    title: 'Text to Speech',
+    title: 'Text-to-Speech',
     summary: 'Typed text spoken in one of the model\'s voices.',
     model: AudioModels.phonon,
     sample: '',
@@ -473,7 +473,7 @@ final _catalog = <GalleryTask>[
     id: 'text_proofreader',
     category: GalleryCategory.text,
     demo: GalleryDemo.text,
-    title: 'Proofreader',
+    title: 'Text Proofreader',
     summary: 'Corrected text and the edits that make it, as it is written.',
     model: TextModels.proofreader,
     sample: '',
@@ -512,7 +512,7 @@ final _catalog = <GalleryTask>[
     id: 'text_summarizer',
     category: GalleryCategory.text,
     demo: GalleryDemo.text,
-    title: 'Summarizer',
+    title: 'Text Summarizer',
     summary: 'Key points or a short paragraph for a piece of text.',
     model: TextModels.summarizer,
     sample: '',

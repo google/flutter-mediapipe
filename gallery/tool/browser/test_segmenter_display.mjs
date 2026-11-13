@@ -34,7 +34,7 @@ try {
   });
   await page.getByText(/Segmentation complete · Inference/).waitFor({timeout: 120000});
   await page.getByText('dining table', {exact: true}).waitFor();
-  assert.equal(await page.getByRole('button', {name: /DeepLab V3/}).count(), 1);
+  assert.equal(await page.getByRole('button', {name: /DeepLab-V3/}).count(), 1);
   assert.equal(await page.getByText(/^Opacity/).count(), 1);
   assert.equal(await page.getByText(/Connections/).count(), 0);
   await page.waitForTimeout(1000);
