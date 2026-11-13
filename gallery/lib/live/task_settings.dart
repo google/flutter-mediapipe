@@ -34,17 +34,22 @@ final class CountSetting extends TaskSetting {
   final int max;
 }
 
-/// A value between 0 and 1, such as a confidence or a score threshold.
+/// A value between [min] and [max] (0 and 1 unless set), in twentieths, such
+/// as a confidence or a score threshold.
 final class ShareSetting extends TaskSetting {
   const ShareSetting(
     super.key,
     super.label, {
     this.initial = 0.5,
+    this.min = 0,
+    this.max = 1,
     super.display,
   });
 
   @override
   final double initial;
+  final double min;
+  final double max;
 }
 
 /// An on/off option, such as Output Segmentation Masks.
@@ -89,7 +94,7 @@ final class LabelSetting extends TaskSetting {
 }
 
 const _handSettings = [
-  CountSetting('numHands', 'Num Hands', initial: 2, max: 4),
+  CountSetting('numHands', 'Num Hands', initial: 2),
   ShareSetting('minHandDetectionConfidence', 'Min Hand Detection Confidence'),
   ShareSetting('minHandPresenceConfidence', 'Min Hand Presence Confidence'),
   ShareSetting('minTrackingConfidence', 'Min Tracking Confidence'),
@@ -118,7 +123,7 @@ const taskSettings = <String, List<TaskSetting>>{
     ShareSetting('scoreThreshold', 'Score Threshold', initial: 0),
   ],
   'pose_landmarker': [
-    CountSetting('numPoses', 'Num Poses', initial: 1, max: 5),
+    CountSetting('numPoses', 'Num Poses', initial: 1),
     ShareSetting('minPoseDetectionConfidence', 'Min Pose Detection Confidence'),
     ShareSetting('minPosePresenceConfidence', 'Min Pose Presence Confidence'),
     ShareSetting('minTrackingConfidence', 'Min Tracking Confidence'),
@@ -141,7 +146,7 @@ const taskSettings = <String, List<TaskSetting>>{
     SwitchSetting('outputPoseSegmentationMask', 'Output Segmentation Mask'),
   ],
   'object_detector': [
-    CountSetting('maxResults', 'Max Results', initial: 3, max: 25),
+    CountSetting('maxResults', 'Max Results', initial: 3),
     ShareSetting('scoreThreshold', 'Score Threshold', initial: 0.5),
   ],
   // As Google's web demo: Category Mask colors every class with the legend's
@@ -215,10 +220,11 @@ const taskSettings = <String, List<TaskSetting>>{
     ChoiceSetting('mode', 'Mode', options: ['Key Points', 'TL;DR']),
     SwitchSetting('stream', 'Stream Output', initial: true),
   ],
-  // Decision Maker's Yes / No threshold, and Google's normalization against
-  // the model's empty-context prior, which removes label bias.
+  // Decision Maker's Yes / No threshold, over the 0.05 to 0.95 Google's web
+  // demo offers, and Google's normalization against the model's
+  // empty-context prior, which removes label bias.
   'decision_maker': [
-    ShareSetting('threshold', 'Yes Threshold'),
+    ShareSetting('threshold', 'Yes Threshold', min: 0.05, max: 0.95),
     SwitchSetting('normalizePrior', 'Normalize Prior'),
   ],
   // Universal Embedder's normalization, which Google's browser API defaults

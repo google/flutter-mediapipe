@@ -15,6 +15,7 @@ import 'sdk_modern_text_test.dart' as modern_text;
 import 'sdk_segmenter_test.dart' as segmenter;
 import 'sdk_text_audio_test.dart' as text_audio;
 import 'speech_test.dart' as speech;
+import 'task_models_test.dart' as task_models;
 import 'telemetry_probe_test.dart' as telemetry;
 
 // Every phone suite in one app launch: on Firebase Test Lab, where each
@@ -44,6 +45,7 @@ void main() {
   group('hand', hand.main);
   group('landmark tasks', landmarks.main);
   group('detection and classification', detection.main);
+  group('task models', task_models.main);
   group('embedder', embedder.main);
   group('segmenter', segmenter.main);
   group('interactive segmenter', interactive.main);

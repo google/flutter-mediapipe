@@ -81,6 +81,22 @@ const taskModels = <String, List<TaskModel>>{
       1081879648,
     ),
   ],
+  'face_detector': [
+    TaskModel(
+      'BlazeFace (full-range)',
+      'face_detector/blaze_face_full_range/float16/1/'
+          'blaze_face_full_range.tflite',
+      '3698b18f063835bc609069ef052228fbe86d9c9a6dc8dcb7c7c2d69aed2b181b',
+      1083786,
+    ),
+    TaskModel(
+      'BlazeFace Sparse (full-range)',
+      'face_detector/blaze_face_full_range/float16/1/'
+          'blaze_face_full_range_sparse.tflite',
+      '2c3728e6da56f21e21a320433396fb06d40d9088f2247c05e5635a688d45dfe1',
+      676746,
+    ),
+  ],
   'pose_landmarker': [
     TaskModel(
       'Pose Landmarker (full)',

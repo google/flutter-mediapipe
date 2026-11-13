@@ -159,6 +159,7 @@ cd gallery
 flutter test -d macos integration_test/assets_test.dart
 flutter test -d macos integration_test/runtime_test.dart
 flutter test -d macos integration_test/vision_still_image_modes_test.dart
+flutter test -d macos integration_test/task_models_test.dart
 ```
 
 Run one file per invocation: `flutter test -d macos integration_test/` cannot
@@ -166,7 +167,9 @@ start a second app instance on the device and fails to load the later file.
 
 These check the bundle the app was actually built with: that every visible tile
 can load its model and sample, that the live demo's model resolves, and that
-all ten camera vision demos process their sample in still image mode. The
+all ten camera vision demos process their sample in still image mode, and
+that each model Face Detector's Model menu offers downloads from Google and
+runs on each delegate the page offers. The
 tests derive their asset names from the catalog, so they cannot drift from
 what the screens ask for.
 
