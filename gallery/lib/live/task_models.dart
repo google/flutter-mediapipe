@@ -2,6 +2,7 @@ import 'package:crypto/crypto.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:mediapipe_decision/mediapipe_decision.dart'
     show DecisionModels, DownloadAsset;
 import 'package:mediapipe_text/mediapipe_text.dart' show TextModels;
@@ -194,11 +195,17 @@ const embeddingGemmaModel = TaskModel.pinned(
 final _downloaded = <String, Uint8List>{};
 
 /// Downloads [model] once per session and refuses bytes that do not match
-/// its pinned digest.
+/// its pinned digest. package:http, unlike [NetworkAssetBundle], whose
+/// `HttpClient` the web has not, downloads on every platform.
 Future<Uint8List> downloadModel(TaskModel model) async {
   if (_downloaded[model.sha256] case final bytes?) return bytes;
-  final data = await NetworkAssetBundle(model.url).load('');
-  final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  final response = await http.get(model.url);
+  if (response.statusCode != 200) {
+    throw StateError(
+      '${model.name} did not download: HTTP ${response.statusCode}.',
+    );
+  }
+  final bytes = response.bodyBytes;
   if (sha256.convert(bytes).toString() != model.sha256) {
     throw StateError('${model.name} did not match its pinned checksum.');
   }
