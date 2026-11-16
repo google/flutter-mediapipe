@@ -32,27 +32,13 @@ on:
         description: Run the full matrix, not the daily set.
         type: boolean
         default: false
-  # A change to the comparison runs it on its own pull request.
-  pull_request:
-    paths:
-      - .github/workflows/nightly-compare.yaml
-      - .github/actions/nightly-pin/**
-      - packages/mediapipe-core/tool/pin_nightly.py
-      - tool/ci/nightly_compare.py
-      - tool/ci/nightly_pin.py
-      - tool/ci/test_nightly_compare.py
 
 permissions: {}
 
 concurrency:
   group: nightly-compare-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  # What a pull request run compares: a nightly (YYYYMMDD or newest), and the
-  # full matrix or the daily set.
-  PULL_REQUEST_NIGHTLY: newest
-  PULL_REQUEST_FULL: 'false'
   NIGHTLY_COMPARE_ISSUE_PREFIX: ''
   # Multiplies every tolerance; a negative scale makes every value drift,
   # which tests the report.
@@ -61,8 +47,11 @@ env:
 jobs:
   # Hashes Google's archive once, for every job: the nightly's pins as files
   # the nightly side copies over its checkout (.github/actions/nightly-pin).
+  # Never on google/flutter-mediapipe: the comparison runs in a fork, and a
+  # pull request checks the pin and comparison tools in builder.yaml.
   pin:
     name: Pin the nightly
+    if: ${{ github.repository_owner != 'google' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -83,8 +72,8 @@ jobs:
       - name: Pin Google's nightly
         id: pin
         env:
-          NIGHTLY: ${{ github.event_name == 'pull_request' && env.PULL_REQUEST_NIGHTLY || inputs.nightly || 'newest' }}
-          FULL: ${{ github.event_name == 'pull_request' && env.PULL_REQUEST_FULL || inputs.full }}
+          NIGHTLY: ${{ inputs.nightly || 'newest' }}
+          FULL: ${{ inputs.full }}
           EVENT: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
         run: >-
@@ -95,7 +84,7 @@ jobs:
       # set, and a full comparison covers the daily set. The compare job saves
       # it. A cache needs no write permission and keeps no state in the
       # repository; one evicted after 7 days unused only means a nightly that
-      # old is compared again. Dispatches and pull requests always run.
+      # old is compared again. Dispatches always run.
       - name: Look for an earlier comparison of this build
         id: compared
         if: ${{ github.event_name == 'schedule' && steps.pin.outputs.network_failed != 'true' }}
@@ -309,9 +298,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SCOPE: ${{ needs.pin.outputs.scope }}
         run: python3 -B tool/ci/nightly_compare.py --pin build/nightly-pin --scope "$SCOPE" --out build/nightly-compare
-      - name: Say what a scheduled run would do next
-        if: ${{ github.event_name == 'pull_request' && steps.compare.outputs.escalate == 'true' && needs.pin.outputs.scope == 'daily' }}
-        run: echo 'A scheduled run would now dispatch the full matrix for this nightly; a pull request run does not.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -320,7 +306,7 @@ jobs:
       # The marker the pin job looks for. A run that only met infrastructure
       # failures leaves none, so the next schedule tries the build again.
       - name: Mark this build compared
-        if: ${{ github.event_name != 'pull_request' && steps.compare.outputs.infra_only == 'false' }}
+        if: ${{ steps.compare.outputs.infra_only == 'false' }}
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: build/nightly-compare/findings.json
@@ -331,7 +317,7 @@ jobs:
   escalate:
     name: Run the full matrix for this nightly
     needs: [pin, compare]
-    if: ${{ always() && needs.compare.outputs.escalate == 'true' && needs.pin.outputs.scope == 'daily' && github.event_name != 'pull_request' }}
+    if: ${{ always() && needs.compare.outputs.escalate == 'true' && needs.pin.outputs.scope == 'daily' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
