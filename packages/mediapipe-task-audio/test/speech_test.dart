@@ -15,6 +15,7 @@ import 'package:mediapipe_audio/src/third_party/mediapipe/audio_transcriber_bind
     as asr;
 import 'package:mediapipe_audio/src/third_party/mediapipe/text_to_speech_bindings.dart'
     as tts;
+import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_core/src/native_assets/reference_wheels.dart'
     show releaseReferenceWheel;
 import 'package:test/test.dart';
@@ -670,9 +671,11 @@ void main() {
           isA<RuntimeUnavailableException>().having(
             (error) => error.fix,
             'fix',
-            Abi.current() == Abi.macosArm64
-                ? contains('marks none')
-                : contains('proved'),
+            switch (Abi.current()) {
+              Abi.macosArm64 => contains('marks none'),
+              Abi.linuxArm64 => linuxArm64CpuOnly,
+              _ => contains('proved'),
+            },
           ),
         ),
       );
@@ -1127,9 +1130,11 @@ void main() {
             isA<RuntimeUnavailableException>().having(
               (error) => error.fix,
               'fix',
-              Abi.current() == Abi.macosArm64
-                  ? contains('marks none')
-                  : contains('proved'),
+              switch (Abi.current()) {
+                Abi.macosArm64 => contains('marks none'),
+                Abi.linuxArm64 => linuxArm64CpuOnly,
+                _ => contains('proved'),
+              },
             ),
           ),
         );
@@ -1240,6 +1245,19 @@ void main() {
         contains('proved'),
         reason: '$platform',
       );
+    }
+    // Linux arm64 runs every task on the CPU, and says so.
+    const linuxArm64 = TaskPlatform(
+      operatingSystem: 'linux',
+      architecture: 'arm64',
+    );
+    for (final claim in [
+      audioTranscriberCapabilitiesForPlatform,
+      textToSpeechCapabilitiesForPlatform,
+    ]) {
+      final capabilities = claim(linuxArm64);
+      expect(capabilities.supportedDelegates, {Delegate.cpu});
+      expect(capabilities.unavailableReasons[Delegate.gpu], linuxArm64CpuOnly);
     }
     const browser = TaskPlatform(operatingSystem: 'web', architecture: 'wasm');
     expect(audioTranscriberCapabilitiesForPlatform(browser).isSupported, false);

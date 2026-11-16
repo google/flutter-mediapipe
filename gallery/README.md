@@ -38,9 +38,9 @@ project already pins the build to arm64 and declares the camera entitlement
 and usage description.
 
 The same command prepares every target: `ios/arm64`, `ios-simulator/arm64`,
-`linux/x64`, `windows/x64`, `android/arm64`, `android/x64` and `web`. The
-checked-in iOS project already excludes the x86_64 simulator slice and
-declares the camera and photo usage descriptions, none of which
+`linux/x64`, `linux/arm64`, `windows/x64`, `android/arm64`, `android/x64` and
+`web`. The checked-in iOS project already excludes the x86_64 simulator slice
+and declares the camera and photo usage descriptions, none of which
 `flutter create` provides.
 
 For Android, a clean checkout needs only Dart, Flutter and the Android SDK:
@@ -62,10 +62,11 @@ validated both delegates and front/back camera capture on Google's earlier
 Java SDK; [the Android Test Lab guide](tool/ANDROID_FACE_TESTLAB.md) runs them
 without owning an Android device.
 
-For Windows x64 and Linux x64, prepare with `--target windows/x64` or
-`--target linux/x64`, then run `flutter run -d windows --release` or
-`flutter run -d linux --release`. Linux offers GPU for the live Face
-Landmarker demo; Windows and the Hand and Pose demos use CPU only.
+For Windows x64, Linux x64 and Linux arm64, prepare with
+`--target windows/x64`, `--target linux/x64` or `--target linux/arm64`, then
+run `flutter run -d windows --release` or `flutter run -d linux --release`.
+Linux x64 offers GPU for the live Face Landmarker demo; Windows, Linux arm64
+and the Hand and Pose demos use CPU only.
 Each family's hook bundles Google's checksum-pinned library for that family.
 `camera_desktop` provides native
 Media Foundation capture on Windows and GStreamer/V4L2 capture on Linux.

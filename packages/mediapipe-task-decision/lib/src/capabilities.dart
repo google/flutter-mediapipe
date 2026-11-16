@@ -44,8 +44,8 @@ String? _browserRefusal(TaskPlatform platform, DownloadAsset? model) {
 
 const _noLibrary =
     "Google's Decision Maker library covers Android arm64 and x86_64, iOS, "
-    'macOS arm64, Linux x64 and Windows x64, and browsers run its JavaScript '
-    'runtime.';
+    'macOS arm64, Linux x64 and arm64, and Windows x64, and browsers run its '
+    'JavaScript runtime.';
 
 /// Google's browser runtime fails on the CPU.
 const _browserCpu =
@@ -114,6 +114,8 @@ TaskCapabilities decisionMakerCapabilitiesForPlatform(
           ? decisionBackendFactory == null
                 ? _noPlugin
                 : browserRefusal ?? _noWebGpu(platform)
+          : platform.target == 'linux/arm64'
+          ? linuxArm64CpuOnly
           : decisionRuntimeTargets.containsKey(platform.target)
           ? _desktopGpu
           : noLibrary,

@@ -44,8 +44,8 @@ void main() {
 
   test('targets without a library name the ones that have one', () {
     for (final (os, architecture) in [
-      (OS.linux, Architecture.arm64),
       (OS.windows, Architecture.arm64),
+      (OS.linux, Architecture.riscv64),
     ]) {
       expect(
         testCodeBuildHook(
@@ -147,24 +147,30 @@ void main() {
   });
 
   test("every task binds Google's one vision library", () async {
-    await testCodeBuildHook(
-      mainMethod: hook.main,
-      targetOS: OS.linux,
-      targetArchitecture: Architecture.x64,
-      userDefines: defines({
-        'tasks': ['face_detector', 'hand_landmarker', 'interactive_segmenter'],
-      }),
-      assets: core(source),
-      check: (_, output) {
-        final asset = output.assets.code.single;
-        expect(asset.id, 'package:mediapipe_vision/mediapipe.dylib');
-        expect(asset.linkMode, isA<DynamicLoadingBundled>());
-        expect(
-          asset.file!.pathSegments.last,
-          familyRuntimes['vision']!['linux/x64']!.fileName,
-        );
-      },
-    );
+    for (final architecture in [Architecture.x64, Architecture.arm64]) {
+      await testCodeBuildHook(
+        mainMethod: hook.main,
+        targetOS: OS.linux,
+        targetArchitecture: architecture,
+        userDefines: defines({
+          'tasks': [
+            'face_detector',
+            'hand_landmarker',
+            'interactive_segmenter',
+          ],
+        }),
+        assets: core(source),
+        check: (_, output) {
+          final asset = output.assets.code.single;
+          expect(asset.id, 'package:mediapipe_vision/mediapipe.dylib');
+          expect(asset.linkMode, isA<DynamicLoadingBundled>());
+          expect(
+            asset.file!.pathSegments.last,
+            familyRuntimes['vision']!['linux/$architecture']!.fileName,
+          );
+        },
+      );
+    }
   });
 
   test(

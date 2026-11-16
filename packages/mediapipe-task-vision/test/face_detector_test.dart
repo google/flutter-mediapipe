@@ -1,7 +1,9 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:test/test.dart';
 
@@ -31,12 +33,15 @@ void main() {
   test("Linux refuses Face Detector's GPU with its reason", () async {
     // Google's Linux library lacks the LiteRT GPU plugin that Face
     // Detector's GPU inference needs, so the package withdraws the GPU and
-    // refuses it before Google's graph exists.
+    // refuses it before Google's graph exists. Linux arm64 runs every task
+    // on the CPU.
     final capabilities = await queryFaceDetectorCapabilities();
     expect(capabilities.supportedDelegates, {Delegate.cpu});
     expect(
       capabilities.unavailableReasons[Delegate.gpu],
-      contains('LiteRT GPU plugin'),
+      Abi.current() == Abi.linuxArm64
+          ? linuxArm64CpuOnly
+          : contains('LiteRT GPU plugin'),
     );
     await expectLater(
       FaceDetector.create(

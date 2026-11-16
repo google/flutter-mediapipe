@@ -165,6 +165,7 @@ void main() {
       for (final (os, arch, version) in [
         ('macos', 'arm64', '15.0'),
         ('linux', 'x64', null),
+        ('linux', 'arm64', null),
         ('windows', 'x64', null),
         ('android', 'arm64', '14'),
         ('android', 'x64', '14'),
@@ -188,6 +189,7 @@ void main() {
       for (final (os, arch, version) in [
         ('macos', 'arm64', '15.0'),
         ('linux', 'x64', null),
+        ('linux', 'arm64', null),
         ('windows', 'x64', null),
         ('android', 'arm64', '14'),
         ('android', 'x64', '14'),

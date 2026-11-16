@@ -20,11 +20,11 @@ jobs:
   # on this host, and runs them with networking blocked, in debug and release
   # (packages/mediapipe-core/tool/test_bundled_models.py).
   desktop:
-    name: Bundled models / ${{ matrix.os }} x64
+    name: Bundled models / ${{ matrix.os }} ${{ matrix.os == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025]
+        os: [ubuntu-24.04, windows-2025, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:

@@ -28,6 +28,7 @@ function bool hasHardwareWebGpu(TaskPlatform platform)
 function void holdModelBytes(TaskOptions options, Uint8List bytes)
 getter String get largeModelNeeds64Bit
 getter Map<String, String?> get largeModelRuntimeTargets
+getter String get linuxArm64CpuOnly
 getter int get maxStreamTimestampMilliseconds
 function StateError? missingLinuxGraphicsLibraries(String loaderError)
 getter String? get mpAppId

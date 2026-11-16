@@ -93,12 +93,25 @@ instead.
   <true/>
   ```
 
-## Linux x64
+## Linux x64 and arm64
 
 - Google's Linux library loads EGL and OpenGL ES even for CPU inference. On
-  Debian or Ubuntu: `sudo apt-get install libegl1 libgles2`. Without them,
-  task creation fails with that instruction.
-- GPU inference uses OpenGL ES where the vision status table lists it.
+  Debian, Ubuntu or Raspberry Pi OS: `sudo apt-get install libegl1 libgles2`
+  (Raspberry Pi OS Lite lacks them). Without them, task creation fails with
+  that instruction.
+- GPU inference uses OpenGL ES on Linux x64 where the vision status table
+  lists it. Linux arm64 runs every task on the CPU.
+- Google's Linux arm64 libraries need glibc 2.27 or later: Raspberry Pi OS
+  Bullseye or later, Ubuntu 18.04 or later.
+- On Linux arm64, Google's libraries use Arm's LSE atomic and RCPC load
+  instructions, so they need a Raspberry Pi 5 (Cortex-A76, ARMv8.2) or
+  newer. A Raspberry Pi 4 (Cortex-A72) or older lacks them: there the app
+  stops with an illegal instruction when it loads the library, after "This binary was compiled
+  with lse enabled, but this feature is not available on this processor".
+  Use a 64-bit OS: 32-bit Raspberry Pi OS (armhf) has no library.
+- Flutter publishes no Linux arm64 SDK archive; on an arm64 machine, install
+  Flutter from its git repository (`git clone -b stable
+  https://github.com/flutter/flutter.git`).
 
 ## Windows x64
 

@@ -15,7 +15,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import platform
 import re
 import subprocess
 import sys
@@ -24,7 +23,7 @@ import tempfile
 from generate_audio_reference import FIXTURES, HOST_NAMES, PACKAGE
 
 sys.path.insert(0, str(PACKAGE.parent / 'mediapipe-core/tool'))
-from official_wheels import host_runtime  # noqa: E402
+from official_wheels import host_runtime, host_target  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 
 # Each case: the file name and whether the path is missing, a directory or a
@@ -111,7 +110,7 @@ def main():
     import mediapipe as mp
 
     runtime = host_runtime('releaseReferenceWheels')
-    name, version = HOST_NAMES[platform.system()], runtime['version']
+    name, version = HOST_NAMES[host_target()], runtime['version']
     assert mp.__version__ == version, mp.__version__
     library = Path(mp.__file__).parent / 'tasks/c' / runtime['library']
     assert hashlib.sha256(library.read_bytes()).hexdigest() == runtime['library_sha256']

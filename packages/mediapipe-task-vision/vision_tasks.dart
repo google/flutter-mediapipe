@@ -23,6 +23,7 @@ const visionRuntimeTasks = <String, Set<String>>{
   'ios/arm64': visionTasks,
   'ios-simulator/arm64': visionTasks,
   'linux/x64': visionTasks,
+  'linux/arm64': visionTasks,
   'android/arm64': visionTasks,
   'android/x64': visionTasks,
   // Flutter's release builds include 32-bit ARM, so the hook accepts every

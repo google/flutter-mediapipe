@@ -1,0 +1,63 @@
+name: Linux arm64
+
+permissions:
+  contents: read
+
+# What only an arm64 host checks: core's and vision's hooks bundling Google's
+# aarch64 libraries on Linux arm64, and which Raspberry Pi CPUs those
+# libraries run on. The families' tests on Linux arm64 run in family.yaml,
+# desktop.yaml, bundled-models.yaml and samples.yaml.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
+concurrency:
+  group: linux-arm64-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hooks:
+    name: Native hooks / Linux arm64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+          linux-profile: ffi
+      - name: Core's hooks and native library tests
+        working-directory: packages/mediapipe-core
+        run: flutter pub get && dart test test/native_assets --reporter expanded
+      - name: Vision's hook
+        working-directory: packages/mediapipe-task-vision
+        run: flutter pub get && dart test test/native_assets --reporter expanded
+
+  # A Raspberry Pi 5 has Cortex-A76 cores, a Pi 4 Cortex-A72 ones. qemu-user
+  # emulates each on this Neoverse host (tool/ci/pi_cpu_baseline.py): every
+  # library must load on the A76 and stop with SIGILL on the A72, as
+  # doc/platform_setup.md says, and the Language Detector's tests must pass
+  # on the A76 and stop on the libraries' LSE check on the A72.
+  pi:
+    name: Raspberry Pi CPU baseline / qemu cortex-a72 and cortex-a76
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+          linux-profile: ffi
+      - uses: ./.github/actions/apt-install
+        with:
+          packages: qemu-user
+      - name: Download the Language Detector model
+        working-directory: packages/mediapipe-task-text
+        run: flutter pub get && dart tool/download_models.dart language_detector
+      - name: Check the libraries and an inference against both CPUs
+        run: >-
+          python3 -B tool/ci/pi_cpu_baseline.py
+          --inference packages/mediapipe-task-text test/language_detector_executor_test.dart

@@ -5,8 +5,8 @@ tool/test_text_audio.py uses), downloads the three pinned models, generates the
 three references with that wheel, and runs the text package's `modern-text`
 tests against them: Google's completed and streamed outputs for the same model,
 runtime and inputs, each option, stream lifecycle, errors and disposal. CI runs
-it on the Linux x64 and Windows x64 desktop runners; it runs on macOS arm64 as
-well. Python only prepares the expected outputs; the suite loads Google's
+it on the Linux x64, Linux arm64 and Windows x64 desktop runners; it runs on
+macOS arm64 as well. Python only prepares the expected outputs; the suite loads Google's
 library through the package, as an app does.
 """
 import json

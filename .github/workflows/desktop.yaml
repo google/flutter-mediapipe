@@ -36,13 +36,17 @@ env:
 
 jobs:
   face-tasks:
-    name: Vision tasks / ${{ matrix.os }} x64 CPU
+    name: Vision tasks / ${{ matrix.os }} ${{ matrix.os == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }} CPU
     strategy:
       fail-fast: false
       matrix:
-        # Both, except in nightly-compare.yaml's daily set, which runs Linux.
-        os: ${{ fromJSON(inputs.scope == 'daily' && '["ubuntu-24.04"]' || '["ubuntu-24.04", "windows-2025"]') }}
+        # Linux x64, Windows x64 and Linux arm64, except in nightly-compare.yaml,
+        # whose daily set runs Linux x64 and whose full set the two x64 hosts.
+        os: ${{ fromJSON(inputs.scope == 'daily' && '["ubuntu-24.04"]' || inputs.side && '["ubuntu-24.04", "windows-2025"]' || '["ubuntu-24.04", "windows-2025", "ubuntu-24.04-arm"]') }}
     runs-on: ${{ matrix.os }}
+    # Linux arm64 records the matrix's linux-arm64 cells, under its own suites.
+    env:
+      COVERAGE_PLATFORM: ${{ matrix.os == 'ubuntu-24.04-arm' && 'linux-arm64' || 'linux' }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -57,12 +61,12 @@ jobs:
         id: linux_cpu
         if: runner.os == 'Linux'
         run: xvfb-run -a python3 -B packages/mediapipe-task-vision/tool/test_desktop.py --object-detector --image-tasks --landmark-tasks --segmenter-tasks --interactive-segmenter
-      - name: Record linux CPU task coverage (linux-cpu)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU task coverage
         if: always() && runner.os == 'Linux'
         uses: ./.github/actions/record-coverage
         with:
-          suite: linux-cpu
-          platform: linux
+          suite: ${{ env.COVERAGE_PLATFORM }}-cpu
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,interactive_segmenter,object_detector,pose_landmarker
           outcome: ${{ steps.linux_cpu.outcome }}
@@ -72,12 +76,12 @@ jobs:
         id: linux_text_audio
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: python3 -B tool/test_text_audio.py
-      - name: Record linux CPU text and audio coverage (linux-text-audio)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU text and audio coverage
         if: always() && runner.os == 'Linux'
         uses: ./.github/actions/record-coverage
         with:
-          suite: linux-text-audio
-          platform: linux
+          suite: ${{ env.COVERAGE_PLATFORM }}-text-audio
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: audio_classifier,language_detector,text_classifier,text_embedder
           outcome: ${{ steps.linux_text_audio.outcome }}
@@ -85,12 +89,12 @@ jobs:
         id: linux_modern_text
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: python3 -B tool/test_modern_text.py
-      - name: Record linux CPU modern text coverage (linux-modern-text)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU modern text coverage
         if: always() && runner.os == 'Linux'
         uses: ./.github/actions/record-coverage
         with:
-          suite: linux-modern-text
-          platform: linux
+          suite: ${{ env.COVERAGE_PLATFORM }}-modern-text
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: embedding_gemma,text_proofreader,text_summarizer
           outcome: ${{ steps.linux_modern_text.outcome }}

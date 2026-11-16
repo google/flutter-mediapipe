@@ -102,6 +102,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'e86556f45ee840bc0041bb1948059288dde36ef87a41b8f474735ea011c6c216',
       34864320,
     ),
+    'linux/arm64': FamilyRuntime(
+      'vision/linux_arm64/libmediapipe_tasks_vision.so',
+      '4505468c775bc2893d8771c9a390d4f5df083c441ea1f8395723af90a4eb6867',
+      31708696,
+    ),
     'windows/x64': FamilyRuntime(
       'vision/windows_x86_64/mediapipe_tasks_vision.dll',
       '30b54929f350e31ee2afcac5cbea250ff7004eac9b489006b9702f4f06b6256a',
@@ -143,6 +148,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'text/linux_x86_64/libmediapipe_tasks_text.so',
       '1e2e2929b8c8cdb4828a41093a3e7997522e44193dae24096007d4545ead78fd',
       41813600,
+    ),
+    'linux/arm64': FamilyRuntime(
+      'text/linux_arm64/libmediapipe_tasks_text.so',
+      '02b882119ec2056cf6306c12b39bdc7f0836b663f1cca57c8744dd33ec6abf62',
+      38294504,
     ),
     'windows/x64': FamilyRuntime(
       'text/windows_x86_64/mediapipe_tasks_text.dll',
@@ -186,6 +196,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'c735a9d2e3062450ed54dabe5acf6fbdf427e93bc5b4f6c9219ab50cfb0b7222',
       42208240,
     ),
+    'linux/arm64': FamilyRuntime(
+      'audio/linux_arm64/libmediapipe_tasks_audio.so',
+      'cf1003e330fbcb84b49ef273c43483c49b5636993471d56ab8c1c85dcedab723',
+      38648016,
+    ),
     'windows/x64': FamilyRuntime(
       'audio/windows_x86_64/mediapipe_tasks_audio.dll',
       'c88bede1400a75a8c2cff91f3a4d7247f969bcf376be14a5373c204c0aca7518',
@@ -228,6 +243,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'c9169204fd423ec71aa18de4aadf69cf9dd59fef03d641d02cc84d9cf973679f',
       32969280,
     ),
+    'linux/arm64': FamilyRuntime(
+      'retrieval/linux_arm64/libmediapipe_tasks_retrieval.so',
+      '361723a30a6bdebe2d83781e0dce970823cd1855fec84b2a09ca8bee828832c7',
+      29783152,
+    ),
     'windows/x64': FamilyRuntime(
       'retrieval/windows_x86_64/mediapipe_tasks_retrieval.dll',
       '8e9f054fcc11421243915ae3e54984f0d0e4322c6f9ddf0a418a3cacfa039016',
@@ -269,6 +289,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'decision/linux_x86_64/libmediapipe_tasks_decision.so',
       '025438d2c7c542c8b4676da407ca3b37cc2cc56b86cd185de08ecb188ce39c25',
       36645552,
+    ),
+    'linux/arm64': FamilyRuntime(
+      'decision/linux_arm64/libmediapipe_tasks_decision.so',
+      '441ad6eddf7dac732fb2bbb610d50e2dc3f8865bc15c5747e9a088a888b34ef7',
+      33152464,
     ),
     'windows/x64': FamilyRuntime(
       'decision/windows_x86_64/mediapipe_tasks_decision.dll',

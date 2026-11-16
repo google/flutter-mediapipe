@@ -14,8 +14,8 @@ timings) run on 64-bit Android, iOS, macOS, Linux, Windows and the web; see
 ## Platforms
 
 The task runs Google's runtime on each platform, on the CPU: its MediaPipe
-1.2.3 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64 and
-Windows x64, which this package's hook bundles, and
+1.2.3 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64,
+Linux arm64 and Windows x64, which this package's hook bundles, and
 `@mediapipe/tasks-audio` 1.2.3 in browsers. The library is built for macOS 14
 and tested on macOS 15.
 

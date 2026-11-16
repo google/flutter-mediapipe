@@ -24,7 +24,7 @@ import sys
 import time
 
 REPO = Path(__file__).resolve().parents[2]
-PLATFORMS = ['web', 'android', 'ios', 'macos', 'linux', 'windows']
+PLATFORMS = ['web', 'android', 'ios', 'macos', 'linux', 'linux-arm64', 'windows']
 # Workflows whose jobs record rows. The gate waits for each to finish on the
 # commit; a missing one is a failure rather than silently fewer rows.
 RECORDING_WORKFLOWS = ['.github/workflows/android.yaml', '.github/workflows/ios.yaml',

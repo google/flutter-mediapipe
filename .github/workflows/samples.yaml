@@ -43,6 +43,11 @@ jobs:
           - target: linux
             os: ubuntu-24.04
             build: flutter build linux --release
+          # Google's aarch64 library, on GitHub's arm64 runner; the tests run
+          # the detector there too.
+          - target: linux-arm64
+            os: ubuntu-24.04-arm
+            build: flutter build linux --release
           - target: web
             os: ubuntu-24.04
             build: flutter build web --release
@@ -67,14 +72,14 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - if: matrix.target == 'android'
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '17'
       - uses: ./.github/actions/setup
         with:
           python: 'false'
-          linux-profile: ${{ matrix.target == 'linux' && 'gallery' || 'none' }}
+          linux-profile: ${{ startsWith(matrix.target, 'linux') && 'gallery' || 'none' }}
       # Gradle's own NDK and CMake downloads give up on one corrupt archive.
       - if: matrix.target == 'android'
         uses: ./.github/actions/android-ndk
@@ -88,6 +93,6 @@ jobs:
         run: dart format --output=none --set-exit-if-changed lib test
       - if: matrix.target == 'linux'
         run: flutter analyze
-      - if: matrix.target == 'linux'
+      - if: startsWith(matrix.target, 'linux')
         run: flutter test
       - run: ${{ matrix.build }}
