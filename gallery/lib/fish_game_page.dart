@@ -256,7 +256,7 @@ class _FishGamePageState extends State<FishGamePage>
       onModel: _chooseModel,
       onUpload: null,
       bundledModel: widget.task.modelFile,
-      standardModel: 'EmbeddingGemma 2 (270M)',
+      standardModel: 'EmbeddingGemma 2 Text (270M)',
     ),
   );
 
@@ -355,7 +355,7 @@ class _FishGamePageState extends State<FishGamePage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task),
+        TaskToolbar(task: widget.task, model: _model?.file),
         SurfaceCard(
           padding: const EdgeInsets.all(12),
           child: Column(

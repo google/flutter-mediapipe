@@ -52,11 +52,13 @@ def main():
          'integration_test/face_landmarker_still_image_test.dart',
          'integration_test/gallery_journey_test.dart',
          'integration_test/runtime_test.dart',
+         'integration_test/task_models_test.dart',
          'integration_test/text_tasks_test.dart',
          'integration_test/audio_task_test.dart'], 'analyze')
     run(['flutter', 'test', 'test'], 'unit')
     for name in ['assets_test', 'runtime_test', 'text_tasks_test',
                  'audio_task_test', 'face_landmarker_still_image_test',
+                 'task_models_test',
                  'gallery_journey_test']:
         run(['flutter', 'test', '-d', target,
              f'integration_test/{name}.dart', '--reporter', 'expanded'], name)

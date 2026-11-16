@@ -17,8 +17,8 @@ import 'ui/workspace.dart';
 const generatedTextKey = ValueKey('generated_text');
 
 /// A text task on typed input, laid out as the live demos are: the input and
-/// its results beside the same settings panel, with MediaPipe Studio's
-/// settings and model selection. The classic tasks score or compare the
+/// its results beside the same settings panel, with the task's options and
+/// model selection. The classic tasks score or compare the
 /// input, Text Embedder with either model Google's guide lists for it:
 /// Universal Sentence Encoder or EmbeddingGemma. The Proofreader and
 /// Summarizer write text, streamed as Google generates it.
@@ -45,7 +45,9 @@ class TextPage extends StatefulWidget {
 typedef _Row = ({String label, double score});
 
 /// EmbeddingGemma's uses, in the order the Task Type setting lists them.
-const _gemmaTypes = [
+@visibleForTesting
+const gemmaTypes = [
+  EmbeddingType.retrievalDocument,
   EmbeddingType.retrievalQuery,
   EmbeddingType.semanticSimilarity,
   EmbeddingType.classification,
@@ -63,6 +65,24 @@ const _pairTypes = {
   EmbeddingType.factChecking,
   EmbeddingType.codeRetrieval,
 };
+
+/// How EmbeddingGemma formats the two texts for [type]. A query use formats
+/// the second text as its document, retrieval queries as a retrieval
+/// document; every other use, Retrieval (Document) included, formats both
+/// texts alike.
+@visibleForTesting
+(TextFormatContext, TextFormatContext) gemmaFormats(EmbeddingType type) {
+  final pair = _pairTypes.contains(type);
+  return (
+    TextFormatContext(taskType: type),
+    TextFormatContext(
+      taskType: type == EmbeddingType.retrievalQuery
+          ? EmbeddingType.retrievalDocument
+          : type,
+      role: pair ? TextRole.document : TextRole.query,
+    ),
+  );
+}
 
 class _TextPageState extends State<TextPage>
     with RevisionedState, ModelSelectionState {
@@ -205,17 +225,7 @@ class _TextPageState extends State<TextPage>
   /// embedders take none.
   (TextFormatContext?, TextFormatContext?) _formats() {
     if (!_gemma) return (null, null);
-    final type = _gemmaTypes[_values.choice('taskType')];
-    final pair = _pairTypes.contains(type);
-    return (
-      TextFormatContext(taskType: type),
-      TextFormatContext(
-        taskType: type == EmbeddingType.retrievalQuery
-            ? EmbeddingType.retrievalDocument
-            : type,
-        role: pair ? TextRole.document : TextRole.query,
-      ),
-    );
+    return gemmaFormats(gemmaTypes[_values.choice('taskType')]);
   }
 
   Future<void> _run() async {
@@ -438,7 +448,11 @@ class _TextPageState extends State<TextPage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task, gemmaTerms: widget.embeddingGemma),
+        TaskToolbar(
+          task: widget.task,
+          gemmaTerms: widget.embeddingGemma,
+          model: modelFile,
+        ),
         SurfaceCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -80,7 +80,7 @@ void main() {
                 modelStatus: null,
                 onModel: (_) {},
                 onUpload: () {},
-                standardModel: 'DeepLab V3',
+                standardModel: 'DeepLab-V3',
                 labels: const ['background', 'person'],
               ),
             ],
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(panel());
 
     // The bundled model is listed first by Google's name for it.
-    expect(find.text('DeepLab V3'), findsOneWidget);
+    expect(find.text('DeepLab-V3'), findsOneWidget);
     expect(find.text('Output Type'), findsOneWidget);
     expect(find.text('Category Mask'), findsOneWidget);
     expect(find.text('Opacity'), findsOneWidget);

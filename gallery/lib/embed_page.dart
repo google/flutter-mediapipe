@@ -176,7 +176,7 @@ class _EmbedPageState extends State<EmbedPage>
       onOpenMenu: widget.onOpenMenu,
       settings: _panel(),
       children: [
-        TaskToolbar(task: widget.task),
+        TaskToolbar(task: widget.task, model: modelFile),
         LayoutBuilder(
           builder: (context, constraints) {
             // Side by side, as Google's demo shows them, while each image's

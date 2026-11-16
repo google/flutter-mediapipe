@@ -18,7 +18,7 @@ import 'ui/design.dart';
 import 'ui/workspace.dart';
 
 /// MagicTouch segmentation: drag over a subject to select it, with Google's
-/// three brushes. Include and Exclude strokes mark what to add and remove;
+/// three brushes. Positive and Negative strokes mark what to add and remove;
 /// a lasso selects what lies inside the box around the drag.
 ///
 /// The editor controller and mask thresholding coalesce in-flight requests,
@@ -433,13 +433,13 @@ class _SegmentPageState extends State<SegmentPage> with RevisionedState {
           segments: const [
             (
               value: BrushMode.positive,
-              label: 'Include',
+              label: 'Positive',
               icon: LucideIcons.circlePlus,
               key: ValueKey('brush-positive'),
             ),
             (
               value: BrushMode.negative,
-              label: 'Exclude',
+              label: 'Negative',
               icon: LucideIcons.circleMinus,
               key: ValueKey('brush-negative'),
             ),
@@ -488,8 +488,8 @@ class _StrokePainter extends CustomPainter {
   final List<NormalizedKeypoint> active;
   final BrushMode activeBrush;
 
-  /// Include in the overlays' accent; Exclude and Lasso in the red and blue of
-  /// Google's samples, the lasso filled lightly.
+  /// Positive in the overlays' accent; Negative and Lasso in the red and blue
+  /// of Google's samples, the lasso filled lightly.
   static const _exclude = Color(0xFFE53935);
   static const _lasso = Color(0xFF2196F3);
 

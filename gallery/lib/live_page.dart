@@ -630,6 +630,7 @@ class _LivePageState extends State<LivePage>
       children: [
         TaskToolbar(
           task: widget.task,
+          model: modelFile,
           leading: _hasImageMode
               ? Segmented<_VisionInputMode>(
                   semanticsIdentifier: '$_id-mode',

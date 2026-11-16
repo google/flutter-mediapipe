@@ -131,6 +131,12 @@ jobs:
         run: node gallery/tool/browser/test_loading_screen.mjs
       - name: Image Segmenter masks, legend and output types in Chromium
         run: node gallery/tool/browser/test_segmenter_display.mjs
+      - name: Face Detector's menu models in Chromium and Firefox
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          node gallery/tool/browser/test_task_models.mjs
+          xvfb-run -a node gallery/tool/browser/test_task_models.mjs --browser=firefox --headed=true
       - name: Chromium CPU runtime, API and face webcam
         id: chromium_cpu
         env:
@@ -249,6 +255,7 @@ jobs:
             build/ci-tmp/worker-overlays/
             build/ci-tmp/loading-screen-web/
             build/ci-tmp/gallery-journey-*/
+            build/ci-tmp/task-models-*/
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: web-gallery-release
@@ -330,6 +337,9 @@ jobs:
         id: webkit_cpu
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node gallery/tool/browser/test_browser.mjs --browser=webkit --suite=api --official-runtime=/runtime/
+      - name: Face Detector's menu models in WebKit
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node gallery/tool/browser/test_task_models.mjs --browser=webkit
       - name: Record web CPU task coverage (web-webkit-cpu)
         if: always()
         uses: ./.github/actions/record-coverage
@@ -345,6 +355,7 @@ jobs:
           name: web-webkit-evidence
           path: |
             build/ci-tmp/web-browser-*/
+            build/ci-tmp/task-models-*/
             web-server.log
 
   deploy:

@@ -33,42 +33,12 @@ export 'gallery_assets_io.dart'
 
 SemanticsHandle? _webSemantics;
 
-/// The gallery's task order within each category; other tasks follow by title.
-const _taskOrder = [
-  'face_detector',
-  'face_landmarker',
-  'hand_landmarker',
-  'gesture_recognizer',
-  'pose_landmarker',
-  'holistic_landmarker',
-  'object_detector',
-  'image_classifier',
-  'image_embedder',
-  'image_segmenter',
-  'interactive_segmenter',
-  'audio_classifier',
-  'audio_transcriber',
-  'text_to_speech',
-  'language_detector',
-  'text_classifier',
-  'text_embedder',
-  'decision_maker',
-  'universal_embedder',
-  'semantic_retriever',
-];
-
+/// Tasks by title within each category, as Google's MediaPipe Solutions
+/// guide lists them.
 int compareTasks(
   ({String runtimeId, String title}) a,
   ({String runtimeId, String title}) b,
-) {
-  int rank(String id) {
-    final index = _taskOrder.indexOf(id);
-    return index < 0 ? _taskOrder.length : index;
-  }
-
-  final byRank = rank(a.runtimeId).compareTo(rank(b.runtimeId));
-  return byRank != 0 ? byRank : a.title.compareTo(b.title);
-}
+) => a.title.compareTo(b.title);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

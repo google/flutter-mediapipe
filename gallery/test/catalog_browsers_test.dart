@@ -85,7 +85,7 @@ void main() {
         for (final model in taskModels['decision_maker']!)
           if (decisionRunsModel(_browser(engine), model)) model.name,
       ];
-      expect(offered, ['Laya (512 tokens)'], reason: '$engine');
+      expect(offered, ['Laya (512-token)'], reason: '$engine');
     }
     final native = [
       for (final model in taskModels['decision_maker']!)

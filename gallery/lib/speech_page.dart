@@ -178,7 +178,7 @@ class _SpeechPageState extends State<SpeechPage> with RevisionedState {
       onModel: (_) {},
       onUpload: null,
       bundledModel: widget.task.modelFile,
-      standardModel: 'Phonon',
+      standardModel: 'Phonon 31M',
     ),
   );
 

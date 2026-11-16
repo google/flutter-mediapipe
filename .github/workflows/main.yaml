@@ -54,6 +54,9 @@ jobs:
       - name: Test still image inference for every camera vision task
         working-directory: gallery
         run: flutter test -d macos integration_test/vision_still_image_modes_test.dart --reporter expanded
+      - name: Test the models Face Detector's menu offers
+        working-directory: gallery
+        run: flutter test -d macos integration_test/task_models_test.dart --reporter expanded
       # Includes the MagicTouch editor: strokes, undo and clear.
       - name: Exercise every prepared gallery page through its sidebar
         working-directory: gallery

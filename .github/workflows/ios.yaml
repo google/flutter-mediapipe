@@ -97,7 +97,7 @@ jobs:
         env:
           DEVICE: ${{ steps.simulator.outputs.device }}
         run: |
-          for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test speech_test runtime_test face_landmarker_still_image_test gallery_journey_test; do
+          for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test task_models_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test speech_test runtime_test face_landmarker_still_image_test gallery_journey_test; do
             # Each file finishes in minutes, so 15 is a stall.
             bash tool/test_ios_simulator_suite.sh "$DEVICE" 900 "$test" --dart-define=SDK_GPU=skip
           done
