@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {keepLocal} from './local_network.mjs';
 
 // The Image Segmenter page as Google's web demo shows it: a smooth mask in the
 // legend's colors with the legend under the view, then Output Type set to
@@ -13,7 +14,7 @@ const portrait = path.join(repo, 'gallery/assets/samples/portrait.jpg');
 const evidence = path.join(repo, 'build/ci-tmp/segmenter-display-web');
 fs.mkdirSync(evidence, {recursive: true});
 
-const browser = await chromium.launch({channel: 'chromium', headless: true});
+const browser = keepLocal(await chromium.launch({channel: 'chromium', headless: true}), base);
 try {
   const page = await browser.newPage({viewport: {width: 1280, height: 800}});
   const errors = [];

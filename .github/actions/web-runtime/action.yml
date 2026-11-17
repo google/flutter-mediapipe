@@ -1,0 +1,34 @@
+name: Copy Google's browser runtimes
+description: >-
+  Writes every family's pinned browser runtime to gallery/build/web-runtime,
+  which gallery/tool/web_server.py serves at /runtime/ and
+  gallery/tool/browser/local_network.mjs answers the browsers' jsDelivr
+  requests from, so no browser test reaches a CDN while it runs. The files come
+  from the cache, else from npm, jsDelivr or unpkg (tool/ci/web_runtime.py),
+  each checked against its runtime.json.
+inputs:
+  save:
+    description: >-
+      Save the copy to the cache on a run that is not a pull request's; the
+      nightly comparison does not, since each night's pins would be a new
+      184 MB entry.
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    # Keyed by the pins, so a new version is a new entry. Only main saves, as
+    # with the models: a pull request reads main's.
+    - if: ${{ github.event_name == 'pull_request' || inputs.save != 'true' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: gallery/build/web-runtime
+        key: web-runtime-${{ hashFiles('packages/mediapipe-task-*/assets/runtime.json') }}
+    - if: ${{ github.event_name != 'pull_request' && inputs.save == 'true' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: gallery/build/web-runtime
+        key: web-runtime-${{ hashFiles('packages/mediapipe-task-*/assets/runtime.json') }}
+    # Checks what the cache gave and fetches only what is missing or changed.
+    - name: Copy the runtimes, checked against their pins
+      shell: bash
+      run: python3 -B tool/ci/web_runtime.py gallery/build/web-runtime

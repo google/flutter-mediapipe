@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium, firefox, webkit} from 'playwright';
+import {keepLocal} from './local_network.mjs';
 import {isLostPage, saveSystemLog} from './lost_page.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -98,6 +99,7 @@ const browser = await ({chromium, firefox, webkit}[browserName]).launch({
     ...(linux ? {'webgl.force-enabled': true} : {}),
   }} : {}),
 });
+keepLocal(browser, base);
 browser.on('disconnected', () => lifecycle('browser disconnected'));
 let page;
 let hardwareWebGpu = false;
@@ -151,13 +153,14 @@ try {
     page.getByText(new RegExp(`^(?!0\\.0 fps)\\d+\\.\\d fps · \\d+ ms · ${delegate.toUpperCase()}$`));
   // A runtime that embeds every input as zeros scores every option the same,
   // and a tie reads as the first option, so options whose score rows ("shipping
-  // 0.87") all read the same fail here.
+  // 0.87") all read the same fail here. The rows are read together, since a
+  // running game can show its next decision between two reads.
   const assertScoresDiffer = async (names, what) => {
-    const scores = [];
     for (const name of names) {
-      const row = (await page.getByText(new RegExp(`^${name} \\d\\.\\d{2}$`)).first().textContent()) ?? '';
-      scores.push(row.slice(name.length + 1));
+      await page.getByText(new RegExp(`^${name} \\d\\.\\d{2}$`)).first().waitFor();
     }
+    const rows = await page.getByText(new RegExp(`^(${names.join('|')}) \\d\\.\\d{2}$`)).allTextContents();
+    const scores = names.map(name => rows.find(row => row.startsWith(`${name} `))?.slice(name.length + 1));
     assert.ok(new Set(scores).size > 1,
       `${what}: every option scored ${scores[0]}, as when Google's runtime embeds every input as zeros`);
   };
@@ -329,12 +332,18 @@ try {
       await page.locator('[flt-semantics-identifier="universal-2-samples"]')
         .getByRole('button', {name: 'Elephant', exact: true}).click();
       await page.getByRole('img', {name: 'Image 2: Elephant'}).or(page.getByText('Image 2: Elephant')).first().waitFor({timeout: 120000});
-      await page.getByRole('button', {name: 'Compare', exact: true}).click();
+      // The label follows the tap at once, but the photo the page embeds only
+      // once its asset has loaded, so a comparison started before then
+      // measures the dog again. Compare again until the similarity changes.
       const deadline = Date.now() + 120000;
       let elephant = dog;
       while (elephant === dog && Date.now() < deadline) {
-        await page.waitForTimeout(500);
-        elephant = await value();
+        await page.getByRole('button', {name: 'Compare', exact: true}).click();
+        const retry = Date.now() + 10000;
+        while (elephant === dog && Date.now() < Math.min(retry, deadline)) {
+          await page.waitForTimeout(500);
+          elephant = await value();
+        }
       }
       assert.ok(elephant < dog, `${id}: dog text vs dog photo ${dog}, vs elephant ${elephant}`);
       report.checks.push(`${id}:cpu:compare`);

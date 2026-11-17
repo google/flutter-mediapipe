@@ -109,15 +109,21 @@ jobs:
           BROWSER: ${{ matrix.browser }}
         run: |
           npm ci
-          npx playwright install "$BROWSER"
           if [ "$RUNNER_OS" = Linux ]; then npx playwright install-deps --dry-run "$BROWSER"; fi
-      - name: Build the speech probe and Google's runtimes
+      - name: Install Playwright's ${{ matrix.browser }}
+        uses: ./.github/actions/playwright-browsers
+        with:
+          browsers: ${{ matrix.browser }}
+      - name: Build the speech probe
         working-directory: gallery
         run: |
           flutter pub get
           flutter analyze tool/web_speech_probe.dart
           flutter build web --release --base-href /speech-probe/ --no-web-resources-cdn --output build/web-speech -t tool/web_speech_probe.dart
-          dart run mediapipe_core:web_runtime build/web-runtime
+      # The probe's workers ask jsDelivr for Google's runtime; the browser test
+      # answers them from this copy (local_network.mjs), so a CDN outage cannot
+      # fail the run, as jsDelivr's 503s failed two of these jobs on 2026-11-16.
+      - uses: ./.github/actions/web-runtime
       - name: Start the probe server
         run: |
           nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &

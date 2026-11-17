@@ -1,0 +1,26 @@
+name: Web runtime hosts
+
+permissions:
+  contents: read
+
+# Daily and by hand only, never on a pull request: it reads the CDNs that the
+# browser tests no longer reach, so their outages cannot fail a change.
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  # Apps load Google's browser runtime from jsDelivr by default
+  # (MediaPipeWebRuntime.defaultBaseUrl), and tool/ci/web_runtime.py falls back
+  # to it and to unpkg. Each file every family's runtime.json pins must still
+  # come from both with its SHA-384 and Access-Control-Allow-Origin: *, as a
+  # page's worker needs it. A failure that passes on a later day was an outage;
+  # one that stays means a host changed what it serves.
+  check:
+    name: jsDelivr and unpkg serve the pinned runtimes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: python3 -B tool/ci/web_runtime.py --check

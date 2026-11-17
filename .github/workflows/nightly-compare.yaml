@@ -245,9 +245,16 @@ jobs:
           python3 -B gallery/tool/browser/prepare_camera.py
       - name: Install browser test dependencies
         working-directory: gallery/tool/browser
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium webkit
+        run: npm ci
+      - name: Install Chromium and WebKit
+        uses: ./.github/actions/playwright-browsers
+        with:
+          browsers: --with-deps chromium webkit
+      # This side's runtimes, which the browser tests answer the pages' jsDelivr
+      # requests from, as in web.yaml.
+      - uses: ./.github/actions/web-runtime
+        with:
+          save: 'false'
       # The text and audio suite ends in the release gallery's Text Embedder.
       - name: Build the release gallery and the API and text and audio probes
         id: build
@@ -256,7 +263,6 @@ jobs:
           flutter build web --release --base-href /flutter-mediapipe/ --no-web-resources-cdn
           flutter build web --release --base-href /api-probe/ --no-web-resources-cdn --output build/web-api -t tool/web_api_probe.dart
           flutter build web --release --base-href /text-audio-probe/ --no-web-resources-cdn --output build/web-text-audio -t tool/web_text_audio_probe.dart
-          dart run mediapipe_core:web_runtime build/web-runtime
       - name: Start the gallery server
         run: |
           nohup python3 -B gallery/tool/web_server.py > web-server.log 2>&1 &

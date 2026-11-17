@@ -487,20 +487,25 @@ void main() {
             reason: '${task.id}: ${screenText(tester)}',
           );
           final dog = _universalSimilarity(tester)!;
+          // The second picture, by type too: a Semantics widget carries its
+          // key as well.
+          final photo = find.byWidgetPredicate(
+            (widget) =>
+                widget is Image &&
+                widget.key == const ValueKey('universal-2-image'),
+          );
+          final dogPhoto = _shownBytes(tester.widget<Image>(photo));
           await tester.tap(find.byKey(const ValueKey('universal-2-elephant')));
           // The picture's own label: semantics finders read debugSemantics,
-          // which release builds leave empty.
-          await _until(
-            tester,
-            () => find
-                .byWidgetPredicate(
-                  (widget) =>
-                      widget is Image &&
-                      widget.semanticLabel == 'Image 2: Elephant',
-                )
-                .evaluate()
-                .isNotEmpty,
-          );
+          // which release builds leave empty. The label follows the tap at
+          // once, but the photo the page embeds only once its asset has
+          // loaded, so a comparison started before then measures the dog
+          // again. Wait for the photo itself to change too.
+          await _until(tester, () {
+            final shown = tester.widget<Image>(photo);
+            return shown.semanticLabel == 'Image 2: Elephant' &&
+                _shownBytes(shown) != dogPhoto;
+          });
           await tester.tap(find.byKey(const ValueKey('universal-compare')));
           await tester.pump();
           await _until(tester, () {
@@ -986,6 +991,10 @@ double? _universalSimilarity(WidgetTester tester) {
   if (finder.evaluate().isEmpty) return null;
   return double.tryParse(tester.widget<Text>(finder).data ?? '');
 }
+
+/// The bytes an Image.memory shows: a new list each time a page loads a
+/// picture, so a change means the next one has decoded.
+Uint8List _shownBytes(Image image) => (image.image as MemoryImage).bytes;
 
 /// The Proofreader and Summarizer write text, checked here for arriving;
 /// sdk_modern_text_test.dart compares what they write with Google's.

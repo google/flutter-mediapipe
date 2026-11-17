@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {keepLocal} from './local_network.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const base = process.argv.find(value => value.startsWith('--base-url='))?.split('=')[1]
@@ -15,6 +16,7 @@ const browser = await chromium.launch({channel: 'chromium', args: [
   '--use-file-for-fake-video-capture=' + path.join(repo, 'build/ci-tmp/web-camera-hand.y4m'),
   ...(process.platform === 'linux' ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : []),
 ]});
+keepLocal(browser, base);
 try {
   const context = await browser.newContext({viewport: {width: 1280, height: 800}});
   await context.grantPermissions(['camera'], {origin: new URL(base).origin});
@@ -54,6 +56,7 @@ const detectorBrowser = await chromium.launch({channel: 'chromium', args: [
   '--use-file-for-fake-video-capture=' + path.join(repo, 'build/ci-tmp/web-camera.y4m'),
   ...(process.platform === 'linux' ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : []),
 ]});
+keepLocal(detectorBrowser, base);
 try {
   const context = await detectorBrowser.newContext({viewport: {width: 1280, height: 800}});
   await context.grantPermissions(['camera'], {origin: new URL(base).origin});

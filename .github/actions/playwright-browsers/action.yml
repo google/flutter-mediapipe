@@ -1,0 +1,63 @@
+name: Install Playwright's browsers
+description: >-
+  Installs the browsers gallery/tool/browser's Playwright runs, after its
+  `npm ci`: from the cache when it has them, else from Playwright's hosts,
+  retried. Playwright's install tries each browser five times across its three
+  hosts at once, so a host that is down for a minute fails the job without
+  this; its CI guide advises against caching for speed, so the cache is here so
+  that a job needs no download at all, keyed by the Playwright version as the
+  guide says.
+inputs:
+  browsers:
+    description: The `npx playwright install` arguments, such as `chromium firefox` or `--no-shell chromium`.
+    required: true
+  save:
+    description: Save the browsers to the cache on a run that is not a pull request's.
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - id: pins
+      shell: bash
+      env:
+        BROWSERS: ${{ inputs.browsers }}
+      run: |
+        case "$RUNNER_OS" in
+          Linux) dir="$HOME/.cache/ms-playwright" ;;
+          macOS) dir="$HOME/Library/Caches/ms-playwright" ;;
+          *) echo "::error::No Playwright browser folder known for $RUNNER_OS."; exit 1 ;;
+        esac
+        version=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["packages"]["node_modules/playwright-core"]["version"])' gallery/tool/browser/package-lock.json)
+        echo "dir=$dir" >> "$GITHUB_OUTPUT"
+        echo "key=playwright-$RUNNER_OS-$RUNNER_ARCH-$version-$(echo $BROWSERS | tr ' ' '-')" >> "$GITHUB_OUTPUT"
+    # Only main saves, as with the runtimes: a pull request reads main's.
+    - id: restore
+      if: ${{ github.event_name == 'pull_request' || inputs.save != 'true' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ steps.pins.outputs.dir }}
+        key: ${{ steps.pins.outputs.key }}
+    - id: cache
+      if: ${{ github.event_name != 'pull_request' && inputs.save == 'true' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ steps.pins.outputs.dir }}
+        key: ${{ steps.pins.outputs.key }}
+    # Downloads only what the cache did not give; three attempts, 30 and 90
+    # seconds apart.
+    - name: Install the browsers
+      shell: bash
+      working-directory: gallery/tool/browser
+      env:
+        BROWSERS: ${{ inputs.browsers }}
+        CACHE_HIT: ${{ steps.restore.outputs.cache-hit || steps.cache.outputs.cache-hit }}
+      run: |
+        echo "Cache ${{ steps.pins.outputs.key }}: ${CACHE_HIT:-miss}."
+        for wait in 30 90 0; do
+          npx playwright install $BROWSERS && exit 0
+          [ "$wait" = 0 ] && break
+          echo "::warning::npx playwright install $BROWSERS failed; trying again in $wait s."
+          sleep "$wait"
+        done
+        echo "::error::npx playwright install $BROWSERS failed three times."
+        exit 1
