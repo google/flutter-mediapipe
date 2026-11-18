@@ -50,6 +50,10 @@ List<String> coverageMatrixProblems(
       version: '15.0',
     ),
     'linux': const TaskPlatform(operatingSystem: 'linux', architecture: 'x64'),
+    'linux-arm64': const TaskPlatform(
+      operatingSystem: 'linux',
+      architecture: 'arm64',
+    ),
     'windows': const TaskPlatform(
       operatingSystem: 'windows',
       architecture: 'x64',

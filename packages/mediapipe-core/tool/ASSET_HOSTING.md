@@ -82,6 +82,19 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
   NDK with four attempts; the Android jobs install their system image in a
   retried step.
 
+- **CI's browser tests no longer reach a CDN** (after jsDelivr's 503s, again
+  with no `Access-Control-Allow-Origin`, failed Speech's Chromium and Firefox
+  browser jobs and Retrieval's macos-15 journey on PR #95, 2026-11-16).
+  `.github/actions/web-runtime` restores every family's runtime from the cache
+  or copies it with `tool/ci/web_runtime.py`: npm's tarball, then jsDelivr,
+  then unpkg, each request retried as `verified_download.dart` retries, every
+  file checked against its SHA-384. `gallery/tool/browser/local_network.mjs`
+  answers the pages' and workers' jsDelivr requests from that copy, so the
+  gallery's default `baseUrl` path still runs, and fails a test on any other
+  request that leaves the machine. `.github/workflows/web-runtime-hosts.yaml`
+  checks daily that jsDelivr and unpkg still serve the pinned files with
+  `Access-Control-Allow-Origin: *`. Apps still load from jsDelivr alone.
+
 ## Today
 
 | Asset | Fetched by | From | Fallback today |
@@ -311,8 +324,11 @@ they never wait.
 ## Not tried
 
 - Blocking a host in the browser tests (Playwright's `route`) to prove each
-  fallback: whether routing sees a dedicated worker's requests in all three
-  engines. Pointing a root at a closed local port is the alternative.
+  fallback. Routing does see a dedicated module worker's requests in
+  Chromium, Firefox and WebKit (Playwright 1.63, checked 2026-11-16), and
+  `local_network.mjs` relies on it; but a fulfilled response passes CORS, so
+  only a real cross-origin answer without the header reproduces "Failed to
+  fetch".
 - Shipping the files: Flutter's handling of a 26 MB web asset in `flutter
   build web` and `flutter run -d chrome`, and the size of a published
   package with them.

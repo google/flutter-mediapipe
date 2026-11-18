@@ -11,14 +11,14 @@ models are bundled with your app at build time.
 
 ## Tasks and platforms
 
-| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Text classification (BERT) | `TextClassifier` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text embeddings (Universal Sentence Encoder) | `TextEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Language detection | `LanguageDetector` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| EmbeddingGemma 300M | `TextEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Proofreader 200M | `TextProofreader` | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| Summarizer 200M | `TextSummarizer` | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Text classification (BERT) | `TextClassifier` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text embeddings (Universal Sentence Encoder) | `TextEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Language detection | `LanguageDetector` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| EmbeddingGemma 300M | `TextEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Proofreader 200M | `TextProofreader` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Summarizer 200M | `TextSummarizer` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
 
 All text tasks run on the CPU. The runtimes are Google's: its MediaPipe
 1.2.3 text library on Android 9+, iOS 15+ (devices and the arm64 simulator),
@@ -41,7 +41,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_text
 ```
 
-This adds `mediapipe_text: ^0.3.0` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_text: ^0.4.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_text.dart` exports its types, so you do not add or
 import core yourself.
 

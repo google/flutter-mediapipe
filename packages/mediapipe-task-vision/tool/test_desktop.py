@@ -44,8 +44,9 @@ def main():
     args = parser.parse_args()
     system = platform.system()
     target = {'Linux': 'linux', 'Windows': 'windows'}.get(system)
-    if target is None or platform.machine().lower() not in ('amd64', 'x86_64'):
-        raise SystemExit('This validation requires Linux x64 or Windows x64.')
+    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64'}.get(platform.machine().lower())
+    if target is None or arch is None or (target, arch) == ('windows', 'arm64'):
+        raise SystemExit('This validation requires Linux x64 or arm64, or Windows x64.')
     build = REPO / 'build/ci-tmp'
     build.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(prefix=f'desktop-{target}-', dir=build))
@@ -83,7 +84,7 @@ def main():
     if args.segmenter_tasks:
         tasks.append(('segmenter_tasks', 'segmenter_tasks'))
         files.append('segmenter_tasks/official_reference.json')
-    oracle = generate(root, references, target + '/x64', tasks, files)
+    oracle = generate(root, references, f'{target}/{arch}', tasks, files)
     library_sha = oracle['library_sha256']
     if args.interactive_segmenter:
         if target != 'linux':
@@ -91,7 +92,7 @@ def main():
         # Rewrites the checked-in fixtures with this host's wheel, as above:
         # Google's 1.2 release wheel, as the generator requires.
         python = pinned_venv(root / 'python-release',
-                             reference_wheel(target + '/x64', 'releaseReferenceWheels'),
+                             reference_wheel(f'{target}/{arch}', 'releaseReferenceWheels'),
                              log=root / 'pip-release.log')
         run([python, '-u', '-X', 'faulthandler', '-B',
              PACKAGE / 'tool/generate_interactive_segmenter_reference.py'],
@@ -211,7 +212,7 @@ flutter:
     env = consumer_environment(MEDIAPIPE_CPU_REFERENCE_DIR=str(references))
     # Google's vision library, which the hook bundles unchanged on Linux and
     # Windows; the references come from its wheel's own library.
-    vision = family_runtime('vision', target + '/x64')
+    vision = family_runtime('vision', f'{target}/{arch}')
     run(['flutter', 'pub', 'get'], app, root / 'pub.log', env)
     # Every selected task builds its own tasks per reference case. A task's
     # close waits for Google's usage-logging upload, so a slow reply holds a
@@ -220,12 +221,12 @@ flutter:
         root / 'dart-tests.log', env, timeout=2400)
     run(['flutter', 'test', '-d', target, 'integration_test/face_test.dart',
          '--reporter', 'expanded'], app, root / 'integration.log', env)
-    report = {'target': target + '/x64', 'delegate': 'CPU', 'library_sha256': vision['sha256'],
+    report = {'target': f'{target}/{arch}', 'delegate': 'CPU', 'library_sha256': vision['sha256'],
               'reference_library_sha256': library_sha,
               'reference_comparison': comparisons, 'modes': {}}
     for mode in ['debug', 'release']:
         run(['flutter', 'build', target, '--' + mode], app, root / f'build-{mode}.log', env)
-        bundle = app / (f'build/linux/x64/{mode}/bundle' if target == 'linux' else
+        bundle = app / (f'build/linux/{arch}/{mode}/bundle' if target == 'linux' else
                         f'build/windows/x64/runner/{mode.capitalize()}')
         libraries = [path for path in bundle.rglob('*')
                      if path.is_file() and path.suffix in ('.so', '.dll')

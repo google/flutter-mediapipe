@@ -22,14 +22,13 @@ import argparse
 import hashlib
 import os
 from pathlib import Path
-import platform
 import sys
 
 from generate_audio_reference import FIXTURES, HOST_NAMES, PACKAGE
 from generate_speech_reference import ENVELOPE_SECONDS, STREAM_TEXT, audio
 
 sys.path.insert(0, str(PACKAGE.parent / 'mediapipe-core/tool'))
-from official_wheels import host_runtime  # noqa: E402
+from official_wheels import host_runtime, host_target  # noqa: E402
 from model_pins import model_sha256  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 
@@ -153,7 +152,7 @@ def main():
     import mediapipe as mp
 
     runtime = host_runtime('releaseReferenceWheels')
-    name, version = HOST_NAMES[platform.system()], runtime['version']
+    name, version = HOST_NAMES[host_target()], runtime['version']
     assert mp.__version__ == version, mp.__version__
     library = Path(mp.__file__).parent / 'tasks/c' / runtime['library']
     assert hashlib.sha256(library.read_bytes()).hexdigest() == runtime['library_sha256']

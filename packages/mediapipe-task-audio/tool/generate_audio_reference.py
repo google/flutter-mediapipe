@@ -12,7 +12,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import platform
 import sys
 import time
 import wave
@@ -21,11 +20,12 @@ PACKAGE = Path(__file__).resolve().parents[1]
 FIXTURES = PACKAGE / 'test/fixtures'
 CLIPS = ['speech_16000_hz_mono.wav', 'speech_48000_hz_mono.wav', 'two_heads_16000_hz_mono.wav']
 sys.path.insert(0, str(PACKAGE.parent / 'mediapipe-core/tool'))
-from official_wheels import host_runtime  # noqa: E402
+from official_wheels import host_runtime, host_target  # noqa: E402
 from model_pins import model_sha256  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 MODEL_SHA256 = model_sha256('yamnet.tflite')
-HOST_NAMES = {'Darwin': 'macOS arm64', 'Linux': 'Linux x64', 'Windows': 'Windows x64'}
+HOST_NAMES = {'macos/arm64': 'macOS arm64', 'linux/x64': 'Linux x64',
+              'linux/arm64': 'Linux arm64', 'windows/x64': 'Windows x64'}
 
 # YAMNet's input, from its metadata: windows of 15,600 mono samples at 16 kHz.
 MODEL_WINDOW, MODEL_RATE = 15600, 16000
@@ -131,7 +131,7 @@ def main():
     from mediapipe.tasks.python.components.containers import audio_data
 
     runtime = host_runtime()
-    name, version = HOST_NAMES[platform.system()], runtime['version']
+    name, version = HOST_NAMES[host_target()], runtime['version']
     assert mp.__version__ == version, mp.__version__
     library = Path(mp.__file__).parent / 'tasks/c' / runtime['library']
     assert hashlib.sha256(library.read_bytes()).hexdigest() == runtime['library_sha256']

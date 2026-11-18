@@ -20,8 +20,8 @@ void requireTextTasksRuntime() {
     throw const RuntimeUnavailableException(
       "Google's text runtime is unavailable on this platform.",
       fix:
-          'Use Android (arm64 or x64), iOS arm64, macOS arm64, Linux x64 or '
-          'Windows x64, or a browser.',
+          'Use Android (arm64 or x64), iOS arm64, macOS arm64, Linux (x64 or '
+          'arm64), Windows x64, or a browser.',
     );
   }
   try {

@@ -1,3 +1,31 @@
+## 0.4.0
+
+- Upgrade every mediapipe package to 0.4.0 together. Adds Linux arm64
+  (aarch64): each family's hook bundles Google's MediaPipe 1.2.3
+  `linux_arm64` library, from the same archive as the other platforms and
+  pinned by SHA-256 like them. MediaPipe stays at 1.2.3 and its option
+  structs keep their layout, so the build still accepts family releases
+  from 0.3.0.
+- Linux arm64 runs every task on the CPU. A GPU request there fails with
+  `linuxArm64CpuOnly`, exported from `platform_interface.dart`, as the
+  reason. No GPU delegate has been validated on Linux arm64.
+- Linux arm64 needs glibc 2.27 or later (Raspberry Pi OS Bullseye,
+  Ubuntu 18.04 and later) and, even on the CPU, EGL and OpenGL ES:
+  `sudo apt-get install libegl1 libgles2`, which Raspberry Pi OS Lite
+  lacks. Google's library uses Arm's LSE atomic and RCPC load
+  instructions, so it needs a Raspberry Pi 5 (Cortex-A76, ARMv8.2) or
+  newer: on a Pi 4 or older (Cortex-A72 or earlier) it stops with an
+  illegal instruction.
+- On a Linux arm64 machine, install Flutter from its git repository:
+  Flutter publishes no Linux arm64 SDK archive.
+- CI runs on GitHub's `ubuntu-24.04-arm` runners as well: every family's
+  tests, the native hook tests, bundled models, the object detection
+  sample and the gallery's desktop tests, and a Raspberry Pi CPU check
+  under qemu.
+- The package is now licensed under Apache 2.0, like the rest of the
+  repository, in place of BSD-3-Clause. Releases up to 0.3.0 keep
+  BSD-3-Clause.
+
 ## 0.3.0
 
 - Upgrade every mediapipe package to 0.3.0 together. MediaPipe 1.2.3

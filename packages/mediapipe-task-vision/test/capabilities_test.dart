@@ -1,3 +1,4 @@
+import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:test/test.dart';
 
@@ -152,6 +153,28 @@ void main() {
     expect(on('windows').unavailableReasons[Delegate.gpu], isNotNull);
   });
 
+  test('every Linux arm64 task runs on the CPU only, with a reason', () {
+    const arm = TaskPlatform(operatingSystem: 'linux', architecture: 'arm64');
+    for (final claim in [
+      faceDetectorCapabilitiesForPlatform,
+      faceLandmarkerCapabilitiesForPlatform,
+      gestureRecognizerCapabilitiesForPlatform,
+      handLandmarkerCapabilitiesForPlatform,
+      holisticLandmarkerCapabilitiesForPlatform,
+      imageClassifierCapabilitiesForPlatform,
+      imageEmbedderCapabilitiesForPlatform,
+      imageSegmenterCapabilitiesForPlatform,
+      interactiveSegmenterCapabilitiesForPlatform,
+      objectDetectorCapabilitiesForPlatform,
+      poseLandmarkerCapabilitiesForPlatform,
+    ]) {
+      final result = claim(arm);
+      expect(result.supportedDelegates, {Delegate.cpu});
+      expect(result.runtimeVersion, '1.2.3');
+      expect(result.unavailableReasons[Delegate.gpu], linuxArm64CpuOnly);
+    }
+  });
+
   test("Linux and Windows report Google's 1.2.3 libraries", () {
     for (final (os, version) in [('linux', '1.2.3'), ('windows', '1.2.3')]) {
       final platform = TaskPlatform(operatingSystem: os, architecture: 'x64');
@@ -170,7 +193,7 @@ void main() {
   test('an unsupported platform fails closed for both delegates', () {
     final result = objectDetectorCapabilitiesForPlatform(
       const TaskPlatform(
-        operatingSystem: 'linux',
+        operatingSystem: 'windows',
         architecture: 'arm64',
         version: '1.0',
       ),

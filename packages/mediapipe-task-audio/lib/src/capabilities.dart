@@ -8,8 +8,8 @@ import 'audio_task_backend.dart'
     show audioTaskBackendFactory, audioTranscriberOpener, browserOnMac;
 
 /// Where Audio Classifier runs: CPU on Google's audio library on Android,
-/// iOS 15+, macOS 14+ arm64, Linux x64 and Windows x64, and through Google's
-/// browser runtime where the web plugin installs it.
+/// iOS 15+, macOS 14+ arm64, Linux x64 and arm64, and Windows x64, and
+/// through Google's browser runtime where the web plugin installs it.
 Future<TaskCapabilities> queryAudioClassifierCapabilities() async =>
     audioClassifierCapabilitiesForPlatform(await currentTaskPlatform());
 
@@ -33,7 +33,7 @@ const speechRuntimeTargets = largeModelRuntimeTargets;
 
 const _speechNoLibrary =
     "Google's audio library has the speech tasks on Android arm64 and "
-    'x86_64, iOS, macOS arm64, Linux x64 and Windows x64.';
+    'x86_64, iOS, macOS arm64, Linux x64 and arm64, and Windows x64.';
 
 const _speechNoBrowserPlugin =
     "The speech tasks' browser runtime needs this package's web plugin, which "
@@ -102,10 +102,10 @@ const transcriberGpuTargets = <String, String?>{
 };
 
 /// Where Audio Transcriber runs: Google's audio library on 64-bit Android,
-/// iOS 15+, macOS 14+ arm64, Linux x64 and Windows x64, and through Google's
-/// browser runtime where the web plugin installs it, on the CPU everywhere and
-/// on the GPU on [transcriberGpuTargets] and in Chromium and WebKit on a Mac's
-/// Apple WebGPU adapter.
+/// iOS 15+, macOS 14+ arm64, Linux x64 and arm64, and Windows x64, and
+/// through Google's browser runtime where the web plugin installs it, on the
+/// CPU everywhere and on the GPU on [transcriberGpuTargets] and in Chromium
+/// and WebKit on a Mac's Apple WebGPU adapter.
 Future<TaskCapabilities> queryAudioTranscriberCapabilities() async =>
     audioTranscriberCapabilitiesForPlatform(await currentTaskPlatform());
 
@@ -117,6 +117,8 @@ TaskCapabilities audioTranscriberCapabilitiesForPlatform(
   final String gpuReason;
   if (!targets.containsKey(platform.target)) {
     gpuReason = _speechUnavailable(platform);
+  } else if (platform.target == 'linux/arm64') {
+    gpuReason = linuxArm64CpuOnly;
   } else if (platform.operatingSystem == 'web') {
     gpuReason = hasHardwareWebGpu(platform)
         ? '$_transcriberWebGpuUnproved This browser has ${platform.gpu} on '
@@ -152,9 +154,10 @@ TaskCapabilities audioTranscriberCapabilitiesForPlatform(
 const textToSpeechGpuTargets = <String, String?>{'macos/arm64': '15.0'};
 
 /// Where Text to Speech runs: Google's audio library on 64-bit Android, iOS
-/// 15+, macOS 14+ arm64, Linux x64 and Windows x64, and through Google's
-/// browser runtime where the web plugin installs it, on the CPU everywhere and
-/// on the GPU on [textToSpeechGpuTargets] for a model with a GPU section.
+/// 15+, macOS 14+ arm64, Linux x64 and arm64, and Windows x64, and through
+/// Google's browser runtime where the web plugin installs it, on the CPU
+/// everywhere and on the GPU on [textToSpeechGpuTargets] for a model with a
+/// GPU section.
 Future<TaskCapabilities> queryTextToSpeechCapabilities() async =>
     textToSpeechCapabilitiesForPlatform(await currentTaskPlatform());
 
@@ -168,6 +171,8 @@ TaskCapabilities textToSpeechCapabilitiesForPlatform(TaskPlatform platform) {
       Delegate.cpu: _speechUnavailable(platform),
       Delegate.gpu: !targets.containsKey(platform.target)
           ? _speechUnavailable(platform)
+          : platform.target == 'linux/arm64'
+          ? linuxArm64CpuOnly
           : platform.operatingSystem == 'web'
           ? _textToSpeechWebGpuUnproved
           : _textToSpeechGpuUnproved,

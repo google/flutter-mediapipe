@@ -43,6 +43,18 @@ const referenceWheels = <String, ReferenceWheel>{
     librarySha256:
         '273e2ea1757c0e88e580c64829160f7711fdcd89ac2673a8fbbcab3058926087',
   ),
+  'linux/arm64': (
+    version: '1.1.0rc20260925',
+    url:
+        'https://files.pythonhosted.org/packages/70/5c/'
+        '3967ed9ee966cd212bb6c02a4354ef91508131e728639457e65be7aa1b1b/'
+        'mediapipe_nightly-1.1.0rc20260925-py3-none-manylinux_2_28_aarch64.whl',
+    wheelSha256:
+        '95e0df7c6fde228a8cc63cd2eccaf5adbdb0b6549807c5f23c0026908b7516f8',
+    libraryName: 'libmediapipe.so',
+    librarySha256:
+        '6df1b1ed2a0e6f28c386ff4d9117d5d33c4b1ab8afe4e44513dd889f91ece065',
+  ),
   'windows/x64': (
     version: '1.1.0rc20260925',
     url:
@@ -87,6 +99,18 @@ const releaseReferenceWheels = <String, ReferenceWheel>{
     libraryName: 'libmediapipe.so',
     librarySha256:
         '7ce8b23159d3fd4e8b727e35afbfb35f3d45d6bde1ec11cc01c316b3bf469f63',
+  ),
+  'linux/arm64': (
+    version: '1.2.3',
+    url:
+        'https://files.pythonhosted.org/packages/bf/ec/'
+        'd29126f33b5c8de9b4ad70b2cf17d06853f3d9c13d8228a1e4c1887e630e/'
+        'mediapipe-1.2.3-py3-none-manylinux_2_28_aarch64.whl',
+    wheelSha256:
+        '59d55f6395efbda2a053a8db18f598277e63c264f9a6f65a819c23d92b90fed8',
+    libraryName: 'libmediapipe.so',
+    librarySha256:
+        '7c86336791c4d73bff5dce15c1ce911469870af136139e8d2a4598aee7f90e7f',
   ),
   'windows/x64': (
     version: '1.2.3',

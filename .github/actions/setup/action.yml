@@ -29,12 +29,63 @@ inputs:
 runs:
   using: composite
   steps:
-    - if: ${{ inputs.flutter == 'true' }}
+    - if: ${{ inputs.flutter == 'true' && !(runner.os == 'Linux' && runner.arch == 'ARM64') }}
       uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
       with:
         flutter-version: '3.50.0'
         channel: stable
         cache: true
+    # Flutter publishes no Linux arm64 SDK archive, so flutter-action finds no
+    # release for that runner. The same tag from Flutter's repository runs
+    # there: its first command downloads the arm64 Dart SDK and engine.
+    - id: flutter-arm64
+      if: ${{ inputs.flutter == 'true' && runner.os == 'Linux' && runner.arch == 'ARM64' }}
+      shell: bash
+      env:
+        FLUTTER_VERSION: '3.50.0'
+      run: |
+        echo "root=$RUNNER_TOOL_CACHE/flutter-git/$FLUTTER_VERSION" >> "$GITHUB_OUTPUT"
+        echo "version=$FLUTTER_VERSION" >> "$GITHUB_OUTPUT"
+    - if: ${{ steps.flutter-arm64.outcome == 'success' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ steps.flutter-arm64.outputs.root }}
+        key: flutter-git-linux-arm64-${{ steps.flutter-arm64.outputs.version }}-v2
+    - if: ${{ steps.flutter-arm64.outcome == 'success' }}
+      shell: bash
+      env:
+        FLUTTER_ROOT: ${{ steps.flutter-arm64.outputs.root }}
+        FLUTTER_VERSION: ${{ steps.flutter-arm64.outputs.version }}
+      run: |
+        if [ ! -x "$FLUTTER_ROOT/bin/flutter" ]; then
+          rm -rf "$FLUTTER_ROOT"
+          for attempt in 1 2 3; do
+            git clone --quiet --depth 1 --branch "$FLUTTER_VERSION" \
+              https://github.com/flutter/flutter.git "$FLUTTER_ROOT" && break
+            rm -rf "$FLUTTER_ROOT"
+            [ "$attempt" = 3 ] && exit 1
+            sleep $((attempt * 15))
+          done
+        fi
+        git config --global --add safe.directory "$FLUTTER_ROOT"
+        {
+          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
+          echo "PUB_CACHE=$HOME/.pub-cache"
+        } >> "$GITHUB_ENV"
+        {
+          echo "$FLUTTER_ROOT/bin"
+          echo "$FLUTTER_ROOT/bin/cache/dart-sdk/bin"
+          echo "$HOME/.pub-cache/bin"
+        } >> "$GITHUB_PATH"
+        "$FLUTTER_ROOT/bin/flutter" config --no-analytics > /dev/null
+        "$FLUTTER_ROOT/bin/flutter" --version
+        # Plain `dart pub get` finds sky_engine in the cache, which only a
+        # Flutter command that needs it downloads.
+        for attempt in 1 2 3; do
+          "$FLUTTER_ROOT/bin/flutter" precache --linux && break
+          [ "$attempt" = 3 ] && exit 1
+          sleep $((attempt * 15))
+        done
     - if: ${{ inputs.python == 'true' }}
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
@@ -81,8 +132,11 @@ runs:
           *) echo "Unknown linux-profile: $PROFILE" >&2; exit 1 ;;
         esac
         hash=$(echo "$packages" | sha256sum | cut -c1-16)
+        # The arm64 image can share the x64 image's name and version, and its
+        # .deb files are not the x64 ones.
+        arch=''; if [ "$RUNNER_ARCH" != X64 ]; then arch="-$RUNNER_ARCH"; fi
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
-        echo "key=apt-v1-${ImageOS:-linux}-${ImageVersion:-unknown}-$PROFILE-$hash" >> "$GITHUB_OUTPUT"
+        echo "key=apt-v1-${ImageOS:-linux}${arch}-${ImageVersion:-unknown}-$PROFILE-$hash" >> "$GITHUB_OUTPUT"
     # The .deb files of the profile and everything it pulls in, so a hit
     # installs without a download or an apt-get update. Only main saves them,
     # as with the models: two pull requests each saved a 95 MB copy of the key

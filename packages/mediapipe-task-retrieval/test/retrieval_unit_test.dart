@@ -305,6 +305,7 @@ void main() {
       for (final (os, arch, version) in [
         ('macos', 'arm64', '15.0'),
         ('linux', 'x64', null),
+        ('linux', 'arm64', null),
         ('windows', 'x64', null),
         ('android', 'arm64', '14'),
         ('android', 'x64', '14'),
@@ -335,11 +336,7 @@ void main() {
     });
 
     test('a target without the library says so for both delegates', () {
-      for (final (os, arch) in [
-        ('macos', 'x64'),
-        ('linux', 'arm64'),
-        ('windows', 'arm64'),
-      ]) {
+      for (final (os, arch) in [('macos', 'x64'), ('windows', 'arm64')]) {
         final capabilities = semanticRetrieverCapabilitiesForPlatform(
           _platform(os, arch, null),
         );

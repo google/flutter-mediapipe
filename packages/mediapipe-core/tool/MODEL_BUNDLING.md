@@ -91,7 +91,7 @@ behind it and the verification follow.
   every HTTP client refused, refuses the unbundled Face Landmarker and, with
   downloads on, downloads it at run time. A release build then ships exactly
   the three models and passes the offline checks from a copy of its bundle. It
-  passed on macOS arm64. CI runs it on Linux x64 and Windows x64
+  passed on macOS arm64. CI runs it on Linux x64, Linux arm64 and Windows x64
   (`.github/workflows/bundled-models.yaml`), with core's store and bundling
   unit tests.
 

@@ -456,7 +456,8 @@ class WorkflowWithNoBuild(unittest.TestCase):
         jobs = self.jobs()
         self.assertEqual(set(jobs), {'pin', 'desktop', 'android', 'ios', 'macos', 'web',
                                      'compare', 'escalate'})
-        self.assertIsNone(jobs.pop('pin'))
+        # The pin job only skips on Google's repository.
+        self.assertEqual(jobs.pop('pin'), "${{ github.repository_owner != 'google' }}")
         for name in 'desktop', 'android', 'ios', 'macos', 'web':
             self.assertIn("needs.pin.outputs.compare == 'true'", jobs[name])
         self.assertIn("needs.pin.outputs.report == 'true'", jobs['compare'])

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium, firefox, webkit} from 'playwright';
+import {keepLocal} from './local_network.mjs';
 import {isLostPage, saveSystemLog} from './lost_page.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -111,7 +112,7 @@ async function launch(deviceCount = 2, useFile = true) {
     firefoxUserPrefs: process.platform === 'linux' ? {'webgl.force-enabled': true} : {},
   };
   options.headless = argumentsMap.headed !== 'true';
-  const browser = await ({chromium, firefox, webkit}[browserName]).launch(options);
+  const browser = keepLocal(await ({chromium, firefox, webkit}[browserName]).launch(options), base);
   browsers.push(browser);
   report.browser_version = browser.version();
   return browser;
@@ -951,6 +952,7 @@ async function textAudioChecks() {
     ...(microphone ? {channel: 'chromium', args: ['--use-fake-device-for-media-stream',
       '--use-file-for-fake-audio-capture=' + path.join(repo, 'gallery/assets/samples/speech_16000_hz_mono.wav')]} : {}),
   });
+  keepLocal(browser, textAudioBase);
   browsers.push(browser);
   report.browser_version = browser.version();
   const context = await browser.newContext(microphone ? {permissions: ['microphone']} : {});
@@ -1259,6 +1261,7 @@ async function speechChecks() {
     headless: argumentsMap.headed !== 'true',
     ...(browserName === 'chromium' ? {channel: 'chromium', args: ['--enable-unsafe-webgpu']} : {}),
   });
+  keepLocal(browser, speechBase);
   browsers.push(browser);
   report.browser_version = browser.version();
   const context = await browser.newContext();

@@ -31,7 +31,13 @@ runs:
         # next mirror only fetches what is missing.
         sudo apt-get clean
         downloaded=false
-        for mirror in default http://us.archive.ubuntu.com/ubuntu http://mirrors.edge.kernel.org/ubuntu; do
+        # Ubuntu serves arm64 from its ports archive, which the x64 mirrors
+        # do not carry.
+        mirrors='http://us.archive.ubuntu.com/ubuntu http://mirrors.edge.kernel.org/ubuntu'
+        if [ "$(dpkg --print-architecture)" != amd64 ]; then
+          mirrors='http://ports.ubuntu.com/ubuntu-ports http://mirrors.edge.kernel.org/ubuntu-ports'
+        fi
+        for mirror in default $mirrors; do
           if [ "$mirror" != default ]; then
             if [ ! -f "$sources" ]; then
               echo "No $sources to point at $mirror." >&2

@@ -34,7 +34,7 @@ def _strings(source):
 
 def reference_wheel(target, table='referenceWheels'):
     """Core's `referenceWheels` row, or the `table` named, for `macos/arm64`,
-    `linux/x64` or `windows/x64`."""
+    `linux/x64`, `linux/arm64` or `windows/x64`."""
     source = REFERENCE_WHEELS.read_text(encoding='utf-8')
     source = source[source.index(f'const {table} ='):]
     row = re.search(r"'" + re.escape(target) + r"': \((.*?)\n  \),", source, re.S).group(1)
@@ -49,14 +49,21 @@ def reference_wheel(target, table='referenceWheels'):
 
 MACOS = reference_wheel('macos/arm64')
 
+def host_target():
+    """This host as a build target (`linux/arm64` and so on), or None where
+    no official wheel is pinned for it."""
+    return {('Darwin', 'arm64'): 'macos/arm64', ('Linux', 'x86_64'): 'linux/x64',
+            ('Linux', 'aarch64'): 'linux/arm64',
+            ('Windows', 'AMD64'): 'windows/x64'}.get((platform.system(), platform.machine()))
+
+
 def host_runtime(table='referenceWheels'):
     """The pinned official runtime for this host in core's `table`, or
     SystemExit where none is."""
-    host = (platform.system(), platform.machine())
-    target = {('Darwin', 'arm64'): 'macos/arm64', ('Linux', 'x86_64'): 'linux/x64',
-              ('Windows', 'AMD64'): 'windows/x64'}.get(host)
+    target = host_target()
     if target is None:
-        raise SystemExit(f'No official wheel is pinned for {host[0]} {host[1]}.')
+        raise SystemExit(f'No official wheel is pinned for {platform.system()} '
+                         f'{platform.machine()}.')
     return reference_wheel(target, table)
 
 

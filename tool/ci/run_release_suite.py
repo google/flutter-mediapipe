@@ -17,6 +17,7 @@ Usage, from the repository root, after preparing the gallery:
 """
 import argparse
 from pathlib import Path
+import platform
 import queue
 import re
 import subprocess
@@ -53,8 +54,10 @@ BUILD_RETRY_DELAY = 30
 # finishes at the run's timeout.
 PROGRESS = 'MODEL_DOWNLOAD '
 DOWNLOAD = re.compile(r'^MODEL_DOWNLOAD (.+): (?:HTTP .*|(\d+)(?: of \d+)? MB in \d+ s(?:, ended)?)$')
+# Flutter's folder for this Linux host's architecture.
+LINUX_ARCH = 'arm64' if platform.machine().lower() == 'aarch64' else 'x64'
 EXECUTABLES = {
-    'linux': f'build/linux/x64/release/bundle/{NAME}',
+    'linux': f'build/linux/{LINUX_ARCH}/release/bundle/{NAME}',
     'windows': f'build/windows/x64/runner/Release/{NAME}.exe',
     'macos': f'build/macos/Build/Products/Release/{NAME}.app/Contents/MacOS/{NAME}',
 }

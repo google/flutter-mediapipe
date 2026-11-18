@@ -19,8 +19,9 @@ def main():
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
     target = {'Linux': 'linux', 'Windows': 'windows'}.get(platform.system())
-    if target is None or platform.machine().lower() not in ('amd64', 'x86_64'):
-        raise SystemExit('Run this validation on Windows x64 or Linux x64.')
+    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64'}.get(platform.machine().lower())
+    if target is None or arch is None or (target, arch) == ('windows', 'arm64'):
+        raise SystemExit('Run this validation on Windows x64, or Linux x64 or arm64.')
     evidence = REPO / f'build/ci-tmp/gallery-desktop-{target}'
     evidence.mkdir(parents=True, exist_ok=True)
 
@@ -39,7 +40,7 @@ def main():
             raise RuntimeError(f'{name} failed ({result.returncode})')
 
     run(['dart', 'run', REPO / 'tool/gallery_builder/bin/prepare_gallery.dart',
-         '--target', f'{target}/x64'], 'prepare')
+         '--target', f'{target}/{arch}'], 'prepare')
     manifest = json.loads((GALLERY / 'assets/manifest.json').read_text())
     required = {'face_landmarker', 'hand_landmarker', 'pose_landmarker',
                 'audio_classifier', 'language_detector', 'text_classifier',
@@ -68,12 +69,12 @@ def main():
              f'--dart-define=GALLERY_LIVE_TASK={task}',
              '--reporter', 'expanded'], f'desktop_cpu_camera_test-{task}')
     run(['flutter', 'build', target, '--release'], 'release')
-    bundle = GALLERY / ('build/linux/x64/release/bundle' if target == 'linux'
+    bundle = GALLERY / (f'build/linux/{arch}/release/bundle' if target == 'linux'
                          else 'build/windows/x64/runner/Release')
     # One library per family, each the one core pins for this target.
     runtimes = {}
     for family in task_families():
-        pin = family_runtime(family, f'{target}/x64')
+        pin = family_runtime(family, f'{target}/{arch}')
         libraries = list(bundle.rglob(pin['file']))
         if len(libraries) != 1:
             raise RuntimeError(f'Expected one {family} library, got {libraries}')
@@ -88,7 +89,7 @@ def main():
          '--suite', 'integration_test/gallery_journey_test.dart', '--timeout', '900'],
         'release-journey', timeout=1800)
     (evidence / 'report.json').write_text(json.dumps({
-        'target': f'{target}/x64', 'delegates': ['cpu'], 'runtimes': runtimes,
+        'target': f'{target}/{arch}', 'delegates': ['cpu'], 'runtimes': runtimes,
         'checks': ['native-camera-registration-and-enumeration',
                    'assets', 'cross-task-runtime-coexistence',
                    'one-pinned-library-per-family',

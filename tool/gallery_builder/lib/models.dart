@@ -118,6 +118,7 @@ const nativeTargets = [
   'ios/arm64',
   'ios-simulator/arm64',
   'linux/x64',
+  'linux/arm64',
   'macos/arm64',
   'windows/x64',
 ];

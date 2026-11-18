@@ -1,3 +1,24 @@
+## 0.4.0
+
+- Upgrade every mediapipe package to 0.4.0 together, so this package now
+  requires `mediapipe_core` ^0.4.0, which pins Google's Linux arm64
+  libraries. MediaPipe stays at 1.2.3.
+- Adds Linux arm64 (aarch64): every audio task, Audio Transcriber and
+  Text to Speech run there on the CPU. A GPU request for the speech tasks
+  fails there with a clear reason.
+- Linux arm64 needs glibc 2.27 or later (Raspberry Pi OS Bullseye,
+  Ubuntu 18.04 and later) and, even on the CPU, EGL and OpenGL ES:
+  `sudo apt-get install libegl1 libgles2`, which Raspberry Pi OS Lite
+  lacks. Google's library uses Arm's LSE atomic and RCPC load
+  instructions, so it needs a Raspberry Pi 5 (Cortex-A76, ARMv8.2) or
+  newer: on a Pi 4 or older (Cortex-A72 or earlier) it stops with an
+  illegal instruction.
+- CI runs every audio task on GitHub's `ubuntu-24.04-arm` runners,
+  against references from Google's aarch64 Python wheel.
+- The package is now licensed under Apache 2.0, like the rest of the
+  repository, in place of BSD-3-Clause. Releases up to 0.3.0 keep
+  BSD-3-Clause.
+
 ## 0.3.0
 
 - Upgrade every mediapipe package to 0.3.0 together. MediaPipe 1.2.3

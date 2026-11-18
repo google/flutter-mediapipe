@@ -520,7 +520,7 @@ class PinNightlyTest(unittest.TestCase):
             old, {**old, 'generation': generation}, self.digests)
 
     def test_reads_every_pin(self):
-        self.assertEqual(len(self.old['paths']), 40)
+        self.assertEqual(len(self.old['paths']), 45)
         self.assertEqual(set(self.old['paths']), set(self.digests))
 
     def test_the_same_build_rewrites_nothing(self):

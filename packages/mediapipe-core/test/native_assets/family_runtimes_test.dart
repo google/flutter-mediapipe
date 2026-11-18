@@ -84,14 +84,37 @@ void main() {
 
   test('targets without a library name the ones that have one', () {
     expect(
-      () => requireFamilyRuntime('text', 'linux/arm64'),
+      () => requireFamilyRuntime('text', 'windows/arm64'),
       throwsA(
         isA<UnsupportedError>().having(
           (error) => error.message,
           'message',
-          allOf(contains('linux/arm64'), contains('macos/arm64')),
+          allOf(contains('windows/arm64'), contains('linux/arm64')),
         ),
       ),
+    );
+  });
+
+  // From any host: the hook cross-builds, so every runner checks the pin.
+  test("Linux arm64 bundles Google's aarch64 library as is", () async {
+    final google = familyRuntimes['text']!['linux/arm64']!;
+    await _bundle(
+      'text',
+      OS.linux,
+      Architecture.arm64,
+      check: (output) {
+        final asset = output.assets.code.single;
+        expect(asset.id, 'package:mediapipe_core/mediapipe.dylib');
+        final bytes = File.fromUri(asset.file!).readAsBytesSync();
+        expect(bytes, hasLength(google.bytes));
+        expect(sha256.convert(bytes).toString(), google.sha256);
+        final header = ByteData.sublistView(bytes);
+        // ELF, 64-bit, little-endian, e_machine EM_AARCH64 (183).
+        expect(header.getUint32(0, Endian.big), 0x7f454c46);
+        expect(bytes[4], 2);
+        expect(bytes[5], 1);
+        expect(header.getUint16(18, Endian.little), 183);
+      },
     );
   });
 

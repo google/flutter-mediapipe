@@ -11,6 +11,7 @@ export 'src/capabilities/task_capabilities.dart'
     show
         largeModelNeeds64Bit,
         largeModelRuntimeTargets,
+        linuxArm64CpuOnly,
         pluginNotRegistered,
         requireDelegate,
         taskPlatformGpuReader,

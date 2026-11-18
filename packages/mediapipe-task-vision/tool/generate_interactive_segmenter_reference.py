@@ -52,8 +52,9 @@ def main():
     runtime = host_runtime(WHEELS)
     assert mp.__version__ == runtime['version'], mp.__version__
     host = (platform.system(), platform.machine().lower())
-    if host not in (('Darwin', 'arm64'), ('Linux', 'x86_64'), ('Linux', 'amd64')):
-        raise SystemExit('The stateful API is validated on macOS arm64 and Linux x64.')
+    if host not in (('Darwin', 'arm64'), ('Linux', 'x86_64'), ('Linux', 'amd64'),
+                    ('Linux', 'aarch64')):
+        raise SystemExit('The stateful API is validated on macOS arm64 and Linux x64 and arm64.')
     library, library_sha256 = runtime['library'], runtime['library_sha256']
     library = Path(mp.__file__).parent / 'tasks/c' / library
     assert digest(library.read_bytes()) == library_sha256

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium, firefox, webkit} from 'playwright';
+import {keepLocal} from './local_network.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const args = Object.fromEntries(process.argv.slice(2).map(arg => arg.replace(/^--/, '').split('=')));
@@ -46,6 +47,7 @@ const browser = await ({chromium, firefox, webkit}[browserName]).launch({
     ...(linux ? {'webgl.force-enabled': true} : {}),
   }} : {}),
 });
+keepLocal(browser, base);
 const report = {browser: browserName, checks: [], errors: []};
 let page;
 try {

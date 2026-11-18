@@ -236,17 +236,17 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
 
 - **Retrieval** (`mediapipe_retrieval`) runs Universal Embedder and Semantic
   Retriever on every target through `familyRuntimes['retrieval']`: Android
-  arm64, arm and x86_64; iOS device and simulator; macOS arm64; Linux x64;
-  Windows x64; and in browsers on `@mediapipe/tasks-retrieval`. The
-  October 9 library exports 60 functions, identical on every platform: the
+  arm64, arm and x86_64; iOS device and simulator; macOS arm64; Linux x64
+  and, since 0.4.0, arm64; Windows x64; and in browsers on
+  `@mediapipe/tasks-retrieval`. The October 9 library exports 60 functions, identical on every platform: the
   two tasks, the Text and Image Embedder and `MpImage` functions they depend
   on, and the shared error, string list and logging functions.
   Google's engine refuses the text-only EmbeddingGemma 2 model for the task, so
   the package pins the text and vision (388 MB) and the full (485 MB) models.
 - **Decision Maker** (`mediapipe_decision`) runs on the per-family decision
   library through `familyRuntimes['decision']` on Android arm64, arm and
-  x86_64, iOS device and simulator, macOS arm64, Linux x64 and Windows x64,
-  and on `@mediapipe/tasks-decision` in browsers. The October 9 library
+  x86_64, iOS device and simulator, macOS arm64, Linux x64 and (since 0.4.0)
+  arm64, and Windows x64, and on `@mediapipe/tasks-decision` in browsers. The October 9 library
   exports 24 Decision Maker functions (the 13 Google's Python declares, plus
   schema, JSON, context and prewarm evaluation) and the shared helpers; its
   answers match Google's wheel to float precision with Laya and with the
@@ -344,6 +344,50 @@ Google's URL above; the October 18 `BUILD_INFO` is in
 - **Text-only EmbeddingGemma 2.** The decision library runs it (checked on
   macOS arm64).
 - iOS framework zips still hold only the binary and `Info.plist`.
+
+## Linux arm64 (0.4.0)
+
+Google's 1.2.3 zip carries `<family>/linux_arm64/` for all five families,
+and 0.4.0 pins them as they are, beside Linux x64 (MB, 10^6 bytes):
+
+| Platform | Vision | Text | Audio | Retrieval | Decision |
+| --- | --- | --- | --- | --- | --- |
+| Linux x64 | 34.9 | 41.8 | 42.2 | 33.0 | 36.6 |
+| Linux arm64 | 31.7 | 38.3 | 38.6 | 29.8 | 33.2 |
+
+Every task runs on the CPU there: no GPU delegate has been validated on
+Linux arm64 (`linuxArm64CpuOnly` in `task_capabilities.dart`). Checked on
+2026-11-16:
+
+- **glibc.** The newest symbol version any of the five needs is
+  `GLIBC_2.27`, and none needs `libstdc++` (each links it statically). So
+  Ubuntu 18.04, Debian 10 and Raspberry Pi OS Bullseye or later.
+- **EGL and OpenGL ES.** Each library lists `libEGL.so.1` and
+  `libGLESv2.so.2` as needed and fails to load without them, even for a
+  CPU task. Raspberry Pi OS Lite lacks both: `apt install libegl1 libgles2`.
+- **CPU.** The libraries are built for Armv8.2 and later: the vision library
+  holds about 6,300 LSE atomics (`ldaddal`, `casal`, `swpal`) and 2,800 RCPC
+  loads (`ldapr`), the text library 7,400 and 2,400, inline (not the
+  outlined `__aarch64_*` helpers a baseline build would call). Each library
+  checks for LSE as it loads and, without it, prints "This binary was
+  compiled with lse enabled, but this feature is not available on this
+  processor (go/sigill-fail-fast)" and raises SIGILL. A Raspberry Pi 5
+  (Cortex-A76) has both features; a Raspberry Pi 4 (Cortex-A72) and older
+  lack both. Under qemu-user on a GitHub Neoverse runner, `-cpu cortex-a72`
+  hides both from `AT_HWCAP` and `-cpu cortex-a76` shows them; `dlopen` of
+  each of the five libraries then stops with SIGILL on the A72 and succeeds
+  on the A76, where the Language Detector's tests also pass (the test VM
+  runs under qemu; on the A72 it stops on that check).
+  `tool/ci/pi_cpu_baseline.py` checks all of this in `linux-arm64.yaml`.
+- **32-bit.** The zip has no `armhf` library, so a 32-bit Raspberry Pi OS is
+  not supported on any Pi.
+- **Flutter.** Flutter publishes no Linux arm64 SDK archive; CI clones the
+  pinned tag instead (`.github/actions/setup`). Dart runs natively there.
+
+The families' tests run on the `ubuntu-24.04-arm` runner beside
+`ubuntu-24.04` in `family.yaml`, `desktop.yaml`, `bundled-models.yaml` and
+`samples.yaml`, and the coverage gate requires a `linux-arm64` CPU result for
+every task.
 
 ## Flutter host environment
 

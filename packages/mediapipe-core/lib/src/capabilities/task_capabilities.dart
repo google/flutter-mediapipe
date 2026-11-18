@@ -112,12 +112,21 @@ const tasksRuntimeTargets = <String, String?>{
 const largeModelRuntimeTargets = <String, String?>{
   'macos/arm64': '14.0',
   'linux/x64': null,
+  // Google's aarch64 library, on the CPU. It uses the LSE atomics and RCPC
+  // loads a Raspberry Pi 5's cores have and a Pi 4's lack.
+  'linux/arm64': null,
   'windows/x64': null,
   'ios/arm64': '15.0',
   // Android 9 (API 28) and later; the hooks refuse a lower minSdk.
   'android/arm64': null,
   'android/x64': null,
 };
+
+/// Why no task offers the GPU on Linux arm64, where every task runs on the
+/// CPU.
+const linuxArm64CpuOnly =
+    "On Linux arm64 this package runs every task on the CPU of Google's "
+    'aarch64 library; no GPU delegate has been validated there.';
 
 /// Why a task on [largeModelRuntimeTargets] refuses 32-bit Android.
 const largeModelNeeds64Bit =

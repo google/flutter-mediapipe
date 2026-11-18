@@ -65,6 +65,12 @@ jobs:
       # (packages/mediapipe-core/tool/official_wheels.py).
       - name: Test the official wheel install
         run: python3 -B -m unittest packages/mediapipe-core/tool/test_official_wheels.py
+      # The nightly comparison runs only on a schedule, in a fork
+      # (nightly-compare.yaml); its pin and comparison tools are tested here.
+      - name: Test the nightly pin and comparison tools
+        run: |
+          python3 -B -m unittest packages/mediapipe-core/tool/test_pin_nightly.py
+          python3 -B -m unittest tool/ci/test_nightly_compare.py
       # Every public library must match its reviewed snapshot, and each
       # family's API must be identical on native and web and follow the shared
       # conventions (tool/api_parity/README.md).

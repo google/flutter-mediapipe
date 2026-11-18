@@ -123,7 +123,10 @@ def where_it_runs(problems, table, cells):
         if not line.startswith('|'):
             break
         rows.append([cell.strip() for cell in line.strip().strip('|').split('|')])
-    platforms = [column.split()[0].lower() for column in rows[0][1:]]
+    # A column is its matrix platform: "Linux arm64" is linux-arm64, and any
+    # other column is its first word ("Linux x64" is linux).
+    platforms = ['linux-arm64' if column == 'Linux arm64' else column.split()[0].lower()
+                 for column in rows[0][1:]]
     found = {row[0]: dict(zip(platforms, row[1:])) for row in rows[2:]}
     listed = sorted(task for tasks in README_ROWS.values() for task in tasks)
     if listed != sorted(cells):
@@ -180,7 +183,8 @@ def flutter_versions(problems):
     for source in sorted([*github.glob('workflows/*.y*ml'), *github.glob('actions/*/action.yml')]):
         if source == github / FLOOR_WORKFLOW:
             continue
-        for version in re.findall(r"flutter-version: '([^']+)'", source.read_text()):
+        for version in re.findall(r"(?:flutter-version|FLUTTER_VERSION): '([^']+)'",
+                                  source.read_text()):
             ci.setdefault(version, []).append(str(source.relative_to(github)))
     if len(ci) != 1:
         problems.append(f'.github: Flutter versions differ: {ci}')
