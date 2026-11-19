@@ -1,23 +1,65 @@
-name: Resolve Gradle plugins from Maven Central directly
+name: Resolve Gradle downloads from Google's copy of Maven Central
 description: >-
   Flutter's own Gradle build resolves its plugins from the plugin portal only,
   which sends Kotlin's artifacts on to Maven Central by redirect; one run
   failed when the redirect served none (2026-11-12). An init script makes
   every Gradle build on the runner resolve plugins from Google's Maven and
-  Maven Central first.
+  Maven Central first. Maven Central itself has since failed whole jobs: on
+  8 of 50 runners it answered "not found" for files it has, or "too many
+  requests" to everything, for the whole job (2026-11-19). Gradle gives up
+  on a repository that keeps failing and asks no repository after it, so
+  kotlin-dsl, which only the portal has, and Flutter's engine, which only
+  Flutter's repository has, were not found. So Gradle now uses Google's copy
+  of Maven Central in its place, and retries a failed download longer.
 runs:
   using: composite
   steps:
-    - name: Resolve Gradle plugins from Maven Central directly
+    # Wherever a build names Maven Central, for plugins, settings, projects or
+    # build scripts, Google's copy takes its place; Bazel's downloader asks it
+    # first too. It answered on all 50 runners. It gets a release about a day
+    # after Maven Central, and plugins come from Google's Maven, the copy and
+    # then the portal, which sends what the copy has not got yet on to Maven
+    # Central.
+    - name: Resolve Gradle downloads from Google's copy of Maven Central
       shell: bash
       run: |
         mkdir -p ~/.gradle/init.d
         cat > ~/.gradle/init.d/plugin-repositories.init.gradle.kts <<'SCRIPT'
+        fun RepositoryHandler.useCopy() {
+            withType<MavenArtifactRepository>().whenObjectAdded {
+                if (url.toString() == "https://repo.maven.apache.org/maven2/") {
+                    url = uri("https://maven-central.storage-download.googleapis.com/maven2/")
+                }
+            }
+        }
         beforeSettings {
+            buildscript.repositories.useCopy()
+            dependencyResolutionManagement.repositories.useCopy()
             pluginManagement.repositories {
+                useCopy()
                 google()
                 mavenCentral()
                 gradlePluginPortal()
             }
         }
+        allprojects {
+            buildscript.repositories.useCopy()
+            repositories.useCopy()
+        }
         SCRIPT
+    # Gradle tries a download that failed on the network or with a 5xx, 408 or
+    # 429 3 times, 1 and 2 s apart, so a portal hiccup of a few seconds fails
+    # the build (2026-11-19). These make it 10 times, from 0.5 s apart, about
+    # 4 minutes in all. Gradle reads max.tentatives (in Gradle 6 to 9.5);
+    # the max.retries some projects set is read by nothing. They apply to
+    # every Gradle build on the runner, Flutter's own included build too.
+    - name: Retry Gradle downloads longer
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle
+        cat >> ~/.gradle/gradle.properties <<'PROPS'
+        systemProp.org.gradle.internal.http.connectionTimeout=120000
+        systemProp.org.gradle.internal.http.socketTimeout=120000
+        systemProp.org.gradle.internal.repository.max.tentatives=10
+        systemProp.org.gradle.internal.repository.initial.backoff=500
+        PROPS

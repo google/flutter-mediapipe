@@ -15,6 +15,7 @@ on:
       - packages/mediapipe-task-vision/**
       - gallery/packages/video_frames/**
       - .github/actions/setup/**
+      - .github/actions/gradle-plugin-repositories/**
       - .github/workflows/samples.yaml
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - packages/mediapipe-task-vision/**
       - gallery/packages/video_frames/**
       - .github/actions/setup/**
+      - .github/actions/gradle-plugin-repositories/**
       - .github/workflows/samples.yaml
   workflow_dispatch:
 
