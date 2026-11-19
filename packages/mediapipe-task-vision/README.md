@@ -810,8 +810,7 @@ before offering a GPU toggle.
 | iOS | Official library | Metal for supported tasks |
 | Android | Official library | Supported GPUs on arm64 devices; CPU only on emulators |
 | macOS Apple Silicon | Official library | Not available for now: Google's Metal results since 1.1.1 are unconfirmed |
-| Linux x64 | Official library | OpenGL ES for supported tasks; EGL and a GPU driver required |
-| Linux arm64 | Official library | Not available: CPU only |
+| Linux x64 and arm64 | Official library | OpenGL ES for supported tasks; EGL and a GPU driver required |
 | Windows x64 | Official library | Not available |
 
 On Android and Linux, Hand Landmarker, Gesture Recognizer and Pose Landmarker

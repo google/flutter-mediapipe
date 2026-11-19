@@ -355,9 +355,13 @@ and 0.4.0 pins them as they are, beside Linux x64 (MB, 10^6 bytes):
 | Linux x64 | 34.9 | 41.8 | 42.2 | 33.0 | 36.6 |
 | Linux arm64 | 31.7 | 38.3 | 38.6 | 29.8 | 33.2 |
 
-Every task runs on the CPU there: no GPU delegate has been validated on
-Linux arm64 (`linuxArm64CpuOnly` in `task_capabilities.dart`). Checked on
-2026-11-16:
+0.4.0 ran every task on the CPU there. Since 0.4.1 the vision tasks that
+run on the GPU on Linux x64 (Face Landmarker, Image Classifier, Image
+Segmenter and Object Detector) run on it on Linux arm64 too, checked like
+Linux x64's against Google's own GPU output on a hosted runner's renamed
+Mesa renderer; a Raspberry Pi 5's V3D GPU has not been tested. Every other
+task still runs on the CPU only (`linuxArm64CpuOnly` in
+`task_capabilities.dart`, or Linux x64's reason). Checked on 2026-11-16:
 
 - **glibc.** The newest symbol version any of the five needs is
   `GLIBC_2.27`, and none needs `libstdc++` (each links it statically). So

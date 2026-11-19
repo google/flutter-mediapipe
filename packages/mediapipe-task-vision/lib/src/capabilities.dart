@@ -173,14 +173,15 @@ TaskCapabilities holisticLandmarkerCapabilitiesForPlatform(
 
 /// CPU on Google's vision library (Android, iOS, macOS arm64, Linux x64 and
 /// arm64, and Windows x64) and the registered web adapter; GPU on iOS,
-/// Android and the web, and with [linuxGpu] on Linux x64 (OpenGL ES, needing
-/// EGL and a GPU driver; Linux arm64 runs on the CPU only). [macosGpu] marks the tasks that run on Metal, which macOS
-/// withdraws for now ([_macosGpuGap]). An [androidGpuGap] withdraws the
-/// Android GPU and is the reason an Android device reports, except on an
-/// emulator, which loses the GPU for every task ([_emulatorGpuGap]); an
-/// [iosGpuGap] withdraws an iPhone's GPU the same way, and the iOS Simulator
-/// always loses the GPU ([_simulatorGpuGap]). An iPhone's GPU is offered, and
-/// was tested on an iPhone 15 Pro (iOS 27) with Google's 1.2.2 library.
+/// Android and the web, and with [linuxGpu] on Linux x64 and arm64 (OpenGL
+/// ES, needing EGL and a GPU driver). [macosGpu] marks the tasks that run on
+/// Metal, which macOS withdraws for now ([_macosGpuGap]). An [androidGpuGap]
+/// withdraws the Android GPU and is the reason an Android device reports,
+/// except on an emulator, which loses the GPU for every task
+/// ([_emulatorGpuGap]); an [iosGpuGap] withdraws an iPhone's GPU the same
+/// way, and the iOS Simulator always loses the GPU ([_simulatorGpuGap]). An
+/// iPhone's GPU is offered, and was tested on an iPhone 15 Pro (iOS 27) with
+/// Google's 1.2.2 library.
 TaskCapabilities _visionTaskCapabilities(
   TaskPlatform platform,
   String name, {
@@ -211,6 +212,7 @@ TaskCapabilities _visionTaskCapabilities(
       },
       Delegate.gpu: {
         if (linuxGpu) 'linux/x64': null,
+        if (linuxGpu) 'linux/arm64': null,
         if (!platform.simulator && iosGpuGap == null) 'ios/arm64': '15.0',
         if (androidGap == null) 'android/arm64': null,
         if (webAdapter) 'web/unknown': null,
@@ -222,7 +224,6 @@ TaskCapabilities _visionTaskCapabilities(
           '$name requires Linux x64 or arm64, Windows x64, macOS arm64, iOS, '
           'Android, or the web adapter package.',
       Delegate.gpu:
-          (platform.target == 'linux/arm64' ? linuxArm64CpuOnly : null) ??
           (platform.target == 'android/arm' ? _arm32GpuGap : null) ??
           (platform.operatingSystem == 'android' ? androidGap : null) ??
           (platform.simulator ? _simulatorGpuGap : null) ??
@@ -231,7 +232,7 @@ TaskCapabilities _visionTaskCapabilities(
               ? _macosGpuGap
               : null) ??
           [
-            '$name GPU requires ${_either([if (linuxGpu) 'Linux x64', if (iosGpuGap == null) 'iOS', if (androidGpuGap == null) 'Android', 'the web adapter'])}.',
+            '$name GPU requires ${_either([if (linuxGpu) 'Linux x64 or arm64', if (iosGpuGap == null) 'iOS', if (androidGpuGap == null) 'Android', 'the web adapter'])}.',
             ?desktopGpuGap,
           ].join(' '),
     },
@@ -336,9 +337,7 @@ TaskCapabilities interactiveSegmenterCapabilitiesForPlatform(
           'InteractiveSegmenter requires macOS arm64, Linux x64 or arm64, iOS, '
           "Android, or the web adapter package. Google's Windows library "
           'runs it too slowly to offer.',
-      Delegate.gpu: platform.target == 'linux/arm64'
-          ? linuxArm64CpuOnly
-          : platform.operatingSystem == 'macos'
+      Delegate.gpu: platform.operatingSystem == 'macos'
           ? 'The official MediaPipe macOS GPU stroke shader requests GLSL 330 in '
                 'an OpenGL 2.1 context and fails to compile. Confirmed on both '
                 'the 1.0.0 and 1.0.1 official runtimes, so it is not fixed by '

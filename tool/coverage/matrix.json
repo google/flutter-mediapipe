@@ -31,7 +31,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux library does not ship the LiteRT GPU plugin Face Detector's GPU needs"
       },
       "windows": {
         "cpu": "required",
@@ -61,7 +61,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "required"
       },
       "windows": {
         "cpu": "required",
@@ -91,7 +91,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux library since 1.2.3 runs part of the task's graph on LiteRT and does not ship the LiteRT GPU plugin it needs"
       },
       "windows": {
         "cpu": "required",
@@ -121,7 +121,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux library since 1.2.3 runs part of the task's graph on LiteRT and does not ship the LiteRT GPU plugin it needs"
       },
       "windows": {
         "cpu": "required",
@@ -151,7 +151,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's desktop runtimes cannot open Holistic's face blendshapes model on GPU"
       },
       "windows": {
         "cpu": "required",
@@ -181,7 +181,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "required"
       },
       "windows": {
         "cpu": "required",
@@ -211,7 +211,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux runtime aborts the embedder on OpenGL ES"
       },
       "windows": {
         "cpu": "required",
@@ -241,7 +241,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "required"
       },
       "windows": {
         "cpu": "required",
@@ -271,7 +271,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux runtime aborts the stroke segmenter on OpenGL ES"
       },
       "windows": {
         "cpu": "unsupported: Google's Windows library runs the stateful segmenter at about 25 s a stroke on GitHub's runner",
@@ -301,7 +301,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "required"
       },
       "windows": {
         "cpu": "required",
@@ -331,7 +331,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: Google's Linux library since 1.2.3 runs part of the task's graph on LiteRT and does not ship the LiteRT GPU plugin it needs"
       },
       "windows": {
         "cpu": "required",
@@ -361,7 +361,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -391,7 +391,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -421,7 +421,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -451,7 +451,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -481,7 +481,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -511,7 +511,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -541,7 +541,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -571,7 +571,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -601,7 +601,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -631,7 +631,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -661,7 +661,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",
@@ -691,7 +691,7 @@
       },
       "linux-arm64": {
         "cpu": "required",
-        "gpu": "unsupported: this package runs every task on the CPU on Linux arm64; no GPU delegate has been validated there"
+        "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
         "cpu": "required",

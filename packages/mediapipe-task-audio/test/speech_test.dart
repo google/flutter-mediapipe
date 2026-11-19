@@ -1246,7 +1246,7 @@ void main() {
         reason: '$platform',
       );
     }
-    // Linux arm64 runs every task on the CPU, and says so.
+    // Linux arm64 runs the audio tasks on the CPU, and says so.
     const linuxArm64 = TaskPlatform(
       operatingSystem: 'linux',
       architecture: 'arm64',

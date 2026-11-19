@@ -14,7 +14,6 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:ffi/ffi.dart';
-import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:mediapipe_vision/src/third_party/mediapipe/vision_bindings.dart'
     as mp;
@@ -266,9 +265,7 @@ void main() {
           isA<RuntimeUnavailableException>().having(
             (e) => e.fix,
             'fix',
-            Abi.current() == Abi.linuxArm64
-                ? linuxArm64CpuOnly
-                : contains('CPU only'),
+            contains('CPU only'),
           ),
         ),
       );
