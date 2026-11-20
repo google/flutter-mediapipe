@@ -55,9 +55,9 @@ def main():
             if pin['source'].startswith('mediapipe-task-vision/')}
     models = ['blaze_face_short_range.tflite', 'face_landmarker.task']
     if args.object_detector:
-        models.append('efficientdet_lite0.tflite')
+        models.append('efficientdet_lite0_float32.tflite')
     if args.image_tasks:
-        models += ['efficientnet_lite0.tflite', 'mobilenet_v3_small.tflite']
+        models += ['efficientnet_lite0_float32.tflite', 'mobilenet_v3_small.tflite']
     if args.landmark_tasks:
         models += ['hand_landmarker.task', 'gesture_recognizer.task',
                    'pose_landmarker_lite.task', 'holistic_landmarker.task']
@@ -112,10 +112,10 @@ def main():
                (PACKAGE / 'test/fixtures/face_detection/portrait-301x209.rgb', 'portrait.rgb')]
     if args.object_detector:
         selected.append('object_detector')
-        bundled.append((PACKAGE / 'models/efficientdet_lite0.tflite', 'object_detector.tflite'))
+        bundled.append((PACKAGE / 'models/efficientdet_lite0_float32.tflite', 'object_detector.tflite'))
     if args.image_tasks:
         selected += ['image_classifier', 'image_embedder']
-        bundled += [(PACKAGE / 'models/efficientnet_lite0.tflite', 'image_classifier.tflite'),
+        bundled += [(PACKAGE / 'models/efficientnet_lite0_float32.tflite', 'image_classifier.tflite'),
                     (PACKAGE / 'models/mobilenet_v3_small.tflite', 'image_embedder.tflite')]
     if args.landmark_tasks:
         selected += ['hand_landmarker', 'gesture_recognizer', 'pose_landmarker',

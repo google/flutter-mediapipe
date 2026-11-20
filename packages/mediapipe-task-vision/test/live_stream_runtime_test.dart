@@ -172,7 +172,7 @@ void main() {
       portrait,
       (mode) => ObjectDetector.create(
         ObjectDetectorOptions(
-          modelPath: 'models/efficientdet_lite0.tflite',
+          modelPath: 'models/efficientdet_lite0_float32.tflite',
           runningMode: mode,
         ),
       ),
@@ -197,7 +197,7 @@ void main() {
       portrait,
       (mode) => ImageClassifier.create(
         ImageClassifierOptions(
-          modelPath: 'models/efficientnet_lite0.tflite',
+          modelPath: 'models/efficientnet_lite0_float32.tflite',
           runningMode: mode,
           maxResults: 5,
         ),

@@ -76,7 +76,7 @@ for (const family of fs.readdirSync(path.join(repo, 'packages')).filter(name => 
 const menuModels = path.join(repo, 'gallery/build/task-models');
 for (const [, parts, digest] of fs.readFileSync(path.join(repo, 'gallery/lib/live/task_models.dart'), 'utf8')
   .matchAll(/TaskModel\(\s*'[^']*',\s*((?:'[^']*'\s*)+),\s*'([0-9a-f]{64})'/g)) {
-  const url = 'https://storage.googleapis.com/mediapipe-models/' + [...parts.matchAll(/'([^']*)'/g)].map(match => match[1]).join('');
+  const url = 'https://huggingface.co/litert-community/' + [...parts.matchAll(/'([^']*)'/g)].map(match => match[1]).join('');
   models.set(url, {files: [path.join(menuModels, digest)], sha256: digest});
 }
 const sha256 = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

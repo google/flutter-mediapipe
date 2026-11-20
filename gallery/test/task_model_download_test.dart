@@ -16,7 +16,7 @@ void main() {
   test('a model downloads through package:http from Google\'s URL', () async {
     final asked = <Uri>[];
     final bytes = await http.runWithClient(
-      () => downloadModel(model('test/a/1/a.tflite')),
+      () => downloadModel(model('Test/resolve/0/a.tflite')),
       () => MockClient((request) async {
         asked.add(request.url);
         return http.Response.bytes(body, 200);
@@ -25,13 +25,13 @@ void main() {
     expect(bytes, body);
     expect(asked, [
       Uri.parse(
-        'https://storage.googleapis.com/mediapipe-models/test/a/1/a.tflite',
+        'https://huggingface.co/litert-community/Test/resolve/0/a.tflite',
       ),
     ]);
   });
 
   test('a download that is not the pinned model is refused', () async {
-    final pinned = TaskModel('Other', 'test/b/1/b.tflite', '0' * 64, 1);
+    final pinned = TaskModel('Other', 'Test/resolve/0/b.tflite', '0' * 64, 1);
     await expectLater(
       http.runWithClient(
         () => downloadModel(pinned),
@@ -42,7 +42,12 @@ void main() {
   });
 
   test('an HTTP error is refused', () async {
-    final missing = TaskModel('Missing', 'test/c/1/c.tflite', '1' * 64, 1);
+    final missing = TaskModel(
+      'Missing',
+      'Test/resolve/0/c.tflite',
+      '1' * 64,
+      1,
+    );
     await expectLater(
       http.runWithClient(
         () => downloadModel(missing),

@@ -402,7 +402,7 @@ final _subjects = <_Subject>[
   ),
   _Subject(
     name: 'object_detector',
-    model: 'efficientdet_lite0.tflite',
+    model: 'efficientdet_lite0_float32.tflite',
     samples: const ['portrait.jpg', 'group.jpeg'],
     registered: () => objectDetectorBackendFactory != null,
     capabilities: queryObjectDetectorCapabilities,
@@ -448,7 +448,7 @@ final _subjects = <_Subject>[
   ),
   _Subject(
     name: 'image_classifier',
-    model: 'efficientnet_lite0.tflite',
+    model: 'efficientnet_lite0_float32.tflite',
     samples: const ['portrait.jpg'],
     registered: () => imageClassifierBackendFactory != null,
     capabilities: queryImageClassifierCapabilities,

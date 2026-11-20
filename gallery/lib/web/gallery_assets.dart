@@ -23,7 +23,7 @@ final class GalleryAssets {
   static Future<String> modelPath(DownloadAsset model) async =>
       Uri.base.resolve('assets/assets/mediapipe/${model.sha256}').toString();
 
-  /// [model]'s URL in Google's bucket, which Google's browser runtime
+  /// [model]'s pinned URL on Hugging Face, which Google's browser runtime
   /// fetches itself: Decision Maker's models are too large to bundle or to
   /// pass through Dart.
   static Future<String> downloadedModelPath(DownloadAsset model) async =>

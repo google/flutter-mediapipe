@@ -20,7 +20,7 @@ from official_wheels import host_runtime  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 from model_pins import model_sha256  # noqa: E402
 MODEL_SHA256 = model_sha256('summarization_quant_200m_2modes.litertlm')
-MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/text_summarizer/200m/1/summarization_quant_200m_2modes.litertlm'
+MODEL_URL = 'https://huggingface.co/litert-community/MediaPipe-TextSummarizer-200M/resolve/e59af6de5d4753422ce706280d0371fdc223b1ba/summarization_quant_200m_2modes.litertlm'
 
 
 def main():

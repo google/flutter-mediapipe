@@ -94,7 +94,7 @@ which answer the same, everywhere but WebKit (see above). They are
 large, so an app usually downloads one on first use rather than bundling
 it: set
 `ModelStore.allowDownloads = true` before `create`, or pass `modelPath`.
-In browsers, `modelPath` can be the model's URL in Google's bucket, which
+In browsers, `modelPath` can be the model's pinned Hugging Face URL, which
 Google's runtime then fetches itself.
 
 ## Questions and answers

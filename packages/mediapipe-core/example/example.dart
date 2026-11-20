@@ -14,8 +14,10 @@ import 'package:mediapipe_core/mediapipe_core.dart';
 Future<void> main() async {
   const model = DownloadAsset(
     url:
-        'https://storage.googleapis.com/mediapipe-models/'
-        'audio_classifier/yamnet/float32/1/yamnet.tflite',
+        'https://huggingface.co/litert-community/'
+        'MediaPipe-AudioClassifier-YAMNet/resolve/'
+        'fcd63e19bd0a7a0d3d8c9c070af1898f7dd29675/'
+        'yamnet.tflite',
     sha256: '4d8b4a53282dc83ef04e3e7dbc4fbc98082e34e44ed798e16c3a0cdd4c584faf',
   );
   final store = ModelStore(

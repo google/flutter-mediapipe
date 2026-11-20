@@ -121,7 +121,7 @@ def test_root(destination, groups):
     if "object" in groups:
         folders.append("fixtures/object_detection")
         tests.append("object_detector_test.dart")
-        models.append("efficientdet_lite0.tflite")
+        models.append("efficientdet_lite0_float32.tflite")
         tasks.append("object_detector")
     if "hand" in groups or "landmark" in groups:
         folders.append("fixtures/landmark_tasks")
@@ -135,7 +135,7 @@ def test_root(destination, groups):
     if "image" in groups:
         folders.append("fixtures/image_tasks")
         tests.append("image_tasks_test.dart")
-        models += ["efficientnet_lite0.tflite", "mobilenet_v3_small.tflite"]
+        models += ["efficientnet_lite0_float32.tflite", "mobilenet_v3_small.tflite"]
         tasks += ["image_classifier", "image_embedder"]
     if "segmenter" in groups:
         folders.append("fixtures/segmenter_tasks")
