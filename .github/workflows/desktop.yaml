@@ -168,6 +168,34 @@ jobs:
             build/audio-reference/*.log
           if-no-files-found: error
 
+  # Windows versions disagree on an MP4 edit list in Media Foundation's MPEG-4
+  # source: Server 2025 applies it, Windows 11 ignores it and Server 2022
+  # moves the frames later by it (video_frames_plugin.cpp,
+  # EditListFirstFrameUs). The journey checks the first two above; this checks
+  # the third with the gallery's video file test alone.
+  video-files-windows-2022:
+    name: Video files / windows-2022 x64
+    if: ${{ !inputs.side }}
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+      - name: Prepare the gallery with Face Detector
+        shell: bash
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target windows/x64 --tasks face_detector
+          cd gallery && flutter pub get
+      - name: Video files decode with their timestamps and rotation
+        working-directory: gallery
+        shell: bash
+        run: >-
+          flutter test -d windows integration_test/gallery_journey_test.dart
+          --plain-name 'video files decode with their timestamps and rotation'
+          --reporter expanded
+
   linux-gpu:
     name: Vision tasks / ubuntu-24.04 x64 GPU (Mesa, renamed renderer)
     runs-on: ubuntu-24.04
