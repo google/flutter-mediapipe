@@ -1,3 +1,23 @@
+## 0.5.0
+
+- Upgrade every mediapipe package to 0.5.0 together, so this package now
+  requires `mediapipe_core` ^0.5.0, which pins Google's Windows arm64
+  libraries. MediaPipe stays at 1.2.3.
+- Adds Windows arm64: the 10 vision tasks supported on Windows x64 run
+  there on the CPU, with the same capabilities and `tasks` build-setting
+  checks (Interactive Segmenter remains unavailable on Windows).
+- CI runs the vision tasks, bundled models and the object detection sample
+  on GitHub's `windows-11-arm` runners.
+- Every vision model now downloads from Google's LiteRT community on
+  Hugging Face (`huggingface.co/litert-community`), each pinned to a fixed
+  revision, instead of Google's `storage.googleapis.com/mediapipe-models`
+  bucket. The files are byte-identical, so their SHA-256 pins are
+  unchanged. Hugging Face names two of them differently, so the Object
+  Detector and Image Classifier models download as
+  `efficientdet_lite0_float32.tflite` and
+  `efficientnet_lite0_float32.tflite`. The model store and bundles find
+  files by SHA-256, so apps need no change.
+
 ## 0.4.1
 
 - Upgrade every mediapipe package to 0.4.1 together, so this package now

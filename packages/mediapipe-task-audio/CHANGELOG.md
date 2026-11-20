@@ -1,3 +1,17 @@
+## 0.5.0
+
+- Upgrade every mediapipe package to 0.5.0 together, so this package now
+  requires `mediapipe_core` ^0.5.0, which pins Google's Windows arm64
+  libraries. MediaPipe stays at 1.2.3.
+- Adds Windows arm64: Audio Classifier, Audio Transcriber and Text to
+  Speech run there on the CPU, as on Windows x64.
+- CI runs every audio task on GitHub's `windows-11-arm` runners, against
+  references from Google's `win_arm64` Python wheels.
+- YAMNet now downloads from Google's LiteRT community on Hugging Face
+  (`huggingface.co/litert-community`), pinned to a fixed revision, instead
+  of Google's `storage.googleapis.com/mediapipe-models` bucket. The file is
+  byte-identical, so its SHA-256 pin is unchanged.
+
 ## 0.4.1
 
 - Upgrade every mediapipe package to 0.4.1 together, so this package now
