@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:camera_platform_interface/camera_platform_interface.dart';
@@ -51,14 +50,10 @@ void main() {
         await tester.pumpWidget(const GalleryApp());
         final tileTitle = await scrollToGalleryTile(tester, subject.tile);
         expect(tileTitle, findsOneWidget);
-        // Linux x64 offers GPU for face, and the page opens on it; this test
-        // selects CPU. Hand has no Linux GPU since Google's 1.2.3 library,
-        // Linux arm64 runs every task on the CPU, and Windows has no GPU
-        // path.
-        final gpuOffered =
-            Platform.isLinux &&
-                Abi.current() != Abi.linuxArm64 &&
-                subject.task == 'face'
+        // Linux (x64 and arm64) offers GPU for face, and the page opens on
+        // it; this test selects CPU. Hand has no Linux GPU since Google's
+        // 1.2.3 library, and Windows has no GPU path.
+        final gpuOffered = Platform.isLinux && subject.task == 'face'
             ? findsOneWidget
             : findsNothing;
         final tile = find.byKey(ValueKey('gallery-card-${subject.tile}'));

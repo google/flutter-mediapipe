@@ -1,8 +1,6 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:test/test.dart';
 import 'support/face_reference.dart';
@@ -232,7 +230,6 @@ void main() {
     // Since 1.2.3 Google's Linux library runs their hand detector and pose
     // landmarks model on LiteRT without the GPU plugin LiteRT needs, so the
     // package withdraws the GPU and refuses it before Google's graph exists.
-    // Linux arm64 runs every task on the CPU.
     for (final (capabilities, create) in [
       (
         await queryHandLandmarkerCapabilities(),
@@ -265,9 +262,7 @@ void main() {
       expect(capabilities.supportedDelegates, {Delegate.cpu});
       expect(
         capabilities.unavailableReasons[Delegate.gpu],
-        Abi.current() == Abi.linuxArm64
-            ? linuxArm64CpuOnly
-            : contains('libLiteRtGpuAccelerator.so'),
+        contains('libLiteRtGpuAccelerator.so'),
       );
       await expectLater(create(), throwsA(isA<RuntimeUnavailableException>()));
     }

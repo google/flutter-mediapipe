@@ -1,4 +1,3 @@
-import 'package:mediapipe_core/platform_interface.dart' show linuxArm64CpuOnly;
 import 'package:mediapipe_vision/mediapipe_vision.dart';
 import 'package:test/test.dart';
 
@@ -153,8 +152,9 @@ void main() {
     expect(on('windows').unavailableReasons[Delegate.gpu], isNotNull);
   });
 
-  test('every Linux arm64 task runs on the CPU only, with a reason', () {
+  test('Linux arm64 offers what Linux x64 does, with the same reasons', () {
     const arm = TaskPlatform(operatingSystem: 'linux', architecture: 'arm64');
+    const x64 = TaskPlatform(operatingSystem: 'linux', architecture: 'x64');
     for (final claim in [
       faceDetectorCapabilitiesForPlatform,
       faceLandmarkerCapabilitiesForPlatform,
@@ -169,9 +169,22 @@ void main() {
       poseLandmarkerCapabilitiesForPlatform,
     ]) {
       final result = claim(arm);
-      expect(result.supportedDelegates, {Delegate.cpu});
+      expect(result.supportedDelegates, claim(x64).supportedDelegates);
       expect(result.runtimeVersion, '1.2.3');
-      expect(result.unavailableReasons[Delegate.gpu], linuxArm64CpuOnly);
+      expect(
+        result.unavailableReasons[Delegate.gpu],
+        claim(x64).unavailableReasons[Delegate.gpu],
+      );
+    }
+    // Google's aarch64 library runs these four on OpenGL ES, matching its
+    // own GPU output on CI as on Linux x64.
+    for (final claim in [
+      faceLandmarkerCapabilitiesForPlatform,
+      imageClassifierCapabilitiesForPlatform,
+      imageSegmenterCapabilitiesForPlatform,
+      objectDetectorCapabilitiesForPlatform,
+    ]) {
+      expect(claim(arm).supportedDelegates, {Delegate.cpu, Delegate.gpu});
     }
   });
 
@@ -263,7 +276,7 @@ void main() {
       faceDetectorCapabilitiesForPlatform(
         linux,
       ).unavailableReasons[Delegate.gpu],
-      allOf(contains('LiteRT GPU plugin'), isNot(contains('Linux x64,'))),
+      allOf(contains('LiteRT GPU plugin'), isNot(contains('Linux x64'))),
     );
     for (final claim in [
       handLandmarkerCapabilitiesForPlatform,
@@ -274,7 +287,7 @@ void main() {
         claim(linux).unavailableReasons[Delegate.gpu],
         allOf(
           contains('libLiteRtGpuAccelerator.so'),
-          isNot(contains('Linux x64,')),
+          isNot(contains('Linux x64')),
         ),
       );
     }

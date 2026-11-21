@@ -1,3 +1,10 @@
+## 0.4.1
+
+- Upgrade every mediapipe package to 0.4.1 together, so this package now
+  requires `mediapipe_core` ^0.4.1. MediaPipe stays at 1.2.3.
+- No change to the text tasks, which run on the CPU on Linux arm64 as on
+  Linux x64.
+
 ## 0.4.0
 
 - Upgrade every mediapipe package to 0.4.0 together, so this package now

@@ -253,3 +253,84 @@ jobs:
             build/gpu-reference/**/*.json
             build/gpu-reference/*.log
           if-no-files-found: error
+
+  # The linux-gpu job on Linux arm64, where Google's aarch64 library runs the
+  # same four tasks on OpenGL ES. llvmpipe stands in for a Raspberry Pi 5's
+  # V3D, which no hosted runner has. nightly-compare.yaml runs Linux arm64 in
+  # neither set.
+  linux-arm64-gpu:
+    name: Vision tasks / ubuntu-24.04-arm arm64 GPU (Mesa, renamed renderer)
+    if: ${{ !inputs.side }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    env:
+      MEDIAPIPE_GPU_REFERENCE_DIR: ${{ github.workspace }}/build/gpu-reference
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          official-wheel-cache: 'true'
+          linux-profile: gallery
+      # Through apt-install: the setup action's cache hit runs no apt-get update.
+      - name: Install Mesa's EGL and OpenGL ES
+        uses: ./.github/actions/apt-install
+        with:
+          packages: libegl-mesa0 libgl1-mesa-dri
+      - name: Download the vision models
+        working-directory: packages/mediapipe-task-vision
+        run: |
+          dart pub get
+          dart tool/download_models.dart face_detector face_landmarker hand_landmarker gesture_recognizer pose_landmarker holistic_landmarker image_classifier image_embedder object_detector image_segmenter
+      - name: Official GPU references and Dart GPU suites on llvmpipe
+        id: linux_arm64_gpu
+        env:
+          # The linux-gpu job's rename and EGL platform; see there.
+          force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
+          EGL_PLATFORM: surfaceless
+        # No --landmark-tasks, as on Linux x64.
+        run: >-
+          python3 -B packages/mediapipe-task-vision/tool/prepare_gpu_reference.py --test
+          --object-detector --image-tasks --segmenter-tasks
+      - name: Record linux-arm64 GPU task coverage (linux-arm64-gpu)
+        if: always()
+        uses: ./.github/actions/record-coverage
+        with:
+          suite: linux-arm64-gpu
+          platform: linux-arm64
+          delegate: gpu
+          tasks: face_landmarker,image_classifier,image_segmenter,object_detector
+          outcome: ${{ steps.linux_arm64_gpu.outcome }}
+      - name: Without the rename, the refused GPU is reported and not replaced
+        working-directory: build/gpu-face-tests
+        env:
+          MEDIAPIPE_EXPECT_GPU_REFUSAL: '1'
+          EGL_PLATFORM: surfaceless
+        run: dart test test/face_landmarker_test.dart --name 'a refused GPU is reported' --reporter expanded
+      - name: Prepare the Linux arm64 gallery with the face task
+        run: |
+          dart run tool/gallery_builder/bin/prepare_gallery.dart --target linux/arm64 --tasks face_landmarker
+          cd gallery && flutter pub get
+      - name: Gallery GPU inside the running Flutter app (renamed renderer)
+        working-directory: gallery
+        env:
+          force_gl_renderer: Mesa software rasterizer, renamed for a MediaPipe CI test
+        run: |
+          xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+            integration_test/desktop_gpu_camera_test.dart \
+            --dart-define=GALLERY_LIVE_TASK=face \
+            --dart-define=GALLERY_GPU_EXPECT=works --reporter expanded
+      - name: Gallery falls back to CPU visibly when the GPU is refused
+        working-directory: gallery
+        run: |
+          xvfb-run -a -s "-screen 0 1600x1000x24" flutter test -d linux \
+            integration_test/desktop_gpu_camera_test.dart \
+            --dart-define=GALLERY_LIVE_TASK=face \
+            --dart-define=GALLERY_GPU_EXPECT=refused --reporter expanded
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: linux-arm64-gpu-reference
+          path: |
+            build/gpu-reference/**/*.json
+            build/gpu-reference/*.log
+          if-no-files-found: error

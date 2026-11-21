@@ -59,18 +59,18 @@ There is no wrapper-level CPU retry on GPU initialization failure.
 
 ## Linux
 
-On Linux x64 the same script installs Google's pinned reference wheel for
-Linux, of the release the package's Linux library was built from. Linux has no checked-in GPU goldens, so its
+On Linux x64 and arm64 the same script installs Google's pinned reference
+wheel for Linux, of the release the package's Linux library was built from. Linux has no checked-in GPU goldens, so its
 GPU suites run only when `MEDIAPIPE_GPU_REFERENCE_DIR` points at same-host
 references. The receipt must record `gl_confirmed`: every generator log must show
 an OpenGL ES context. The tasks set `use_advanced_gpu_api`, so TensorFlow Lite
 runs on OpenGL ES directly and logs no delegate line.
 
 Hosted runners only have Mesa's llvmpipe, which Google's runtime refuses by name
-(`GPU emulation detected`). The `linux-gpu` job in `.github/workflows/desktop.yaml`
-sets Mesa's `force_gl_renderer` to rename the same software renderer, plus
+(`GPU emulation detected`). The `linux-gpu` and `linux-arm64-gpu` jobs in
+`.github/workflows/desktop.yaml` set Mesa's `force_gl_renderer` to rename the same software renderer, plus
 `EGL_PLATFORM=surfaceless` because the runner has no display. The receipt
-records the override as `renderer_override`. The job then runs the face suite's
+records the override as `renderer_override`. Each job then runs the face suite's
 refusal test without the rename, which must fail with `gpuUnavailable` and never
 fall back to CPU. A physical GPU needs no override; the script for that run,
 `test_linux_gpu.sh`, is in git history at `9383185`.

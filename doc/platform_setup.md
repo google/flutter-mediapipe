@@ -99,8 +99,9 @@ instead.
   Debian, Ubuntu or Raspberry Pi OS: `sudo apt-get install libegl1 libgles2`
   (Raspberry Pi OS Lite lacks them). Without them, task creation fails with
   that instruction.
-- GPU inference uses OpenGL ES on Linux x64 where the vision status table
-  lists it. Linux arm64 runs every task on the CPU.
+- GPU inference uses OpenGL ES on Linux x64 and arm64 where the vision
+  status table lists it. On arm64, CI checks it with Mesa's software renderer;
+  a Raspberry Pi 5's GPU has not been tested.
 - Google's Linux arm64 libraries need glibc 2.27 or later: Raspberry Pi OS
   Bullseye or later, Ubuntu 18.04 or later.
 - On Linux arm64, Google's libraries use Arm's LSE atomic and RCPC load

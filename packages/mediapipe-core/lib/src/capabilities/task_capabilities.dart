@@ -122,11 +122,13 @@ const largeModelRuntimeTargets = <String, String?>{
   'android/x64': null,
 };
 
-/// Why no task offers the GPU on Linux arm64, where every task runs on the
-/// CPU.
+/// Why a task of the audio, decision and retrieval families offers no GPU on
+/// Linux arm64, where it runs on the CPU. The vision tasks that run on the
+/// GPU on Linux x64 run on it on Linux arm64 too, and give Linux x64's reasons
+/// for the rest.
 const linuxArm64CpuOnly =
-    "On Linux arm64 this package runs every task on the CPU of Google's "
-    'aarch64 library; no GPU delegate has been validated there.';
+    "On Linux arm64 this package runs this task on the CPU of Google's "
+    'aarch64 library; no GPU delegate has been validated for it there.';
 
 /// Why a task on [largeModelRuntimeTargets] refuses 32-bit Android.
 const largeModelNeeds64Bit =

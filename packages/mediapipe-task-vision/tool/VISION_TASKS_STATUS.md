@@ -15,13 +15,14 @@ Every target uses Google's official runtime, with no rebuild of MediaPipe:
 | iOS arm64 and simulator | Google's 1.2.3 vision library (`MediaPipeTasksVisionC`), which this package's hook bundles |
 | Android arm64, x86_64 and 32-bit armeabi-v7a (CPU) | Google's 1.2.3 vision library (`libmediapipe_tasks_vision.so`), which this package's hook bundles |
 | macOS arm64 | Google's 1.2.3 vision library (`libmediapipe_tasks_vision`) |
-| Linux x64 | Google's 1.2.3 vision library |
+| Linux x64 and arm64 | Google's 1.2.3 vision library |
 | Windows x64 | Google's 1.2.3 vision library |
 
 ## Support
 
 CPU everywhere a cell has an entry; the entry names the GPU path when there is
-one. ✗ means the package refuses the task on that target.
+one. ✗ means the package refuses the task on that target. The Linux column
+holds for x64 and arm64.
 
 `test/status_table_test.dart` checks every cell against the capability
 queries (✗, CPU, or the platform's GPU name) and that each footnote is
@@ -90,8 +91,8 @@ iPhones and iPads, and were tested on an iPhone 15 Pro (iOS 27) with Google's
   references the pinned wheel generates on the same runner, then builds and
   runs a Flutter app. Linux GPU (Face, Object Detector, Image Classifier and
   Image Segmenter; Hand, Pose and Gesture until 1.2.3 [k]) matches Google's own
-  GPU output on a CI
-  runner whose Mesa renderer is renamed past Google's software-GPU check
+  GPU output on CI runners, x64 and arm64,
+  whose Mesa renderer is renamed past Google's software-GPU check
   (`tool/prepare_gpu_reference.py --test`); a physical GPU run is pending.
 
 ## Upstream limits

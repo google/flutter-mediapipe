@@ -65,8 +65,8 @@ without owning an Android device.
 For Windows x64, Linux x64 and Linux arm64, prepare with
 `--target windows/x64`, `--target linux/x64` or `--target linux/arm64`, then
 run `flutter run -d windows --release` or `flutter run -d linux --release`.
-Linux x64 offers GPU for the live Face Landmarker demo; Windows, Linux arm64
-and the Hand and Pose demos use CPU only.
+Linux x64 and arm64 offer GPU for the live Face Landmarker demo; Windows and
+the Hand and Pose demos use CPU only.
 Each family's hook bundles Google's checksum-pinned library for that family.
 `camera_desktop` provides native
 Media Foundation capture on Windows and GStreamer/V4L2 capture on Linux.

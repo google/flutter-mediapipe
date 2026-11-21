@@ -1,3 +1,16 @@
+## 0.4.1
+
+- Upgrade every mediapipe package to 0.4.1 together. MediaPipe stays at
+  1.2.3 and its option structs keep their layout, so the build still
+  accepts family releases from 0.3.0.
+- `linuxArm64CpuOnly` now names the task rather than every task: Face
+  Landmarker, Image Classifier, Image Segmenter and Object Detector run on
+  the GPU on Linux arm64 in `mediapipe_vision` 0.4.1. The audio, decision
+  and retrieval tasks still give it as the reason they offer no GPU there.
+- CI checks the Linux arm64 GPU on GitHub's `ubuntu-24.04-arm` runners,
+  with Mesa's software renderer, against Google's aarch64 wheel. A
+  Raspberry Pi 5's GPU has not been tested.
+
 ## 0.4.0
 
 - Upgrade every mediapipe package to 0.4.0 together. Adds Linux arm64
