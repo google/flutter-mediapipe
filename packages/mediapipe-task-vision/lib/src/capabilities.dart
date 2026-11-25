@@ -172,12 +172,12 @@ TaskCapabilities holisticLandmarkerCapabilitiesForPlatform(
 );
 
 /// CPU on Google's vision library (Android, iOS, macOS arm64, Linux x64 and
-/// arm64, and Windows x64) and the registered web adapter; GPU on iOS,
-/// Android and the web, and with [linuxGpu] on Linux x64 and arm64 (OpenGL
-/// ES, needing EGL and a GPU driver). [macosGpu] marks the tasks that run on
-/// Metal, which macOS withdraws for now ([_macosGpuGap]). An [androidGpuGap]
-/// withdraws the Android GPU and is the reason an Android device reports,
-/// except on an emulator, which loses the GPU for every task
+/// arm64, and Windows x64 and arm64) and the registered web adapter; GPU on
+/// iOS, Android and the web, and with [linuxGpu] on Linux x64 and arm64
+/// (OpenGL ES, needing EGL and a GPU driver). [macosGpu] marks the tasks that
+/// run on Metal, which macOS withdraws for now ([_macosGpuGap]). An
+/// [androidGpuGap] withdraws the Android GPU and is the reason an Android
+/// device reports, except on an emulator, which loses the GPU for every task
 /// ([_emulatorGpuGap]); an [iosGpuGap] withdraws an iPhone's GPU the same
 /// way, and the iOS Simulator always loses the GPU ([_simulatorGpuGap]). An
 /// iPhone's GPU is offered, and was tested on an iPhone 15 Pro (iOS 27) with
@@ -200,6 +200,7 @@ TaskCapabilities _visionTaskCapabilities(
         'linux/x64': null,
         'linux/arm64': null,
         'windows/x64': null,
+        'windows/arm64': null,
         'macos/arm64': '14.0',
         'ios/arm64': '15.0',
         'android/arm64': null,
@@ -221,8 +222,8 @@ TaskCapabilities _visionTaskCapabilities(
     runtimeVersion: tasksRuntimeVersionOn(platform),
     unavailableReasons: {
       Delegate.cpu:
-          '$name requires Linux x64 or arm64, Windows x64, macOS arm64, iOS, '
-          'Android, or the web adapter package.',
+          '$name requires Linux x64 or arm64, Windows x64 or arm64, macOS '
+          'arm64, iOS, Android, or the web adapter package.',
       Delegate.gpu:
           (platform.target == 'android/arm' ? _arm32GpuGap : null) ??
           (platform.operatingSystem == 'android' ? androidGap : null) ??

@@ -44,9 +44,10 @@ def main():
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
     target = {'Linux': 'linux', 'Windows': 'windows'}.get(platform.system())
-    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64'}.get(platform.machine().lower())
-    if target is None or arch is None or (target, arch) == ('windows', 'arm64'):
-        raise SystemExit('Run this validation on Windows x64, or Linux x64 or arm64.')
+    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64',
+            'arm64': 'arm64'}.get(platform.machine().lower())
+    if target is None or arch is None:
+        raise SystemExit('Run this validation on Windows or Linux, on x64 or arm64.')
     evidence = REPO / f'build/ci-tmp/gallery-desktop-{target}'
     evidence.mkdir(parents=True, exist_ok=True)
 
@@ -117,7 +118,7 @@ def main():
              '--reporter', 'expanded'], f'desktop_cpu_camera_test-{task}')
     run(['flutter', 'build', target, '--release'], 'release')
     bundle = GALLERY / (f'build/linux/{arch}/release/bundle' if target == 'linux'
-                         else 'build/windows/x64/runner/Release')
+                         else f'build/windows/{arch}/runner/Release')
     # One library per family, each the one core pins for this target.
     runtimes = {}
     for family in task_families():

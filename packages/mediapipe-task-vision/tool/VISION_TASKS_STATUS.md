@@ -16,13 +16,13 @@ Every target uses Google's official runtime, with no rebuild of MediaPipe:
 | Android arm64, x86_64 and 32-bit armeabi-v7a (CPU) | Google's 1.2.3 vision library (`libmediapipe_tasks_vision.so`), which this package's hook bundles |
 | macOS arm64 | Google's 1.2.3 vision library (`libmediapipe_tasks_vision`) |
 | Linux x64 and arm64 | Google's 1.2.3 vision library |
-| Windows x64 | Google's 1.2.3 vision library |
+| Windows x64 and arm64 | Google's 1.2.3 vision library |
 
 ## Support
 
 CPU everywhere a cell has an entry; the entry names the GPU path when there is
-one. ✗ means the package refuses the task on that target. The Linux column
-holds for x64 and arm64.
+one. ✗ means the package refuses the task on that target. The Linux and Windows
+columns hold for x64 and arm64.
 
 `test/status_table_test.dart` checks every cell against the capability
 queries (✗, CPU, or the platform's GPU name) and that each footnote is

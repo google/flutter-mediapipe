@@ -25,7 +25,8 @@ from model_pins import model_sha256  # noqa: E402
 from tool_helpers import reference_json  # noqa: E402
 MODEL_SHA256 = model_sha256('yamnet.tflite')
 HOST_NAMES = {'macos/arm64': 'macOS arm64', 'linux/x64': 'Linux x64',
-              'linux/arm64': 'Linux arm64', 'windows/x64': 'Windows x64'}
+              'linux/arm64': 'Linux arm64', 'windows/x64': 'Windows x64',
+              'windows/arm64': 'Windows arm64'}
 
 # YAMNet's input, from its metadata: windows of 15,600 mono samples at 16 kHz.
 MODEL_WINDOW, MODEL_RATE = 15600, 16000

@@ -10,10 +10,10 @@ pipeline.
 
 ## Platforms
 
-| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Universal Embedder | `UniversalEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Semantic Retriever | `SemanticRetriever` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Universal Embedder | `UniversalEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Semantic Retriever | `SemanticRetriever` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The runtimes are Google's MediaPipe 1.2.3: its per-family retrieval C
 library, which this package's build hook downloads and checks against its

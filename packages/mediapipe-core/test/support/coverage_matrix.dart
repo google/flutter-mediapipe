@@ -58,6 +58,10 @@ List<String> coverageMatrixProblems(
       operatingSystem: 'windows',
       architecture: 'x64',
     ),
+    'windows-arm64': const TaskPlatform(
+      operatingSystem: 'windows',
+      architecture: 'arm64',
+    ),
   };
   final matrix =
       jsonDecode(

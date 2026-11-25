@@ -1225,6 +1225,7 @@ void main() {
     for (final platform in const [
       TaskPlatform(operatingSystem: 'linux', architecture: 'x64'),
       TaskPlatform(operatingSystem: 'windows', architecture: 'x64'),
+      TaskPlatform(operatingSystem: 'windows', architecture: 'arm64'),
       TaskPlatform(operatingSystem: 'android', architecture: 'arm64'),
       iphone,
     ]) {

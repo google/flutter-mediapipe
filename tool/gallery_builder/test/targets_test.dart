@@ -20,12 +20,15 @@ void main() {
         reason: target,
       );
     }
-    // Google's Windows library runs the stateful segmenter too slowly to
+    // Google's Windows libraries run the stateful segmenter too slowly to
     // offer.
-    expect(
-      targetTasks['windows/x64'],
-      isNot(contains('interactive_segmenter')),
-    );
+    for (final target in ['windows/x64', 'windows/arm64']) {
+      expect(
+        targetTasks[target],
+        isNot(contains('interactive_segmenter')),
+        reason: target,
+      );
+    }
     expect(targetTasks['macos/arm64'], hasLength(models.length));
   });
 

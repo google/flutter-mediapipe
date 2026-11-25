@@ -116,6 +116,7 @@ const largeModelRuntimeTargets = <String, String?>{
   // loads a Raspberry Pi 5's cores have and a Pi 4's lack.
   'linux/arm64': null,
   'windows/x64': null,
+  'windows/arm64': null,
   'ios/arm64': '15.0',
   // Android 9 (API 28) and later; the hooks refuse a lower minSdk.
   'android/arm64': null,

@@ -9,9 +9,9 @@ generating text. Every call runs Google's official MediaPipe pipeline.
 
 ## Platforms
 
-| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Decision Maker | `DecisionMaker` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Decision Maker | `DecisionMaker` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The runtimes are Google's MediaPipe 1.2.3: its per-family decision C
 library (its release build of November 11, 2026), which this package's build

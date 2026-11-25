@@ -36,17 +36,18 @@ env:
 
 jobs:
   face-tasks:
-    name: Vision tasks / ${{ matrix.os }} ${{ matrix.os == 'ubuntu-24.04-arm' && 'arm64' || 'x64' }} CPU
+    name: Vision tasks / ${{ matrix.os }} ${{ (matrix.os == 'ubuntu-24.04-arm' || matrix.os == 'windows-11-arm') && 'arm64' || 'x64' }} CPU
     strategy:
       fail-fast: false
       matrix:
-        # Linux x64, Windows x64 and Linux arm64, except in nightly-compare.yaml,
-        # whose daily set runs Linux x64 and whose full set the two x64 hosts.
-        os: ${{ fromJSON(inputs.scope == 'daily' && '["ubuntu-24.04"]' || inputs.side && '["ubuntu-24.04", "windows-2025"]' || '["ubuntu-24.04", "windows-2025", "ubuntu-24.04-arm"]') }}
+        # Linux x64, Windows x64, Linux arm64 and Windows arm64, except in
+        # nightly-compare.yaml, whose daily set runs Linux x64 and whose full
+        # set the two x64 hosts.
+        os: ${{ fromJSON(inputs.scope == 'daily' && '["ubuntu-24.04"]' || inputs.side && '["ubuntu-24.04", "windows-2025"]' || '["ubuntu-24.04", "windows-2025", "ubuntu-24.04-arm", "windows-11-arm"]') }}
     runs-on: ${{ matrix.os }}
-    # Linux arm64 records the matrix's linux-arm64 cells, under its own suites.
+    # Arm64 runners record the matrix's linux-arm64 and windows-arm64 cells.
     env:
-      COVERAGE_PLATFORM: ${{ matrix.os == 'ubuntu-24.04-arm' && 'linux-arm64' || 'linux' }}
+      COVERAGE_PLATFORM: ${{ matrix.os == 'ubuntu-24.04-arm' && 'linux-arm64' || matrix.os == 'windows-11-arm' && 'windows-arm64' || startsWith(matrix.os, 'windows-') && 'windows' || 'linux' }}
     # About 30 minutes; 45 on a slow runner (November 20, 2026) whose gallery
     # journey took 19, and the journey may take 40 (gallery/tool/test_desktop.py).
     timeout-minutes: 80
@@ -104,12 +105,12 @@ jobs:
         id: windows_cpu
         if: runner.os == 'Windows'
         run: python -B packages/mediapipe-task-vision/tool/test_desktop.py --object-detector --image-tasks --landmark-tasks --segmenter-tasks
-      - name: Record windows CPU task coverage (windows-cpu)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU task coverage
         if: always() && runner.os == 'Windows'
         uses: ./.github/actions/record-coverage
         with:
-          suite: windows-cpu
-          platform: windows
+          suite: ${{ env.COVERAGE_PLATFORM }}-cpu
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: face_detector,face_landmarker,gesture_recognizer,hand_landmarker,holistic_landmarker,image_classifier,image_embedder,image_segmenter,object_detector,pose_landmarker
           outcome: ${{ steps.windows_cpu.outcome }}
@@ -117,12 +118,12 @@ jobs:
         id: windows_text_audio
         if: ${{ !cancelled() && runner.os == 'Windows' }}
         run: python -B tool/test_text_audio.py
-      - name: Record windows CPU text and audio coverage (windows-text-audio)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU text and audio coverage
         if: always() && runner.os == 'Windows'
         uses: ./.github/actions/record-coverage
         with:
-          suite: windows-text-audio
-          platform: windows
+          suite: ${{ env.COVERAGE_PLATFORM }}-text-audio
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: audio_classifier,language_detector,text_classifier,text_embedder
           outcome: ${{ steps.windows_text_audio.outcome }}
@@ -130,12 +131,12 @@ jobs:
         id: windows_modern_text
         if: ${{ !cancelled() && runner.os == 'Windows' }}
         run: python -B tool/test_modern_text.py
-      - name: Record windows CPU modern text coverage (windows-modern-text)
+      - name: Record ${{ env.COVERAGE_PLATFORM }} CPU modern text coverage
         if: always() && runner.os == 'Windows'
         uses: ./.github/actions/record-coverage
         with:
-          suite: windows-modern-text
-          platform: windows
+          suite: ${{ env.COVERAGE_PLATFORM }}-modern-text
+          platform: ${{ env.COVERAGE_PLATFORM }}
           delegate: cpu
           tasks: embedding_gemma,text_proofreader,text_summarizer
           outcome: ${{ steps.windows_modern_text.outcome }}

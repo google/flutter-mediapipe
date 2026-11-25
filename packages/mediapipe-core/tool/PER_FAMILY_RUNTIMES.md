@@ -237,8 +237,8 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
 - **Retrieval** (`mediapipe_retrieval`) runs Universal Embedder and Semantic
   Retriever on every target through `familyRuntimes['retrieval']`: Android
   arm64, arm and x86_64; iOS device and simulator; macOS arm64; Linux x64
-  and, since 0.4.0, arm64; Windows x64; and in browsers on
-  `@mediapipe/tasks-retrieval`. The October 9 library exports 60 functions, identical on every platform: the
+  and, since 0.4.0, arm64; Windows x64 and, since 0.5.0, arm64; and in browsers
+  on `@mediapipe/tasks-retrieval`. The October 9 library exports 60 functions, identical on every platform: the
   two tasks, the Text and Image Embedder and `MpImage` functions they depend
   on, and the shared error, string list and logging functions.
   Google's engine refuses the text-only EmbeddingGemma 2 model for the task, so
@@ -246,7 +246,8 @@ the simulator, Apple's ld on iOS devices, Android API 28 with 16 KB pages).
 - **Decision Maker** (`mediapipe_decision`) runs on the per-family decision
   library through `familyRuntimes['decision']` on Android arm64, arm and
   x86_64, iOS device and simulator, macOS arm64, Linux x64 and (since 0.4.0)
-  arm64, and Windows x64, and on `@mediapipe/tasks-decision` in browsers. The October 9 library
+  arm64, and Windows x64 and (since 0.5.0) arm64, and on
+  `@mediapipe/tasks-decision` in browsers. The October 9 library
   exports 24 Decision Maker functions (the 13 Google's Python declares, plus
   schema, JSON, context and prewarm evaluation) and the shared helpers; its
   answers match Google's wheel to float precision with Laya and with the
@@ -392,6 +393,34 @@ The families' tests run on the `ubuntu-24.04-arm` runner beside
 `ubuntu-24.04` in `family.yaml`, `desktop.yaml`, `bundled-models.yaml` and
 `samples.yaml`, and the coverage gate requires a `linux-arm64` CPU result for
 every task.
+
+## Windows arm64 (0.5.0)
+
+Google's 1.2.3 zip carries `<family>/windows_arm64/` PE32+ ARM64 DLLs
+(`IMAGE_FILE_MACHINE_ARM64`, `0xaa64`) for all five families, and 0.5.0 pins
+them as they are, beside Windows x64 (MB, 10^6 bytes):
+
+| Platform | Vision | Text | Audio | Retrieval | Decision |
+| --- | --- | --- | --- | --- | --- |
+| Windows x64 | 29.8 | 29.8 | 48.0 | 27.4 | 40.4 |
+| Windows arm64 | 22.9 | 23.7 | 38.5 | 21.0 | 32.1 |
+
+Every task supported on Windows x64 runs on the CPU on Windows arm64 as well
+(Google builds its Windows runtimes without GPU, and Interactive Segmenter
+stays off Windows). Both PyPI reference wheels (`mediapipe-nightly`
+`1.1.0rc20260925` and `mediapipe` `1.2.3`) ship `win_arm64` builds, pinned in
+`reference_wheels.dart`.
+
+- **Flutter.** Flutter's Windows SDK archive ships only an x64 Dart SDK, whose
+  architecture decides the default Windows build target. On `windows-11-arm`,
+  `.github/actions/setup` clones the pinned tag in native ARM64 PowerShell so
+  `update_dart_sdk.ps1` sees `PROCESSOR_ARCHITECTURE=ARM64`, downloads
+  `dart-sdk-windows-arm64.zip`, and `flutter precache --windows` fetches the
+  `windows-arm64` engine artifacts.
+- **CI.** The families' tests run on GitHub's `windows-11-arm` runner beside
+  `windows-2025` in `family.yaml`, `desktop.yaml`, `bundled-models.yaml` and
+  `samples.yaml`, with `windows-arm64.yaml` running the native hook tests. The
+  coverage gate requires a `windows-arm64` CPU result for every Windows task.
 
 ## Flutter host environment
 

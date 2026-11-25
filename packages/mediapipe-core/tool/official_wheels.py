@@ -34,7 +34,7 @@ def _strings(source):
 
 def reference_wheel(target, table='referenceWheels'):
     """Core's `referenceWheels` row, or the `table` named, for `macos/arm64`,
-    `linux/x64`, `linux/arm64` or `windows/x64`."""
+    `linux/x64`, `linux/arm64`, `windows/x64` or `windows/arm64`."""
     source = REFERENCE_WHEELS.read_text(encoding='utf-8')
     source = source[source.index(f'const {table} ='):]
     row = re.search(r"'" + re.escape(target) + r"': \((.*?)\n  \),", source, re.S).group(1)
@@ -50,11 +50,15 @@ def reference_wheel(target, table='referenceWheels'):
 MACOS = reference_wheel('macos/arm64')
 
 def host_target():
-    """This host as a build target (`linux/arm64` and so on), or None where
-    no official wheel is pinned for it."""
-    return {('Darwin', 'arm64'): 'macos/arm64', ('Linux', 'x86_64'): 'linux/x64',
+    """This host as a build target (`linux/arm64`, `windows/arm64` and so on),
+    or None where no official wheel is pinned for it."""
+    system, machine = platform.system(), platform.machine().lower()
+    return {('Darwin', 'arm64'): 'macos/arm64',
+            ('Linux', 'x86_64'): 'linux/x64',
+            ('Linux', 'amd64'): 'linux/x64',
             ('Linux', 'aarch64'): 'linux/arm64',
-            ('Windows', 'AMD64'): 'windows/x64'}.get((platform.system(), platform.machine()))
+            ('Windows', 'amd64'): 'windows/x64',
+            ('Windows', 'arm64'): 'windows/arm64'}.get((system, machine))
 
 
 def host_runtime(table='referenceWheels'):

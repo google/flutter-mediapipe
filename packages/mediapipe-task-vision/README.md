@@ -811,7 +811,7 @@ before offering a GPU toggle.
 | Android | Official library | Supported GPUs on arm64 devices; CPU only on emulators |
 | macOS Apple Silicon | Official library | Not available for now: Google's Metal results since 1.1.1 are unconfirmed |
 | Linux x64 and arm64 | Official library | OpenGL ES for supported tasks; EGL and a GPU driver required |
-| Windows x64 | Official library | Not available |
+| Windows x64 and arm64 | Official library | Not available |
 
 On Android and Linux, Hand Landmarker, Gesture Recognizer and Pose Landmarker
 (like Face Detector) run on the CPU only with Google's 1.2.3 library, because

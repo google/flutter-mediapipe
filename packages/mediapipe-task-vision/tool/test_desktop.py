@@ -44,9 +44,10 @@ def main():
     args = parser.parse_args()
     system = platform.system()
     target = {'Linux': 'linux', 'Windows': 'windows'}.get(system)
-    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64'}.get(platform.machine().lower())
-    if target is None or arch is None or (target, arch) == ('windows', 'arm64'):
-        raise SystemExit('This validation requires Linux x64 or arm64, or Windows x64.')
+    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64',
+            'arm64': 'arm64'}.get(platform.machine().lower())
+    if target is None or arch is None:
+        raise SystemExit('This validation requires Linux or Windows, on x64 or arm64.')
     build = REPO / 'build/ci-tmp'
     build.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(prefix=f'desktop-{target}-', dir=build))
@@ -227,7 +228,7 @@ flutter:
     for mode in ['debug', 'release']:
         run(['flutter', 'build', target, '--' + mode], app, root / f'build-{mode}.log', env)
         bundle = app / (f'build/linux/{arch}/{mode}/bundle' if target == 'linux' else
-                        f'build/windows/x64/runner/{mode.capitalize()}')
+                        f'build/windows/{arch}/runner/{mode.capitalize()}')
         libraries = [path for path in bundle.rglob('*')
                      if path.is_file() and path.suffix in ('.so', '.dll')
                      and digest(path) == vision['sha256']]

@@ -84,12 +84,12 @@ void main() {
 
   test('targets without a library name the ones that have one', () {
     expect(
-      () => requireFamilyRuntime('text', 'windows/arm64'),
+      () => requireFamilyRuntime('text', 'linux/riscv64'),
       throwsA(
         isA<UnsupportedError>().having(
           (error) => error.message,
           'message',
-          allOf(contains('windows/arm64'), contains('linux/arm64')),
+          allOf(contains('linux/riscv64'), contains('windows/arm64')),
         ),
       ),
     );
@@ -114,6 +114,30 @@ void main() {
         expect(bytes[4], 2);
         expect(bytes[5], 1);
         expect(header.getUint16(18, Endian.little), 183);
+      },
+    );
+  });
+
+  // From any host: the hook cross-builds, so every runner checks the pin.
+  test("Windows arm64 bundles Google's ARM64 DLL as is", () async {
+    final google = familyRuntimes['text']!['windows/arm64']!;
+    await _bundle(
+      'text',
+      OS.windows,
+      Architecture.arm64,
+      check: (output) {
+        final asset = output.assets.code.single;
+        expect(asset.id, 'package:mediapipe_core/mediapipe.dylib');
+        final bytes = File.fromUri(asset.file!).readAsBytesSync();
+        expect(bytes, hasLength(google.bytes));
+        expect(sha256.convert(bytes).toString(), google.sha256);
+        final header = ByteData.sublistView(bytes);
+        // MZ header, PE signature, IMAGE_FILE_MACHINE_ARM64 (0xaa64), PE32+ (0x020b).
+        expect(header.getUint16(0, Endian.big), 0x4d5a);
+        final peOffset = header.getUint32(0x3c, Endian.little);
+        expect(header.getUint32(peOffset, Endian.big), 0x50450000);
+        expect(header.getUint16(peOffset + 4, Endian.little), 0xaa64);
+        expect(header.getUint16(peOffset + 24, Endian.little), 0x020b);
       },
     );
   });

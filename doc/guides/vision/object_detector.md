@@ -425,7 +425,7 @@ and the mirroring of front cameras.
 | iOS | Google's library | Metal, tested on an iPhone 15 Pro (iOS 27) with Google's 1.2.2 library, not on iPads |
 | macOS (Apple Silicon) | Google's library | Not available for now |
 | Linux x64 and arm64 | Google's library | OpenGL ES; EGL and a GPU driver required |
-| Windows x64 | Google's library | Not available |
+| Windows x64 and arm64 | Google's library | Not available |
 | Web | WebAssembly | WebGL 2, when supported |
 
 - **GPU fallback:** creating a GPU task where the GPU is unavailable throws

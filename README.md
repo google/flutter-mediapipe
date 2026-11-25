@@ -112,16 +112,16 @@ On macOS, build the app for Apple Silicon only (two lines in its
 
 ## Where it runs
 
-| Family | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Vision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (classify, embed, detect language) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Audio (transcribe, speak) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Family | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Vision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (classify, embed, detect language) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Audio (transcribe, speak) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 Every text task runs on every platform listed except Text Proofreader and Text
 Summarizer, which are not yet available on the web, matching the MediaPipe Tasks

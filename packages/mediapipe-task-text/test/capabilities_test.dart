@@ -18,6 +18,7 @@ const _runtime = [
   TaskPlatform(operatingSystem: 'linux', architecture: 'x64'),
   TaskPlatform(operatingSystem: 'linux', architecture: 'arm64'),
   TaskPlatform(operatingSystem: 'windows', architecture: 'x64'),
+  TaskPlatform(operatingSystem: 'windows', architecture: 'arm64'),
   TaskPlatform(operatingSystem: 'ios', architecture: 'arm64', version: '18.0'),
 ];
 const _android = [
@@ -145,8 +146,8 @@ void main() {
   test('a target outside every runtime is refused with the target list', () {
     textTaskBackendFactory = _unused;
     const other = TaskPlatform(
-      operatingSystem: 'windows',
-      architecture: 'arm64',
+      operatingSystem: 'linux',
+      architecture: 'riscv64',
     );
     for (final MapEntry(key: name, value: claim) in every.entries) {
       final result = claim(other);

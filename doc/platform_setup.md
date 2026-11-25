@@ -114,10 +114,15 @@ instead.
   Flutter from its git repository (`git clone -b stable
   https://github.com/flutter/flutter.git`).
 
-## Windows x64
+## Windows x64 and arm64
 
 - CPU inference. Google's Windows library may wait for a usage-log upload when
   a task is disposed.
+- On a Windows arm64 machine, install Flutter from its git repository
+  (`git clone -b stable https://github.com/flutter/flutter.git`) in native ARM64
+  PowerShell so Flutter downloads the native `windows-arm64` Dart SDK and builds
+  `windows/arm64` natively: Flutter's Windows SDK archive ships an x64 Dart SDK,
+  whose architecture decides the default Windows build target.
 
 ## Web
 

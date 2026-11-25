@@ -123,10 +123,14 @@ def where_it_runs(problems, table, cells):
         if not line.startswith('|'):
             break
         rows.append([cell.strip() for cell in line.strip().strip('|').split('|')])
-    # A column is its matrix platform: "Linux arm64" is linux-arm64, and any
-    # other column is its first word ("Linux x64" is linux).
-    platforms = ['linux-arm64' if column == 'Linux arm64' else column.split()[0].lower()
-                 for column in rows[0][1:]]
+    # A column is its matrix platform: "Linux arm64" is linux-arm64,
+    # "Windows arm64" is windows-arm64, and any other column is its first word
+    # ("Linux x64" is linux, "Windows x64" is windows).
+    platforms = [
+        'linux-arm64' if column == 'Linux arm64'
+        else 'windows-arm64' if column == 'Windows arm64'
+        else column.split()[0].lower()
+        for column in rows[0][1:]]
     found = {row[0]: dict(zip(platforms, row[1:])) for row in rows[2:]}
     listed = sorted(task for tasks in README_ROWS.values() for task in tasks)
     if listed != sorted(cells):
