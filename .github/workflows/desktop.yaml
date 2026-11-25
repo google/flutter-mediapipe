@@ -47,7 +47,9 @@ jobs:
     # Linux arm64 records the matrix's linux-arm64 cells, under its own suites.
     env:
       COVERAGE_PLATFORM: ${{ matrix.os == 'ubuntu-24.04-arm' && 'linux-arm64' || 'linux' }}
-    timeout-minutes: 60
+    # About 30 minutes; 45 on a slow runner (November 20, 2026) whose gallery
+    # journey took 19, and the journey may take 40 (gallery/tool/test_desktop.py).
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - if: inputs.side == 'nightly'

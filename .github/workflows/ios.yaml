@@ -40,7 +40,9 @@ jobs:
   sdk-tasks:
     name: Every phone suite / official iOS SDK on an arm64 simulator
     runs-on: macos-15
-    timeout-minutes: 110
+    # About an hour; 85 minutes on a slow runner (November 20, 2026) whose
+    # gallery journey stopped at 15, and the journey may now take 40 (below).
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - if: inputs.side == 'nightly'
@@ -97,9 +99,21 @@ jobs:
         env:
           DEVICE: ${{ steps.simulator.outputs.device }}
         run: |
-          for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test task_models_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test speech_test runtime_test face_landmarker_still_image_test gallery_journey_test; do
-            # Each file finishes in minutes, so 15 is a stall.
-            bash tool/test_ios_simulator_suite.sh "$DEVICE" 900 "$test" --dart-define=SDK_GPU=skip
+          for test in sdk_face_landmarker_test sdk_hand_landmarker_test sdk_landmark_tasks_test sdk_detection_tasks_test task_models_test sdk_embedder_test sdk_segmenter_test sdk_interactive_segmenter_test decision_maker_test retrieval_test speech_test gallery_journey_test runtime_test face_landmarker_still_image_test; do
+            # Each file finishes in minutes, so 15 is a stall. The gallery
+            # journey first downloads every first-use model, each within its
+            # own limit (gallery_journey_test.dart), which took 15 minutes on
+            # a slow runner (November 20, 2026), so it gets 40.
+            limit=900
+            if [ "$test" = gallery_journey_test ]; then limit=2400; fi
+            # The decision, retrieval and speech suites leave the app
+            # installed, so the journey right after them finds the 1.7 GB of
+            # models they downloaded in its store instead of downloading
+            # them again. The journey uninstalls it, so the suites after it
+            # start on a fresh install.
+            keep=
+            case $test in decision_maker_test|retrieval_test|speech_test) keep=--no-uninstall ;; esac
+            bash tool/test_ios_simulator_suite.sh "$DEVICE" "$limit" "$test" --dart-define=SDK_GPU=skip $keep
           done
       - name: Record ios CPU task coverage (ios-sdk-simulator)
         if: always()
