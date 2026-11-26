@@ -121,6 +121,7 @@ const nativeTargets = [
   'linux/arm64',
   'macos/arm64',
   'windows/x64',
+  'windows/arm64',
 ];
 
 /// Tasks Google's JavaScript runtime serves in browsers. Proofreader and

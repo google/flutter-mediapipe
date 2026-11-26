@@ -1,3 +1,14 @@
+## 0.5.0
+
+- Upgrade every mediapipe package to 0.5.0 together, so this package now
+  requires `mediapipe_core` ^0.5.0, which pins Google's Windows arm64
+  libraries. MediaPipe stays at 1.2.3.
+- Adds Windows arm64: Universal Embedder and Semantic Retriever run there
+  on the CPU, as on Windows x64.
+- CI runs both retrieval tasks on GitHub's `windows-11-arm` runners.
+- This package's models already came from Hugging Face, where the other
+  families' models now come from too.
+
 ## 0.4.1
 
 - Upgrade every mediapipe package to 0.4.1 together, so this package now

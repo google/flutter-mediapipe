@@ -45,7 +45,7 @@ def test_root(root):
                     root / 'models/face_landmarker.task')
     for name in ('hand_landmarker.task', 'pose_landmarker_lite.task',
                  'gesture_recognizer.task', 'holistic_landmarker.task',
-                 'efficientdet_lite0.tflite', 'efficientnet_lite0.tflite',
+                 'efficientdet_lite0_float32.tflite', 'efficientnet_lite0_float32.tflite',
                  'mobilenet_v3_small.tflite', 'deeplab_v3.tflite'):
         shutil.copyfile(PACKAGE / 'models' / name, root / 'models' / name)
     (root / 'pubspec.yaml').write_text(f'''name: macos_reference_test

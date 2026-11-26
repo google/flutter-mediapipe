@@ -19,8 +19,8 @@ const _desktopGpu =
 /// Why a native target outside [retrievalRuntimeTargets] runs neither task.
 const _noLibrary =
     "Google's retrieval library covers Android arm64 and x86_64, iOS, macOS "
-    'arm64, Linux x64 and arm64, and Windows x64, and browsers run its '
-    'JavaScript runtime.';
+    'arm64, Linux x64 and arm64, and Windows x64 and arm64, and browsers run '
+    'its JavaScript runtime.';
 
 final _unregistered = pluginNotRegistered('mediapipe_retrieval');
 final _noPlugin = '${_unregistered.message} ${_unregistered.fix}';

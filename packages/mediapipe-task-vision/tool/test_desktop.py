@@ -44,9 +44,10 @@ def main():
     args = parser.parse_args()
     system = platform.system()
     target = {'Linux': 'linux', 'Windows': 'windows'}.get(system)
-    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64'}.get(platform.machine().lower())
-    if target is None or arch is None or (target, arch) == ('windows', 'arm64'):
-        raise SystemExit('This validation requires Linux x64 or arm64, or Windows x64.')
+    arch = {'amd64': 'x64', 'x86_64': 'x64', 'aarch64': 'arm64',
+            'arm64': 'arm64'}.get(platform.machine().lower())
+    if target is None or arch is None:
+        raise SystemExit('This validation requires Linux or Windows, on x64 or arm64.')
     build = REPO / 'build/ci-tmp'
     build.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(prefix=f'desktop-{target}-', dir=build))
@@ -55,9 +56,9 @@ def main():
             if pin['source'].startswith('mediapipe-task-vision/')}
     models = ['blaze_face_short_range.tflite', 'face_landmarker.task']
     if args.object_detector:
-        models.append('efficientdet_lite0.tflite')
+        models.append('efficientdet_lite0_float32.tflite')
     if args.image_tasks:
-        models += ['efficientnet_lite0.tflite', 'mobilenet_v3_small.tflite']
+        models += ['efficientnet_lite0_float32.tflite', 'mobilenet_v3_small.tflite']
     if args.landmark_tasks:
         models += ['hand_landmarker.task', 'gesture_recognizer.task',
                    'pose_landmarker_lite.task', 'holistic_landmarker.task']
@@ -112,10 +113,10 @@ def main():
                (PACKAGE / 'test/fixtures/face_detection/portrait-301x209.rgb', 'portrait.rgb')]
     if args.object_detector:
         selected.append('object_detector')
-        bundled.append((PACKAGE / 'models/efficientdet_lite0.tflite', 'object_detector.tflite'))
+        bundled.append((PACKAGE / 'models/efficientdet_lite0_float32.tflite', 'object_detector.tflite'))
     if args.image_tasks:
         selected += ['image_classifier', 'image_embedder']
-        bundled += [(PACKAGE / 'models/efficientnet_lite0.tflite', 'image_classifier.tflite'),
+        bundled += [(PACKAGE / 'models/efficientnet_lite0_float32.tflite', 'image_classifier.tflite'),
                     (PACKAGE / 'models/mobilenet_v3_small.tflite', 'image_embedder.tflite')]
     if args.landmark_tasks:
         selected += ['hand_landmarker', 'gesture_recognizer', 'pose_landmarker',
@@ -227,7 +228,7 @@ flutter:
     for mode in ['debug', 'release']:
         run(['flutter', 'build', target, '--' + mode], app, root / f'build-{mode}.log', env)
         bundle = app / (f'build/linux/{arch}/{mode}/bundle' if target == 'linux' else
-                        f'build/windows/x64/runner/{mode.capitalize()}')
+                        f'build/windows/{arch}/runner/{mode.capitalize()}')
         libraries = [path for path in bundle.rglob('*')
                      if path.is_file() and path.suffix in ('.so', '.dll')
                      and digest(path) == vision['sha256']]

@@ -65,6 +65,9 @@ jobs:
           - target: windows
             os: windows-2025
             build: flutter build windows --release
+          - target: windows-arm64
+            os: windows-11-arm
+            build: flutter build windows --release
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     defaults:

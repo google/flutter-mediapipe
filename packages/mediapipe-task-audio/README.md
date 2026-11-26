@@ -15,9 +15,9 @@ timings) run on 64-bit Android, iOS, macOS, Linux, Windows and the web; see
 
 The task runs Google's runtime on each platform, on the CPU: its MediaPipe
 1.2.3 audio library on Android 9+, iOS 15+, macOS 14+ arm64, Linux x64,
-Linux arm64 and Windows x64, which this package's hook bundles, and
-`@mediapipe/tasks-audio` 1.2.3 in browsers. The library is built for macOS 14
-and tested on macOS 15.
+Linux arm64, Windows x64 and Windows arm64, which this package's hook bundles,
+and `@mediapipe/tasks-audio` 1.2.3 in browsers. The library is built for macOS
+14 and tested on macOS 15.
 
 No platform needs a setting. See
 [platform setup](https://github.com/google/flutter-mediapipe/blob/main/doc/platform_setup.md)
@@ -32,7 +32,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_audio
 ```
 
-This adds `mediapipe_audio: ^0.4.1` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_audio: ^0.5.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_audio.dart` exports its types, so you do not add or
 import core yourself.
 

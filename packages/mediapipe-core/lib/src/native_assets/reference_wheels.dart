@@ -67,6 +67,18 @@ const referenceWheels = <String, ReferenceWheel>{
     librarySha256:
         '67671f2f1bb5bf5ffcf6c1e7567859247f8fac7f111878b7b9b7e30f4bd8e103',
   ),
+  'windows/arm64': (
+    version: '1.1.0rc20260925',
+    url:
+        'https://files.pythonhosted.org/packages/40/b4/'
+        '1eca9cdad46b493d93365f751c3cb4024df4bf38e9fd405ac398e2cd7d05/'
+        'mediapipe_nightly-1.1.0rc20260925-py3-none-win_arm64.whl',
+    wheelSha256:
+        '63826a3b70c74e2e496d7ee2218c92c78bd461655daabc459bf599aaf03f1230',
+    libraryName: 'libmediapipe.dll',
+    librarySha256:
+        '0f1ad9e15b82b836e363d8748a1ea6fc8ed29566556a27789ed454eef295487d',
+  ),
 };
 
 /// Google's wheel for the tasks whose 1.2 answers [referenceWheels]' 1.1.0
@@ -123,6 +135,18 @@ const releaseReferenceWheels = <String, ReferenceWheel>{
     libraryName: 'libmediapipe.dll',
     librarySha256:
         'b5a7c1f2162996f88f947f9fba4930a04dcbced33eece033386064c37602a3de',
+  ),
+  'windows/arm64': (
+    version: '1.2.3',
+    url:
+        'https://files.pythonhosted.org/packages/41/d0/'
+        '5424adc1594d4951102c460fa9e71f714ba9b4ce38c49f10db39da8f3131/'
+        'mediapipe-1.2.3-py3-none-win_arm64.whl',
+    wheelSha256:
+        '9b3871f1faeb6eb69c28675ea78cff7e45bb6dd2dc72b0d3d07ee06f73144976',
+    libraryName: 'libmediapipe.dll',
+    librarySha256:
+        '835344fcacc3d283cf104b5a898a839289784f69bd183e6db2b0ce2d2b8fa038',
   ),
 };
 

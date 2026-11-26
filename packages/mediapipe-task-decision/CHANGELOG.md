@@ -1,3 +1,17 @@
+## 0.5.0
+
+- Upgrade every mediapipe package to 0.5.0 together, so this package now
+  requires `mediapipe_core` ^0.5.0, which pins Google's Windows arm64
+  libraries. MediaPipe stays at 1.2.3.
+- Adds Windows arm64: Decision Maker runs there on the CPU, as on Windows
+  x64.
+- CI runs Decision Maker on GitHub's `windows-11-arm` runners.
+- Laya and GLiNER2.5-Decide now download from Google's LiteRT community on
+  Hugging Face (`huggingface.co/litert-community`), each pinned to a fixed
+  revision, instead of Google's `storage.googleapis.com/mediapipe-models`
+  bucket. The files are byte-identical, so their SHA-256 pins are
+  unchanged.
+
 ## 0.4.1
 
 - Upgrade every mediapipe package to 0.4.1 together, so this package now

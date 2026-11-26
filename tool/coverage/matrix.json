@@ -36,6 +36,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "face_landmarker": {
@@ -64,6 +68,10 @@
         "gpu": "required"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
@@ -96,6 +104,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "hand_landmarker": {
@@ -124,6 +136,10 @@
         "gpu": "unsupported: Google's Linux library since 1.2.3 runs part of the task's graph on LiteRT and does not ship the LiteRT GPU plugin it needs"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
@@ -156,6 +172,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "image_classifier": {
@@ -184,6 +204,10 @@
         "gpu": "required"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
@@ -216,6 +240,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "image_segmenter": {
@@ -244,6 +272,10 @@
         "gpu": "required"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
@@ -276,6 +308,10 @@
       "windows": {
         "cpu": "unsupported: Google's Windows library runs the stateful segmenter at about 25 s a stroke on GitHub's runner",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "unsupported: Google's Windows library runs the stateful segmenter at about 25 s a stroke on GitHub's runner",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "object_detector": {
@@ -304,6 +340,10 @@
         "gpu": "required"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
@@ -336,6 +376,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google builds the Windows runtime without GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google builds the Windows runtime without GPU"
       }
     },
     "audio_classifier": {
@@ -364,6 +408,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google runs this task on CPU only on this platform"
       }
@@ -396,6 +444,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
       }
     },
     "text_classifier": {
@@ -424,6 +476,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google runs this task on CPU only on this platform"
       }
@@ -456,6 +512,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google runs this task on CPU only on this platform"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs this task on CPU only on this platform"
       }
     },
     "embedding_gemma": {
@@ -484,6 +544,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: the pinned official runtime runs EmbeddingGemma on CPU only"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: the pinned official runtime runs EmbeddingGemma on CPU only"
       }
@@ -516,6 +580,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
       }
     },
     "text_summarizer": {
@@ -544,6 +612,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's task accepts only the CPU delegate"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google's task accepts only the CPU delegate"
       }
@@ -576,6 +648,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
       }
     },
     "semantic_retriever": {
@@ -604,6 +680,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: Google's retrieval tasks run on CPU only"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: Google's retrieval tasks run on CPU only"
       }
@@ -636,6 +716,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: Google runs Decision Maker on the CPU only on this platform"
       }
     },
     "audio_transcriber": {
@@ -666,6 +750,10 @@
       "windows": {
         "cpu": "required",
         "gpu": "unsupported: no test has proved the GPU does Audio Transcriber's work here, and hosted runners have no GPU"
+      },
+      "windows-arm64": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Audio Transcriber's work here, and hosted runners have no GPU"
       }
     },
     "text_to_speech": {
@@ -694,6 +782,10 @@
         "gpu": "unsupported: this package runs this task on the CPU on Linux arm64; no GPU delegate has been validated for it there"
       },
       "windows": {
+        "cpu": "required",
+        "gpu": "unsupported: no test has proved the GPU does Text to Speech's work here, and hosted runners have no GPU"
+      },
+      "windows-arm64": {
         "cpu": "required",
         "gpu": "unsupported: no test has proved the GPU does Text to Speech's work here, and hosted runners have no GPU"
       }

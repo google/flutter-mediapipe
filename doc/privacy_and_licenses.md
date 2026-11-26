@@ -17,7 +17,7 @@ At run time:
 
 | What | Host |
 | --- | --- |
-| Pinned models, only when the app sets `ModelStore.allowDownloads = true` or calls `ModelStore` itself; bundled models are fetched at build time by `dart run mediapipe_core:bundle_models` instead | `storage.googleapis.com`; the EmbeddingGemma 2 models (Decision Maker and Retrieval) and the speech models (Parakeet, Phonon, Kokoro and PocketTTS) from `huggingface.co`, which redirects to its CDN (`*.hf.co`) |
+| Pinned models, only when the app sets `ModelStore.allowDownloads = true` or calls `ModelStore` itself; bundled models are fetched at build time by `dart run mediapipe_core:bundle_models` instead | `huggingface.co` (Google's LiteRT community, each pin at a fixed revision), which redirects to its CDN (`*.hf.co`) |
 | Google's browser runtime (web only), unless self-hosted | `cdn.jsdelivr.net` |
 
 `hooks.user_defines.mediapipe_core.asset_source`, `ModelStore(source: ...)`

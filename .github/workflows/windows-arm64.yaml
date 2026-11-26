@@ -1,0 +1,39 @@
+name: Windows arm64
+
+permissions:
+  contents: read
+
+# What only a Windows arm64 host checks: the native windows_arm64 Dart SDK and
+# core's hooks bundling Google's ARM64 DLLs on Windows arm64. Vision's own test
+# setup names the Interactive Segmenter, which no Windows target offers, so
+# vision's hook runs on Windows arm64 in the gallery and sample builds instead,
+# each with a Windows task list. The families' tests on Windows arm64 run in
+# family.yaml, desktop.yaml, bundled-models.yaml and samples.yaml.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Keyed by commit on main: GitHub marks a commit failed when a run is cancelled.
+concurrency:
+  group: windows-arm64-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hooks:
+    name: Native hooks / Windows arm64
+    runs-on: windows-11-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup
+        with:
+          python: 'false'
+      - name: Core's hooks and native library tests
+        working-directory: packages/mediapipe-core
+        shell: pwsh
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dart test test/native_assets --reporter expanded

@@ -111,7 +111,7 @@ void main() {
         architecture: 'arm64',
         version: '26.4',
       ),
-      const TaskPlatform(operatingSystem: 'windows', architecture: 'arm64'),
+      const TaskPlatform(operatingSystem: 'linux', architecture: 'riscv64'),
       const TaskPlatform(operatingSystem: 'web', architecture: 'unknown'),
     ]) {
       final result = _support(platform);

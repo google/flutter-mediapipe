@@ -14,32 +14,40 @@ abstract final class DecisionModels {
   /// Laya, float32, 256 tokens: 678 MB. The model the gallery runs.
   static const layaS256 = DownloadAsset(
     url:
-        'https://storage.googleapis.com/mediapipe-models/decision_maker/'
-        'laya/float32/laya_s256/1/laya_s256.task',
+        'https://huggingface.co/litert-community/'
+        'MediaPipe-DecisionMaker-Laya/resolve/'
+        '415ff3eb5db8a0f75e6bfb1693e5f3153ad7adce/'
+        'laya_s256.task',
     sha256: '8cb730b89ef99cb5c98cdbc7936de79deab77623ce25dc0031eec9e25c64c24e',
   );
 
   /// Laya, float32, 512 tokens: 679 MB.
   static const layaS512 = DownloadAsset(
     url:
-        'https://storage.googleapis.com/mediapipe-models/decision_maker/'
-        'laya/float32/laya_s512/1/laya_s512.task',
+        'https://huggingface.co/litert-community/'
+        'MediaPipe-DecisionMaker-Laya/resolve/'
+        '415ff3eb5db8a0f75e6bfb1693e5f3153ad7adce/'
+        'laya_s512.task',
     sha256: 'e9f1693861c9a79a541d6f716648142ee844fd2e7119c9ed48d166f4b85a15df',
   );
 
   /// GLiNER2.5-Decide, float16, 256 tokens: 981 MB.
   static const glinerS256 = DownloadAsset(
     url:
-        'https://storage.googleapis.com/mediapipe-models/decision_maker/'
-        'gliner/float16/gliner_s256/1/gliner_s256.task',
+        'https://huggingface.co/litert-community/'
+        'MediaPipe-DecisionMaker-GLiNER2.5-Decide/resolve/'
+        '3856ebbda2d1b06ec1afff5c06bb5863ab8cbe3a/'
+        'gliner_s256.task',
     sha256: '18e8eb07a06e3833c4ebb4b0a32c76bff0e1197acba0e4c1658b121d01c92674',
   );
 
   /// GLiNER2.5-Decide, float16, 512 tokens: 1.08 GB.
   static const glinerS512 = DownloadAsset(
     url:
-        'https://storage.googleapis.com/mediapipe-models/decision_maker/'
-        'gliner/float16/gliner_s512/1/gliner_s512.task',
+        'https://huggingface.co/litert-community/'
+        'MediaPipe-DecisionMaker-GLiNER2.5-Decide/resolve/'
+        '3856ebbda2d1b06ec1afff5c06bb5863ab8cbe3a/'
+        'gliner_s512.task',
     sha256: '23a02e1b286fab7573ef2a00acbd8bf80fd2b1284de25eb8fafcd74f8bccd7ec',
   );
 

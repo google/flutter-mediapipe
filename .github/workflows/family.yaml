@@ -1,8 +1,8 @@
 name: Family checks
 
 # One family's checks, called by decision.yaml, retrieval.yaml and speech.yaml: the package
-# against Google's Python answers on each desktop (Linux on x64 and arm64), the
-# gallery's test and journey on the desktops, and the browser journey,
+# against Google's Python answers on each desktop (Linux and Windows on x64 and
+# arm64), the gallery's test and journey on the desktops, and the browser journey,
 # recording task coverage rows for the gate. The phones run the test and the
 # journey in android.yaml and ios.yaml, with the other families. main.yaml
 # analyzes every package, so no job here does.
@@ -75,7 +75,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, ubuntu-24.04, windows-2025, ubuntu-24.04-arm]
+        os: [macos-15, ubuntu-24.04, windows-2025, ubuntu-24.04-arm, windows-11-arm]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
@@ -176,8 +176,9 @@ jobs:
           - {os: macos-15, target: macos/arm64, device: macos}
           - {os: ubuntu-24.04, target: linux/x64, device: linux}
           - {os: windows-2025, target: windows/x64, device: windows}
-          # Linux arm64 records the matrix's linux-arm64 cells.
+          # Arm64 runners record the matrix's linux-arm64 and windows-arm64 cells.
           - {os: ubuntu-24.04-arm, target: linux/arm64, device: linux, platform: linux-arm64}
+          - {os: windows-11-arm, target: windows/arm64, device: windows, platform: windows-arm64}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:

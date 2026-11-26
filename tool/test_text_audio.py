@@ -7,8 +7,8 @@ packages' Dart suites against those same-host references (with what Google's
 speech tasks do with a path that is no model, from the 1.2.3 wheel, for the
 audio suite's speech tests that need no model), after the audio
 stream bridge's AddressSanitizer test outside Windows. CI runs it on the
-Linux x64, Linux arm64 and Windows x64 desktop runners; it runs on macOS
-arm64 as well.
+Linux x64, Linux arm64, Windows x64 and Windows arm64 desktop runners; it runs
+on macOS arm64 as well.
 Python only prepares the expected outputs; the suites load Google's library
 through the packages, as an app does.
 """

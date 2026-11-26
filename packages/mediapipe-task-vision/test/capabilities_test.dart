@@ -188,6 +188,40 @@ void main() {
     }
   });
 
+  test('Windows arm64 offers what Windows x64 does, with the same reasons', () {
+    const arm = TaskPlatform(operatingSystem: 'windows', architecture: 'arm64');
+    const x64 = TaskPlatform(operatingSystem: 'windows', architecture: 'x64');
+    for (final claim in [
+      faceDetectorCapabilitiesForPlatform,
+      faceLandmarkerCapabilitiesForPlatform,
+      gestureRecognizerCapabilitiesForPlatform,
+      handLandmarkerCapabilitiesForPlatform,
+      holisticLandmarkerCapabilitiesForPlatform,
+      imageClassifierCapabilitiesForPlatform,
+      imageEmbedderCapabilitiesForPlatform,
+      imageSegmenterCapabilitiesForPlatform,
+      interactiveSegmenterCapabilitiesForPlatform,
+      objectDetectorCapabilitiesForPlatform,
+      poseLandmarkerCapabilitiesForPlatform,
+    ]) {
+      final result = claim(arm);
+      expect(result.supportedDelegates, claim(x64).supportedDelegates);
+      expect(result.runtimeVersion, '1.2.3');
+      expect(
+        result.unavailableReasons[Delegate.cpu],
+        claim(x64).unavailableReasons[Delegate.cpu],
+      );
+      expect(
+        result.unavailableReasons[Delegate.gpu],
+        claim(x64).unavailableReasons[Delegate.gpu],
+      );
+    }
+    expect(
+      interactiveSegmenterCapabilitiesForPlatform(arm).isSupported,
+      isFalse,
+    );
+  });
+
   test("Linux and Windows report Google's 1.2.3 libraries", () {
     for (final (os, version) in [('linux', '1.2.3'), ('windows', '1.2.3')]) {
       final platform = TaskPlatform(operatingSystem: os, architecture: 'x64');
@@ -206,8 +240,8 @@ void main() {
   test('an unsupported platform fails closed for both delegates', () {
     final result = objectDetectorCapabilitiesForPlatform(
       const TaskPlatform(
-        operatingSystem: 'windows',
-        architecture: 'arm64',
+        operatingSystem: 'linux',
+        architecture: 'riscv64',
         version: '1.0',
       ),
     );
@@ -230,7 +264,7 @@ void main() {
     expect(windows.unavailableReasons[Delegate.gpu], contains('Linux'));
     expect(
       windows.supportedTargets.keys,
-      containsAll(['linux/x64', 'windows/x64']),
+      containsAll(['linux/x64', 'linux/arm64', 'windows/x64', 'windows/arm64']),
     );
   });
 

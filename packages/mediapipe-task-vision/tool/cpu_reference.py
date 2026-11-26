@@ -33,6 +33,8 @@ def host_target():
         return 'macos/arm64'
     if system == 'Linux' and machine == 'aarch64':
         return 'linux/arm64'
+    if system == 'Windows' and machine == 'arm64':
+        return 'windows/arm64'
     if machine in ('amd64', 'x86_64'):
         return {'Linux': 'linux/x64', 'Windows': 'windows/x64'}.get(system)
     return None

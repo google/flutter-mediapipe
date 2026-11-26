@@ -644,7 +644,7 @@ Future<Map<String, Object?>> checkDetectionTasksApi(
   final objects = await ObjectDetector.create(
     ObjectDetectorOptions(
       delegate: delegate,
-      modelBytes: await model('efficientdet_lite0.tflite'),
+      modelBytes: await model('efficientdet_lite0_float32.tflite'),
       maxResults: 5,
       scoreThreshold: 0.3,
     ),
@@ -676,7 +676,7 @@ Future<Map<String, Object?>> checkDetectionTasksApi(
   final classifier = await ImageClassifier.create(
     ImageClassifierOptions(
       delegate: delegate,
-      modelBytes: await model('efficientnet_lite0.tflite'),
+      modelBytes: await model('efficientnet_lite0_float32.tflite'),
       maxResults: 3,
     ),
   );

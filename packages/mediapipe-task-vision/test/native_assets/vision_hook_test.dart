@@ -44,7 +44,7 @@ void main() {
 
   test('targets without a library name the ones that have one', () {
     for (final (os, architecture) in [
-      (OS.windows, Architecture.arm64),
+      (OS.windows, Architecture.ia32),
       (OS.linux, Architecture.riscv64),
     ]) {
       expect(
@@ -121,7 +121,7 @@ void main() {
         in visionRuntimeTasks.entries) {
       expect(
         tasks,
-        target == 'windows/x64'
+        target.startsWith('windows/')
             ? visionTasks.difference({'interactive_segmenter'})
             : visionTasks,
         reason: target,
@@ -130,35 +130,44 @@ void main() {
   });
 
   test('an unvalidated task names the validated ones', () {
-    expect(
-      testCodeBuildHook(
-        mainMethod: hook.main,
-        targetOS: OS.windows,
-        targetArchitecture: Architecture.x64,
-        userDefines: defines({
-          'tasks': ['interactive_segmenter'],
-        }),
-        check: (_, _) => fail('Unvalidated task unexpectedly accepted'),
-      ),
-      failsWith<UnsupportedError>(
-        allOf(contains('interactive_segmenter'), contains('pose_landmarker')),
-      ),
-    );
+    for (final architecture in [Architecture.x64, Architecture.arm64]) {
+      expect(
+        testCodeBuildHook(
+          mainMethod: hook.main,
+          targetOS: OS.windows,
+          targetArchitecture: architecture,
+          userDefines: defines({
+            'tasks': ['interactive_segmenter'],
+          }),
+          check: (_, _) => fail('Unvalidated task unexpectedly accepted'),
+        ),
+        failsWith<UnsupportedError>(
+          allOf(contains('interactive_segmenter'), contains('pose_landmarker')),
+        ),
+      );
+    }
   });
 
   test("every task binds Google's one vision library", () async {
-    for (final architecture in [Architecture.x64, Architecture.arm64]) {
+    for (final (os, architecture, tasks) in [
+      (
+        OS.linux,
+        Architecture.x64,
+        ['face_detector', 'hand_landmarker', 'interactive_segmenter'],
+      ),
+      (
+        OS.linux,
+        Architecture.arm64,
+        ['face_detector', 'hand_landmarker', 'interactive_segmenter'],
+      ),
+      (OS.windows, Architecture.x64, ['face_detector', 'hand_landmarker']),
+      (OS.windows, Architecture.arm64, ['face_detector', 'hand_landmarker']),
+    ]) {
       await testCodeBuildHook(
         mainMethod: hook.main,
-        targetOS: OS.linux,
+        targetOS: os,
         targetArchitecture: architecture,
-        userDefines: defines({
-          'tasks': [
-            'face_detector',
-            'hand_landmarker',
-            'interactive_segmenter',
-          ],
-        }),
+        userDefines: defines({'tasks': tasks}),
         assets: core(source),
         check: (_, output) {
           final asset = output.assets.code.single;
@@ -166,7 +175,7 @@ void main() {
           expect(asset.linkMode, isA<DynamicLoadingBundled>());
           expect(
             asset.file!.pathSegments.last,
-            familyRuntimes['vision']!['linux/$architecture']!.fileName,
+            familyRuntimes['vision']!['$os/$architecture']!.fileName,
           );
         },
       );

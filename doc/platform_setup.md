@@ -114,10 +114,15 @@ instead.
   Flutter from its git repository (`git clone -b stable
   https://github.com/flutter/flutter.git`).
 
-## Windows x64
+## Windows x64 and arm64
 
 - CPU inference. Google's Windows library may wait for a usage-log upload when
   a task is disposed.
+- On a Windows arm64 machine, install Flutter from its git repository
+  (`git clone -b stable https://github.com/flutter/flutter.git`) in native ARM64
+  PowerShell so Flutter downloads the native `windows-arm64` Dart SDK and builds
+  `windows/arm64` natively: Flutter's Windows SDK archive ships an x64 Dart SDK,
+  whose architecture decides the default Windows build target.
 
 ## Web
 
@@ -125,7 +130,8 @@ instead.
   default and check every file against its SHA-384 before running it, then
   load it from a `blob:` URL. Bundled models load from the app's own assets.
   Models downloaded at run time (`ModelStore.allowDownloads = true`) come from
-  `storage.googleapis.com` and are kept in Cache Storage.
+  `huggingface.co` (redirected to its CDN, `*.hf.co`) and are kept in Cache
+  Storage.
 - To serve the runtimes yourself (offline, an intranet, or a strict policy),
   run `dart run mediapipe_core:web_runtime web/mediapipe` from the app root
   and set `MediaPipeWebRuntime.baseUrl = 'mediapipe/';` before creating the
@@ -133,9 +139,10 @@ instead.
 - If the site sends a Content Security Policy, it has to allow what the
   loader does: `script-src` and `worker-src` for `'self'` and `blob:`,
   `'wasm-unsafe-eval'` for the WebAssembly runtime, and `connect-src` for
-  `'self'` (bundled models), `https://cdn.jsdelivr.net` (unless self-hosted)
-  and `https://storage.googleapis.com` (only for models downloaded at run
-  time). CI runs without a policy, so test yours in the browsers you support.
+  `'self'` (bundled models), `https://cdn.jsdelivr.net` (unless self-hosted),
+  and `https://huggingface.co` with its CDN `https://*.hf.co` (only for
+  models downloaded at run time). CI runs without a policy, so test yours in
+  the browsers you support.
 
 ## Build settings
 

@@ -10,10 +10,10 @@ pipeline.
 
 ## Platforms
 
-| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Universal Embedder | `UniversalEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Semantic Retriever | `SemanticRetriever` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Universal Embedder | `UniversalEmbedder` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Semantic Retriever | `SemanticRetriever` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The runtimes are Google's MediaPipe 1.2.3: its per-family retrieval C
 library, which this package's build hook downloads and checks against its
@@ -38,7 +38,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_retrieval
 ```
 
-This adds `mediapipe_retrieval: ^0.4.1` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_retrieval: ^0.5.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_retrieval.dart` exports its types, so you do not add or
 import core yourself.
 

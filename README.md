@@ -43,7 +43,7 @@ Add a family from pub.dev, from your app's root:
 flutter pub add mediapipe_vision
 ```
 
-This adds `mediapipe_vision: ^0.4.1` to your app's `pubspec.yaml`. List the
+This adds `mediapipe_vision: ^0.5.0` to your app's `pubspec.yaml`. List the
 models your app uses in the same pubspec, and declare the folder they are
 bundled in:
 
@@ -112,16 +112,16 @@ On macOS, build the app for Apple Silicon only (two lines in its
 
 ## Where it runs
 
-| Family | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Vision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (classify, embed, detect language) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Audio (transcribe, speak) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Family | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Vision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (classify, embed, detect language) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (EmbeddingGemma) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Text (proofread, summarize) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Audio | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Audio (transcribe, speak) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Decision | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Retrieval | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 Every text task runs on every platform listed except Text Proofreader and Text
 Summarizer, which are not yet available on the web, matching the MediaPipe Tasks

@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'support/face_reference.dart';
 import 'support/vision_fixture.dart';
 
-const _classifierModel = 'models/efficientnet_lite0.tflite';
+const _classifierModel = 'models/efficientnet_lite0_float32.tflite';
 const _embedderModel = 'models/mobilenet_v3_small.tflite';
 
 void main() {

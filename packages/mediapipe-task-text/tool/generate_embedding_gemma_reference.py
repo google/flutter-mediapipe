@@ -67,7 +67,7 @@ def main():
     ]
     report = {'runtime': 'mediapipe==' + runtime['version'], 'delegate': 'CPU',
               'library_sha256': runtime['library_sha256'], 'model_sha256': MODEL_SHA256,
-              'model_url': 'https://storage.googleapis.com/mediapipe-models/text_embedder/embedding_gemma/int4int8/1/embedding_gemma.task',
+              'model_url': 'https://huggingface.co/litert-community/MediaPipe-TextEmbedder-EmbeddingGemma-300M/resolve/93c96b51d328c85e4cbbfe3039d3cd9b98d8a55d/embedding_gemma.task',
               'machine': platform.machine(), 'os': platform.platform(), 'cases': []}
     for quantize, normalize in [(False, False), (True, True)]:
         options = api.TextEmbedderOptions(mp.tasks.BaseOptions(

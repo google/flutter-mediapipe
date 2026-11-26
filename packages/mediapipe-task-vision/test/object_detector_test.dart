@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'support/face_reference.dart';
 import 'support/vision_fixture.dart';
 
-const _model = 'models/efficientdet_lite0.tflite';
+const _model = 'models/efficientdet_lite0_float32.tflite';
 const _scoreThreshold = 0.3;
 const _maxResults = 5;
 

@@ -54,7 +54,7 @@ def main():
     ]
     report = {'runtime': 'mediapipe==' + runtime['version'], 'delegate': 'CPU',
               'library_sha256': runtime['library_sha256'], 'model_sha256': MODEL_SHA256,
-              'model_url': 'https://storage.googleapis.com/mediapipe-models/text_proofreader/200m/1/proofread_quant_200m.litertlm',
+              'model_url': 'https://huggingface.co/litert-community/MediaPipe-TextProofreader-200M/resolve/7f5d1124f2adc535113f671268eca8c5b65df77e/proofread_quant_200m.litertlm',
               'os': platform.platform(), 'machine': platform.machine(), 'cases': []}
 
     def result_json(result):

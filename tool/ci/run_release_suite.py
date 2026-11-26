@@ -54,11 +54,11 @@ BUILD_RETRY_DELAY = 30
 # finishes at the run's timeout.
 PROGRESS = 'MODEL_DOWNLOAD '
 DOWNLOAD = re.compile(r'^MODEL_DOWNLOAD (.+): (?:HTTP .*|(\d+)(?: of \d+)? MB in \d+ s(?:, ended)?)$')
-# Flutter's folder for this Linux host's architecture.
-LINUX_ARCH = 'arm64' if platform.machine().lower() == 'aarch64' else 'x64'
+# Flutter's folder for this Linux or Windows host's architecture.
+HOST_ARCH = 'arm64' if platform.machine().lower() in ('aarch64', 'arm64') else 'x64'
 EXECUTABLES = {
-    'linux': f'build/linux/{LINUX_ARCH}/release/bundle/{NAME}',
-    'windows': f'build/windows/x64/runner/Release/{NAME}.exe',
+    'linux': f'build/linux/{HOST_ARCH}/release/bundle/{NAME}',
+    'windows': f'build/windows/{HOST_ARCH}/runner/Release/{NAME}.exe',
     'macos': f'build/macos/Build/Products/Release/{NAME}.app/Contents/MacOS/{NAME}',
 }
 

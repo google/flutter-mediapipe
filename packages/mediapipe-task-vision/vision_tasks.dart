@@ -16,6 +16,19 @@ const visionTasks = {
   'pose_landmarker',
 };
 
+const _windowsVisionTasks = {
+  'face_detector',
+  'face_landmarker',
+  'gesture_recognizer',
+  'hand_landmarker',
+  'holistic_landmarker',
+  'image_classifier',
+  'image_embedder',
+  'image_segmenter',
+  'object_detector',
+  'pose_landmarker',
+};
+
 /// The vision tasks validated on Google's vision library, by build target.
 /// The library exports every task; only these have earned a claim there.
 const visionRuntimeTasks = <String, Set<String>>{
@@ -29,18 +42,8 @@ const visionRuntimeTasks = <String, Set<String>>{
   // Flutter's release builds include 32-bit ARM, so the hook accepts every
   // task there, though no capability claims it.
   'android/arm': visionTasks,
-  // Google's Windows library exports the stateful Interactive Segmenter but
-  // runs a stroke in about 25 seconds.
-  'windows/x64': {
-    'face_detector',
-    'face_landmarker',
-    'gesture_recognizer',
-    'hand_landmarker',
-    'holistic_landmarker',
-    'image_classifier',
-    'image_embedder',
-    'image_segmenter',
-    'object_detector',
-    'pose_landmarker',
-  },
+  // Google's Windows libraries export the stateful Interactive Segmenter but
+  // run a stroke in about 25 seconds.
+  'windows/x64': _windowsVisionTasks,
+  'windows/arm64': _windowsVisionTasks,
 };

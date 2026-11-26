@@ -464,8 +464,8 @@ async function apiChecks() {
       new URL('assets/assets/samples/pose.jpg', document.baseURI))).blob());
     try {
       const faces = await open('FaceDetector', 'blaze_face_short_range.tflite', {});
-      const objects = await open('ObjectDetector', 'efficientdet_lite0.tflite', {maxResults: 5, scoreThreshold: 0.3});
-      const classifier = await open('ImageClassifier', 'efficientnet_lite0.tflite', {maxResults: 3});
+      const objects = await open('ObjectDetector', 'efficientdet_lite0_float32.tflite', {maxResults: 5, scoreThreshold: 0.3});
+      const classifier = await open('ImageClassifier', 'efficientnet_lite0_float32.tflite', {maxResults: 3});
       const embedder = await open('ImageEmbedder', 'mobilenet_v3_small.tflite', {});
       const quantizer = await open('ImageEmbedder', 'mobilenet_v3_small.tflite',
         {l2Normalize: true, quantize: true});

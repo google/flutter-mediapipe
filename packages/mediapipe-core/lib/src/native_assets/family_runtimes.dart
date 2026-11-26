@@ -112,6 +112,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       '30b54929f350e31ee2afcac5cbea250ff7004eac9b489006b9702f4f06b6256a',
       29751296,
     ),
+    'windows/arm64': FamilyRuntime(
+      'vision/windows_arm64/mediapipe_tasks_vision.dll',
+      '9810ae678ffccacdddd0d927c3acc3ecd4b0d8ada12c3d0560f7f283d60bbff1',
+      22880256,
+    ),
   },
   'text': {
     'macos/arm64': FamilyRuntime(
@@ -158,6 +163,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'text/windows_x86_64/mediapipe_tasks_text.dll',
       '8c6157d9a76b3c57ef6af872789fbcc1baf9586eab86340d318ba8ec9a64859f',
       29845504,
+    ),
+    'windows/arm64': FamilyRuntime(
+      'text/windows_arm64/mediapipe_tasks_text.dll',
+      '1d64900a7d5ade42200926c6162c3fc8813745c2f5a8256305947966ab712d62',
+      23695872,
     ),
   },
   'audio': {
@@ -206,6 +216,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'c88bede1400a75a8c2cff91f3a4d7247f969bcf376be14a5373c204c0aca7518',
       47985152,
     ),
+    'windows/arm64': FamilyRuntime(
+      'audio/windows_arm64/mediapipe_tasks_audio.dll',
+      'b3fa2e8732784149807facb9d61e12cac59ed379faad252bed680778a38fd5fc',
+      38501376,
+    ),
   },
   'retrieval': {
     'macos/arm64': FamilyRuntime(
@@ -253,6 +268,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       '8e9f054fcc11421243915ae3e54984f0d0e4322c6f9ddf0a418a3cacfa039016',
       27446272,
     ),
+    'windows/arm64': FamilyRuntime(
+      'retrieval/windows_arm64/mediapipe_tasks_retrieval.dll',
+      '4ccfc7f6398f336dc32f5e5094bd0c8d2f30c9fb56dea0525fc7730ee519e34a',
+      21011456,
+    ),
   },
   'decision': {
     'macos/arm64': FamilyRuntime(
@@ -299,6 +319,11 @@ const familyRuntimes = <String, Map<String, FamilyRuntime>>{
       'decision/windows_x86_64/mediapipe_tasks_decision.dll',
       '09ec664895ee83cf96aaf1aa875ded66370f452d516da8666886c6094d9db665',
       40359424,
+    ),
+    'windows/arm64': FamilyRuntime(
+      'decision/windows_arm64/mediapipe_tasks_decision.dll',
+      'e8a7135a8b63c5c6f1618dc777e6ee23843d82f868d283365e1a66ccf1710d46',
+      32097792,
     ),
   },
 };

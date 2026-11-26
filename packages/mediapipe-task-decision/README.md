@@ -9,9 +9,9 @@ generating text. Every call runs Google's official MediaPipe pipeline.
 
 ## Platforms
 
-| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Web |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Decision Maker | `DecisionMaker` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Task | Class | Android | iOS | macOS arm64 | Linux x64 | Linux arm64 | Windows x64 | Windows arm64 | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Decision Maker | `DecisionMaker` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 The runtimes are Google's MediaPipe 1.2.3: its per-family decision C
 library (its release build of November 11, 2026), which this package's build
@@ -42,7 +42,7 @@ Add the package from pub.dev, from your app's root:
 flutter pub add mediapipe_decision
 ```
 
-This adds `mediapipe_decision: ^0.4.1` to your app's `pubspec.yaml`. `mediapipe_core`
+This adds `mediapipe_decision: ^0.5.0` to your app's `pubspec.yaml`. `mediapipe_core`
 comes with it, and `mediapipe_decision.dart` exports its types, so you do not add or
 import core yourself.
 
@@ -94,7 +94,7 @@ which answer the same, everywhere but WebKit (see above). They are
 large, so an app usually downloads one on first use rather than bundling
 it: set
 `ModelStore.allowDownloads = true` before `create`, or pass `modelPath`.
-In browsers, `modelPath` can be the model's URL in Google's bucket, which
+In browsers, `modelPath` can be the model's pinned Hugging Face URL, which
 Google's runtime then fetches itself.
 
 ## Questions and answers

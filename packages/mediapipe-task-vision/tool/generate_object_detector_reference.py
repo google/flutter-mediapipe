@@ -27,8 +27,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "test/fixtures/object_detection"
 # The input images are shared with the face fixtures; only the goldens differ.
 IMAGES = ROOT / "test/fixtures/face_detection"
-MODEL = ROOT / "models/efficientdet_lite0.tflite"
-MODEL_SHA256 = model_sha256('efficientdet_lite0.tflite')
+MODEL = ROOT / "models/efficientdet_lite0_float32.tflite"
+MODEL_SHA256 = model_sha256('efficientdet_lite0_float32.tflite')
 SCORE_THRESHOLD = 0.3
 MAX_RESULTS = 5
 

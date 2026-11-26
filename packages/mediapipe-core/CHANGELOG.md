@@ -1,3 +1,33 @@
+## 0.5.0
+
+- Upgrade every mediapipe package to 0.5.0 together. MediaPipe stays at
+  1.2.3 and its option structs keep their layout, so the build still
+  accepts family releases from 0.3.0.
+- Adds Windows arm64: each family's hook bundles Google's MediaPipe 1.2.3
+  `windows_arm64` DLL, from the same archive as the other platforms and
+  pinned by SHA-256 like them.
+- Windows arm64 runs every supported Windows task on the CPU, as Windows
+  x64 does.
+- On a Windows arm64 machine, install Flutter from its git repository in
+  native ARM64 PowerShell so Flutter fetches the native `windows-arm64`
+  Dart SDK and builds `windows/arm64` natively: Flutter's Windows SDK
+  archive ships only an x64 Dart SDK.
+- CI adds GitHub's `windows-11-arm` runner for every family's tests, the
+  native hook tests, bundled models, the object detection sample and the
+  gallery's desktop tests.
+- The family packages' models now download from Google's LiteRT community
+  on Hugging Face (`huggingface.co/litert-community`), each pinned to a
+  fixed revision, instead of Google's
+  `storage.googleapis.com/mediapipe-models` bucket. Hugging Face redirects
+  downloads to its CDN, `*.hf.co`; the privacy and web setup docs list both
+  for firewalls and content security policies. Google's per-family
+  MediaPipe libraries still come from its release archive on
+  `storage.googleapis.com`.
+- The iOS code that keeps downloaded models out of iCloud backup moves to
+  its own file, imported only where `dart:ffi` exists, so build systems
+  that compile each conditional import on its own (Bazel's Dart rules) can
+  build core for the web. Nothing changes for Flutter apps.
+
 ## 0.4.1
 
 - Upgrade every mediapipe package to 0.4.1 together. MediaPipe stays at

@@ -9,8 +9,8 @@ is not bundled must be refused, and with downloads turned on that model must
 download at run time. Finally a release build must ship exactly the bundled
 models and pass the offline checks from a copy of its bundle.
 
-CI runs it on the Linux x64 and arm64 (under xvfb-run) and Windows x64
-runners; it runs on macOS arm64 as well.
+CI runs it on the Linux x64 and arm64 (under xvfb-run) and Windows x64 and
+arm64 runners; it runs on macOS arm64 as well.
 """
 import json
 from pathlib import Path
@@ -135,18 +135,18 @@ hooks:
     return app
 
 
-def linux_arch():
-    """Flutter's build folder for this Linux host's architecture."""
-    return 'arm64' if platform.machine().lower() == 'aarch64' else 'x64'
+def desktop_arch():
+    """Flutter's build folder for this Linux or Windows host's architecture."""
+    return 'arm64' if platform.machine().lower() in ('aarch64', 'arm64') else 'x64'
 
 
 def release_bundle(app, target):
     """The release build's folder, its executable and its models folder."""
     if target == 'linux':
-        bundle = app / f'build/linux/{linux_arch()}/release/bundle'
+        bundle = app / f'build/linux/{desktop_arch()}/release/bundle'
         executable = Path(NAME)
     elif target == 'windows':
-        bundle = app / 'build/windows/x64/runner/Release'
+        bundle = app / f'build/windows/{desktop_arch()}/runner/Release'
         executable = Path(f'{NAME}.exe')
     else:
         bundle = app / f'build/macos/Build/Products/Release/{NAME}.app'
@@ -166,8 +166,10 @@ def main():
     machine = platform.machine().lower()
     if not ((target in ('linux', 'windows') and machine in ('amd64', 'x86_64'))
             or (target == 'linux' and machine == 'aarch64')
+            or (target == 'windows' and machine == 'arm64')
             or (target == 'macos' and machine == 'arm64')):
-        raise SystemExit('This test needs Linux x64 or arm64, Windows x64 or macOS arm64.')
+        raise SystemExit(
+            'This test needs Linux x64 or arm64, Windows x64 or arm64, or macOS arm64.')
     folders = sorted(folder for folder, _ in FAMILIES.values())
     require(folders == sorted(task_families().values()),
             f'FAMILIES covers {folders}; add a model for every task family.')

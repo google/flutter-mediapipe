@@ -29,7 +29,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - if: ${{ inputs.flutter == 'true' && !(runner.os == 'Linux' && runner.arch == 'ARM64') }}
+    - if: ${{ inputs.flutter == 'true' && !(runner.arch == 'ARM64' && (runner.os == 'Linux' || runner.os == 'Windows')) }}
       uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
       with:
         flutter-version: '3.50.0'
@@ -86,10 +86,73 @@ runs:
           [ "$attempt" = 3 ] && exit 1
           sleep $((attempt * 15))
         done
+    # Flutter's Windows SDK archive ships only an x64 Dart SDK, whose
+    # architecture decides Flutter's default Windows build target. Cloning the
+    # same tag in native ARM64 PowerShell lets update_dart_sdk.ps1 see
+    # PROCESSOR_ARCHITECTURE=ARM64 and download dart-sdk-windows-arm64.zip and
+    # the windows-arm64 engine artifacts.
+    - id: flutter-windows-arm64
+      if: ${{ inputs.flutter == 'true' && runner.os == 'Windows' && runner.arch == 'ARM64' }}
+      shell: pwsh
+      env:
+        FLUTTER_VERSION: '3.50.0'
+      run: |
+        $root = Join-Path $env:RUNNER_TOOL_CACHE "flutter-git\$env:FLUTTER_VERSION"
+        "root=$root" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        "version=$env:FLUTTER_VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+    - if: ${{ steps.flutter-windows-arm64.outcome == 'success' }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ${{ steps.flutter-windows-arm64.outputs.root }}
+        key: flutter-git-windows-arm64-${{ steps.flutter-windows-arm64.outputs.version }}-v1
+    - if: ${{ steps.flutter-windows-arm64.outcome == 'success' }}
+      shell: pwsh
+      env:
+        FLUTTER_ROOT: ${{ steps.flutter-windows-arm64.outputs.root }}
+        FLUTTER_VERSION: ${{ steps.flutter-windows-arm64.outputs.version }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $flutterBat = Join-Path $env:FLUTTER_ROOT 'bin\flutter.bat'
+        if (-not (Test-Path $flutterBat)) {
+          if (Test-Path $env:FLUTTER_ROOT) { Remove-Item -Recurse -Force $env:FLUTTER_ROOT }
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            git clone --quiet --depth 1 --branch $env:FLUTTER_VERSION `
+              https://github.com/flutter/flutter.git $env:FLUTTER_ROOT
+            if ($LASTEXITCODE -eq 0) { break }
+            if (Test-Path $env:FLUTTER_ROOT) { Remove-Item -Recurse -Force $env:FLUTTER_ROOT }
+            if ($attempt -eq 3) { exit 1 }
+            Start-Sleep -Seconds ($attempt * 15)
+          }
+        }
+        git config --global --add safe.directory ($env:FLUTTER_ROOT -replace '\\', '/')
+        $pubCache = Join-Path $env:LOCALAPPDATA 'Pub\Cache'
+        "FLUTTER_ROOT=$env:FLUTTER_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "PUB_CACHE=$pubCache" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        @(
+          (Join-Path $env:FLUTTER_ROOT 'bin'),
+          (Join-Path $env:FLUTTER_ROOT 'bin\cache\dart-sdk\bin'),
+          (Join-Path $pubCache 'bin')
+        ) | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        & $flutterBat config --no-analytics | Out-Null
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & $flutterBat --version
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $dartVersion = & (Join-Path $env:FLUTTER_ROOT 'bin\cache\dart-sdk\bin\dart.exe') --version 2>&1 | Out-String
+        Write-Host $dartVersion
+        if ($dartVersion -notmatch 'windows_arm64') {
+          throw "Expected native windows_arm64 Dart SDK, got: $dartVersion"
+        }
+        for ($attempt = 1; $attempt -le 3; $attempt++) {
+          & $flutterBat precache --windows
+          if ($LASTEXITCODE -eq 0) { break }
+          if ($attempt -eq 3) { exit 1 }
+          Start-Sleep -Seconds ($attempt * 15)
+        }
     - if: ${{ inputs.python == 'true' }}
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
       with:
         python-version: '3.12'
+        architecture: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'arm64' || '' }}
     # An apt mirror that serves 3 to 5 minutes a package, or hangs after the
     # InRelease files, held two jobs until their limits (2026-10-22). Every apt
     # call after this step, here and in the workflows, retries and gives up on

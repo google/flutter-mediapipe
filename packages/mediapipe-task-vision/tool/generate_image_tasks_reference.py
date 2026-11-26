@@ -19,8 +19,8 @@ from official_embedding_layout import use_header_embedding_layout  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / 'test/fixtures/face_detection'
 MODELS = {
-    'classifier': ('efficientnet_lite0.tflite',
-        model_sha256('efficientnet_lite0.tflite')),
+    'classifier': ('efficientnet_lite0_float32.tflite',
+        model_sha256('efficientnet_lite0_float32.tflite')),
     'embedder': ('mobilenet_v3_small.tflite',
         model_sha256('mobilenet_v3_small.tflite')),
 }

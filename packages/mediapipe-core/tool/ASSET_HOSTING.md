@@ -102,7 +102,7 @@ but the gallery's own tasks load from jsDelivr, as any app's do by default.
 | Browser runtime: bundle and WASM | each family's `assets/worker.js`, through core's `assets/verified_runtime.js` | `cdn.jsdelivr.net` (`MediaPipeWebRuntime.defaultBaseUrl`) | none: one `baseUrl`, one `fetch` per file |
 | Native per-family libraries | build hooks, through `downloadVerified` | Google's archive on `storage.googleapis.com` (`familyRuntimeArchiveUrl`) | none; retried |
 | Reference wheels, for generating test references | reference tools, pinned in `reference_wheels.dart` | `files.pythonhosted.org` | none |
-| Models, native | `ModelStore`, `bundle_models`, through `downloadVerified` | `storage.googleapis.com`, `huggingface.co` | `DownloadAsset.mirrors`, but no pin names one; retried |
+| Models, native | `ModelStore`, `bundle_models`, through `downloadVerified` | `huggingface.co` (redirected to `*.hf.co`) | `DownloadAsset.mirrors`, but no pin names one; retried |
 | Models, web | `ModelStore` (`model_store_web.dart`), workers given a `modelPath` | the same | the same mirrors, one `fetch` each |
 | npm tarball for the `web_runtime` command | `web_runtime_host.dart` | `registry.npmjs.org` | none |
 
